@@ -103,6 +103,41 @@
   .pico [data-lucide]{width:15px;height:15px}
   .pg{font-size:12.5px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px;margin:0 2px}
   .pgin{width:36px;text-align:center;border:none;background:var(--idle-soft);border-radius:6px;padding:5px 4px;font-family:var(--font);font-size:13px;color:var(--ink);font-weight:700}
+  .ifbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow)}
+  .ifbar .grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ifbar .lbl{font-size:12px;color:var(--ink-soft);font-weight:600;display:inline-flex;align-items:center;gap:5px}
+  .ifbar .lbl [data-lucide]{width:14px;height:14px}
+  .ifbar .sep{width:1px;height:26px;background:var(--line)}
+  .fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px}
+  .fchip:hover{border-color:var(--green)}
+  .fchip.on{background:var(--green);border-color:var(--green);color:#fff}
+  .fchip .d{width:8px;height:8px;border-radius:50%}
+  .fsel{height:32px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-size:13px;background:var(--surface);color:var(--ink);cursor:pointer}
+  .fdate{height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--font);font-size:13px;color:var(--ink)}
+  .mtag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--yellow-soft);color:var(--yellow-dark);font-weight:700;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .mtag [data-lucide]{width:12px;height:12px}
+  .spick{position:relative}
+  .spick-sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 24px rgba(19,32,26,.14);z-index:5;max-height:220px;overflow:auto;display:none}
+  .spick-sug.show{display:block}
+  .spick-sug div{padding:8px 11px;font-size:13px;cursor:pointer;display:flex;gap:8px}
+  .spick-sug div:hover{background:var(--green-soft)}
+  .spick-sug b{color:var(--green-dark);min-width:56px}
+  .schips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .schip{display:inline-flex;align-items:center;gap:6px;background:var(--green-soft);color:var(--green-dark);border-radius:999px;padding:4px 6px 4px 11px;font-size:12.5px;font-weight:600}
+  .schip small{color:var(--ink-soft);font-weight:500}
+  .schip button{width:20px;height:20px;border:none;background:none;border-radius:50%;cursor:pointer;color:var(--green-dark);display:grid;place-items:center;font-size:15px;line-height:1}
+  .schip button:hover{background:rgba(0,0,0,.08)}
+  .warnbox{display:none;margin-top:12px;background:var(--warn-soft);color:#8a5600;border-radius:9px;padding:10px 12px;font-size:13px;gap:8px;align-items:flex-start}
+  .warnbox.show{display:flex}
+  .warnbox [data-lucide]{width:17px;height:17px;flex:none;margin-top:1px}
+  .cklist{border:1px solid var(--line);border-radius:9px;max-height:230px;overflow:auto}
+  .ckrow{display:flex;align-items:center;gap:10px;padding:8px 11px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
+  .ckrow:last-child{border-bottom:none}
+  .ckrow:hover{background:#f6faf7}
+  .ckrow.all{background:#f6faf7;font-weight:700}
+  .ckrow input{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+  .ckrow .n{font-weight:700;color:var(--green-dark);min-width:52px}
+  .ckrow .o{flex:1;min-width:0;color:var(--ink-soft)}
   .btn.link{background:none;border:none;color:var(--green-dark);padding:4px 6px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
   .btn.link.danger{color:var(--danger)}
   .btn.link:hover{text-decoration:underline}
@@ -339,6 +374,7 @@
     </span>
     <span id="count" class="count"></span>
     <button class="btn round" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
+    <button class="btn outline round" id="multiAdd" style="display:none"><i data-lucide="layers"></i>Multi-store issue</button>
     <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
   </div>
   <div class="hintbar" id="hintbar">
@@ -494,6 +530,44 @@
   </div>
 </div>
 
+<!-- Multi-store issue popup -->
+<div class="overlay top" id="multiOverlay">
+  <div class="modal">
+    <div class="head"><i data-lucide="layers"></i><div><h2>Multi-store issue</h2><div class="subt">One issue logged to 2 or more stores</div></div><button class="x" id="multiX">&times;</button></div>
+    <div class="body">
+      <div class="field" style="margin-bottom:13px">
+        <label>Stores — type a store # and pick it, or paste many (comma, space or new line)</label>
+        <div class="spick">
+          <div style="display:flex;gap:8px">
+            <input id="m_store_in" placeholder="e.g. 12345  or  12345, 22004, 2237" autocomplete="off" style="flex:1">
+            <button class="btn sm outline round" id="m_store_add" style="height:38px"><i data-lucide="plus"></i>Add</button>
+          </div>
+          <div class="spick-sug" id="m_sug"></div>
+        </div>
+        <div class="schips" id="m_chips"></div>
+        <div class="help" id="m_count">No stores selected yet.</div>
+      </div>
+      <div class="field" style="margin-bottom:13px"><label>What is the issue?</label><textarea id="m_issue" placeholder="e.g. DoorDash menu prices not matching the store menu"></textarea></div>
+      <div class="field" style="margin-bottom:13px"><label>Platform(s) affected — pick one or more</label><div class="chips" id="m_platforms"></div></div>
+      <div class="field"><label>Status (applies to all selected stores)</label><div class="sbtns" id="m_status"></div></div>
+      <div class="warnbox" id="m_warn"><i data-lucide="info"></i><div>A multi-store issue needs <b>2 or more stores</b>. For just one store, please use the <b>Log issue</b> button instead.</div></div>
+    </div>
+    <footer><button class="btn ghost" id="multiCancel">Cancel</button><button class="btn" id="multiSave"><i data-lucide="plus"></i>Log multi-store issue</button></footer>
+  </div>
+</div>
+
+<!-- Group update popup -->
+<div class="overlay top" id="grpOverlay">
+  <div class="modal">
+    <div class="head"><i data-lucide="refresh-cw"></i><div><h2>Update Status · Multi-store issue</h2><div class="subt" id="grp_sub"></div></div><button class="x" id="grpX">&times;</button></div>
+    <div class="body" id="grp_body"></div>
+    <footer>
+      <button class="btn link danger" id="grpDelete" style="margin-right:auto"><i data-lucide="trash-2"></i>Delete selected</button>
+      <button class="btn ghost" id="grpCancel">Cancel</button><button class="btn" id="grpSave"><i data-lucide="save"></i>Save update</button>
+    </footer>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -509,6 +583,8 @@ let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, clo
 let frPage=1, stPage=1, frStorePage=1;
 const PAGE_FR=25, PAGE_ST=50, PAGE_FRST=12;
 let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
+let isStatus="", isPeriod="all", isDate="", isSort="new";
+let mStores=[], grpId=null;
 let FR=[], ST=[], SF=[], IS=[];
 let storesByFr={}, storeByNum={};
 const $ = id => document.getElementById(id);
@@ -538,7 +614,7 @@ function setStatus(state, header, popup){
 function friendly(err){
   const m=(err&&err.message?err.message:"").toLowerCase(), code=(err&&err.code)?String(err.code):"";
   if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
-  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-issues.sql in Supabase, then Refresh.",a:"settings"};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-multi-issue.sql (and migrate-issues.sql if not yet done) in Supabase SQL Editor, then Refresh.",a:"settings"};
   if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
   if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
   if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
@@ -674,15 +750,17 @@ function emptyBox(icon,title,sub){ return '<div class="card"><div class="state">
 function render(){
   if(!db){viewDisconnected();return;}
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
-  const showSearch=(tab==="franchisees"||tab==="stores");
+  const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues");
   $("searchWrap").style.display=showSearch?"flex":"none";
-  $("terrFilter").style.display=showSearch?"block":"none";
+  $("search").placeholder=(tab==="issues")?"Search issues…  (word, #store or @franchisee)":"Search…  (#store or @franchisee)";
+  $("terrFilter").style.display=(tab==="franchisees"||tab==="stores")?"block":"none";
   $("storeFilters").style.display=(tab==="stores")?"inline-flex":"none";
   $("stIssueFilter").classList.toggle("on", issuesOnly);
   $("stClosedFilter").classList.toggle("on-alt", closedOnly);
   $("hintbar").style.display=showSearch?"flex":"none";
   const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
   $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
+  $("multiAdd").style.display=(tab==="issues")?"inline-flex":"none";
   if(tab==="franchisees") renderFranchisees();
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
@@ -807,22 +885,101 @@ function renderStaff(){
 }
 
 /* Issues log */
+function issueInPeriod(i){
+  if(isPeriod==="all") return true;
+  const d=new Date(i.created_at); if(isNaN(d)) return false;
+  const now=new Date();
+  const dayStart=x=>{const t=new Date(x); t.setHours(0,0,0,0); return t;};
+  let from,to;
+  const base=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month")?(isDate?new Date(isDate+"T00:00:00"):null):now;
+  if(!base) return true;
+  if(isPeriod==="today"||isPeriod==="day"){ from=dayStart(base); to=new Date(from); to.setDate(to.getDate()+1); }
+  else if(isPeriod==="thisweek"||isPeriod==="week"){ from=dayStart(base); from.setDate(from.getDate()-from.getDay()); to=new Date(from); to.setDate(to.getDate()+7); }
+  else if(isPeriod==="thismonth"||isPeriod==="month"){ from=new Date(base.getFullYear(),base.getMonth(),1); to=new Date(base.getFullYear(),base.getMonth()+1,1); }
+  else return true;
+  return d>=from && d<to;
+}
+function groupStatusBadge(members){
+  const counts={}; members.forEach(m=>{const s=normIssueStatus(m.status); counts[s]=(counts[s]||0)+1;});
+  const keys=Object.keys(counts);
+  if(keys.length===1) return statusBadge(keys[0]);
+  return '<span class="badge b-progress" title="'+keys.map(k=>counts[k]+' '+k).join(' · ')+'">Mixed</span><div class="muted" style="font-size:11px;margin-top:3px">'+ISSUE_STATES.filter(k=>counts[k]).map(k=>counts[k]+' '+(k==="Work in Progress"?"WIP":k)).join(' · ')+'</div>';
+}
 function renderIssues(){
   const frName={}; FR.forEach(f=>frName[f.id]=f.name);
-  let list=IS.slice().sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
-  $("count").textContent=list.filter(isOpen).length+" open · "+list.length+" total";
-  if(!list.length){ setView(emptyBox("clipboard-list","No issues logged","Use “Log issue” to add one.")); return; }
-  const rows=list.map(i=>{ const s=storeByNum[String(i.store_num)];
-    const pls=issuePlatforms(i);
-    return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
-    +'<td>'+statusBadge(i.status)+'</td>'
-    +'<td>'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
-    +'<td class="hide-sm store">'+(i.store_num?'#'+esc(i.store_num):'—')+'</td>'
-    +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
-    +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(i.updated_at||i.created_at)+'</td>'
-    +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';}).join("");
-  setView('<div class="card"><table><thead><tr><th>Status</th><th>Issue</th><th class="hide-sm">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm">Updated</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
+  const {mode,q}=parseQuery();
+  const matchSearch=i=>{
+    if(!q) return true;
+    if(mode==="store") return String(i.store_num||"").toLowerCase().includes(q);
+    if(mode==="fr") return (frName[i.franchisee_id]||"").toLowerCase().includes(q);
+    return [i.title,i.action_taken,i.store_num,frName[i.franchisee_id],issuePlatforms(i).join(" ")].join(" ").toLowerCase().includes(q);
+  };
+  // build entries: singles + groups (a group shows if ANY member passes the filters)
+  const groups={}, entries=[];
+  IS.forEach(i=>{
+    if(i.group_id){ (groups[i.group_id]=groups[i.group_id]||[]).push(i); }
+    else entries.push({kind:"single", items:[i], created:i.created_at});
+  });
+  Object.keys(groups).forEach(g=>{ const m=groups[g].sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||"")); entries.push({kind:"group", gid:g, items:m, created:m[0].created_at}); });
+  const pass=i=>(!isStatus||normIssueStatus(i.status)===isStatus) && issueInPeriod(i) && matchSearch(i);
+  let list=entries.filter(e=>e.items.some(pass));
+  list.sort((a,b)=>{ const da=new Date(a.created).getTime()||0, dbb=new Date(b.created).getTime()||0; return isSort==="new"? dbb-da : da-dbb; });
+
+  const openCount=IS.filter(isOpen).length;
+  $("count").textContent=list.length+" shown · "+openCount+" open";
+
+  const sChip=(v,label,color)=>'<button class="fchip'+(isStatus===v?' on':'')+'" onclick="setIsStatus(\''+v+'\')">'+(color?'<span class="d" style="background:'+color+'"></span>':'')+label+'</button>';
+  const needDate=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month");
+  const bar='<div class="ifbar">'
+    +'<div class="grp"><span class="lbl"><i data-lucide="filter"></i>Status</span>'
+      +sChip("","All")+sChip("Pending","Pending","var(--danger)")+sChip("Work in Progress","Work in Progress","var(--warn)")+sChip("Resolved","Resolved","var(--ok)")+'</div>'
+    +'<span class="sep"></span>'
+    +'<div class="grp"><span class="lbl"><i data-lucide="calendar"></i>Date logged</span>'
+      +'<select class="fsel" onchange="setIsPeriod(this.value)">'
+        +[["all","All dates"],["today","Today"],["thisweek","This week"],["thismonth","This month"],["day","Pick a day…"],["week","Pick a week…"],["month","Pick a month…"]]
+          .map(([v,l])=>'<option value="'+v+'"'+(isPeriod===v?' selected':'')+'>'+l+'</option>').join("")
+      +'</select>'
+      +(needDate?'<input type="date" class="fdate" value="'+esc(isDate)+'" title="'+(isPeriod==="week"?"Any day in the week":isPeriod==="month"?"Any day in the month":"Day")+'" onchange="setIsDate(this.value)">':'')
+    +'</div>'
+    +'<span class="sep"></span>'
+    +'<div class="grp"><span class="lbl"><i data-lucide="arrow-down-up"></i>Sort</span>'
+      +'<select class="fsel" onchange="setIsSort(this.value)"><option value="new"'+(isSort==="new"?' selected':'')+'>Most recent first</option><option value="old"'+(isSort==="old"?' selected':'')+'>Oldest first</option></select></div>'
+    +((isStatus||isPeriod!=="all"||q)?'<button class="btn link" onclick="clearIsFilters()" style="margin-left:auto"><i data-lucide="x"></i>Clear filters</button>':'')
+    +'</div>';
+
+  if(!IS.length){ setView(bar+emptyBox("clipboard-list","No issues logged","Use “Log issue” or “Multi-store issue” to add one.")); return; }
+  if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
+
+  const rows=list.map(e=>{
+    if(e.kind==="single"){
+      const i=e.items[0]; const s=storeByNum[String(i.store_num)]; const pls=issuePlatforms(i);
+      return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
+        +'<td>'+statusBadge(i.status)+'</td>'
+        +'<td>'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+        +'<td class="hide-sm store">'+(i.store_num?esc(i.store_num):'—')+'</td>'
+        +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
+        +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
+        +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+    }
+    const m=e.items, f=m[0], pls=issuePlatforms(f);
+    const nums=m.map(x=>x.store_num); const shown=nums.slice(0,4).join(", ")+(nums.length>4?' +'+(nums.length-4)+' more':'');
+    const owners=[...new Set(m.map(x=>frName[x.franchisee_id]).filter(Boolean))];
+    const lastUpd=m.map(x=>x.updated_at||x.created_at).sort().pop();
+    return '<tr class="click" onclick="openGroupUpdate(\''+e.gid+'\')">'
+      +'<td>'+groupStatusBadge(m)+'</td>'
+      +'<td><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+esc(f.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+      +'<td class="hide-sm store" style="font-size:12.5px">'+esc(shown)+'</td>'
+      +'<td class="hide-sm">'+esc(owners.length>1?owners.length+' franchisees':(owners[0]||""))+'</td>'
+      +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(f.created_at)+(lastUpd&&lastUpd!==f.created_at?'<br>upd. '+fmtTs(lastUpd):'')+'</td>'
+      +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+  }).join("");
+  setView(bar+'<div class="card"><table><thead><tr><th>Status</th><th>Issue</th><th class="hide-sm">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm">Logged</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
 }
+function setIsStatus(v){ isStatus=v; render(); }
+function setIsPeriod(v){ isPeriod=v; if((v==="day"||v==="week"||v==="month")&&!isDate){ const t=new Date(); isDate=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); } render(); }
+function setIsDate(v){ isDate=v; render(); }
+function setIsSort(v){ isSort=v; render(); }
+function clearIsFilters(){ isStatus=""; isPeriod="all"; isDate=""; $("search").value=""; render(); }
 
 /* ============ STORE WINDOW ============ */
 function openStore(id, focusIssueId){
@@ -918,8 +1075,11 @@ function renderStoreRight(){
   const issues=IS.filter(i=>String(i.store_num)===String(s.num)).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const notes=notesOf(s);
   const issuesHtml=issues.length?issues.map(i=>{ const pls=issuePlatforms(i);
+    const gsize=i.group_id?IS.filter(x=>x.group_id===i.group_id).length:0;
+    const upd=i.group_id?'openGroupUpdate(\''+i.group_id+'\','+i.id+')':'openUpdateIssue('+i.id+')';
     return '<div class="issue-card" id="issc_'+i.id+'"><div class="top">'+statusBadge(i.status)+'<b>'+esc(i.title)+'</b>'
-      +'<button class="iconbtn mini" title="Update" onclick="openUpdateIssue('+i.id+')"><i data-lucide="refresh-cw"></i></button>'
+      +(gsize?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')
+      +'<button class="iconbtn mini" title="Update" onclick="'+upd+'"><i data-lucide="refresh-cw"></i></button>'
       +'<button class="iconbtn mini" title="Delete" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button></div>'
       +(pls.length?'<div class="chips" style="margin-bottom:2px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')
       +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
@@ -1125,11 +1285,13 @@ async function doDelete(){
   if(p.kind==="import"){ runImport(p.data); return; }
   $("confirmOk").disabled=true; let error;
   if(p.kind==="issue"){ ({error}=await db.from("issues").delete().eq("id",p.id)); }
+  else if(p.kind==="issues"){ ({error}=await db.from("issues").delete().in("id",p.ids)); }
   else if(p.kind==="staff"){ ({error}=await db.from("staff").delete().eq("id",p.id)); }
   $("confirmOk").disabled=false; $("confirmOverlay").classList.remove("show"); pending=null;
   if(error){toast(friendly(error).t,"err");return;}
   toast("Deleted","ok");
   if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); updCounts(); if(curStore) renderStoreRight(); }
+  if(p.kind==="issues"){ IS=IS.filter(i=>!p.ids.includes(i.id)); updCounts(); $("grpOverlay").classList.remove("show"); if(curStore) renderStoreRight(); }
   if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); updCounts(); $("sdOverlay").classList.remove("show"); }
   render();
 }
@@ -1149,6 +1311,106 @@ function pageSet(which,val){
   else if(which==='st'){ stPage=n; render(); }
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
+/* ===== Multi-store issue ===== */
+function openMultiIssue(){
+  mStores=[];
+  $("m_store_in").value=""; $("m_issue").value=""; $("m_warn").classList.remove("show"); $("m_sug").classList.remove("show");
+  $("m_platforms").innerHTML=ISSUE_PLATFORMS.map(pl=>'<button type="button" class="mchip" data-v="'+esc(pl)+'" onclick="toggleChip(this)">'+esc(pl)+'</button>').join("");
+  $("m_status").innerHTML=ISSUE_STATES.map((st,idx)=>'<button type="button" class="sbtn'+(idx===0?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
+  renderMChips(); $("multiOverlay").classList.add("show"); icons();
+  setTimeout(()=>$("m_store_in").focus(),60);
+}
+function frNameById(id){ const f=FR.find(x=>x.id===id); return f?f.name:""; }
+function renderMChips(){
+  $("m_chips").innerHTML=mStores.map(n=>{ const s=storeByNum[n];
+    return '<span class="schip">'+esc(n)+(s?' <small>'+esc(frNameById(s.franchisee_id))+'</small>':'')+'<button title="Remove" onclick="removeMStore(\''+esc(n)+'\')">&times;</button></span>'; }).join("");
+  $("m_count").textContent=mStores.length?(mStores.length+" store"+(mStores.length>1?"s":"")+" selected"):"No stores selected yet.";
+  if(mStores.length>=2) $("m_warn").classList.remove("show");
+}
+function removeMStore(n){ mStores=mStores.filter(x=>x!==n); renderMChips(); }
+function addMStores(raw){
+  const parts=(raw||"").split(/[\s,;]+/).map(x=>x.replace(/^#/,"").trim()).filter(Boolean);
+  const bad=[]; let added=0;
+  parts.forEach(p=>{ if(!storeByNum[p]){bad.push(p);return;} if(!mStores.includes(p)){mStores.push(p);added++;} });
+  renderMChips(); $("m_store_in").value=""; $("m_sug").classList.remove("show");
+  if(bad.length) toast("Not found: "+bad.slice(0,5).join(", ")+(bad.length>5?"…":""),"err");
+  else if(added) toast(added+" store"+(added>1?"s":"")+" added","ok");
+}
+function mSuggest(){
+  const v=$("m_store_in").value.trim().replace(/^#/,"");
+  if(!v || /[\s,;]/.test(v)){ $("m_sug").classList.remove("show"); return; }
+  const hits=ST.filter(s=>(s.num||"").startsWith(v) && !mStores.includes(String(s.num))).slice(0,8);
+  if(!hits.length){ $("m_sug").classList.remove("show"); return; }
+  $("m_sug").innerHTML=hits.map(s=>'<div onmousedown="event.preventDefault();addMStores(\''+esc(s.num)+'\')"><b>'+esc(s.num)+'</b><span>'+esc(frNameById(s.franchisee_id))+' · '+esc(s.city||"")+'</span></div>').join("");
+  $("m_sug").classList.add("show");
+}
+async function saveMultiIssue(){
+  if($("m_store_in").value.trim()) addMStores($("m_store_in").value);
+  if(mStores.length<2){ $("m_warn").classList.add("show"); icons(); toast("Select 2 or more stores — or use Log issue for one store","err"); return; }
+  const title=$("m_issue").value.trim(); if(!title){ toast("Describe the issue first","err"); return; }
+  const platforms=[...document.querySelectorAll("#m_platforms .mchip.sel")].map(x=>x.dataset.v);
+  const status=(document.querySelector("#m_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
+  const gid="G"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const ts=nowIso();
+  const recs=mStores.map(n=>({ franchisee_id:storeByNum[n]?storeByNum[n].franchisee_id:null, store_num:n, title, status, platforms, action_taken:"", notes:"", group_id:gid, created_at:ts, updated_at:ts }));
+  $("multiSave").disabled=true;
+  const {data,error}=await db.from("issues").insert(recs).select();
+  $("multiSave").disabled=false;
+  if(error){ toast(friendly(error).t,"err"); return; }
+  (data||[]).forEach(r=>IS.push(r));
+  updCounts(); $("multiOverlay").classList.remove("show");
+  toast("Issue logged to "+recs.length+" stores","ok"); render();
+}
+
+/* ===== Group update ===== */
+function openGroupUpdate(gid, preselectId){
+  const m=IS.filter(x=>x.group_id===gid).sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||""));
+  if(!m.length){ toast("Issue not found","err"); return; }
+  grpId=gid; const f=m[0];
+  $("grp_sub").textContent=m.length+" stores · logged "+fmtTs(f.created_at);
+  const rows=m.map(i=>'<label class="ckrow"><input type="checkbox" class="grp-ck" value="'+i.id+'"'+((!preselectId||preselectId===i.id)?' checked':'')+' onchange="syncGrpAll()">'
+    +'<span class="n">'+esc(i.store_num)+'</span><span class="o">'+esc(frNameById(i.franchisee_id))+'</span>'+statusBadge(i.status)+'</label>').join("");
+  const pls=issuePlatforms(f);
+  $("grp_body").innerHTML=
+    '<div class="field" style="margin-bottom:12px"><label>Issue</label><div style="font-size:14px">'+esc(f.title)+'</div>'
+      +(pls.length?'<div class="chips" style="margin-top:6px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')+'</div>'
+    +'<div class="field" style="margin-bottom:13px"><label>Stores to update — pick which ones</label><div class="cklist">'
+      +'<label class="ckrow all"><input type="checkbox" id="grp_all" onchange="toggleGrpAll(this.checked)"><span>All stores</span></label>'+rows+'</div>'
+      +'<div class="help" id="grp_selcount"></div></div>'
+    +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="grp_status">'
+      +ISSUE_STATES.map(st=>'<button type="button" class="sbtn" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("")+'</div></div>'
+    +'<div class="field"><label>Action taken (applies to selected stores)</label><textarea id="grp_action" placeholder="What did you do?"></textarea></div>';
+  syncGrpAll(); $("grpOverlay").classList.add("show"); icons();
+}
+function toggleGrpAll(on){ document.querySelectorAll(".grp-ck").forEach(c=>c.checked=on); syncGrpAll(); }
+function syncGrpAll(){
+  const cks=[...document.querySelectorAll(".grp-ck")], sel=cks.filter(c=>c.checked).length;
+  const all=$("grp_all"); if(all){ all.checked=(sel===cks.length); all.indeterminate=(sel>0&&sel<cks.length); }
+  const sc=$("grp_selcount"); if(sc) sc.textContent=sel+" of "+cks.length+" selected";
+}
+function grpSelectedIds(){ return [...document.querySelectorAll(".grp-ck:checked")].map(c=>+c.value); }
+async function saveGroupUpdate(){
+  const ids=grpSelectedIds(); if(!ids.length){ toast("Select at least one store","err"); return; }
+  const stBtn=document.querySelector("#grp_status .sbtn.active");
+  const action=$("grp_action").value.trim();
+  if(!stBtn && !action){ toast("Pick a status or write the action taken","err"); return; }
+  const rec={ updated_at:nowIso() }; if(stBtn) rec.status=stBtn.dataset.v; if(action) rec.action_taken=action;
+  $("grpSave").disabled=true;
+  const {error}=await db.from("issues").update(rec).in("id",ids);
+  $("grpSave").disabled=false;
+  if(error){ toast(friendly(error).t,"err"); return; }
+  IS.forEach(i=>{ if(ids.includes(i.id)) Object.assign(i,rec); });
+  updCounts(); $("grpOverlay").classList.remove("show");
+  toast(ids.length+" store"+(ids.length>1?"s":"")+" updated","ok");
+  if(curStore) renderStoreRight(); render();
+}
+function askDeleteGroupSel(){
+  const ids=grpSelectedIds(); if(!ids.length){ toast("Select at least one store","err"); return; }
+  pending={kind:"issues", ids}; $("confirmOk").textContent="Delete";
+  $("confirmText").textContent="Delete this issue from "+ids.length+" selected store"+(ids.length>1?"s":"")+"?";
+  $("confirmOverlay").classList.add("show");
+}
+
 function primaryAdd(){ if(tab==="issues") openLogIssue(null); else if(tab==="staff") openStaffEdit(null); }
 
 /* events */
@@ -1159,6 +1421,19 @@ $("stIssueFilter").onclick=toggleIssues;
 $("stClosedFilter").onclick=toggleClosed;
 $("refreshBtn").onclick=loadAll;
 $("primaryAdd").onclick=primaryAdd;
+$("multiAdd").onclick=openMultiIssue;
+$("multiX").onclick=$("multiCancel").onclick=()=>$("multiOverlay").classList.remove("show");
+$("multiOverlay").onclick=e=>{if(e.target===$("multiOverlay"))$("multiOverlay").classList.remove("show");};
+$("multiSave").onclick=saveMultiIssue;
+$("m_store_add").onclick=()=>addMStores($("m_store_in").value);
+$("m_store_in").oninput=mSuggest;
+$("m_store_in").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); addMStores($("m_store_in").value); } };
+$("m_store_in").onblur=()=>setTimeout(()=>$("m_sug").classList.remove("show"),120);
+$("m_store_in").onpaste=()=>setTimeout(()=>{ const v=$("m_store_in").value; if(/[\s,;]/.test(v.trim())) addMStores(v); },0);
+$("grpX").onclick=$("grpCancel").onclick=()=>$("grpOverlay").classList.remove("show");
+$("grpOverlay").onclick=e=>{if(e.target===$("grpOverlay"))$("grpOverlay").classList.remove("show");};
+$("grpSave").onclick=saveGroupUpdate;
+$("grpDelete").onclick=askDeleteGroupSel;
 
 $("settingsBtn").onclick=openSettings; $("settingsX").onclick=closeSettings; $("settingsCloseBtn").onclick=closeSettings;
 $("connectBtn").onclick=()=>connect($("c_url").value,$("c_key").value); $("disconnectBtn").onclick=disconnect;
