@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Franchisee Tracker — 3PD Helpdesk</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<style>
+  :root{
+    --bg:#eef3ee; --surface:#ffffff; --ink:#13201a; --ink-soft:#59685e;
+    --line:#dde6df;
+    --green:#04663a; --green-dark:#034a2a; --green-soft:#e2f0e8;
+    --yellow:#ffc600; --yellow-dark:#9a7400; --yellow-soft:#fff5d1;
+    --danger:#c0392b; --danger-soft:#fdecea;
+    --ok:#1a7f45; --ok-soft:#e6f4ea;
+    --warn:#a86400; --warn-soft:#fbf0da;
+    --idle:#59685e; --idle-soft:#ecefec;
+    --radius:10px; --shadow:0 1px 2px rgba(19,32,26,.06), 0 6px 20px rgba(19,32,26,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 20px 60px}
+  [data-lucide]{width:18px;height:18px;stroke-width:2}
+
+  .topbar{background:var(--green); color:#fff}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:8px;background:var(--yellow);color:var(--green-dark);
+    display:grid;place-items:center;font-weight:800;font-size:16px}
+  .brand h1{font-size:18px;margin:0;letter-spacing:-.01em;color:#fff}
+  .brand .sub{font-size:12px;color:#cfe7d8;margin-top:1px}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .status-dot{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#e7f4ec;
+    padding:6px 11px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.1)}
+  .status-dot i.d{width:8px;height:8px;border-radius:50%;background:#bdccc3;display:inline-block;flex:none}
+  .status-dot.ok i.d{background:var(--yellow)} .status-dot.err i.d{background:#ffb4a8}
+  .status-dot.busy i.d{background:var(--yellow);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .ghost-icon{height:36px;width:36px;display:grid;place-items:center;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;cursor:pointer}
+  .ghost-icon:hover{background:rgba(255,255,255,.22)}
+
+  .tabs{background:var(--green);border-bottom:3px solid var(--yellow)}
+  .tabs .inner{max-width:1240px;margin:0 auto;padding:0 20px;display:flex;gap:4px;flex-wrap:wrap}
+  .tab{display:flex;align-items:center;gap:7px;padding:11px 16px;color:#cfe7d8;background:none;border:none;
+    cursor:pointer;font-size:14px;font-weight:600;border-radius:8px 8px 0 0;position:relative;top:1px}
+  .tab:hover{color:#fff;background:rgba(255,255,255,.08)}
+  .tab.active{color:var(--green-dark);background:var(--bg)}
+  .tab .badge-num{background:var(--yellow-soft);color:var(--yellow-dark);border-radius:999px;
+    font-size:11px;padding:0 7px;font-weight:700}
+  .tab.active .badge-num{background:var(--green-soft);color:var(--green-dark)}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
+  .search-wrap{flex:1;min-width:200px;position:relative;display:flex;align-items:center}
+  .search-wrap .lead{position:absolute;left:11px;color:var(--ink-soft);display:flex}
+  .search-wrap input{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;
+    padding:0 12px 0 36px;background:var(--surface);font-size:14px;color:var(--ink)}
+  .terr-filter{height:40px;border:1px solid var(--line);border-radius:9px;padding:0 32px 0 12px;background:var(--surface);
+    font-size:14px;color:var(--ink);cursor:pointer;min-width:150px;
+    appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2359685e' stroke-width='2' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--green);outline-offset:1px;border-color:transparent}
+  .hintbar{font-size:12px;color:var(--ink-soft);display:flex;gap:14px;align-items:center;margin:-6px 0 14px 2px;flex-wrap:wrap}
+  .hintbar kbd{background:var(--yellow-soft);border:1px solid #ecd98a;border-radius:5px;padding:1px 6px;
+    font-family:inherit;font-weight:700;color:var(--yellow-dark);font-size:12px}
+  .count{color:var(--ink-soft);font-size:13px}
+
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid transparent}
+  .btn{height:40px;padding:0 16px;background:var(--green);color:#fff;font-weight:600;font-size:14px;
+    display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:var(--green-dark)}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+  .btn.ghost:hover{background:#e9efe9}
+  .btn.yellow{background:var(--yellow);color:var(--green-dark)}
+  .btn.yellow:hover{background:#f0bb00}
+  .btn.danger{background:var(--danger)} .btn.danger:hover{background:#a5301f}
+  .btn.sm{height:32px;padding:0 11px;font-size:13px}
+  .btn.link{background:none;border:none;color:var(--green-dark);padding:4px 6px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
+  .btn.link.danger{color:var(--danger)}
+  .btn.link:hover{text-decoration:underline}
+  .iconbtn{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);
+    background:var(--surface);border-radius:7px;color:var(--ink-soft);cursor:pointer}
+  .iconbtn:hover{background:#e9efe9;color:var(--ink)}
+  .iconbtn [data-lucide]{width:15px;height:15px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{text-align:left;padding:11px 14px;color:var(--ink-soft);font-weight:600;
+    border-bottom:1px solid var(--line);white-space:nowrap;font-size:12.5px}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr.click{cursor:pointer}
+  tbody tr.click:hover{background:var(--green-soft)}
+  .store{font-weight:700;color:var(--green-dark)}
+  .muted{color:var(--ink-soft)}
+  .row-actions{display:flex;gap:4px;justify-content:flex-end}
+
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .b-inactive{background:var(--idle-soft);color:var(--idle)}
+  .b-open{background:var(--danger-soft);color:var(--danger)}
+  .b-resolved{background:var(--ok-soft);color:var(--ok)}
+  .b-progress{background:var(--warn-soft);color:var(--warn)}
+  .pill{display:inline-flex;align-items:center;gap:5px;background:var(--idle-soft);color:var(--ink-soft);
+    border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+  .pill [data-lucide]{width:13px;height:13px}
+
+  .plat{display:flex;gap:4px;flex-wrap:wrap}
+  .chip{font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft)}
+  .chip.on{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+  .chip.pend{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+
+  .state{padding:52px 24px;text-align:center;color:var(--ink-soft)}
+  .state .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;margin:0 auto 14px;background:var(--idle-soft);color:var(--ink-soft)}
+  .state.error .ic{background:var(--danger-soft);color:var(--danger)}
+  .state .ic [data-lucide]{width:24px;height:24px}
+  .state b{color:var(--ink);display:block;margin-bottom:5px;font-size:16px}
+  .state p{margin:0 auto;max-width:440px;font-size:13.5px}
+  .state .cta{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Two-panel franchisee */
+  .split{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
+  @media(max-width:880px){.split{grid-template-columns:1fr}}
+  .fr-list{max-height:72vh;overflow:auto}
+  .fr-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+  .fr-item:last-child{border-bottom:none}
+  .fr-item:hover{background:var(--green-soft)}
+  .fr-item.active{background:var(--green-soft);box-shadow:inset 3px 0 0 var(--green)}
+  .fr-item .nm{font-weight:600;font-size:13.5px;flex:1;min-width:0}
+  .fr-item .nm small{display:block;color:var(--ink-soft);font-weight:400;font-size:12px}
+  .fr-detail-placeholder{padding:60px 24px;text-align:center;color:var(--ink-soft)}
+  .fr-detail-placeholder [data-lucide]{width:30px;height:30px;margin-bottom:10px}
+
+  .detail-head{display:flex;align-items:flex-start;gap:14px;margin:2px 0 16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:1080px){.grid2{grid-template-columns:1fr}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel .ph{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+  .panel .ph [data-lucide]{width:17px;height:17px;color:var(--green)}
+  .panel .ph .act{margin-left:auto}
+  .panel .pb{padding:13px 15px}
+  .kv{display:flex;gap:8px;padding:7px 0;font-size:13.5px;border-bottom:1px dashed var(--line)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--ink-soft);min-width:52px;flex:none;font-weight:600}
+  .contact-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .contact-row:last-child{border-bottom:none}
+  .contact-row a{color:var(--green-dark)}
+  .contact-row .type{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);
+    background:var(--idle-soft);border-radius:5px;padding:2px 6px;font-weight:700;flex:none}
+  .contact-row .val{flex:1;word-break:break-all}
+  .store-line{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .store-line:last-child{border-bottom:none}
+  .store-line:hover{background:var(--green-soft);margin:0 -8px;padding:10px 8px;border-radius:8px}
+  .store-line .num{font-weight:700;color:var(--green-dark);flex:none;width:60px}
+  .store-line .meta{flex:1;min-width:0}
+  .store-line .meta .a{font-size:13.5px}
+  .store-line .meta .b{font-size:12.5px;color:var(--ink-soft)}
+  .staff-badge{display:inline-flex;align-items:center;gap:6px;background:var(--yellow-soft);color:var(--yellow-dark);
+    border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;margin:3px 6px 3px 0}
+  .staff-badge [data-lucide]{width:14px;height:14px}
+  .issue-line{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer;font-size:13.5px}
+  .issue-line:last-child{border-bottom:none}
+  .issue-line:hover{background:var(--green-soft);margin:0 -8px;padding:9px 8px;border-radius:8px}
+  .issue-line .val{flex:1}
+
+  /* Cards grid (staff) */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;cursor:pointer}
+  .pcard:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(4,102,58,.12)}
+  .pcard .rl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--yellow-dark);background:var(--yellow-soft);border-radius:5px;padding:2px 7px;display:inline-block}
+  .pcard h3{margin:9px 0 4px;font-size:16px}
+  .pcard .terr{font-size:12.5px;color:var(--ink-soft)}
+  .pcard .mini{margin-top:9px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:12px}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(19,32,26,.5);display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow:auto;z-index:60}
+  .overlay.show{display:flex}
+  .overlay.blur{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);background:rgba(19,32,26,.4)}
+  .modal{background:var(--surface);border-radius:14px;width:100%;max-width:640px;box-shadow:0 20px 60px rgba(19,32,26,.28)}
+  .modal.small{max-width:460px}
+  .modal.big{max-width:760px}
+  .modal .head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);border-radius:14px 14px 0 0;z-index:2}
+  .modal .head h2{margin:0;font-size:17px}
+  .modal .head .subt{font-size:12.5px;color:var(--ink-soft);font-weight:400}
+  .modal .head [data-lucide]{color:var(--green)}
+  .modal .head .x{margin-left:auto;width:30px;height:30px;border-radius:7px;border:none;background:none;color:var(--ink-soft);display:grid;place-items:center;cursor:pointer;font-size:20px}
+  .modal .head .x:hover{background:#e9efe9;color:var(--ink)}
+  .modal .body{padding:18px 20px;max-height:70vh;overflow:auto}
+  .modal .body p.hint{margin:0;color:var(--ink-soft);font-size:14px}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .fgrid .full{grid-column:1/-1}
+  @media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;font-weight:600}
+  .field input,.field select,.field textarea{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font:inherit;font-size:14px;color:var(--ink);background:var(--surface)}
+  .field textarea{height:64px;padding:9px 11px;resize:vertical}
+  .modal footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
+
+  /* Store window sections */
+  .sw-sec{border:1px solid var(--line);border-radius:10px;margin-bottom:13px;overflow:hidden}
+  .sw-sec .sh{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#f6f9f6;font-weight:700;font-size:13.5px;border-bottom:1px solid var(--line)}
+  .sw-sec .sh [data-lucide]{width:16px;height:16px;color:var(--green)}
+  .sw-sec .sh .act{margin-left:auto}
+  .sw-sec .sb{padding:13px}
+  .plat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){.plat-grid{grid-template-columns:1fr}}
+  .issue-card{border:1px solid var(--line);border-radius:9px;padding:11px;margin-bottom:10px;background:#fcfdfc}
+  .issue-card:last-child{margin-bottom:0}
+  .issue-card .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .issue-card .ts{font-size:11.5px;color:var(--ink-soft)}
+  .note-row{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .note-row:last-child{border-bottom:none}
+  .note-row .nt{font-size:11.5px;color:var(--ink-soft);flex:none;width:118px}
+  .addrow{display:flex;gap:8px;margin-top:10px}
+  .addrow input,.addrow textarea{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font:inherit;font-size:14px}
+
+  .conn-status{display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:8px;background:var(--idle-soft);font-size:13.5px;margin-bottom:16px}
+  .conn-status i.d{width:9px;height:9px;border-radius:50%;background:var(--idle);flex:none}
+  .conn-status.ok{background:var(--ok-soft)} .conn-status.ok i.d{background:var(--ok)}
+  .conn-status.err{background:var(--danger-soft)} .conn-status.err i.d{background:var(--danger)}
+  .help{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.2s;z-index:120}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .toast.err{background:var(--danger)} .toast.ok{background:var(--green)}
+
+  @media(max-width:700px){ .hide-sm{display:none} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <div class="mark">S</div>
+      <div><h1>Franchisee Tracker</h1><div class="sub">3PD Helpdesk</div></div>
+    </div>
+    <div class="top-right">
+      <div id="statusDot" class="status-dot"><i class="d"></i><span>Not connected</span></div>
+      <button class="ghost-icon" id="settingsBtn" title="Settings" aria-label="Settings"><i data-lucide="settings"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="inner">
+    <button class="tab active" data-tab="franchisees"><i data-lucide="users"></i>Franchisees <span class="badge-num" id="cnt-fr">0</span></button>
+    <button class="tab" data-tab="stores"><i data-lucide="store"></i>All Stores <span class="badge-num" id="cnt-st">0</span></button>
+    <button class="tab" data-tab="staff"><i data-lucide="contact"></i>FBC / OM <span class="badge-num" id="cnt-sf">0</span></button>
+    <button class="tab" data-tab="issues"><i data-lucide="triangle-alert"></i>Issues <span class="badge-num" id="cnt-is">0</span></button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="search-wrap" id="searchWrap">
+      <span class="lead"><i data-lucide="search"></i></span>
+      <input id="search" type="search" placeholder="Search…  (#store or @franchisee)">
+    </div>
+    <select class="terr-filter" id="terrFilter"><option value="">All territories</option></select>
+    <span id="count" class="count"></span>
+    <button class="btn" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
+    <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
+  </div>
+  <div class="hintbar" id="hintbar">
+    <span><kbd>#</kbd> store number — e.g. #12345</span>
+    <span><kbd>@</kbd> franchisee name — e.g. @Aggarwal</span>
+  </div>
+
+  <div id="view"></div>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="settings"></i><h2>Settings</h2><button class="x" id="settingsX">&times;</button></div>
+    <div class="body">
+      <div id="connStatus" class="conn-status"><i class="d"></i><span>Not connected</span></div>
+      <div class="field" style="margin-bottom:13px"><label>Project URL</label><input id="c_url" placeholder="https://xxxx.supabase.co" spellcheck="false"></div>
+      <div class="field"><label>Database key (publishable or anon)</label><input id="c_key" placeholder="sb_publishable_…" spellcheck="false"></div>
+      <div class="help">Saved on this computer so you stay connected. Share the file with your team and it connects automatically.</div>
+    </div>
+    <footer>
+      <button class="btn link danger" id="disconnectBtn" style="margin-right:auto;display:none">Disconnect</button>
+      <button class="btn ghost" id="settingsCloseBtn">Close</button>
+      <button class="btn" id="connectBtn">Connect</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Franchisee edit -->
+<div class="overlay" id="frOverlay">
+  <div class="modal">
+    <div class="head"><i data-lucide="user-round-pen"></i><h2 id="frTitle">Edit franchisee</h2><button class="x" id="frX">&times;</button></div>
+    <div class="body">
+      <input type="hidden" id="fr_id">
+      <div class="fgrid">
+        <div class="field full"><label>Franchisee name</label><input id="fr_name" placeholder="Last, First"></div>
+        <div class="field"><label>Territory</label><input id="fr_territory" placeholder="540, 584"></div>
+        <div class="field"><label>Status</label><select id="fr_closed"><option value="false">Active</option><option value="true">Closed</option></select></div>
+      </div>
+      <div style="margin-top:16px">
+        <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">Contacts</label>
+        <div id="fr_contacts"></div>
+        <button class="btn link" id="fr_addContact"><i data-lucide="plus"></i>Add contact</button>
+      </div>
+      <div class="field full" style="margin-top:12px"><label>Notes</label><textarea id="fr_notes" placeholder="Anything the team should know"></textarea></div>
+    </div>
+    <footer><button class="btn ghost" id="frCancel">Cancel</button><button class="btn" id="frSave">Save</button></footer>
+  </div>
+</div>
+
+<!-- STORE WINDOW (no outside-click close) -->
+<div class="overlay blur" id="storeOverlay">
+  <div class="modal big">
+    <div class="head"><i data-lucide="store"></i><div><h2 id="sw_title">Store</h2><div class="subt" id="sw_sub"></div></div><button class="x" id="storeX">&times;</button></div>
+    <div class="body" id="sw_body"></div>
+    <footer>
+      <button class="btn ghost" id="storeClose">Close</button>
+      <button class="btn" id="sw_saveStore"><i data-lucide="save"></i>Save store details</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Issue add (from Issues tab / store window log) -->
+<div class="overlay" id="isOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="triangle-alert"></i><h2 id="isTitle">Log issue</h2><button class="x" id="isX">&times;</button></div>
+    <div class="body">
+      <input type="hidden" id="is_id">
+      <div class="field" style="margin-bottom:13px"><label>Store #</label><input id="is_store" placeholder="e.g. 12345"></div>
+      <div class="field" style="margin-bottom:13px"><label>Issue</label><textarea id="is_title" placeholder="Describe the issue"></textarea></div>
+      <div class="fgrid">
+        <div class="field"><label>Status</label><select id="is_status"><option>Open</option><option>In progress</option><option>Resolved</option></select></div>
+        <div class="field"><label>Action taken</label><input id="is_action" placeholder="Optional"></div>
+      </div>
+      <div class="field" style="margin-top:13px"><label>Notes</label><textarea id="is_notes" placeholder="Optional"></textarea></div>
+    </div>
+    <footer><button class="btn ghost" id="isCancel">Cancel</button><button class="btn" id="isSave">Save</button></footer>
+  </div>
+</div>
+
+<!-- Staff detail -->
+<div class="overlay" id="sdOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="id-card"></i><div><h2 id="sd_name">—</h2><div class="subt" id="sd_role"></div></div><button class="x" id="sdX">&times;</button></div>
+    <div class="body" id="sd_body"></div>
+    <footer>
+      <button class="btn link danger" id="sd_delete" style="margin-right:auto">Delete</button>
+      <button class="btn ghost" id="sdClose">Close</button>
+      <button class="btn" id="sd_edit"><i data-lucide="pencil"></i>Edit</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Staff add/edit -->
+<div class="overlay" id="sfOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="user-round-plus"></i><h2 id="sfTitle">Add FBC / OM</h2><button class="x" id="sfX">&times;</button></div>
+    <div class="body">
+      <input type="hidden" id="sf_id">
+      <div class="fgrid" style="margin-bottom:13px">
+        <div class="field"><label>Role</label><select id="sf_role"><option>OM</option><option>FBC</option></select></div>
+        <div class="field"><label>Name</label><input id="sf_name"></div>
+      </div>
+      <div class="field" style="margin-bottom:13px"><label>Territory (stores they handle are matched by this)</label><input id="sf_territory" placeholder="e.g. 540, 584"></div>
+      <div class="fgrid">
+        <div class="field"><label>Cellphone</label><input id="sf_cell" placeholder="+1 …"></div>
+        <div class="field"><label>Email</label><input id="sf_email" placeholder="name@…"></div>
+      </div>
+      <div id="sf_preview" class="help"></div>
+    </div>
+    <footer><button class="btn ghost" id="sfCancel">Cancel</button><button class="btn" id="sfSave">Save</button></footer>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="trash-2"></i><h2>Confirm delete</h2></div>
+    <div class="body"><p class="hint" id="confirmText"></p></div>
+    <footer><button class="btn ghost" id="confirmCancel">Cancel</button><button class="btn danger" id="confirmOk">Delete</button></footer>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_URL = "https://pwgxzzkzvhqajlgkbziu.supabase.co";
+const DEFAULT_KEY = "sb_publishable_xcn3uRSFsyYZC3cDhOOVIw_pAsEd1o7";
+const PLATFORMS=[["ue","Uber Eats","UE"],["dd","DoorDash","DD"],["gh","Grubhub","GH"],["ez","ezCater","EZ"],["fj","Foodja","FJ"]];
+const PLAT_STATES=["Active","Pending","Not enrolled","Inactive"];
+
+let db=null, tab="franchisees", selFr=null, terrFilter="", curStore=null, pending=null;
+let FR=[], ST=[], SF=[], IS=[];
+let storesByFr={}, storeByNum={};
+const $ = id => document.getElementById(id);
+function esc(s){return (s??"").toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function icons(){ if(window.lucide) lucide.createIcons(); }
+function fmtTs(ts){ if(!ts)return ""; try{return new Date(ts).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return ts;} }
+function nowIso(){ return new Date().toISOString(); }
+
+function toast(m,type){ const t=$("toast"); t.textContent=m; t.className="toast show"+(type?" "+type:"");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.className="toast",2600); }
+
+function setStatus(state, header, popup){
+  const d=$("statusDot"); d.className="status-dot "+(state||""); d.querySelector("span").textContent=header;
+  const s=$("connStatus"); s.className="conn-status "+(state||""); s.querySelector("span").textContent=popup||header;
+  $("disconnectBtn").style.display=(state==="ok")?"inline-block":"none";
+  $("connectBtn").textContent=(state==="ok")?"Reconnect":"Connect";
+}
+
+function friendly(err){
+  const m=(err&&err.message?err.message:"").toLowerCase(), code=(err&&err.code)?String(err.code):"";
+  if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-issues.sql (or the full setup) in Supabase, then Refresh.",a:"settings"};
+  if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
+  if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
+  if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
+  return {t:"Something went wrong",b:(err&&err.message)||"Please try again.",a:"retry"};
+}
+
+/* connection */
+function saveCreds(u,k){try{localStorage.setItem("ft2_url",u);localStorage.setItem("ft2_key",k);}catch(e){}}
+function clearCreds(){try{localStorage.removeItem("ft2_url");localStorage.removeItem("ft2_key");}catch(e){}}
+function getCreds(){let u="",k="";try{u=localStorage.getItem("ft2_url")||"";k=localStorage.getItem("ft2_key")||"";}catch(e){}return{url:u||DEFAULT_URL,key:k||DEFAULT_KEY};}
+function openSettings(){const c=getCreds(); if(!$("c_url").value)$("c_url").value=c.url; if(!$("c_key").value)$("c_key").value=c.key; $("settingsOverlay").classList.add("show");}
+function closeSettings(){$("settingsOverlay").classList.remove("show");}
+
+async function connect(url,key,silent){
+  url=(url||"").trim(); key=(key||"").trim();
+  if(!url||!key){toast("Enter both URL and key","err");return;}
+  setStatus("busy","Connecting…"); if(!silent) viewLoading("Connecting…");
+  db=supabase.createClient(url,key);
+  const {error}=await db.from("franchisees").select("id").limit(1);
+  if(error){ db=null; setStatus("err","Not connected",friendly(error).t); viewError(error); if(!silent) toast(friendly(error).t,"err"); return; }
+  saveCreds(url,key); let host=url; try{host=new URL(url).host;}catch(e){}
+  setStatus("ok","Connected","Connected to "+host);
+  if(!silent){toast("Connected","ok"); closeSettings();}
+  loadAll();
+}
+function disconnect(){ clearCreds(); db=null; FR=ST=SF=IS=[]; setStatus("","Not connected"); viewDisconnected(); toast("Disconnected"); }
+
+async function fetchAll(table){
+  let all=[], from=0, page=1000;
+  while(true){
+    const {data,error}=await db.from(table).select("*").range(from,from+page-1);
+    if(error) throw error;
+    all=all.concat(data||[]);
+    if(!data||data.length<page) break;
+    from+=page;
+  }
+  return all;
+}
+function reindex(){
+  FR.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  storesByFr={}; storeByNum={};
+  ST.forEach(s=>{(storesByFr[s.franchisee_id]=storesByFr[s.franchisee_id]||[]).push(s); if(s.num) storeByNum[String(s.num)]=s;});
+}
+function buildTerrFilter(){
+  const set=new Set();
+  FR.forEach(f=>terrSet(f.territory).forEach(t=>set.add(t)));
+  ST.forEach(s=>terrSet(s.territory).forEach(t=>set.add(t)));
+  const opts=[...set].sort((a,b)=>(+a||a)-(+b||b)||(""+a).localeCompare(b));
+  $("terrFilter").innerHTML='<option value="">All territories</option>'+opts.map(t=>'<option value="'+esc(t)+'">Territory '+esc(t)+'</option>').join("");
+  $("terrFilter").value=terrFilter;
+}
+async function loadAll(){
+  if(!db){viewDisconnected();return;}
+  viewLoading("Loading data…");
+  try{ [FR,ST,SF,IS]=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]); }
+  catch(err){ setStatus("err","Connection issue",friendly(err).t); viewError(err); return; }
+  setStatus("ok","Connected");
+  reindex(); buildTerrFilter();
+  $("cnt-fr").textContent=FR.length; $("cnt-st").textContent=ST.length;
+  $("cnt-sf").textContent=SF.length; $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length;
+  render();
+}
+
+/* helpers */
+function contactsOf(o){ try{return Array.isArray(o.contacts)?o.contacts:JSON.parse(o.contacts||"[]");}catch(e){return [];} }
+function platOf(s){ let p; try{p=(typeof s.platforms==="object"&&s.platforms)?s.platforms:JSON.parse(s.platforms||"{}");}catch(e){p={};} return p||{}; }
+function notesOf(s){ try{return Array.isArray(s.notes)?s.notes:JSON.parse(s.notes||"[]");}catch(e){return [];} }
+function terrSet(str){ return new Set((str||"").split(",").map(x=>x.trim()).filter(Boolean)); }
+function staffFor(territory){
+  const set=terrSet(territory); const om=[],fbc=[];
+  SF.forEach(s=>{ const ss=terrSet(s.territory); for(const t of set){ if(ss.has(t)){ (s.role==="OM"?om:fbc).push(s); break; } } });
+  return {om,fbc};
+}
+function storesHandled(staff){
+  const set=terrSet(staff.territory);
+  return ST.filter(s=>{ const ss=terrSet(s.territory); for(const t of ss){ if(set.has(t)) return true; } return false; });
+}
+function cellOf(o){ const c=contactsOf(o).find(x=>x.type==="cell"); return c?c.value:""; }
+function emailOf(o){ const c=contactsOf(o).find(x=>x.type==="email"); return c?c.value:""; }
+function platChips(p){
+  return '<div class="plat">'+PLATFORMS.map(([k,,short])=>{ const v=p[k]||"Not enrolled";
+    return '<span class="chip '+(v==="Active"?"on":(v==="Pending"?"pend":""))+'" title="'+short+': '+esc(v)+'">'+short+'</span>'; }).join("")+'</div>';
+}
+function statusBadge(s){ const cls=s==="Resolved"?"b-resolved":(s==="In progress"?"b-progress":"b-open"); return '<span class="badge '+cls+'">'+esc(s||"Open")+'</span>'; }
+function copyBtn(val){ return '<button class="iconbtn" title="Copy" onclick="copyText(\''+esc(String(val)).replace(/'/g,"\\'")+'\')"><i data-lucide="copy"></i></button>'; }
+function copyText(t){ if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast("Copied","ok"),()=>fallbackCopy(t));} else fallbackCopy(t); }
+function fallbackCopy(t){ const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand("copy");toast("Copied","ok");}catch(e){} a.remove(); }
+
+/* search + filter */
+function parseQuery(){
+  const raw=$("search").value.trim();
+  if(raw.startsWith("#")) return {mode:"store", q:raw.slice(1).trim().toLowerCase()};
+  if(raw.startsWith("@")) return {mode:"fr", q:raw.slice(1).trim().toLowerCase()};
+  return {mode:"any", q:raw.toLowerCase()};
+}
+function frInTerr(f){ if(!terrFilter) return true; return terrSet(f.territory).has(terrFilter); }
+function stInTerr(s){ if(!terrFilter) return true; return terrSet(s.territory).has(terrFilter); }
+
+/* view container */
+function setView(html){ $("view").innerHTML=html; icons(); }
+function viewLoading(t){ setView('<div class="card"><div class="state"><div class="spinner"></div><b>'+esc(t||"Loading…")+'</b></div></div>'); }
+function viewDisconnected(){ setView('<div class="card"><div class="state"><div class="ic"><i data-lucide="unplug"></i></div><b>Not connected</b><p>Open Settings and connect to your database.</p><div class="cta"><button class="btn" onclick="openSettings()">Open Settings</button></div></div></div>'); }
+function viewError(err){ const f=friendly(err); let cta=''; if(f.a==="settings")cta='<button class="btn" onclick="openSettings()">Open Settings</button><button class="btn ghost" onclick="loadAll()">Refresh</button>'; else cta='<button class="btn" onclick="loadAll()">Try again</button>';
+  setView('<div class="card"><div class="state error"><div class="ic"><i data-lucide="circle-alert"></i></div><b>'+esc(f.t)+'</b><p>'+esc(f.b)+'</p><div class="cta">'+cta+'</div></div></div>'); }
+function emptyBox(icon,title,sub){ return '<div class="card"><div class="state"><div class="ic"><i data-lucide="'+icon+'"></i></div><b>'+esc(title)+'</b><p>'+esc(sub)+'</p></div></div>'; }
+
+/* render */
+function render(){
+  if(!db){viewDisconnected();return;}
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+  const showSearch = (tab==="franchisees"||tab==="stores");
+  $("searchWrap").style.display=showSearch?"flex":"none";
+  $("terrFilter").style.display=showSearch?"block":"none";
+  $("hintbar").style.display=showSearch?"flex":"none";
+  const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
+  $("primaryAdd").style.display = lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
+  if(tab==="franchisees") renderFranchisees();
+  else if(tab==="stores") renderStores();
+  else if(tab==="staff") renderStaff();
+  else if(tab==="issues") renderIssues();
+}
+
+/* ---- Franchisees: two-panel ---- */
+function renderFranchisees(){
+  const {mode,q}=parseQuery();
+  let list=FR.filter(f=>{
+    if(!frInTerr(f)) return false;
+    if(mode==="store") return (storesByFr[f.id]||[]).some(s=>(s.num||"").toLowerCase().includes(q));
+    if(mode==="fr") return (f.name||"").toLowerCase().includes(q);
+    if(!q) return true;
+    return (f.name||"").toLowerCase().includes(q) || (f.territory||"").toLowerCase().includes(q);
+  });
+  $("count").textContent=list.length+" of "+FR.length;
+  if(selFr && !list.some(f=>f.id===selFr)) selFr=null;
+  const items=list.map(f=>{
+    const stc=(storesByFr[f.id]||[]).length;
+    const open=IS.filter(i=>i.franchisee_id===f.id&&i.status!=="Resolved").length;
+    return '<div class="fr-item'+(f.id===selFr?' active':'')+'" onclick="selectFranchisee('+f.id+')">'
+      +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div>'
+      +(open?'<span class="badge b-open">'+open+'</span>':'')+'</div>';
+  }).join("") || '<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
+  const detail = selFr ? detailHtml(selFr) : '<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
+  setView('<div class="split"><div class="card fr-list" id="frList">'+items+'</div><div id="frDetailPane">'+detail+'</div></div>');
+}
+function selectFranchisee(id){
+  selFr=id;
+  document.querySelectorAll("#frList .fr-item").forEach(el=>el.classList.remove("active"));
+  const rows=[...document.querySelectorAll("#frList .fr-item")];
+  const idx=FR.filter(frInTerrCurrent).findIndex(f=>f.id===id); // best-effort highlight
+  $("frDetailPane").innerHTML=detailHtml(id); icons();
+  // re-highlight by matching onclick
+  document.querySelectorAll("#frList .fr-item").forEach(el=>{ if(el.getAttribute("onclick")==="selectFranchisee("+id+")") el.classList.add("active"); });
+}
+function frInTerrCurrent(f){ return frInTerr(f); }
+
+function detailHtml(id){
+  const f=FR.find(x=>x.id===id); if(!f) return '';
+  const stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
+  const contacts=contactsOf(f);
+  const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
+  const {om,fbc}=staffFor(f.territory);
+
+  const contactHtml = contacts.length ? contacts.map(c=>{
+    const cp=(c.type==="email"||c.type==="cell")?copyBtn(c.value):"";
+    const href=c.type==="email"?'mailto:'+esc(c.value):(c.type==="cell"?'tel:'+esc(c.value):null);
+    const val=href?'<a href="'+href+'">'+esc(c.value)+'</a>':esc(c.value);
+    return '<div class="contact-row"><span class="type">'+esc(c.type||"other")+'</span><span class="val">'+val+'</span>'+cp+'</div>';
+  }).join("") : '<p class="muted">No contacts yet.</p>';
+
+  const storeHtml = stores.length ? stores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><span class="num">#'+esc(s.num)+'</span><div class="meta">'
+      +'<div class="a">'+esc(s.address||"")+'</div>'
+      +'<div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
+      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join("") : '<p class="muted">No stores.</p>';
+
+  const issueHtml = issues.length ? issues.map(i=>{ const s=storeByNum[String(i.store_num)];
+    return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
+    +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
+    +'<span class="muted" style="font-size:11.5px">'+fmtTs(i.updated_at||i.created_at)+'</span></div>';
+  }).join("") : '<p class="muted">No issues logged.</p>';
+
+  const staffHtml=(arr)=> arr.length ? arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" style="cursor:pointer" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join("") : '<span class="muted">None for this territory</span>';
+
+  return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
+    +'<div class="muted" style="font-size:13.5px">Territory '+esc(f.territory||"—")+' · '+stores.length+' store'+(stores.length!==1?'s':'')+'</div></div>'
+    +'<button class="btn yellow" onclick="openFr('+f.id+')"><i data-lucide="pencil"></i>Edit</button></div>'
+    +'<div class="grid2">'
+      +'<div class="panel"><div class="ph"><i data-lucide="mail"></i>Contacts</div><div class="pb">'+contactHtml+'</div></div>'
+      +'<div class="panel"><div class="ph"><i data-lucide="badge-check"></i>Support team</div><div class="pb">'
+        +'<div class="kv"><span class="k">OM</span><span>'+staffHtml(om)+'</span></div>'
+        +'<div class="kv"><span class="k">FBC</span><span>'+staffHtml(fbc)+'</span></div>'
+        +'<div class="kv"><span class="k">Area</span><span class="muted">'+esc(f.territory||"—")+'</span></div></div></div>'
+      +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="store"></i>Stores <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+stores.length+'</span></div><div class="pb">'+storeHtml+'</div></div>'
+      +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="triangle-alert"></i>Issues</div><div class="pb">'+issueHtml+'</div></div>'
+      +(f.notes?'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="sticky-note"></i>Notes</div><div class="pb" style="white-space:pre-wrap;font-size:13.5px">'+esc(f.notes)+'</div></div>':'')
+    +'</div>';
+}
+
+/* ---- All Stores ---- */
+function renderStores(){
+  const {mode,q}=parseQuery();
+  const frName={}; FR.forEach(f=>frName[f.id]=f.name);
+  let list=ST.filter(s=>{
+    if(!stInTerr(s)) return false;
+    if(mode==="store") return (s.num||"").toLowerCase().includes(q);
+    if(mode==="fr") return (frName[s.franchisee_id]||"").toLowerCase().includes(q);
+    if(!q) return true;
+    return [s.num,s.address,s.city,frName[s.franchisee_id]].join(" ").toLowerCase().includes(q);
+  });
+  $("count").textContent=list.length+" of "+ST.length;
+  if(!list.length){ setView(emptyBox("store","No stores match","Try a different search, territory, or clear it.")); return; }
+  const rows=list.slice(0,1500).map(s=>'<tr class="click" onclick="openStore('+s.id+')">'
+    +'<td class="store">#'+esc(s.num)+'</td>'
+    +'<td>'+esc(frName[s.franchisee_id]||"")+'</td>'
+    +'<td class="hide-sm muted">'+esc(s.address||"")+'<br>'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+'</td>'
+    +'<td class="hide-sm muted">'+esc(s.phone||"")+'</td>'
+    +'<td>'+platChips(platOf(s))+'</td>'
+    +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>').join("");
+  setView('<div class="card"><table><thead><tr><th>Store #</th><th>Franchisee</th><th class="hide-sm">Address</th><th class="hide-sm">Phone</th><th>Platforms</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +(list.length>1500?'<p class="muted" style="text-align:center;margin-top:10px">Showing first 1500. Narrow with search or territory.</p>':''));
+}
+
+/* ---- FBC / OM ---- */
+function renderStaff(){
+  let html='';
+  [["OM","Operations Managers (OM)","user-cog"],["FBC","Field Business Consultants (FBC)","badge-check"]].forEach(([role,label,icon])=>{
+    const people=SF.filter(s=>s.role===role).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+    html+='<div style="margin:6px 0 8px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px"><i data-lucide="'+icon+'" style="color:var(--green)"></i>'+label+' <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+people.length+'</span></div>';
+    html+='<div class="cards" style="margin-bottom:18px">'+ (people.length? people.map(s=>{
+      const handled=storesHandled(s).length;
+      return '<div class="pcard" onclick="openStaff('+s.id+')"><span class="rl">'+esc(s.role)+'</span><h3>'+esc(s.name)+'</h3>'
+        +'<div class="terr"><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px"></i> Territory '+esc(s.territory||"—")+'</div>'
+        +'<div class="mini"><span><i data-lucide="phone" style="width:13px;height:13px;vertical-align:-2px"></i> '+(cellOf(s)?'yes':'—')+'</span><span><i data-lucide="mail" style="width:13px;height:13px;vertical-align:-2px"></i> '+(emailOf(s)?'yes':'—')+'</span><span><i data-lucide="store" style="width:13px;height:13px;vertical-align:-2px"></i> '+handled+'</span></div></div>';
+    }).join("") : '<p class="muted">None. Use “Add FBC / OM”.</p>')+'</div>';
+  });
+  $("count").textContent=SF.length+" people";
+  setView(html);
+}
+
+/* ---- Issues (log) ---- */
+function renderIssues(){
+  const frName={}; FR.forEach(f=>frName[f.id]=f.name);
+  let list=IS.slice().sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
+  $("count").textContent=list.filter(i=>i.status!=="Resolved").length+" open · "+list.length+" total";
+  if(!list.length){ setView(emptyBox("clipboard-list","No issues logged","Use “Log issue” to add one.")); return; }
+  const rows=list.map(i=>{ const s=storeByNum[String(i.store_num)];
+    return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
+    +'<td>'+statusBadge(i.status)+'</td>'
+    +'<td>'+esc(i.title)+'</td>'
+    +'<td class="hide-sm store">'+(i.store_num?'#'+esc(i.store_num):'—')+'</td>'
+    +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
+    +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(i.updated_at||i.created_at)+'</td>'
+    +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+  }).join("");
+  setView('<div class="card"><table><thead><tr><th>Status</th><th>Issue</th><th class="hide-sm">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm">Updated</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
+}
+
+/* ================= STORE WINDOW ================= */
+function openStore(id, focusIssueId){
+  const s=ST.find(x=>x.id===id); if(!s){toast("Store not found","err");return;}
+  curStore=id;
+  const f=FR.find(x=>x.id===s.franchisee_id);
+  const {om,fbc}=staffFor(s.territory);
+  const p=platOf(s), notes=notesOf(s), gbp=s.gbp||"";
+  const issues=IS.filter(i=>String(i.store_num)===String(s.num)).sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
+
+  $("sw_title").textContent="Store #"+(s.num||"");
+  $("sw_sub").textContent=(f?f.name+" · ":"")+"Territory "+(s.territory||"—");
+
+  const staffLine=(arr)=> arr.length? arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>") : '<span class="muted">—</span>';
+
+  const platHtml=PLATFORMS.map(([k,name])=>'<div class="field"><label>'+name+'</label><select id="sw_'+k+'">'
+    +PLAT_STATES.map(o=>'<option'+((p[k]||"Not enrolled")===o?' selected':'')+'>'+o+'</option>').join("")+'</select></div>').join("");
+
+  const issuesHtml = issues.length ? issues.map(i=>
+    '<div class="issue-card" id="issc_'+i.id+'"><div class="top">'+statusBadge(i.status)
+      +'<b style="flex:1">'+esc(i.title)+'</b></div>'
+      +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
+      +'<div class="fgrid" style="margin-top:9px">'
+        +'<div class="field"><label>Status</label><select id="iss_status_'+i.id+'">'+["Open","In progress","Resolved"].map(o=>'<option'+((i.status||"Open")===o?' selected':'')+'>'+o+'</option>').join("")+'</select></div>'
+        +'<div class="field"><label>Action taken</label><input id="iss_action_'+i.id+'" value="'+esc(i.action_taken||"")+'"></div>'
+      +'</div>'
+      +'<div class="field" style="margin-top:9px"><label>Notes</label><textarea id="iss_notes_'+i.id+'">'+esc(i.notes||"")+'</textarea></div>'
+      +'<div style="display:flex;gap:8px;margin-top:9px"><button class="btn sm" onclick="saveIssueRow('+i.id+')"><i data-lucide="save"></i>Update</button>'
+      +'<button class="btn sm ghost" onclick="askDeleteIssue('+i.id+')" style="color:var(--danger)"><i data-lucide="trash-2"></i>Delete</button></div></div>'
+  ).join("") : '<p class="muted">No issues logged for this store.</p>';
+
+  const notesHtml = notes.length ? notes.slice().reverse().map(n=>'<div class="note-row"><span class="nt">'+esc(fmtTs(n.ts))+'</span><span>'+esc(n.text)+'</span></div>').join("") : '<p class="muted">No notes yet.</p>';
+
+  $("sw_body").innerHTML=
+    '<div class="sw-sec"><div class="sh"><i data-lucide="map-pin"></i>Location</div><div class="sb"><div class="fgrid">'
+      +'<div class="field full"><label>Address</label><input id="sw_address" value="'+esc(s.address||"")+'"></div>'
+      +'<div class="field"><label>City</label><input id="sw_city" value="'+esc(s.city||"")+'"></div>'
+      +'<div class="field"><label>State</label><input id="sw_state" value="'+esc(s.state||"")+'"></div>'
+      +'<div class="field"><label>ZIP</label><input id="sw_zip" value="'+esc(s.zip||"")+'"></div>'
+      +'<div class="field"><label>Phone</label><input id="sw_phone" value="'+esc(s.phone||"")+'"></div>'
+    +'</div></div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="badge-check"></i>Support team</div><div class="sb"><div class="fgrid">'
+      +'<div class="field"><label>OM</label><div>'+staffLine(om)+'</div></div>'
+      +'<div class="field"><label>FBC</label><div>'+staffLine(fbc)+'</div></div>'
+      +'<div class="field"><label>Area</label><div class="muted">Territory '+esc(s.territory||"—")+'</div></div>'
+    +'</div></div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="bike"></i>Third-party delivery platforms</div><div class="sb"><div class="plat-grid">'+platHtml+'</div></div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="map"></i>Google Business Profile</div><div class="sb"><div style="display:flex;gap:8px;align-items:center">'
+      +'<input id="sw_gbp" style="flex:1;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font:inherit" value="'+esc(gbp)+'" placeholder="https://…">'
+      +(gbp?'<a class="btn ghost sm" href="'+esc(gbp)+'" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Open</a>':'')+'</div></div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="triangle-alert"></i>Issues<span class="act"></span></div><div class="sb">'+issuesHtml
+      +'<div class="addrow"><input id="sw_new_title" placeholder="Log a new issue…"><button class="btn sm" onclick="logStoreIssue()"><i data-lucide="plus"></i>Log</button></div></div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="sticky-note"></i>Store notes</div><div class="sb">'+notesHtml
+      +'<div class="addrow"><input id="sw_note_text" placeholder="Add a note (timestamped)…"><button class="btn sm yellow" onclick="addStoreNote()"><i data-lucide="plus"></i>Add</button></div></div></div>';
+
+  $("storeOverlay").classList.add("show"); icons();
+  if(focusIssueId){ const el=$("issc_"+focusIssueId); if(el){ el.scrollIntoView({block:"center"}); el.style.boxShadow="0 0 0 2px var(--yellow)"; setTimeout(()=>el.style.boxShadow="",1600); } }
+}
+function closeStore(){ $("storeOverlay").classList.remove("show"); curStore=null; }
+
+async function saveStoreDetails(){
+  const s=ST.find(x=>x.id===curStore); if(!s)return;
+  const rec={ address:$("sw_address").value.trim(), city:$("sw_city").value.trim(), state:$("sw_state").value.trim(),
+    zip:$("sw_zip").value.trim(), phone:$("sw_phone").value.trim(), gbp:$("sw_gbp").value.trim(),
+    platforms:Object.fromEntries(PLATFORMS.map(([k])=>[k,$("sw_"+k).value])) };
+  $("sw_saveStore").disabled=true;
+  const {error}=await db.from("stores").update(rec).eq("id",s.id);
+  $("sw_saveStore").disabled=false;
+  if(error){toast(friendly(error).t,"err");return;}
+  Object.assign(s,rec); reindex(); toast("Store saved","ok");
+  if(tab==="stores") renderStores(); else if(tab==="franchisees"&&selFr) selectFranchisee(selFr);
+}
+async function saveIssueRow(id){
+  const rec={ status:$("iss_status_"+id).value, action_taken:$("iss_action_"+id).value.trim(),
+    notes:$("iss_notes_"+id).value.trim(), updated_at:nowIso() };
+  const {error}=await db.from("issues").update(rec).eq("id",id);
+  if(error){toast(friendly(error).t,"err");return;}
+  const i=IS.find(x=>x.id===id); if(i) Object.assign(i,rec);
+  $("cnt-is").textContent=IS.filter(x=>x.status!=="Resolved").length;
+  toast("Issue updated","ok"); openStore(curStore);
+}
+async function logStoreIssue(){
+  const s=ST.find(x=>x.id===curStore); if(!s)return;
+  const title=$("sw_new_title").value.trim(); if(!title){toast("Type the issue first","err");return;}
+  const rec={ franchisee_id:s.franchisee_id, store_num:String(s.num||""), title, status:"Open", action_taken:"", notes:"", updated_at:nowIso() };
+  const {data,error}=await db.from("issues").insert(rec).select();
+  if(error){toast(friendly(error).t,"err");return;}
+  if(data&&data[0]) IS.push(data[0]);
+  $("cnt-is").textContent=IS.filter(x=>x.status!=="Resolved").length;
+  toast("Issue logged","ok"); openStore(curStore);
+}
+async function addStoreNote(){
+  const s=ST.find(x=>x.id===curStore); if(!s)return;
+  const text=$("sw_note_text").value.trim(); if(!text){toast("Type a note first","err");return;}
+  const notes=notesOf(s); notes.push({ts:nowIso(),text});
+  const {error}=await db.from("stores").update({notes}).eq("id",s.id);
+  if(error){toast(friendly(error).t,"err");return;}
+  s.notes=notes; toast("Note added","ok"); openStore(curStore);
+}
+
+/* contact editor (franchisee) */
+function contactEditorRow(c){
+  const types=["email","cell","other"];
+  return '<div class="contact-edit" style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><select style="width:100px;flex:none;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 8px">'+types.map(t=>'<option'+(c&&c.type===t?' selected':'')+'>'+t+'</option>').join("")+'</select>'
+    +'<input style="flex:1;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px" value="'+esc(c?c.value:"")+'" placeholder="value">'
+    +'<button class="iconbtn" title="Remove" onclick="this.parentNode.remove()"><i data-lucide="x"></i></button></div>';
+}
+function fillContactEditor(id,contacts){ $(id).innerHTML=(contacts&&contacts.length?contacts:[]).map(contactEditorRow).join(""); icons(); }
+function readContactEditor(id){ return [...$(id).querySelectorAll(".contact-edit")].map(r=>({type:r.querySelector("select").value,value:r.querySelector("input").value.trim()})).filter(c=>c.value); }
+
+function openFr(id){
+  const f=FR.find(x=>x.id===id); if(!f)return;
+  $("fr_id").value=f.id; $("fr_name").value=f.name||""; $("fr_territory").value=f.territory||"";
+  $("fr_closed").value=String(!!f.closed); $("fr_notes").value=f.notes||"";
+  fillContactEditor("fr_contacts", contactsOf(f));
+  $("frOverlay").classList.add("show");
+}
+$("fr_addContact").onclick=()=>{ $("fr_contacts").insertAdjacentHTML("beforeend",contactEditorRow()); icons(); };
+async function saveFr(){
+  const id=+$("fr_id").value;
+  const rec={ name:$("fr_name").value.trim(), territory:$("fr_territory").value.trim(),
+    closed:$("fr_closed").value==="true", notes:$("fr_notes").value.trim(), contacts:readContactEditor("fr_contacts") };
+  $("frSave").disabled=true;
+  const {error}=await db.from("franchisees").update(rec).eq("id",id);
+  $("frSave").disabled=false;
+  if(error){toast(friendly(error).t,"err");return;}
+  Object.assign(FR.find(x=>x.id===id),rec); reindex(); buildTerrFilter();
+  toast("Saved","ok"); $("frOverlay").classList.remove("show"); render(); if(selFr===id) selectFranchisee(id);
+}
+
+/* issue add modal (Issues tab) */
+function openIssue(prefillStore){
+  $("isTitle").textContent="Log issue"; $("is_id").value="";
+  $("is_store").value=prefillStore||""; $("is_title").value=""; $("is_status").value="Open"; $("is_action").value=""; $("is_notes").value="";
+  $("isOverlay").classList.add("show");
+}
+async function saveIssue(){
+  const store=$("is_store").value.trim();
+  const title=$("is_title").value.trim();
+  if(!title){toast("Describe the issue first","err");return;}
+  const st=storeByNum[store];
+  const rec={ franchisee_id: st?st.franchisee_id:null, store_num:store, title,
+    status:$("is_status").value, action_taken:$("is_action").value.trim(), notes:$("is_notes").value.trim(), updated_at:nowIso() };
+  $("isSave").disabled=true;
+  const {data,error}=await db.from("issues").insert(rec).select();
+  $("isSave").disabled=false;
+  if(error){toast(friendly(error).t,"err");return;}
+  if(data&&data[0]) IS.push(data[0]);
+  $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length;
+  $("isOverlay").classList.remove("show"); toast("Issue logged","ok"); render();
+}
+function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmText").textContent='Delete this issue: "'+(i?i.title:"")+'"?'; $("confirmOverlay").classList.add("show"); }
+
+/* staff detail + add/edit */
+function openStaff(id){
+  const s=SF.find(x=>x.id===id); if(!s)return;
+  $("sd_name").textContent=s.name||"—"; $("sd_role").textContent=(s.role||"")+" · Territory "+(s.territory||"—");
+  const handled=storesHandled(s);
+  const frIds=new Set(handled.map(x=>x.franchisee_id)); 
+  const cell=cellOf(s), email=emailOf(s);
+  $("sd_body").innerHTML=
+    '<div class="sw-sec"><div class="sh"><i data-lucide="phone"></i>Contact</div><div class="sb">'
+      +'<div class="contact-row"><span class="type">cell</span><span class="val">'+(cell?esc(cell):'<span class="muted">—</span>')+'</span>'+(cell?copyBtn(cell):'')+'</div>'
+      +'<div class="contact-row"><span class="type">email</span><span class="val">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'<span class="muted">—</span>')+'</span>'+(email?copyBtn(email):'')+'</div>'
+    +'</div></div>'
+    +'<div class="sw-sec"><div class="sh"><i data-lucide="store"></i>Handles (by territory)</div><div class="sb">'
+      +'<div class="mini" style="display:flex;gap:16px;font-size:13.5px"><span><b>'+frIds.size+'</b> franchisees</span><span><b>'+handled.length+'</b> stores</span></div>'
+    +'</div></div>';
+  $("sd_edit").onclick=()=>{ $("sdOverlay").classList.remove("show"); openStaffEdit(id); };
+  $("sd_delete").onclick=()=>{ pending={kind:"staff",id}; $("confirmText").textContent='Delete '+(s.role||"")+' "'+(s.name||"")+'"?'; $("confirmOverlay").classList.add("show"); };
+  $("sdOverlay").classList.add("show"); icons();
+}
+function openStaffEdit(id){
+  const s=id?SF.find(x=>x.id===id):null;
+  $("sfTitle").textContent=s?"Edit "+(s.role||""):"Add FBC / OM";
+  $("sf_id").value=s?s.id:""; $("sf_role").value=s?s.role||"OM":"OM"; $("sf_name").value=s?s.name||"":"";
+  $("sf_territory").value=s?s.territory||"":""; $("sf_cell").value=s?cellOf(s):""; $("sf_email").value=s?emailOf(s):"";
+  updateStaffPreview();
+  $("sfOverlay").classList.add("show");
+}
+function updateStaffPreview(){
+  const t=$("sf_territory").value; const n=ST.filter(x=>{const ss=terrSet(x.territory);for(const a of ss){if(terrSet(t).has(a))return true;}return false;}).length;
+  $("sf_preview").textContent = t.trim()? ("Handles "+n+" store"+(n!==1?"s":"")+" in territory "+t) : "";
+}
+async function saveStaff(){
+  const id=$("sf_id").value;
+  const contacts=[]; const cell=$("sf_cell").value.trim(), email=$("sf_email").value.trim();
+  if(cell) contacts.push({type:"cell",value:cell}); if(email) contacts.push({type:"email",value:email});
+  const rec={ role:$("sf_role").value, name:$("sf_name").value.trim(), territory:$("sf_territory").value.trim(), contacts };
+  if(!rec.name){toast("Enter a name","err");return;}
+  $("sfSave").disabled=true; let error, saved;
+  if(id){ ({error}=await db.from("staff").update(rec).eq("id",+id)); saved={...SF.find(x=>x.id===+id),...rec}; }
+  else { const newId=(SF.reduce((m,x)=>Math.max(m,x.id||0),0)||0)+1; rec.id=newId; ({error}=await db.from("staff").insert(rec)); saved=rec; }
+  $("sfSave").disabled=false;
+  if(error){toast(friendly(error).t,"err");return;}
+  if(id){ Object.assign(SF.find(x=>x.id===+id),rec); } else { SF.push(saved); $("cnt-sf").textContent=SF.length; }
+  toast("Saved","ok"); $("sfOverlay").classList.remove("show"); render();
+}
+
+/* confirm delete */
+async function doDelete(){
+  if(!pending)return; const p=pending;
+  $("confirmOk").disabled=true; let error;
+  if(p.kind==="issue"){ ({error}=await db.from("issues").delete().eq("id",p.id)); }
+  else if(p.kind==="staff"){ ({error}=await db.from("staff").delete().eq("id",p.id)); }
+  $("confirmOk").disabled=false; $("confirmOverlay").classList.remove("show"); pending=null;
+  if(error){toast(friendly(error).t,"err");return;}
+  toast("Deleted","ok");
+  if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length; if(curStore) openStore(curStore); }
+  if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); $("cnt-sf").textContent=SF.length; $("sdOverlay").classList.remove("show"); }
+  render();
+}
+
+function primaryAdd(){ if(tab==="issues") openIssue(); else if(tab==="staff") openStaffEdit(null); }
+
+/* events */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; render(); });
+$("search").oninput=render;
+$("terrFilter").onchange=e=>{ terrFilter=e.target.value; render(); };
+$("refreshBtn").onclick=loadAll;
+$("primaryAdd").onclick=primaryAdd;
+
+$("settingsBtn").onclick=openSettings; $("settingsX").onclick=closeSettings; $("settingsCloseBtn").onclick=closeSettings;
+$("connectBtn").onclick=()=>connect($("c_url").value,$("c_key").value); $("disconnectBtn").onclick=disconnect;
+$("settingsOverlay").onclick=e=>{if(e.target===$("settingsOverlay"))closeSettings();};
+
+$("frX").onclick=$("frCancel").onclick=()=>$("frOverlay").classList.remove("show"); $("frSave").onclick=saveFr;
+$("frOverlay").onclick=e=>{if(e.target===$("frOverlay"))$("frOverlay").classList.remove("show");};
+
+/* store window: NO outside-click close */
+$("storeX").onclick=closeStore; $("storeClose").onclick=closeStore; $("sw_saveStore").onclick=saveStoreDetails;
+
+$("isX").onclick=$("isCancel").onclick=()=>$("isOverlay").classList.remove("show"); $("isSave").onclick=saveIssue;
+$("isOverlay").onclick=e=>{if(e.target===$("isOverlay"))$("isOverlay").classList.remove("show");};
+
+$("sdX").onclick=$("sdClose").onclick=()=>$("sdOverlay").classList.remove("show");
+$("sdOverlay").onclick=e=>{if(e.target===$("sdOverlay"))$("sdOverlay").classList.remove("show");};
+$("sfX").onclick=$("sfCancel").onclick=()=>$("sfOverlay").classList.remove("show"); $("sfSave").onclick=saveStaff;
+$("sf_territory").oninput=updateStaffPreview;
+$("sfOverlay").onclick=e=>{if(e.target===$("sfOverlay"))$("sfOverlay").classList.remove("show");};
+
+$("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;}; $("confirmOk").onclick=doDelete;
+$("confirmOverlay").onclick=e=>{if(e.target===$("confirmOverlay")){$("confirmOverlay").classList.remove("show");pending=null;}};
+
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySelectorAll(".overlay.show").forEach(o=>{ if(o.id!=="storeOverlay") o.classList.remove("show"); }); } });
+
+/* startup */
+icons();
+(function start(){ const c=getCreds(); $("c_url").value=c.url; $("c_key").value=c.key; if(c.url&&c.key) connect(c.url,c.key,true); else viewDisconnected(); })();
+</script>
+</body>
+</html>
