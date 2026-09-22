@@ -90,6 +90,19 @@
   .btn.outline.warn{color:var(--yellow-dark);border-color:#e0b400}
   .btn.outline.warn:hover{background:var(--yellow-soft)}
   #issuesOnlyBtn.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+  .list-head{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .list-head .lh-title{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--ink);flex:1;min-width:0}
+  .list-head .lh-title [data-lucide]{width:16px;height:16px;color:var(--green)}
+  .list-head .lh-title b{color:var(--green-dark)}
+  .iconbtn.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+  .iconbtn.on-alt{background:var(--idle-soft);border-color:var(--idle);color:var(--idle)}
+  .pager{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-top:1px solid var(--line)}
+  .pico{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);border-radius:7px;color:var(--ink-soft);cursor:pointer}
+  .pico:hover{background:#e9efe9;color:var(--ink)}
+  .pico:disabled{opacity:.4;cursor:default}
+  .pico [data-lucide]{width:15px;height:15px}
+  .pg{font-size:12.5px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px;margin:0 2px}
+  .pgin{width:36px;text-align:center;border:none;background:var(--idle-soft);border-radius:6px;padding:5px 4px;font-family:var(--font);font-size:13px;color:var(--ink);font-weight:700}
   .btn.link{background:none;border:none;color:var(--green-dark);padding:4px 6px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
   .btn.link.danger{color:var(--danger)}
   .btn.link:hover{text-decoration:underline}
@@ -116,8 +129,9 @@
   .b-progress{background:var(--warn-soft);color:var(--warn)}
   .pill{display:inline-flex;align-items:center;gap:5px;background:var(--idle-soft);color:var(--ink-soft);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
   .pill [data-lucide]{width:13px;height:13px}
-  .idot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);
-    box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(192,57,43,.28);vertical-align:middle;margin-right:6px;cursor:help}
+  .idot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);vertical-align:middle;margin:0 6px;cursor:help}
+  .idot-col{width:10px;flex:none;display:flex;align-items:center;justify-content:center}
+  .idot-col .idot{margin:0}
 
   .plat{display:flex;gap:4px;flex-wrap:wrap}
   .chip{font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft)}
@@ -136,9 +150,11 @@
   .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  .split{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
+  .split{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:stretch}
   @media(max-width:880px){.split{grid-template-columns:1fr}}
   .fr-list{max-height:72vh;overflow:auto}
+  .fr-panel{display:flex;flex-direction:column;min-height:0}
+  .fr-panel .fr-list{flex:1;min-height:0;max-height:none;overflow:auto}
   .fr-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
   .fr-item:last-child{border-bottom:none}
   .fr-item:hover{background:var(--green-soft)}
@@ -317,7 +333,10 @@
       <input id="search" type="search" placeholder="Search…  (#store or @franchisee)">
     </div>
     <select class="terr-filter" id="terrFilter"><option value="">All territories</option></select>
-    <button class="btn ghost" id="issuesOnlyBtn"><i data-lucide="triangle-alert"></i>With issues</button>
+    <span id="storeFilters" style="display:none;gap:6px;align-items:center">
+      <button class="iconbtn" id="stIssueFilter" title="Only stores with an issue"><i data-lucide="triangle-alert"></i></button>
+      <button class="iconbtn" id="stClosedFilter" title="Only closed stores"><i data-lucide="door-closed"></i></button>
+    </span>
     <span id="count" class="count"></span>
     <button class="btn round" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
     <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
@@ -486,7 +505,9 @@ const ISSUE_PLATFORMS=["Uber Eats","DoorDash","Grubhub","ezCater","Google Busine
 const ISSUE_STATES=["Pending","Work in Progress","Resolved"];
 const IMPORT_PW="Sup3rUs3r!";
 
-let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, pending=null;
+let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
+let frPage=1, stPage=1, frStorePage=1;
+const PAGE_FR=25, PAGE_ST=50, PAGE_FRST=12;
 let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
 let FR=[], ST=[], SF=[], IS=[];
 let storesByFr={}, storeByNum={};
@@ -656,7 +677,9 @@ function render(){
   const showSearch=(tab==="franchisees"||tab==="stores");
   $("searchWrap").style.display=showSearch?"flex":"none";
   $("terrFilter").style.display=showSearch?"block":"none";
-  $("issuesOnlyBtn").style.display=showSearch?"inline-flex":"none";
+  $("storeFilters").style.display=(tab==="stores")?"inline-flex":"none";
+  $("stIssueFilter").classList.toggle("on", issuesOnly);
+  $("stClosedFilter").classList.toggle("on-alt", closedOnly);
   $("hintbar").style.display=showSearch?"flex":"none";
   const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
   $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
@@ -679,23 +702,31 @@ function renderFranchisees(){
   });
   $("count").textContent=list.length+" of "+FR.length;
   if(selFr && !list.some(f=>f.id===selFr)) selFr=null;
-  const items=list.map(f=>{
+  const frTotal=Math.max(1,Math.ceil(list.length/PAGE_FR));
+  if(frPage>frTotal)frPage=frTotal; if(frPage<1)frPage=1;
+  const pageList=list.slice((frPage-1)*PAGE_FR, frPage*PAGE_FR);
+  const items=pageList.map(f=>{
     const stc=(storesByFr[f.id]||[]).length;
     return '<div class="fr-item'+(f.id===selFr?' active':'')+'" data-fr="'+f.id+'" onclick="selectFranchisee('+f.id+')">'
-      +'<div class="nm">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
+      +'<div class="idot-col">'+openDot(frOpenIssues(f.id))+'</div>'
+      +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
       +'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
-  setView('<div class="split"><div class="card fr-list" id="frList">'+items+'</div><div id="frDetailPane">'+detail+'</div></div>');
+  const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
+    +'<button class="iconbtn'+(issuesOnly?' on':'')+'" title="Only franchisees with an issue" onclick="toggleIssues()"><i data-lucide="triangle-alert"></i></button></div>';
+  setView('<div class="split"><div class="card fr-panel">'+head+'<div class="fr-list" id="frList">'+items+'</div>'+pagerHtml('fr',frPage,frTotal)+'</div><div id="frDetailPane">'+detail+'</div></div>');
 }
 function selectFranchisee(id){
-  selFr=id;
+  selFr=id; frStorePage=1;
   document.querySelectorAll("#frList .fr-item").forEach(el=>el.classList.toggle("active", +el.dataset.fr===id));
   $("frDetailPane").innerHTML=detailHtml(id); icons();
 }
 function detailHtml(id){
   const f=FR.find(x=>x.id===id); if(!f) return '';
-  const stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
+  let stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
+  const _sq=parseQuery();
+  if(_sq.mode==="store" && _sq.q) stores=stores.filter(s=>(s.num||"").toLowerCase().includes(_sq.q));
   const contacts=contactsOf(f);
   const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const {om,fbc}=staffFor(f.territory);
@@ -705,9 +736,12 @@ function detailHtml(id){
     const val=href?'<a href="'+href+'">'+esc(c.value)+'</a>':esc(c.value);
     return '<div class="contact-row"><span class="type">'+esc(c.type||"other")+'</span><span class="val">'+val+'</span>'+cp+'</div>';
   }).join(""):'<p class="muted">No contacts yet.</p>';
-  const storeHtml=stores.length?stores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><span class="num">'+openDot(storeOpenIssues(s.num))+'#'+esc(s.num)+'</span><div class="meta">'
+  const stTotal=Math.max(1,Math.ceil(stores.length/PAGE_FRST));
+  if(frStorePage>stTotal)frStorePage=stTotal; if(frStorePage<1)frStorePage=1;
+  const pageStores=stores.slice((frStorePage-1)*PAGE_FRST, frStorePage*PAGE_FRST);
+  const storeHtml=stores.length?pageStores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><div class="idot-col">'+openDot(storeOpenIssues(s.num))+'</div><span class="num">'+esc(s.num)+'</span><div class="meta">'
       +'<div class="a">'+esc(s.address||"")+'</div><div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
-      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join(""):'<p class="muted">No stores.</p>';
+      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal):'<p class="muted">No stores.</p>';
   const issueHtml=issues.length?issues.map(i=>{ const s=storeByNum[String(i.store_num)];
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
     +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
@@ -735,22 +769,24 @@ function renderStores(){
   let list=ST.filter(s=>{
     if(!stInTerr(s)) return false;
     if(issuesOnly && !storeOpenIssues(s.num)) return false;
+    if(closedOnly && !s.closed) return false;
     if(mode==="store") return (s.num||"").toLowerCase().includes(q);
     if(mode==="fr") return (frName[s.franchisee_id]||"").toLowerCase().includes(q);
     if(!q) return true;
     return [s.num,s.address,s.city,frName[s.franchisee_id]].join(" ").toLowerCase().includes(q);
   });
   $("count").textContent=list.length+" of "+ST.length;
-  if(!list.length){ setView(emptyBox("store","No stores match","Try a different search, territory, or clear it.")); return; }
-  const rows=list.slice(0,1500).map(s=>'<tr class="click" onclick="openStore('+s.id+')">'
-    +'<td class="store">'+openDot(storeOpenIssues(s.num))+'#'+esc(s.num)+'</td>'
+  if(!list.length){ setView(emptyBox("store","No stores match","Try a different search, territory, or filter.")); return; }
+  const stTotal=Math.max(1,Math.ceil(list.length/PAGE_ST));
+  if(stPage>stTotal)stPage=stTotal; if(stPage<1)stPage=1;
+  const rows=list.slice((stPage-1)*PAGE_ST, stPage*PAGE_ST).map(s=>'<tr class="click" onclick="openStore('+s.id+')">'
+    +'<td class="store">'+openDot(storeOpenIssues(s.num))+esc(s.num)+'</td>'
     +'<td>'+esc(frName[s.franchisee_id]||"")+'</td>'
     +'<td class="hide-sm muted">'+esc(s.address||"")+'<br>'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+'</td>'
     +'<td class="hide-sm muted">'+esc(s.phone||"")+'</td>'
     +'<td>'+platChips(platOf(s))+'</td>'
     +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>').join("");
-  setView('<div class="card"><table><thead><tr><th>Store #</th><th>Franchisee</th><th class="hide-sm">Address</th><th class="hide-sm">Phone</th><th>Platforms</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +(list.length>1500?'<p class="muted" style="text-align:center;margin-top:10px">Showing first 1500. Narrow with search or territory.</p>':''));
+  setView('<div class="card"><table><thead><tr><th>Store #</th><th>Franchisee</th><th class="hide-sm">Address</th><th class="hide-sm">Phone</th><th>Platforms</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'+pagerHtml('st',stPage,stTotal)+'</div>');
 }
 
 /* FBC / OM */
@@ -1098,13 +1134,29 @@ async function doDelete(){
   render();
 }
 
+function toggleIssues(){ issuesOnly=!issuesOnly; frPage=1; stPage=1; render(); }
+function toggleClosed(){ closedOnly=!closedOnly; stPage=1; render(); }
+function pagerHtml(which, page, total){
+  if(total<=1) return '';
+  const b=(icon,title,target,dis)=>'<button class="pico" title="'+title+'"'+(dis?' disabled':'')+' onclick="pageSet(\''+which+'\','+target+')"><i data-lucide="'+icon+'"></i></button>';
+  return '<div class="pager">'+b('chevrons-left','Start',1,page<=1)+b('chevron-left','Previous',page-1,page<=1)
+    +'<span class="pg"><input class="pgin" value="'+page+'" title="Type a page number, then Enter" onkeydown="if(event.key===\'Enter\')pageSet(\''+which+'\',this.value)" onchange="pageSet(\''+which+'\',this.value)"> / '+total+'</span>'
+    +b('chevron-right','Next',page+1,page>=total)+b('chevrons-right','End',total,page>=total)+'</div>';
+}
+function pageSet(which,val){
+  let n=parseInt(val,10); if(isNaN(n)||n<1)n=1;
+  if(which==='fr'){ frPage=n; render(); }
+  else if(which==='st'){ stPage=n; render(); }
+  else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
+}
 function primaryAdd(){ if(tab==="issues") openLogIssue(null); else if(tab==="staff") openStaffEdit(null); }
 
 /* events */
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; render(); });
-$("search").oninput=render;
-$("terrFilter").onchange=e=>{ terrFilter=e.target.value; render(); };
-$("issuesOnlyBtn").onclick=()=>{ issuesOnly=!issuesOnly; $("issuesOnlyBtn").classList.toggle("on",issuesOnly); render(); };
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; frPage=1; stPage=1; render(); });
+$("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; render(); };
+$("terrFilter").onchange=e=>{ terrFilter=e.target.value; frPage=1; stPage=1; render(); };
+$("stIssueFilter").onclick=toggleIssues;
+$("stClosedFilter").onclick=toggleClosed;
 $("refreshBtn").onclick=loadAll;
 $("primaryAdd").onclick=primaryAdd;
 
