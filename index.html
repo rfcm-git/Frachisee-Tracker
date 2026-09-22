@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Franchisee Tracker — 3PD Helpdesk</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 
@@ -12,28 +15,32 @@
   :root{
     --bg:#eef3ee; --surface:#ffffff; --ink:#13201a; --ink-soft:#59685e;
     --line:#dde6df;
-    --green:#04663a; --green-dark:#034a2a; --green-soft:#e2f0e8;
+    --green:#0b8043; --green-dark:#0a6e3a; --green-soft:#e7f4ec;
     --yellow:#ffc600; --yellow-dark:#9a7400; --yellow-soft:#fff5d1;
     --danger:#c0392b; --danger-soft:#fdecea;
-    --ok:#1a7f45; --ok-soft:#e6f4ea;
-    --warn:#a86400; --warn-soft:#fbf0da;
+    --ok:#1a9850; --ok-soft:#e6f4ea;
+    --warn:#e08a00; --warn-soft:#fbf0da;
     --idle:#59685e; --idle-soft:#ecefec;
     --radius:10px; --shadow:0 1px 2px rgba(19,32,26,.06), 0 6px 20px rgba(19,32,26,.05);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg); color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--font); background:var(--bg); color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;}
   .wrap{max-width:1240px; margin:0 auto; padding:0 20px 60px}
   [data-lucide]{width:18px;height:18px;stroke-width:2}
 
   .topbar{background:var(--green); color:#fff}
-  .topbar .inner{max-width:1240px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+  .topbar .inner{max-width:1240px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
   .brand{display:flex;align-items:center;gap:10px}
-  .brand .mark{width:34px;height:34px;border-radius:8px;background:var(--yellow);color:var(--green-dark);
-    display:grid;place-items:center;font-weight:800;font-size:16px}
+  .brand .mark{height:34px;min-width:40px;padding:0 9px;border-radius:8px;background:var(--yellow);color:var(--green-dark);
+    display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px}
   .brand h1{font-size:18px;margin:0;letter-spacing:-.01em;color:#fff}
   .brand .sub{font-size:12px;color:#cfe7d8;margin-top:1px}
+  .clock{display:flex;gap:12px;align-items:center;font-size:12px;color:#e7f4ec;margin-left:8px;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 12px}
+  .clock b{color:var(--yellow);font-weight:700;margin-right:3px}
+  .clock .dt{color:#cfe7d8}
   .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
   .status-dot{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#e7f4ec;
     padding:6px 11px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.1)}
@@ -51,28 +58,24 @@
     cursor:pointer;font-size:14px;font-weight:600;border-radius:8px 8px 0 0;position:relative;top:1px}
   .tab:hover{color:#fff;background:rgba(255,255,255,.08)}
   .tab.active{color:var(--green-dark);background:var(--bg)}
-  .tab .badge-num{background:var(--yellow-soft);color:var(--yellow-dark);border-radius:999px;
-    font-size:11px;padding:0 7px;font-weight:700}
+  .tab .badge-num{background:var(--yellow-soft);color:var(--yellow-dark);border-radius:999px;font-size:11px;padding:0 7px;font-weight:700}
   .tab.active .badge-num{background:var(--green-soft);color:var(--green-dark)}
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
   .search-wrap{flex:1;min-width:200px;position:relative;display:flex;align-items:center}
   .search-wrap .lead{position:absolute;left:11px;color:var(--ink-soft);display:flex}
-  .search-wrap input{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;
-    padding:0 12px 0 36px;background:var(--surface);font-size:14px;color:var(--ink)}
+  .search-wrap input{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 12px 0 36px;background:var(--surface);font-size:14px;color:var(--ink);font-family:var(--font)}
   .terr-filter{height:40px;border:1px solid var(--line);border-radius:9px;padding:0 32px 0 12px;background:var(--surface);
-    font-size:14px;color:var(--ink);cursor:pointer;min-width:150px;
-    appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2359685e' stroke-width='2' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6'/></svg>");
+    font-size:14px;color:var(--ink);cursor:pointer;min-width:150px;font-family:var(--font);appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2359685e' stroke-width='2' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6'/></svg>");
     background-repeat:no-repeat;background-position:right 10px center}
   input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--green);outline-offset:1px;border-color:transparent}
   .hintbar{font-size:12px;color:var(--ink-soft);display:flex;gap:14px;align-items:center;margin:-6px 0 14px 2px;flex-wrap:wrap}
-  .hintbar kbd{background:var(--yellow-soft);border:1px solid #ecd98a;border-radius:5px;padding:1px 6px;
-    font-family:inherit;font-weight:700;color:var(--yellow-dark);font-size:12px}
+  .hintbar kbd{background:var(--yellow-soft);border:1px solid #ecd98a;border-radius:5px;padding:1px 6px;font-family:var(--font);font-weight:700;color:var(--yellow-dark);font-size:12px}
   .count{color:var(--ink-soft);font-size:13px}
 
-  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid transparent}
-  .btn{height:40px;padding:0 16px;background:var(--green);color:#fff;font-weight:600;font-size:14px;
-    display:inline-flex;align-items:center;gap:7px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid transparent;font-family:var(--font)}
+  .btn{height:40px;padding:0 16px;background:var(--green);color:#fff;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:7px}
   .btn:hover{background:var(--green-dark)}
   .btn:disabled{opacity:.55;cursor:default}
   .btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
@@ -80,41 +83,48 @@
   .btn.yellow{background:var(--yellow);color:var(--green-dark)}
   .btn.yellow:hover{background:#f0bb00}
   .btn.danger{background:var(--danger)} .btn.danger:hover{background:#a5301f}
-  .btn.sm{height:32px;padding:0 11px;font-size:13px}
+  .btn.sm{height:32px;padding:0 12px;font-size:13px}
+  .btn.round{border-radius:999px}
+  .btn.outline{background:#fbfaf5;color:var(--green-dark);border:1.5px solid var(--green)}
+  .btn.outline:hover{background:var(--green-soft)}
+  .btn.outline.warn{color:var(--yellow-dark);border-color:#e0b400}
+  .btn.outline.warn:hover{background:var(--yellow-soft)}
+  #issuesOnlyBtn.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
   .btn.link{background:none;border:none;color:var(--green-dark);padding:4px 6px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
   .btn.link.danger{color:var(--danger)}
   .btn.link:hover{text-decoration:underline}
-  .iconbtn{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);
-    background:var(--surface);border-radius:7px;color:var(--ink-soft);cursor:pointer}
+  .iconbtn{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);border-radius:7px;color:var(--ink-soft);cursor:pointer}
   .iconbtn:hover{background:#e9efe9;color:var(--ink)}
   .iconbtn [data-lucide]{width:15px;height:15px}
+  .iconbtn.mini{width:26px;height:26px} .iconbtn.mini [data-lucide]{width:13px;height:13px}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
 
   table{width:100%;border-collapse:collapse;font-size:13.5px}
-  thead th{text-align:left;padding:11px 14px;color:var(--ink-soft);font-weight:600;
-    border-bottom:1px solid var(--line);white-space:nowrap;font-size:12.5px}
+  thead th{text-align:left;padding:11px 14px;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12.5px}
   tbody td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
   tbody tr:last-child td{border-bottom:none}
   tbody tr.click{cursor:pointer}
   tbody tr.click:hover{background:var(--green-soft)}
   .store{font-weight:700;color:var(--green-dark)}
   .muted{color:var(--ink-soft)}
-  .row-actions{display:flex;gap:4px;justify-content:flex-end}
 
   .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
   .b-inactive{background:var(--idle-soft);color:var(--idle)}
   .b-open{background:var(--danger-soft);color:var(--danger)}
   .b-resolved{background:var(--ok-soft);color:var(--ok)}
   .b-progress{background:var(--warn-soft);color:var(--warn)}
-  .pill{display:inline-flex;align-items:center;gap:5px;background:var(--idle-soft);color:var(--ink-soft);
-    border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:5px;background:var(--idle-soft);color:var(--ink-soft);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
   .pill [data-lucide]{width:13px;height:13px}
+  .idot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);
+    box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(192,57,43,.28);vertical-align:middle;margin-right:6px;cursor:help}
 
   .plat{display:flex;gap:4px;flex-wrap:wrap}
   .chip{font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft)}
   .chip.on{background:var(--ok-soft);color:var(--ok);border-color:transparent}
   .chip.pend{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+  .chip.off{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+  .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-weight:600}
 
   .state{padding:52px 24px;text-align:center;color:var(--ink-soft)}
   .state .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;margin:0 auto 14px;background:var(--idle-soft);color:var(--ink-soft)}
@@ -126,7 +136,6 @@
   .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Two-panel franchisee */
   .split{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
   @media(max-width:880px){.split{grid-template-columns:1fr}}
   .fr-list{max-height:72vh;overflow:auto}
@@ -145,7 +154,6 @@
   .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .panel .ph{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
   .panel .ph [data-lucide]{width:17px;height:17px;color:var(--green)}
-  .panel .ph .act{margin-left:auto}
   .panel .pb{padding:13px 15px}
   .kv{display:flex;gap:8px;padding:7px 0;font-size:13.5px;border-bottom:1px dashed var(--line)}
   .kv:last-child{border-bottom:none}
@@ -153,25 +161,22 @@
   .contact-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
   .contact-row:last-child{border-bottom:none}
   .contact-row a{color:var(--green-dark)}
-  .contact-row .type{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);
-    background:var(--idle-soft);border-radius:5px;padding:2px 6px;font-weight:700;flex:none}
+  .contact-row .type{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);background:var(--idle-soft);border-radius:5px;padding:2px 6px;font-weight:700;flex:none}
   .contact-row .val{flex:1;word-break:break-all}
   .store-line{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
   .store-line:last-child{border-bottom:none}
   .store-line:hover{background:var(--green-soft);margin:0 -8px;padding:10px 8px;border-radius:8px}
-  .store-line .num{font-weight:700;color:var(--green-dark);flex:none;width:60px}
+  .store-line .num{font-weight:700;color:var(--green-dark);flex:none;width:74px}
   .store-line .meta{flex:1;min-width:0}
   .store-line .meta .a{font-size:13.5px}
   .store-line .meta .b{font-size:12.5px;color:var(--ink-soft)}
-  .staff-badge{display:inline-flex;align-items:center;gap:6px;background:var(--yellow-soft);color:var(--yellow-dark);
-    border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;margin:3px 6px 3px 0}
+  .staff-badge{display:inline-flex;align-items:center;gap:6px;background:var(--yellow-soft);color:var(--yellow-dark);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;margin:3px 6px 3px 0;cursor:pointer}
   .staff-badge [data-lucide]{width:14px;height:14px}
   .issue-line{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer;font-size:13.5px}
   .issue-line:last-child{border-bottom:none}
   .issue-line:hover{background:var(--green-soft);margin:0 -8px;padding:9px 8px;border-radius:8px}
   .issue-line .val{flex:1}
 
-  /* Cards grid (staff) */
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
   .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;cursor:pointer}
   .pcard:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(4,102,58,.12)}
@@ -180,14 +185,14 @@
   .pcard .terr{font-size:12.5px;color:var(--ink-soft)}
   .pcard .mini{margin-top:9px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:12px}
 
-  /* Modal */
+  /* Modal base */
   .overlay{position:fixed;inset:0;background:rgba(19,32,26,.5);display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow:auto;z-index:60}
   .overlay.show{display:flex}
-  .overlay.blur{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);background:rgba(19,32,26,.4)}
-  .modal{background:var(--surface);border-radius:14px;width:100%;max-width:640px;box-shadow:0 20px 60px rgba(19,32,26,.28)}
+  .overlay.blur{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);background:rgba(19,32,26,.42)}
+  .overlay.top{z-index:90}
+  .modal{background:var(--surface);border-radius:14px;width:100%;max-width:600px;box-shadow:0 20px 60px rgba(19,32,26,.28)}
   .modal.small{max-width:460px}
-  .modal.big{max-width:760px}
-  .modal .head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);border-radius:14px 14px 0 0;z-index:2}
+  .modal .head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
   .modal .head h2{margin:0;font-size:17px}
   .modal .head .subt{font-size:12.5px;color:var(--ink-soft);font-weight:400}
   .modal .head [data-lucide]{color:var(--green)}
@@ -199,27 +204,73 @@
   .fgrid .full{grid-column:1/-1}
   @media(max-width:560px){.fgrid{grid-template-columns:1fr}}
   .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;font-weight:600}
-  .field input,.field select,.field textarea{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font:inherit;font-size:14px;color:var(--ink);background:var(--surface)}
-  .field textarea{height:64px;padding:9px 11px;resize:vertical}
+  .field input,.field select,.field textarea{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);font-family:var(--font)}
+  .field textarea{height:70px;padding:9px 11px;resize:vertical}
   .modal footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
 
-  /* Store window sections */
-  .sw-sec{border:1px solid var(--line);border-radius:10px;margin-bottom:13px;overflow:hidden}
-  .sw-sec .sh{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#f6f9f6;font-weight:700;font-size:13.5px;border-bottom:1px solid var(--line)}
-  .sw-sec .sh [data-lucide]{width:16px;height:16px;color:var(--green)}
-  .sw-sec .sh .act{margin-left:auto}
-  .sw-sec .sb{padding:13px}
-  .plat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:560px){.plat-grid{grid-template-columns:1fr}}
+  .ecard{border:1px solid var(--line);border-radius:11px;margin-bottom:14px;overflow:hidden;background:var(--surface)}
+  .ecard:last-child{margin-bottom:0}
+  .ecard .ech{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#f6faf7;border-bottom:1px solid var(--line);font-weight:700;font-size:13px}
+  .ecard .ech [data-lucide]{width:16px;height:16px;color:var(--green)}
+  .ecard .ecb{padding:13px}
+  .c-edit-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:9px;background:var(--surface)}
+  .c-edit-row .cico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--green-soft);color:var(--green-dark);flex:none}
+  .c-edit-row .cico [data-lucide]{width:16px;height:16px}
+  .c-edit-row select.ctype{width:92px;flex:none;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--font);font-size:13px;background:var(--surface)}
+  .c-edit-row input.cval{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font-family:var(--font);font-size:14px}
+
+  /* Full-screen store window */
+  #storeOverlay{padding:24px 16px;align-items:center}
+  #storeOverlay .modal{max-width:1000px;width:100%;height:auto;max-height:88vh;border-radius:14px;display:flex;flex-direction:column}
+  #storeOverlay .head{position:sticky;top:0;background:var(--surface);z-index:3;border-radius:14px 14px 0 0}
+  .sw-cols{flex:1;display:flex;min-height:0}
+  .sw-left{width:40%;overflow:auto;padding:16px;border-right:1px solid var(--line);background:#f6faf7}
+  .sw-right{width:60%;overflow:auto;padding:16px;background:var(--bg)}
+  @media(max-width:860px){ .sw-cols{flex-direction:column} .sw-left,.sw-right{width:100%} .sw-left{border-right:none;border-bottom:1px solid var(--line)} }
+
+  .lc{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .lc .lch{display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px}
+  .lc .lch [data-lucide]{width:15px;height:15px;color:var(--green)}
+  .lc .lch .ed{margin-left:auto}
+  .lc .lcb{padding:11px 12px;font-size:13px}
+  .lc .line{display:flex;gap:8px;padding:3px 0}
+  .lc .line .k{color:var(--ink-soft);min-width:78px;flex:none;font-size:12px}
+  .lc .line .v{flex:1;min-width:0}
+  .lc .line .v a{color:var(--green-dark)}
+
+  .legend{display:flex;gap:14px;margin-bottom:11px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .legend .d{width:9px;height:9px;border-radius:50%}
+  .pbtns{display:flex;flex-wrap:wrap;gap:7px}
+  .pbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .pbtn:hover{border-color:var(--green)}
+  .pbtn .d{width:10px;height:10px;border-radius:50%;flex:none}
+  .pmenu{margin-top:11px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:#fafcfa}
+  .pmenu .lbl{font-size:12px;color:var(--ink-soft);margin-bottom:7px;font-weight:600}
+  .sbtns{display:flex;gap:7px;flex-wrap:wrap}
+  .sbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .sbtn:hover{border-color:var(--green)}
+  .sbtn.active{background:var(--green);color:#fff;border-color:var(--green)}
+  .sbtn .d{width:9px;height:9px;border-radius:50%}
+  .mchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12.5px;cursor:pointer;font-weight:600;color:var(--ink-soft)}
+  .mchip:hover{border-color:var(--green)}
+  .mchip.sel{background:var(--green-soft);border-color:var(--green);color:var(--green-dark)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+
+  .rpanel{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);margin-bottom:14px}
+  .rpanel .rph{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+  .rpanel .rph [data-lucide]{width:17px;height:17px;color:var(--green)}
+  .rpanel .rph .act{margin-left:auto}
+  .rpanel .rpb{padding:13px 14px}
   .issue-card{border:1px solid var(--line);border-radius:9px;padding:11px;margin-bottom:10px;background:#fcfdfc}
   .issue-card:last-child{margin-bottom:0}
-  .issue-card .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-  .issue-card .ts{font-size:11.5px;color:var(--ink-soft)}
-  .note-row{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .issue-card .top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .issue-card .top b{flex:1;font-size:13.5px}
+  .issue-card .ts{font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+  .issue-card .act{font-size:12.5px;margin-top:6px;background:var(--green-soft);color:var(--green-dark);border-radius:7px;padding:6px 9px}
+  .note-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
   .note-row:last-child{border-bottom:none}
-  .note-row .nt{font-size:11.5px;color:var(--ink-soft);flex:none;width:118px}
-  .addrow{display:flex;gap:8px;margin-top:10px}
-  .addrow input,.addrow textarea{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font:inherit;font-size:14px}
+  .note-row .nt{font-size:11.5px;color:var(--ink-soft);flex:none;width:120px}
 
   .conn-status{display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:8px;background:var(--idle-soft);font-size:13.5px;margin-bottom:16px}
   .conn-status i.d{width:9px;height:9px;border-radius:50%;background:var(--idle);flex:none}
@@ -227,11 +278,11 @@
   .conn-status.err{background:var(--danger-soft)} .conn-status.err i.d{background:var(--danger)}
   .help{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
 
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.2s;z-index:120}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.2s;z-index:200}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
   .toast.err{background:var(--danger)} .toast.ok{background:var(--green)}
 
-  @media(max-width:700px){ .hide-sm{display:none} }
+  @media(max-width:700px){ .hide-sm{display:none} .clock{display:none} }
 </style>
 </head>
 <body>
@@ -239,9 +290,10 @@
 <div class="topbar">
   <div class="inner">
     <div class="brand">
-      <div class="mark">S</div>
+      <div class="mark">3PD</div>
       <div><h1>Franchisee Tracker</h1><div class="sub">3PD Helpdesk</div></div>
     </div>
+    <div class="clock" id="clock"></div>
     <div class="top-right">
       <div id="statusDot" class="status-dot"><i class="d"></i><span>Not connected</span></div>
       <button class="ghost-icon" id="settingsBtn" title="Settings" aria-label="Settings"><i data-lucide="settings"></i></button>
@@ -265,15 +317,15 @@
       <input id="search" type="search" placeholder="Search…  (#store or @franchisee)">
     </div>
     <select class="terr-filter" id="terrFilter"><option value="">All territories</option></select>
+    <button class="btn ghost" id="issuesOnlyBtn"><i data-lucide="triangle-alert"></i>With issues</button>
     <span id="count" class="count"></span>
-    <button class="btn" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
+    <button class="btn round" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
     <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
   </div>
   <div class="hintbar" id="hintbar">
     <span><kbd>#</kbd> store number — e.g. #12345</span>
     <span><kbd>@</kbd> franchisee name — e.g. @Aggarwal</span>
   </div>
-
   <div id="view"></div>
 </div>
 
@@ -286,6 +338,14 @@
       <div class="field" style="margin-bottom:13px"><label>Project URL</label><input id="c_url" placeholder="https://xxxx.supabase.co" spellcheck="false"></div>
       <div class="field"><label>Database key (publishable or anon)</label><input id="c_key" placeholder="sb_publishable_…" spellcheck="false"></div>
       <div class="help">Saved on this computer so you stay connected. Share the file with your team and it connects automatically.</div>
+      <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:15px">
+        <label style="display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:7px">Backup</label>
+        <button class="btn ghost" id="backupBtn"><i data-lucide="download"></i>Save database backup (.json)</button>
+        <div class="help">Downloads every franchisee, store, FBC/OM and issue as one file. Do this before any database change so nothing is lost.</div>
+        <button class="btn ghost" id="importBtn" style="margin-top:12px"><i data-lucide="upload"></i>Import backup (.json)</button>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        <div class="help">Restores a saved backup file into the database. Overwrites matching records — use after data loss.</div>
+      </div>
     </div>
     <footer>
       <button class="btn link danger" id="disconnectBtn" style="margin-right:auto;display:none">Disconnect</button>
@@ -298,52 +358,68 @@
 <!-- Franchisee edit -->
 <div class="overlay" id="frOverlay">
   <div class="modal">
-    <div class="head"><i data-lucide="user-round-pen"></i><h2 id="frTitle">Edit franchisee</h2><button class="x" id="frX">&times;</button></div>
+    <div class="head"><i data-lucide="user-round-pen"></i><div><h2 id="frTitle">Edit franchisee</h2><div class="subt" id="frSub"></div></div><button class="x" id="frX">&times;</button></div>
     <div class="body">
       <input type="hidden" id="fr_id">
-      <div class="fgrid">
-        <div class="field full"><label>Franchisee name</label><input id="fr_name" placeholder="Last, First"></div>
-        <div class="field"><label>Territory</label><input id="fr_territory" placeholder="540, 584"></div>
-        <div class="field"><label>Status</label><select id="fr_closed"><option value="false">Active</option><option value="true">Closed</option></select></div>
+      <div class="ecard">
+        <div class="ech"><i data-lucide="user-round"></i>Franchisee</div>
+        <div class="ecb"><div class="fgrid">
+          <div class="field full"><label>Franchisee name</label><input id="fr_name" placeholder="Last, First"></div>
+          <div class="field"><label>Territory</label><input id="fr_territory" placeholder="540, 584"></div>
+          <div class="field"><label>Status</label><select id="fr_closed"><option value="false">Active</option><option value="true">Closed</option></select></div>
+        </div></div>
       </div>
-      <div style="margin-top:16px">
-        <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px">Contacts</label>
-        <div id="fr_contacts"></div>
-        <button class="btn link" id="fr_addContact"><i data-lucide="plus"></i>Add contact</button>
+      <div class="ecard">
+        <div class="ech"><i data-lucide="mail"></i>Contacts</div>
+        <div class="ecb">
+          <div id="fr_contacts"></div>
+          <button class="btn outline round sm" id="fr_addContact"><i data-lucide="plus"></i>Add contact</button>
+        </div>
       </div>
-      <div class="field full" style="margin-top:12px"><label>Notes</label><textarea id="fr_notes" placeholder="Anything the team should know"></textarea></div>
+      <div class="ecard">
+        <div class="ech"><i data-lucide="sticky-note"></i>Notes</div>
+        <div class="ecb"><textarea id="fr_notes" placeholder="Anything the team should know" style="width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:var(--font);font-size:14px;resize:vertical"></textarea></div>
+      </div>
     </div>
     <footer><button class="btn ghost" id="frCancel">Cancel</button><button class="btn" id="frSave">Save</button></footer>
   </div>
 </div>
 
-<!-- STORE WINDOW (no outside-click close) -->
+<!-- STORE WINDOW (full screen, no outside-click close) -->
 <div class="overlay blur" id="storeOverlay">
-  <div class="modal big">
+  <div class="modal">
     <div class="head"><i data-lucide="store"></i><div><h2 id="sw_title">Store</h2><div class="subt" id="sw_sub"></div></div><button class="x" id="storeX">&times;</button></div>
-    <div class="body" id="sw_body"></div>
-    <footer>
-      <button class="btn ghost" id="storeClose">Close</button>
-      <button class="btn" id="sw_saveStore"><i data-lucide="save"></i>Save store details</button>
-    </footer>
+    <div class="sw-cols">
+      <div class="sw-left" id="sw_left"></div>
+      <div class="sw-right" id="sw_right"></div>
+    </div>
   </div>
 </div>
 
-<!-- Issue add (from Issues tab / store window log) -->
-<div class="overlay" id="isOverlay">
+<!-- Log issue popup -->
+<div class="overlay top" id="logOverlay">
   <div class="modal small">
-    <div class="head"><i data-lucide="triangle-alert"></i><h2 id="isTitle">Log issue</h2><button class="x" id="isX">&times;</button></div>
-    <div class="body">
-      <input type="hidden" id="is_id">
-      <div class="field" style="margin-bottom:13px"><label>Store #</label><input id="is_store" placeholder="e.g. 12345"></div>
-      <div class="field" style="margin-bottom:13px"><label>Issue</label><textarea id="is_title" placeholder="Describe the issue"></textarea></div>
-      <div class="fgrid">
-        <div class="field"><label>Status</label><select id="is_status"><option>Open</option><option>In progress</option><option>Resolved</option></select></div>
-        <div class="field"><label>Action taken</label><input id="is_action" placeholder="Optional"></div>
-      </div>
-      <div class="field" style="margin-top:13px"><label>Notes</label><textarea id="is_notes" placeholder="Optional"></textarea></div>
-    </div>
-    <footer><button class="btn ghost" id="isCancel">Cancel</button><button class="btn" id="isSave">Save</button></footer>
+    <div class="head"><i data-lucide="triangle-alert"></i><h2 id="log_title_h">Log issue</h2><button class="x" id="logX">&times;</button></div>
+    <div class="body" id="log_body"></div>
+    <footer><button class="btn ghost" id="logCancel">Cancel</button><button class="btn" id="logSave"><i data-lucide="plus"></i>Log issue</button></footer>
+  </div>
+</div>
+
+<!-- Update issue popup -->
+<div class="overlay top" id="updOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="refresh-cw"></i><h2 id="upd_title">Update Status</h2><button class="x" id="updX">&times;</button></div>
+    <div class="body" id="upd_body"></div>
+    <footer><button class="btn ghost" id="updCancel">Cancel</button><button class="btn" id="updSave"><i data-lucide="save"></i>Save update</button></footer>
+  </div>
+</div>
+
+<!-- Add note popup -->
+<div class="overlay top" id="noteOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="sticky-note"></i><h2 id="note_title">Add note</h2><button class="x" id="noteX">&times;</button></div>
+    <div class="body"><div class="field"><label>Note</label><textarea id="note_text" placeholder="Type your note… (a date &amp; time stamp is added automatically)"></textarea></div></div>
+    <footer><button class="btn ghost" id="noteCancel">Cancel</button><button class="btn yellow" id="noteSave"><i data-lucide="plus"></i>Add note</button></footer>
   </div>
 </div>
 
@@ -382,11 +458,20 @@
 </div>
 
 <!-- Confirm -->
-<div class="overlay" id="confirmOverlay">
+<div class="overlay top" id="confirmOverlay">
   <div class="modal small">
     <div class="head"><i data-lucide="trash-2"></i><h2>Confirm delete</h2></div>
     <div class="body"><p class="hint" id="confirmText"></p></div>
     <footer><button class="btn ghost" id="confirmCancel">Cancel</button><button class="btn danger" id="confirmOk">Delete</button></footer>
+  </div>
+</div>
+
+<!-- Import password -->
+<div class="overlay top" id="impPwOverlay">
+  <div class="modal small">
+    <div class="head"><i data-lucide="lock"></i><h2>Enter password</h2><button class="x" id="impPwX">&times;</button></div>
+    <div class="body"><div class="field"><label>Import password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
+    <footer><button class="btn ghost" id="impPwCancel">Cancel</button><button class="btn" id="impPwOk"><i data-lucide="unlock"></i>Unlock</button></footer>
   </div>
 </div>
 
@@ -395,10 +480,14 @@
 <script>
 const DEFAULT_URL = "https://pwgxzzkzvhqajlgkbziu.supabase.co";
 const DEFAULT_KEY = "sb_publishable_xcn3uRSFsyYZC3cDhOOVIw_pAsEd1o7";
-const PLATFORMS=[["ue","Uber Eats","UE"],["dd","DoorDash","DD"],["gh","Grubhub","GH"],["ez","ezCater","EZ"],["fj","Foodja","FJ"]];
-const PLAT_STATES=["Active","Pending","Not enrolled","Inactive"];
+const PLATFORMS=[["ue","Uber Eats"],["dd","DoorDash"],["gh","Grubhub"],["ez","ezCater"],["fj","Foodja"]];
+const PLAT_STATES=["Active","Pending","Not enrolled"];
+const ISSUE_PLATFORMS=["Uber Eats","DoorDash","Grubhub","ezCater","Google Business Profile/SOCi","Menu Manager","Others"];
+const ISSUE_STATES=["Pending","Work in Progress","Resolved"];
+const IMPORT_PW="Sup3rUs3r!";
 
-let db=null, tab="franchisees", selFr=null, terrFilter="", curStore=null, pending=null;
+let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, pending=null;
+let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
 let FR=[], ST=[], SF=[], IS=[];
 let storesByFr={}, storeByNum={};
 const $ = id => document.getElementById(id);
@@ -410,17 +499,25 @@ function nowIso(){ return new Date().toISOString(); }
 function toast(m,type){ const t=$("toast"); t.textContent=m; t.className="toast show"+(type?" "+type:"");
   clearTimeout(toast._t); toast._t=setTimeout(()=>t.className="toast",2600); }
 
+/* clock */
+function updateClock(){
+  const now=new Date();
+  const time=tz=>{try{return new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'numeric',minute:'2-digit',hour12:true}).format(now);}catch(e){return"";}};
+  const date=(()=>{try{return new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Manila',weekday:'short',month:'short',day:'numeric'}).format(now);}catch(e){return"";}})();
+  $("clock").innerHTML='<span><b>PHT</b>'+time('Asia/Manila')+'</span><span><b>PST</b>'+time('America/Los_Angeles')+'</span><span class="dt">'+date+'</span>';
+}
+updateClock(); setInterval(updateClock,1000*20);
+
 function setStatus(state, header, popup){
   const d=$("statusDot"); d.className="status-dot "+(state||""); d.querySelector("span").textContent=header;
   const s=$("connStatus"); s.className="conn-status "+(state||""); s.querySelector("span").textContent=popup||header;
   $("disconnectBtn").style.display=(state==="ok")?"inline-block":"none";
   $("connectBtn").textContent=(state==="ok")?"Reconnect":"Connect";
 }
-
 function friendly(err){
   const m=(err&&err.message?err.message:"").toLowerCase(), code=(err&&err.code)?String(err.code):"";
   if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
-  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-issues.sql (or the full setup) in Supabase, then Refresh.",a:"settings"};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-issues.sql in Supabase, then Refresh.",a:"settings"};
   if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
   if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
   if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
@@ -448,6 +545,21 @@ async function connect(url,key,silent){
 }
 function disconnect(){ clearCreds(); db=null; FR=ST=SF=IS=[]; setStatus("","Not connected"); viewDisconnected(); toast("Disconnected"); }
 
+async function backup(){
+  if(!db){toast("Connect first","err");return;}
+  const btn=$("backupBtn"); btn.disabled=true; const old=btn.innerHTML; btn.textContent="Preparing backup…";
+  try{
+    const [fr,st,sf,is]=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]);
+    const payload={ exported_at:nowIso(), counts:{franchisees:fr.length,stores:st.length,staff:sf.length,issues:is.length}, franchisees:fr, stores:st, staff:sf, issues:is };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url; a.download="franchisee-tracker-backup-"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast("Backup downloaded","ok");
+  }catch(err){ toast(friendly(err).t,"err"); }
+  btn.disabled=false; btn.innerHTML=old; icons();
+}
+
 async function fetchAll(table){
   let all=[], from=0, page=1000;
   while(true){
@@ -468,7 +580,7 @@ function buildTerrFilter(){
   const set=new Set();
   FR.forEach(f=>terrSet(f.territory).forEach(t=>set.add(t)));
   ST.forEach(s=>terrSet(s.territory).forEach(t=>set.add(t)));
-  const opts=[...set].sort((a,b)=>(+a||a)-(+b||b)||(""+a).localeCompare(b));
+  const opts=[...set].sort((a,b)=>(+a||0)-(+b||0)||(""+a).localeCompare(b));
   $("terrFilter").innerHTML='<option value="">All territories</option>'+opts.map(t=>'<option value="'+esc(t)+'">Territory '+esc(t)+'</option>').join("");
   $("terrFilter").value=terrFilter;
 }
@@ -478,16 +590,18 @@ async function loadAll(){
   try{ [FR,ST,SF,IS]=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]); }
   catch(err){ setStatus("err","Connection issue",friendly(err).t); viewError(err); return; }
   setStatus("ok","Connected");
-  reindex(); buildTerrFilter();
+  reindex(); buildTerrFilter(); updCounts(); render();
+}
+function updCounts(){
   $("cnt-fr").textContent=FR.length; $("cnt-st").textContent=ST.length;
-  $("cnt-sf").textContent=SF.length; $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length;
-  render();
+  $("cnt-sf").textContent=SF.length; $("cnt-is").textContent=IS.filter(isOpen).length;
 }
 
 /* helpers */
 function contactsOf(o){ try{return Array.isArray(o.contacts)?o.contacts:JSON.parse(o.contacts||"[]");}catch(e){return [];} }
 function platOf(s){ let p; try{p=(typeof s.platforms==="object"&&s.platforms)?s.platforms:JSON.parse(s.platforms||"{}");}catch(e){p={};} return p||{}; }
 function notesOf(s){ try{return Array.isArray(s.notes)?s.notes:JSON.parse(s.notes||"[]");}catch(e){return [];} }
+function issuePlatforms(i){ try{return Array.isArray(i.platforms)?i.platforms:JSON.parse(i.platforms||"[]");}catch(e){return [];} }
 function terrSet(str){ return new Set((str||"").split(",").map(x=>x.trim()).filter(Boolean)); }
 function staffFor(territory){
   const set=terrSet(territory); const om=[],fbc=[];
@@ -500,12 +614,21 @@ function storesHandled(staff){
 }
 function cellOf(o){ const c=contactsOf(o).find(x=>x.type==="cell"); return c?c.value:""; }
 function emailOf(o){ const c=contactsOf(o).find(x=>x.type==="email"); return c?c.value:""; }
+function normPlat(v){ return (v==="Active"||v==="Pending")?v:"Not enrolled"; }
+function platColor(v){ v=normPlat(v); return v==="Active"?"var(--ok)":(v==="Pending"?"var(--warn)":"var(--danger)"); }
+function normIssueStatus(s){ if(s==="Open")return "Pending"; if(s==="In progress")return "Work in Progress"; return s||"Pending"; }
+function isOpen(i){ return normIssueStatus(i.status)!=="Resolved"; }
+function statusBadge(s){ s=normIssueStatus(s); const cls=s==="Resolved"?"b-resolved":(s==="Work in Progress"?"b-progress":"b-open"); return '<span class="badge '+cls+'">'+esc(s)+'</span>'; }
+function storeOpenIssues(num){ return IS.filter(i=>String(i.store_num)===String(num)&&isOpen(i)).length; }
+function frOpenIssues(id){ return IS.filter(i=>i.franchisee_id===id&&isOpen(i)).length; }
+function openDot(n){ return n? '<span class="idot" title="'+n+' issue'+(n>1?'s':'')+' pending / not resolved"></span>' : ''; }
 function platChips(p){
-  return '<div class="plat">'+PLATFORMS.map(([k,,short])=>{ const v=p[k]||"Not enrolled";
-    return '<span class="chip '+(v==="Active"?"on":(v==="Pending"?"pend":""))+'" title="'+short+': '+esc(v)+'">'+short+'</span>'; }).join("")+'</div>';
+  return '<div class="plat">'+PLATFORMS.map(([k,name])=>{ const v=normPlat(p[k]||"Not enrolled"); const cls=v==="Active"?"on":(v==="Pending"?"pend":"off");
+    const short={ue:"UE",dd:"DD",gh:"GH",ez:"EZ",fj:"FJ"}[k];
+    return '<span class="chip '+cls+'" title="'+name+': '+v+'">'+short+'</span>'; }).join("")+'</div>';
 }
-function statusBadge(s){ const cls=s==="Resolved"?"b-resolved":(s==="In progress"?"b-progress":"b-open"); return '<span class="badge '+cls+'">'+esc(s||"Open")+'</span>'; }
-function copyBtn(val){ return '<button class="iconbtn" title="Copy" onclick="copyText(\''+esc(String(val)).replace(/'/g,"\\'")+'\')"><i data-lucide="copy"></i></button>'; }
+function googleSearchUrl(s){ const q=["Subway",s.num?("#"+s.num):"",s.address,s.city,s.state].filter(Boolean).join(" "); return "https://www.google.com/search?q="+encodeURIComponent(q); }
+function copyBtn(val){ return '<button class="iconbtn mini" title="Copy" onclick="copyText(\''+esc(String(val)).replace(/'/g,"\\'")+'\')"><i data-lucide="copy"></i></button>'; }
 function copyText(t){ if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast("Copied","ok"),()=>fallbackCopy(t));} else fallbackCopy(t); }
 function fallbackCopy(t){ const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand("copy");toast("Copied","ok");}catch(e){} a.remove(); }
 
@@ -516,96 +639,83 @@ function parseQuery(){
   if(raw.startsWith("@")) return {mode:"fr", q:raw.slice(1).trim().toLowerCase()};
   return {mode:"any", q:raw.toLowerCase()};
 }
-function frInTerr(f){ if(!terrFilter) return true; return terrSet(f.territory).has(terrFilter); }
-function stInTerr(s){ if(!terrFilter) return true; return terrSet(s.territory).has(terrFilter); }
+function frInTerr(f){ return !terrFilter || terrSet(f.territory).has(terrFilter); }
+function stInTerr(s){ return !terrFilter || terrSet(s.territory).has(terrFilter); }
 
-/* view container */
+/* view */
 function setView(html){ $("view").innerHTML=html; icons(); }
 function viewLoading(t){ setView('<div class="card"><div class="state"><div class="spinner"></div><b>'+esc(t||"Loading…")+'</b></div></div>'); }
 function viewDisconnected(){ setView('<div class="card"><div class="state"><div class="ic"><i data-lucide="unplug"></i></div><b>Not connected</b><p>Open Settings and connect to your database.</p><div class="cta"><button class="btn" onclick="openSettings()">Open Settings</button></div></div></div>'); }
-function viewError(err){ const f=friendly(err); let cta=''; if(f.a==="settings")cta='<button class="btn" onclick="openSettings()">Open Settings</button><button class="btn ghost" onclick="loadAll()">Refresh</button>'; else cta='<button class="btn" onclick="loadAll()">Try again</button>';
+function viewError(err){ const f=friendly(err); let cta=f.a==="settings"?'<button class="btn" onclick="openSettings()">Open Settings</button><button class="btn ghost" onclick="loadAll()">Refresh</button>':'<button class="btn" onclick="loadAll()">Try again</button>';
   setView('<div class="card"><div class="state error"><div class="ic"><i data-lucide="circle-alert"></i></div><b>'+esc(f.t)+'</b><p>'+esc(f.b)+'</p><div class="cta">'+cta+'</div></div></div>'); }
 function emptyBox(icon,title,sub){ return '<div class="card"><div class="state"><div class="ic"><i data-lucide="'+icon+'"></i></div><b>'+esc(title)+'</b><p>'+esc(sub)+'</p></div></div>'; }
 
-/* render */
 function render(){
   if(!db){viewDisconnected();return;}
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
-  const showSearch = (tab==="franchisees"||tab==="stores");
+  const showSearch=(tab==="franchisees"||tab==="stores");
   $("searchWrap").style.display=showSearch?"flex":"none";
   $("terrFilter").style.display=showSearch?"block":"none";
+  $("issuesOnlyBtn").style.display=showSearch?"inline-flex":"none";
   $("hintbar").style.display=showSearch?"flex":"none";
   const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
-  $("primaryAdd").style.display = lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
+  $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
   if(tab==="franchisees") renderFranchisees();
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
   else if(tab==="issues") renderIssues();
 }
 
-/* ---- Franchisees: two-panel ---- */
+/* Franchisees two-panel */
 function renderFranchisees(){
   const {mode,q}=parseQuery();
   let list=FR.filter(f=>{
     if(!frInTerr(f)) return false;
+    if(issuesOnly && !frOpenIssues(f.id)) return false;
     if(mode==="store") return (storesByFr[f.id]||[]).some(s=>(s.num||"").toLowerCase().includes(q));
     if(mode==="fr") return (f.name||"").toLowerCase().includes(q);
     if(!q) return true;
-    return (f.name||"").toLowerCase().includes(q) || (f.territory||"").toLowerCase().includes(q);
+    return (f.name||"").toLowerCase().includes(q)||(f.territory||"").toLowerCase().includes(q);
   });
   $("count").textContent=list.length+" of "+FR.length;
   if(selFr && !list.some(f=>f.id===selFr)) selFr=null;
   const items=list.map(f=>{
     const stc=(storesByFr[f.id]||[]).length;
-    const open=IS.filter(i=>i.franchisee_id===f.id&&i.status!=="Resolved").length;
-    return '<div class="fr-item'+(f.id===selFr?' active':'')+'" onclick="selectFranchisee('+f.id+')">'
-      +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div>'
-      +(open?'<span class="badge b-open">'+open+'</span>':'')+'</div>';
-  }).join("") || '<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
-  const detail = selFr ? detailHtml(selFr) : '<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
+    return '<div class="fr-item'+(f.id===selFr?' active':'')+'" data-fr="'+f.id+'" onclick="selectFranchisee('+f.id+')">'
+      +'<div class="nm">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
+      +'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div></div>';
+  }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
+  const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
   setView('<div class="split"><div class="card fr-list" id="frList">'+items+'</div><div id="frDetailPane">'+detail+'</div></div>');
 }
 function selectFranchisee(id){
   selFr=id;
-  document.querySelectorAll("#frList .fr-item").forEach(el=>el.classList.remove("active"));
-  const rows=[...document.querySelectorAll("#frList .fr-item")];
-  const idx=FR.filter(frInTerrCurrent).findIndex(f=>f.id===id); // best-effort highlight
+  document.querySelectorAll("#frList .fr-item").forEach(el=>el.classList.toggle("active", +el.dataset.fr===id));
   $("frDetailPane").innerHTML=detailHtml(id); icons();
-  // re-highlight by matching onclick
-  document.querySelectorAll("#frList .fr-item").forEach(el=>{ if(el.getAttribute("onclick")==="selectFranchisee("+id+")") el.classList.add("active"); });
 }
-function frInTerrCurrent(f){ return frInTerr(f); }
-
 function detailHtml(id){
   const f=FR.find(x=>x.id===id); if(!f) return '';
   const stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
   const contacts=contactsOf(f);
-  const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
+  const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const {om,fbc}=staffFor(f.territory);
-
-  const contactHtml = contacts.length ? contacts.map(c=>{
+  const contactHtml=contacts.length?contacts.map(c=>{
     const cp=(c.type==="email"||c.type==="cell")?copyBtn(c.value):"";
     const href=c.type==="email"?'mailto:'+esc(c.value):(c.type==="cell"?'tel:'+esc(c.value):null);
     const val=href?'<a href="'+href+'">'+esc(c.value)+'</a>':esc(c.value);
     return '<div class="contact-row"><span class="type">'+esc(c.type||"other")+'</span><span class="val">'+val+'</span>'+cp+'</div>';
-  }).join("") : '<p class="muted">No contacts yet.</p>';
-
-  const storeHtml = stores.length ? stores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><span class="num">#'+esc(s.num)+'</span><div class="meta">'
-      +'<div class="a">'+esc(s.address||"")+'</div>'
-      +'<div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
-      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join("") : '<p class="muted">No stores.</p>';
-
-  const issueHtml = issues.length ? issues.map(i=>{ const s=storeByNum[String(i.store_num)];
+  }).join(""):'<p class="muted">No contacts yet.</p>';
+  const storeHtml=stores.length?stores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><span class="num">'+openDot(storeOpenIssues(s.num))+'#'+esc(s.num)+'</span><div class="meta">'
+      +'<div class="a">'+esc(s.address||"")+'</div><div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
+      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join(""):'<p class="muted">No stores.</p>';
+  const issueHtml=issues.length?issues.map(i=>{ const s=storeByNum[String(i.store_num)];
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
     +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
-    +'<span class="muted" style="font-size:11.5px">'+fmtTs(i.updated_at||i.created_at)+'</span></div>';
-  }).join("") : '<p class="muted">No issues logged.</p>';
-
-  const staffHtml=(arr)=> arr.length ? arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" style="cursor:pointer" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join("") : '<span class="muted">None for this territory</span>';
-
-  return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
+    +'<span class="muted" style="font-size:11.5px">'+fmtTs(i.updated_at||i.created_at)+'</span></div>';}).join(""):'<p class="muted">No issues logged.</p>';
+  const staffHtml=arr=>arr.length?arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join(""):'<span class="muted">None for this territory</span>';
+  return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
     +'<div class="muted" style="font-size:13.5px">Territory '+esc(f.territory||"—")+' · '+stores.length+' store'+(stores.length!==1?'s':'')+'</div></div>'
-    +'<button class="btn yellow" onclick="openFr('+f.id+')"><i data-lucide="pencil"></i>Edit</button></div>'
+    +'<button class="btn outline round" onclick="openFr('+f.id+')"><i data-lucide="pencil"></i>Edit</button></div>'
     +'<div class="grid2">'
       +'<div class="panel"><div class="ph"><i data-lucide="mail"></i>Contacts</div><div class="pb">'+contactHtml+'</div></div>'
       +'<div class="panel"><div class="ph"><i data-lucide="badge-check"></i>Support team</div><div class="pb">'
@@ -618,12 +728,13 @@ function detailHtml(id){
     +'</div>';
 }
 
-/* ---- All Stores ---- */
+/* All Stores */
 function renderStores(){
   const {mode,q}=parseQuery();
   const frName={}; FR.forEach(f=>frName[f.id]=f.name);
   let list=ST.filter(s=>{
     if(!stInTerr(s)) return false;
+    if(issuesOnly && !storeOpenIssues(s.num)) return false;
     if(mode==="store") return (s.num||"").toLowerCase().includes(q);
     if(mode==="fr") return (frName[s.franchisee_id]||"").toLowerCase().includes(q);
     if(!q) return true;
@@ -632,7 +743,7 @@ function renderStores(){
   $("count").textContent=list.length+" of "+ST.length;
   if(!list.length){ setView(emptyBox("store","No stores match","Try a different search, territory, or clear it.")); return; }
   const rows=list.slice(0,1500).map(s=>'<tr class="click" onclick="openStore('+s.id+')">'
-    +'<td class="store">#'+esc(s.num)+'</td>'
+    +'<td class="store">'+openDot(storeOpenIssues(s.num))+'#'+esc(s.num)+'</td>'
     +'<td>'+esc(frName[s.franchisee_id]||"")+'</td>'
     +'<td class="hide-sm muted">'+esc(s.address||"")+'<br>'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+'</td>'
     +'<td class="hide-sm muted">'+esc(s.phone||"")+'</td>'
@@ -642,162 +753,271 @@ function renderStores(){
     +(list.length>1500?'<p class="muted" style="text-align:center;margin-top:10px">Showing first 1500. Narrow with search or territory.</p>':''));
 }
 
-/* ---- FBC / OM ---- */
+/* FBC / OM */
 function renderStaff(){
   let html='';
   [["OM","Operations Managers (OM)","user-cog"],["FBC","Field Business Consultants (FBC)","badge-check"]].forEach(([role,label,icon])=>{
     const people=SF.filter(s=>s.role===role).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
     html+='<div style="margin:6px 0 8px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px"><i data-lucide="'+icon+'" style="color:var(--green)"></i>'+label+' <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+people.length+'</span></div>';
-    html+='<div class="cards" style="margin-bottom:18px">'+ (people.length? people.map(s=>{
+    html+='<div class="cards" style="margin-bottom:18px">'+(people.length?people.map(s=>{
       const handled=storesHandled(s).length;
       return '<div class="pcard" onclick="openStaff('+s.id+')"><span class="rl">'+esc(s.role)+'</span><h3>'+esc(s.name)+'</h3>'
         +'<div class="terr"><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px"></i> Territory '+esc(s.territory||"—")+'</div>'
         +'<div class="mini"><span><i data-lucide="phone" style="width:13px;height:13px;vertical-align:-2px"></i> '+(cellOf(s)?'yes':'—')+'</span><span><i data-lucide="mail" style="width:13px;height:13px;vertical-align:-2px"></i> '+(emailOf(s)?'yes':'—')+'</span><span><i data-lucide="store" style="width:13px;height:13px;vertical-align:-2px"></i> '+handled+'</span></div></div>';
-    }).join("") : '<p class="muted">None. Use “Add FBC / OM”.</p>')+'</div>';
+    }).join(""):'<p class="muted">None. Use “Add FBC / OM”.</p>')+'</div>';
   });
   $("count").textContent=SF.length+" people";
   setView(html);
 }
 
-/* ---- Issues (log) ---- */
+/* Issues log */
 function renderIssues(){
   const frName={}; FR.forEach(f=>frName[f.id]=f.name);
-  let list=IS.slice().sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
-  $("count").textContent=list.filter(i=>i.status!=="Resolved").length+" open · "+list.length+" total";
+  let list=IS.slice().sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
+  $("count").textContent=list.filter(isOpen).length+" open · "+list.length+" total";
   if(!list.length){ setView(emptyBox("clipboard-list","No issues logged","Use “Log issue” to add one.")); return; }
   const rows=list.map(i=>{ const s=storeByNum[String(i.store_num)];
+    const pls=issuePlatforms(i);
     return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
     +'<td>'+statusBadge(i.status)+'</td>'
-    +'<td>'+esc(i.title)+'</td>'
+    +'<td>'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
     +'<td class="hide-sm store">'+(i.store_num?'#'+esc(i.store_num):'—')+'</td>'
     +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
     +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(i.updated_at||i.created_at)+'</td>'
-    +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
-  }).join("");
+    +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';}).join("");
   setView('<div class="card"><table><thead><tr><th>Status</th><th>Issue</th><th class="hide-sm">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm">Updated</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
 }
 
-/* ================= STORE WINDOW ================= */
+/* ============ STORE WINDOW ============ */
 function openStore(id, focusIssueId){
   const s=ST.find(x=>x.id===id); if(!s){toast("Store not found","err");return;}
-  curStore=id;
+  curStore=id; swEditing={location:false,gbp:false}; platMenu=null;
   const f=FR.find(x=>x.id===s.franchisee_id);
-  const {om,fbc}=staffFor(s.territory);
-  const p=platOf(s), notes=notesOf(s), gbp=s.gbp||"";
-  const issues=IS.filter(i=>String(i.store_num)===String(s.num)).sort((a,b)=>(a.status==="Resolved")-(b.status==="Resolved")||(b.id-a.id));
-
   $("sw_title").textContent="Store #"+(s.num||"");
   $("sw_sub").textContent=(f?f.name+" · ":"")+"Territory "+(s.territory||"—");
+  renderStoreLeft(); renderStoreRight();
+  $("storeOverlay").classList.add("show"); icons();
+  if(focusIssueId){ setTimeout(()=>{ const el=$("issc_"+focusIssueId); if(el){ el.scrollIntoView({block:"center"}); el.style.boxShadow="0 0 0 2px var(--yellow)"; setTimeout(()=>el.style.boxShadow="",1600);} },60); }
+}
+function closeStore(){ $("storeOverlay").classList.remove("show"); curStore=null; render(); }
 
-  const staffLine=(arr)=> arr.length? arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>") : '<span class="muted">—</span>';
+function renderStoreLeft(){
+  const s=ST.find(x=>x.id===curStore); if(!s)return;
+  const {om,fbc}=staffFor(s.territory); const p=platOf(s); const gurl=googleSearchUrl(s);
+  const staffLine=arr=>arr.length?arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>"):'<span class="muted">—</span>';
 
-  const platHtml=PLATFORMS.map(([k,name])=>'<div class="field"><label>'+name+'</label><select id="sw_'+k+'">'
-    +PLAT_STATES.map(o=>'<option'+((p[k]||"Not enrolled")===o?' selected':'')+'>'+o+'</option>').join("")+'</select></div>').join("");
-
-  const issuesHtml = issues.length ? issues.map(i=>
-    '<div class="issue-card" id="issc_'+i.id+'"><div class="top">'+statusBadge(i.status)
-      +'<b style="flex:1">'+esc(i.title)+'</b></div>'
-      +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
-      +'<div class="fgrid" style="margin-top:9px">'
-        +'<div class="field"><label>Status</label><select id="iss_status_'+i.id+'">'+["Open","In progress","Resolved"].map(o=>'<option'+((i.status||"Open")===o?' selected':'')+'>'+o+'</option>').join("")+'</select></div>'
-        +'<div class="field"><label>Action taken</label><input id="iss_action_'+i.id+'" value="'+esc(i.action_taken||"")+'"></div>'
-      +'</div>'
-      +'<div class="field" style="margin-top:9px"><label>Notes</label><textarea id="iss_notes_'+i.id+'">'+esc(i.notes||"")+'</textarea></div>'
-      +'<div style="display:flex;gap:8px;margin-top:9px"><button class="btn sm" onclick="saveIssueRow('+i.id+')"><i data-lucide="save"></i>Update</button>'
-      +'<button class="btn sm ghost" onclick="askDeleteIssue('+i.id+')" style="color:var(--danger)"><i data-lucide="trash-2"></i>Delete</button></div></div>'
-  ).join("") : '<p class="muted">No issues logged for this store.</p>';
-
-  const notesHtml = notes.length ? notes.slice().reverse().map(n=>'<div class="note-row"><span class="nt">'+esc(fmtTs(n.ts))+'</span><span>'+esc(n.text)+'</span></div>').join("") : '<p class="muted">No notes yet.</p>';
-
-  $("sw_body").innerHTML=
-    '<div class="sw-sec"><div class="sh"><i data-lucide="map-pin"></i>Location</div><div class="sb"><div class="fgrid">'
+  // Location card
+  let locBody;
+  if(swEditing.location){
+    locBody='<div class="fgrid">'
       +'<div class="field full"><label>Address</label><input id="sw_address" value="'+esc(s.address||"")+'"></div>'
       +'<div class="field"><label>City</label><input id="sw_city" value="'+esc(s.city||"")+'"></div>'
       +'<div class="field"><label>State</label><input id="sw_state" value="'+esc(s.state||"")+'"></div>'
       +'<div class="field"><label>ZIP</label><input id="sw_zip" value="'+esc(s.zip||"")+'"></div>'
-      +'<div class="field"><label>Phone</label><input id="sw_phone" value="'+esc(s.phone||"")+'"></div>'
-    +'</div></div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="badge-check"></i>Support team</div><div class="sb"><div class="fgrid">'
-      +'<div class="field"><label>OM</label><div>'+staffLine(om)+'</div></div>'
-      +'<div class="field"><label>FBC</label><div>'+staffLine(fbc)+'</div></div>'
-      +'<div class="field"><label>Area</label><div class="muted">Territory '+esc(s.territory||"—")+'</div></div>'
-    +'</div></div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="bike"></i>Third-party delivery platforms</div><div class="sb"><div class="plat-grid">'+platHtml+'</div></div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="map"></i>Google Business Profile</div><div class="sb"><div style="display:flex;gap:8px;align-items:center">'
-      +'<input id="sw_gbp" style="flex:1;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font:inherit" value="'+esc(gbp)+'" placeholder="https://…">'
-      +(gbp?'<a class="btn ghost sm" href="'+esc(gbp)+'" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Open</a>':'')+'</div></div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="triangle-alert"></i>Issues<span class="act"></span></div><div class="sb">'+issuesHtml
-      +'<div class="addrow"><input id="sw_new_title" placeholder="Log a new issue…"><button class="btn sm" onclick="logStoreIssue()"><i data-lucide="plus"></i>Log</button></div></div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="sticky-note"></i>Store notes</div><div class="sb">'+notesHtml
-      +'<div class="addrow"><input id="sw_note_text" placeholder="Add a note (timestamped)…"><button class="btn sm yellow" onclick="addStoreNote()"><i data-lucide="plus"></i>Add</button></div></div></div>';
+      +'<div class="field"><label>Store Phone Number</label><input id="sw_phone" value="'+esc(s.phone||"")+'"></div></div>'
+      +'<div style="display:flex;gap:8px;margin-top:11px"><button class="btn sm" onclick="saveStoreLoc()"><i data-lucide="save"></i>Save</button><button class="btn sm ghost" onclick="swEditing.location=false;renderStoreLeft()">Cancel</button></div>';
+  } else {
+    locBody='<div class="line"><span class="k">Address</span><span class="v">'+esc(s.address||"—")+'</span></div>'
+      +'<div class="line"><span class="k">City / State</span><span class="v">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.zip?' '+esc(s.zip):'')+'</span></div>'
+      +'<div class="line"><span class="k">Store Phone Number</span><span class="v">'+(s.phone?esc(s.phone):'<span class="muted">—</span>')+'</span>'+(s.phone?copyBtn(s.phone):'')+'</div>';
+  }
 
-  $("storeOverlay").classList.add("show"); icons();
-  if(focusIssueId){ const el=$("issc_"+focusIssueId); if(el){ el.scrollIntoView({block:"center"}); el.style.boxShadow="0 0 0 2px var(--yellow)"; setTimeout(()=>el.style.boxShadow="",1600); } }
+  // Platforms
+  const legend='<div class="legend"><span><span class="d" style="background:var(--ok)"></span>Active</span><span><span class="d" style="background:var(--warn)"></span>Pending</span><span><span class="d" style="background:var(--danger)"></span>Not enrolled</span></div>';
+  const pbtns=PLATFORMS.map(([k,name])=>{ const v=normPlat(p[k]||"Not enrolled");
+    return '<button class="pbtn" title="'+esc(name)+': '+v+'" onclick="pickPlat(\''+k+'\')"><span class="d" style="background:'+platColor(v)+'"></span>'+esc(name)+'</button>';}).join("");
+  let pmenu='';
+  if(platMenu){ const name=PLATFORMS.find(x=>x[0]===platMenu)[1];
+    pmenu='<div class="pmenu"><div class="lbl">Set '+esc(name)+' status</div><div class="sbtns">'
+      +PLAT_STATES.map(st=>'<button class="sbtn" onclick="setPlat(\''+platMenu+'\',\''+st+'\')"><span class="d" style="background:'+platColor(st)+'"></span>'+st+'</button>').join("")+'</div></div>'; }
+
+  // GBP
+  let gbpBody;
+  if(swEditing.gbp){
+    gbpBody='<div class="field"><label>Google Business Profile link</label><input id="sw_gbp" value="'+esc(s.gbp||"")+'" placeholder="https://…"></div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" onclick="saveStoreGbp()"><i data-lucide="save"></i>Save</button><button class="btn sm ghost" onclick="swEditing.gbp=false;renderStoreLeft()">Cancel</button></div>';
+  } else {
+    gbpBody='<div class="line"><span class="k">Profile</span><span class="v">'+(s.gbp?'<a href="'+esc(s.gbp)+'" target="_blank" rel="noopener">Open profile</a>':'<span class="muted">No link saved</span>')+'</span></div>'
+      +'<div style="margin-top:9px"><button class="btn sm ghost round" onclick="window.open(\''+gurl+'\',\'_blank\')"><i data-lucide="search"></i>Find on Google</button></div>';
+  }
+
+  const edBtn=(card)=>'<button class="iconbtn mini ed" title="Edit" onclick="swEdit(\''+card+'\')"><i data-lucide="pencil"></i></button>';
+
+  $("sw_left").innerHTML=
+    '<div class="lc"><div class="lch"><i data-lucide="map-pin"></i>Location'+edBtn('location')+'</div><div class="lcb">'+locBody+'</div></div>'
+    +'<div class="lc"><div class="lch"><i data-lucide="badge-check"></i>Support Team</div><div class="lcb">'
+      +'<div class="line"><span class="k">OM</span><span class="v">'+staffLine(om)+'</span></div>'
+      +'<div class="line"><span class="k">FBC</span><span class="v">'+staffLine(fbc)+'</span></div>'
+      +'<div class="line"><span class="k">Area</span><span class="v muted">Territory '+esc(s.territory||"—")+'</span></div></div></div>'
+    +'<div class="lc"><div class="lch"><i data-lucide="bike"></i>Delivery Platforms</div><div class="lcb">'+legend+'<div class="pbtns">'+pbtns+'</div>'+pmenu+'</div></div>'
+    +'<div class="lc"><div class="lch"><i data-lucide="map"></i>Google Business Profile'+edBtn('gbp')+'</div><div class="lcb">'+gbpBody+'</div></div>';
+  icons();
 }
-function closeStore(){ $("storeOverlay").classList.remove("show"); curStore=null; }
-
-async function saveStoreDetails(){
-  const s=ST.find(x=>x.id===curStore); if(!s)return;
-  const rec={ address:$("sw_address").value.trim(), city:$("sw_city").value.trim(), state:$("sw_state").value.trim(),
-    zip:$("sw_zip").value.trim(), phone:$("sw_phone").value.trim(), gbp:$("sw_gbp").value.trim(),
-    platforms:Object.fromEntries(PLATFORMS.map(([k])=>[k,$("sw_"+k).value])) };
-  $("sw_saveStore").disabled=true;
+function swEdit(card){ swEditing[card]=!swEditing[card]; platMenu=null; renderStoreLeft(); }
+function pickPlat(k){ platMenu=(platMenu===k?null:k); renderStoreLeft(); }
+async function setPlat(k,st){
+  const s=ST.find(x=>x.id===curStore); const p=platOf(s); p[k]=st;
+  const platforms=Object.fromEntries(PLATFORMS.map(([kk])=>[kk, normPlat(p[kk]||"Not enrolled")]));
+  const {error}=await db.from("stores").update({platforms}).eq("id",s.id);
+  if(error){toast(friendly(error).t,"err");return;}
+  s.platforms=platforms; reindex(); platMenu=null; renderStoreLeft();
+  toast(PLATFORMS.find(x=>x[0]===k)[1]+" → "+st,"ok");
+}
+async function saveStoreLoc(){
+  const s=ST.find(x=>x.id===curStore);
+  const rec={ address:$("sw_address").value.trim(), city:$("sw_city").value.trim(), state:$("sw_state").value.trim(), zip:$("sw_zip").value.trim(), phone:$("sw_phone").value.trim() };
   const {error}=await db.from("stores").update(rec).eq("id",s.id);
-  $("sw_saveStore").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
-  Object.assign(s,rec); reindex(); toast("Store saved","ok");
-  if(tab==="stores") renderStores(); else if(tab==="franchisees"&&selFr) selectFranchisee(selFr);
+  Object.assign(s,rec); reindex(); swEditing.location=false; renderStoreLeft(); toast("Location saved","ok");
 }
-async function saveIssueRow(id){
-  const rec={ status:$("iss_status_"+id).value, action_taken:$("iss_action_"+id).value.trim(),
-    notes:$("iss_notes_"+id).value.trim(), updated_at:nowIso() };
-  const {error}=await db.from("issues").update(rec).eq("id",id);
+async function saveStoreGbp(){
+  const s=ST.find(x=>x.id===curStore); const gbp=$("sw_gbp").value.trim();
+  const {error}=await db.from("stores").update({gbp}).eq("id",s.id);
   if(error){toast(friendly(error).t,"err");return;}
-  const i=IS.find(x=>x.id===id); if(i) Object.assign(i,rec);
-  $("cnt-is").textContent=IS.filter(x=>x.status!=="Resolved").length;
-  toast("Issue updated","ok"); openStore(curStore);
+  s.gbp=gbp; swEditing.gbp=false; renderStoreLeft(); toast("Saved","ok");
 }
-async function logStoreIssue(){
+
+function renderStoreRight(){
   const s=ST.find(x=>x.id===curStore); if(!s)return;
-  const title=$("sw_new_title").value.trim(); if(!title){toast("Type the issue first","err");return;}
-  const rec={ franchisee_id:s.franchisee_id, store_num:String(s.num||""), title, status:"Open", action_taken:"", notes:"", updated_at:nowIso() };
+  const issues=IS.filter(i=>String(i.store_num)===String(s.num)).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
+  const notes=notesOf(s);
+  const issuesHtml=issues.length?issues.map(i=>{ const pls=issuePlatforms(i);
+    return '<div class="issue-card" id="issc_'+i.id+'"><div class="top">'+statusBadge(i.status)+'<b>'+esc(i.title)+'</b>'
+      +'<button class="iconbtn mini" title="Update" onclick="openUpdateIssue('+i.id+')"><i data-lucide="refresh-cw"></i></button>'
+      +'<button class="iconbtn mini" title="Delete" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button></div>'
+      +(pls.length?'<div class="chips" style="margin-bottom:2px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')
+      +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
+      +(i.action_taken?'<div class="act"><b>Action taken:</b> '+esc(i.action_taken)+'</div>':'')+'</div>';
+  }).join(""):'<p class="muted">No issues logged for this store.</p>';
+  const notesHtml=notes.length?notes.slice().reverse().map(n=>'<div class="note-row"><span class="nt">'+esc(fmtTs(n.ts))+'</span><span>'+esc(n.text)+'</span></div>').join(""):'<p class="muted">No notes yet.</p>';
+  $("sw_right").innerHTML=
+    '<div class="rpanel"><div class="rph"><i data-lucide="triangle-alert"></i>Issues<span class="act"><button class="btn sm outline round" onclick="openLogIssue('+s.id+')"><i data-lucide="plus"></i>Log issue</button></span></div><div class="rpb">'+issuesHtml+'</div></div>'
+    +'<div class="rpanel"><div class="rph"><i data-lucide="sticky-note"></i>Notes<span class="act"><button class="btn sm outline warn round" onclick="openAddNote('+s.id+')"><i data-lucide="plus"></i>Add note</button></span></div><div class="rpb">'+notesHtml+'</div></div>';
+  icons();
+}
+
+/* Log issue popup */
+function toggleChip(el){ el.classList.toggle("sel"); }
+function pickSbtn(el){ [...el.parentNode.children].forEach(c=>c.classList.remove("active")); el.classList.add("active"); }
+function openLogIssue(storeId){
+  const s=storeId!=null?ST.find(x=>x.id===storeId):null;
+  logStoreCtx=s?s.id:null;
+  $("log_title_h").textContent=s?("Log issue · Store #"+(s.num||"")):"Log issue";
+  const storeField=s?'':'<div class="field" style="margin-bottom:13px"><label>Store #</label><input id="log_store" placeholder="e.g. 12345"></div>';
+  const chips=ISSUE_PLATFORMS.map(pl=>'<button type="button" class="mchip" data-v="'+esc(pl)+'" onclick="toggleChip(this)">'+esc(pl)+'</button>').join("");
+  const sbtns=ISSUE_STATES.map((st,idx)=>'<button type="button" class="sbtn'+(idx===0?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
+  $("log_body").innerHTML=storeField
+    +'<div class="field" style="margin-bottom:13px"><label>What is the issue?</label><textarea id="log_issue" placeholder="e.g. Uber Eats tablet offline since this morning — orders not coming through"></textarea></div>'
+    +'<div class="field" style="margin-bottom:13px"><label>Platform(s) affected — pick one or more</label><div class="chips" id="log_platforms">'+chips+'</div></div>'
+    +'<div class="field"><label>Status</label><div class="sbtns" id="log_status">'+sbtns+'</div></div>';
+  $("logOverlay").classList.add("show"); icons();
+}
+async function saveLogIssue(){
+  const s=logStoreCtx!=null?ST.find(x=>x.id===logStoreCtx):null;
+  const storeNum=s?String(s.num||""):($("log_store")?$("log_store").value.trim():"");
+  const title=$("log_issue").value.trim(); if(!title){toast("Describe the issue first","err");return;}
+  const platforms=[...document.querySelectorAll("#log_platforms .mchip.sel")].map(x=>x.dataset.v);
+  const status=(document.querySelector("#log_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
+  const st=storeByNum[storeNum];
+  const rec={ franchisee_id:st?st.franchisee_id:(s?s.franchisee_id:null), store_num:storeNum, title, status, platforms, action_taken:"", notes:"", updated_at:nowIso() };
+  $("logSave").disabled=true;
   const {data,error}=await db.from("issues").insert(rec).select();
+  $("logSave").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
   if(data&&data[0]) IS.push(data[0]);
-  $("cnt-is").textContent=IS.filter(x=>x.status!=="Resolved").length;
-  toast("Issue logged","ok"); openStore(curStore);
+  updCounts(); $("logOverlay").classList.remove("show"); toast("Issue logged","ok");
+  if(curStore) renderStoreRight(); render();
 }
-async function addStoreNote(){
-  const s=ST.find(x=>x.id===curStore); if(!s)return;
-  const text=$("sw_note_text").value.trim(); if(!text){toast("Type a note first","err");return;}
-  const notes=notesOf(s); notes.push({ts:nowIso(),text});
-  const {error}=await db.from("stores").update({notes}).eq("id",s.id);
+
+/* Update issue popup */
+function openUpdateIssue(id){
+  const i=IS.find(x=>x.id===id); if(!i)return; updIssueId=id;
+  $("upd_title").textContent="Update Status · Store #"+(i.store_num||"");
+  const cur=normIssueStatus(i.status);
+  const sbtns=ISSUE_STATES.map(st=>'<button type="button" class="sbtn'+(st===cur?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
+  $("upd_body").innerHTML='<div class="field" style="margin-bottom:12px"><label>Issue</label><div class="muted" style="font-size:13.5px">'+esc(i.title)+'</div></div>'
+    +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="upd_status">'+sbtns+'</div></div>'
+    +'<div class="field"><label>Action taken</label><textarea id="upd_action" placeholder="What did you do?">'+esc(i.action_taken||"")+'</textarea></div>';
+  $("updOverlay").classList.add("show"); icons();
+}
+async function saveUpdateIssue(){
+  const i=IS.find(x=>x.id===updIssueId); if(!i)return;
+  const status=(document.querySelector("#upd_status .sbtn.active")||{dataset:{}}).dataset.v||i.status;
+  const rec={ status, action_taken:$("upd_action").value.trim(), updated_at:nowIso() };
+  $("updSave").disabled=true;
+  const {error}=await db.from("issues").update(rec).eq("id",i.id);
+  $("updSave").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
-  s.notes=notes; toast("Note added","ok"); openStore(curStore);
+  Object.assign(i,rec); updCounts(); $("updOverlay").classList.remove("show"); toast("Issue updated","ok");
+  if(curStore) renderStoreRight(); render();
+}
+
+/* Add note popup */
+function openAddNote(storeId){ noteStoreCtx=storeId; const s=ST.find(x=>x.id===storeId); $("note_title").textContent="Add note · Store #"+(s?s.num:""); $("note_text").value=""; $("noteOverlay").classList.add("show"); }
+async function saveNote(){
+  const s=ST.find(x=>x.id===noteStoreCtx); if(!s)return;
+  const text=$("note_text").value.trim(); if(!text){toast("Type a note first","err");return;}
+  const notes=notesOf(s); notes.push({ts:nowIso(),text});
+  $("noteSave").disabled=true;
+  const {error}=await db.from("stores").update({notes}).eq("id",s.id);
+  $("noteSave").disabled=false;
+  if(error){toast(friendly(error).t,"err");return;}
+  s.notes=notes; $("noteOverlay").classList.remove("show"); toast("Note added","ok");
+  if(curStore) renderStoreRight();
 }
 
 /* contact editor (franchisee) */
+function typeIcon(t){ return t==="email"?"mail":(t==="cell"?"phone":"tag"); }
+function typePlaceholder(t){ return t==="email"?"name@email.com":(t==="cell"?"(555) 123-4567":"Value"); }
+function formatCellStr(v){ const d=(v||"").replace(/\D/g,"").slice(0,10);
+  if(!d)return ""; if(d.length<4)return "("+d; if(d.length<7)return "("+d.slice(0,3)+") "+d.slice(3);
+  return "("+d.slice(0,3)+") "+d.slice(3,6)+"-"+d.slice(6); }
+function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function isCell(v){ return /^\(\d{3}\) \d{3}-\d{4}$/.test(v); }
 function contactEditorRow(c){
-  const types=["email","cell","other"];
-  return '<div class="contact-edit" style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><select style="width:100px;flex:none;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 8px">'+types.map(t=>'<option'+(c&&c.type===t?' selected':'')+'>'+t+'</option>').join("")+'</select>'
-    +'<input style="flex:1;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px" value="'+esc(c?c.value:"")+'" placeholder="value">'
-    +'<button class="iconbtn" title="Remove" onclick="this.parentNode.remove()"><i data-lucide="x"></i></button></div>';
+  const t=(c&&c.type)||"email";
+  const types=[["email","Email"],["cell","Cell"],["other","Other"]];
+  const val=(t==="cell")?formatCellStr(c?c.value:""):esc(c?c.value:"");
+  return '<div class="c-edit-row">'
+    +'<span class="cico"><i data-lucide="'+typeIcon(t)+'"></i></span>'
+    +'<select class="ctype" onchange="contactTypeChanged(this)">'+types.map(([v,l])=>'<option value="'+v+'"'+(t===v?' selected':'')+'>'+l+'</option>').join("")+'</select>'
+    +'<input class="cval" value="'+val+'" placeholder="'+typePlaceholder(t)+'" oninput="onContactValueInput(this)">'
+    +'<button class="iconbtn mini" title="Copy" onclick="copyRowValue(this)"><i data-lucide="copy"></i></button>'
+    +'<button class="iconbtn mini" title="Remove" onclick="this.closest(\'.c-edit-row\').remove()"><i data-lucide="x"></i></button>'
+    +'</div>';
 }
-function fillContactEditor(id,contacts){ $(id).innerHTML=(contacts&&contacts.length?contacts:[]).map(contactEditorRow).join(""); icons(); }
-function readContactEditor(id){ return [...$(id).querySelectorAll(".contact-edit")].map(r=>({type:r.querySelector("select").value,value:r.querySelector("input").value.trim()})).filter(c=>c.value); }
+function contactTypeChanged(sel){
+  const row=sel.closest(".c-edit-row"), t=sel.value, inp=row.querySelector(".cval");
+  row.querySelector(".cico").innerHTML='<i data-lucide="'+typeIcon(t)+'"></i>';
+  inp.placeholder=typePlaceholder(t);
+  if(t==="cell") inp.value=formatCellStr(inp.value);
+  icons();
+}
+function onContactValueInput(inp){
+  const t=inp.closest(".c-edit-row").querySelector(".ctype").value;
+  if(t==="cell") inp.value=formatCellStr(inp.value);
+}
+function copyRowValue(btn){ const v=btn.closest(".c-edit-row").querySelector(".cval").value.trim(); if(!v){toast("Nothing to copy","err");return;} copyText(v); }
+function fillContactEditor(id,contacts){ const list=(contacts&&contacts.length)?contacts:[{type:"email",value:""}]; $(id).innerHTML=list.map(contactEditorRow).join(""); icons(); }
+function readContactEditor(id){ return [...$(id).querySelectorAll(".c-edit-row")].map(r=>({type:r.querySelector(".ctype").value,value:r.querySelector(".cval").value.trim()})).filter(c=>c.value); }
 
 function openFr(id){
   const f=FR.find(x=>x.id===id); if(!f)return;
   $("fr_id").value=f.id; $("fr_name").value=f.name||""; $("fr_territory").value=f.territory||"";
-  $("fr_closed").value=String(!!f.closed); $("fr_notes").value=f.notes||"";
+  $("fr_closed").value=String(!!f.closed); $("fr_notes").value=f.notes||""; $("frSub").textContent=f.name||"";
   fillContactEditor("fr_contacts", contactsOf(f));
   $("frOverlay").classList.add("show");
 }
 $("fr_addContact").onclick=()=>{ $("fr_contacts").insertAdjacentHTML("beforeend",contactEditorRow()); icons(); };
 async function saveFr(){
   const id=+$("fr_id").value;
+  const contacts=readContactEditor("fr_contacts");
+  for(const c of contacts){
+    if(c.type==="email" && !isEmail(c.value)){ toast("Check the email address format","err"); return; }
+    if(c.type==="cell" && !isCell(c.value)){ toast("Phone must look like (555) 123-4567","err"); return; }
+  }
   const rec={ name:$("fr_name").value.trim(), territory:$("fr_territory").value.trim(),
-    closed:$("fr_closed").value==="true", notes:$("fr_notes").value.trim(), contacts:readContactEditor("fr_contacts") };
+    closed:$("fr_closed").value==="true", notes:$("fr_notes").value.trim(), contacts };
   $("frSave").disabled=true;
   const {error}=await db.from("franchisees").update(rec).eq("id",id);
   $("frSave").disabled=false;
@@ -806,46 +1026,21 @@ async function saveFr(){
   toast("Saved","ok"); $("frOverlay").classList.remove("show"); render(); if(selFr===id) selectFranchisee(id);
 }
 
-/* issue add modal (Issues tab) */
-function openIssue(prefillStore){
-  $("isTitle").textContent="Log issue"; $("is_id").value="";
-  $("is_store").value=prefillStore||""; $("is_title").value=""; $("is_status").value="Open"; $("is_action").value=""; $("is_notes").value="";
-  $("isOverlay").classList.add("show");
-}
-async function saveIssue(){
-  const store=$("is_store").value.trim();
-  const title=$("is_title").value.trim();
-  if(!title){toast("Describe the issue first","err");return;}
-  const st=storeByNum[store];
-  const rec={ franchisee_id: st?st.franchisee_id:null, store_num:store, title,
-    status:$("is_status").value, action_taken:$("is_action").value.trim(), notes:$("is_notes").value.trim(), updated_at:nowIso() };
-  $("isSave").disabled=true;
-  const {data,error}=await db.from("issues").insert(rec).select();
-  $("isSave").disabled=false;
-  if(error){toast(friendly(error).t,"err");return;}
-  if(data&&data[0]) IS.push(data[0]);
-  $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length;
-  $("isOverlay").classList.remove("show"); toast("Issue logged","ok"); render();
-}
-function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmText").textContent='Delete this issue: "'+(i?i.title:"")+'"?'; $("confirmOverlay").classList.add("show"); }
+function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete this issue: "'+(i?i.title:"")+'"?'; $("confirmOverlay").classList.add("show"); }
 
-/* staff detail + add/edit */
+/* staff */
 function openStaff(id){
   const s=SF.find(x=>x.id===id); if(!s)return;
   $("sd_name").textContent=s.name||"—"; $("sd_role").textContent=(s.role||"")+" · Territory "+(s.territory||"—");
-  const handled=storesHandled(s);
-  const frIds=new Set(handled.map(x=>x.franchisee_id)); 
+  const handled=storesHandled(s); const frIds=new Set(handled.map(x=>x.franchisee_id));
   const cell=cellOf(s), email=emailOf(s);
   $("sd_body").innerHTML=
-    '<div class="sw-sec"><div class="sh"><i data-lucide="phone"></i>Contact</div><div class="sb">'
+    '<div class="lc"><div class="lch"><i data-lucide="phone"></i>Contact</div><div class="lcb">'
       +'<div class="contact-row"><span class="type">cell</span><span class="val">'+(cell?esc(cell):'<span class="muted">—</span>')+'</span>'+(cell?copyBtn(cell):'')+'</div>'
-      +'<div class="contact-row"><span class="type">email</span><span class="val">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'<span class="muted">—</span>')+'</span>'+(email?copyBtn(email):'')+'</div>'
-    +'</div></div>'
-    +'<div class="sw-sec"><div class="sh"><i data-lucide="store"></i>Handles (by territory)</div><div class="sb">'
-      +'<div class="mini" style="display:flex;gap:16px;font-size:13.5px"><span><b>'+frIds.size+'</b> franchisees</span><span><b>'+handled.length+'</b> stores</span></div>'
-    +'</div></div>';
+      +'<div class="contact-row"><span class="type">email</span><span class="val">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'<span class="muted">—</span>')+'</span>'+(email?copyBtn(email):'')+'</div></div></div>'
+    +'<div class="lc"><div class="lch"><i data-lucide="store"></i>Handles (by territory)</div><div class="lcb"><div style="display:flex;gap:18px;font-size:13.5px"><span><b>'+frIds.size+'</b> franchisees</span><span><b>'+handled.length+'</b> stores</span></div></div></div>';
   $("sd_edit").onclick=()=>{ $("sdOverlay").classList.remove("show"); openStaffEdit(id); };
-  $("sd_delete").onclick=()=>{ pending={kind:"staff",id}; $("confirmText").textContent='Delete '+(s.role||"")+' "'+(s.name||"")+'"?'; $("confirmOverlay").classList.add("show"); };
+  $("sd_delete").onclick=()=>{ pending={kind:"staff",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete '+(s.role||"")+' "'+(s.name||"")+'"?'; $("confirmOverlay").classList.add("show"); };
   $("sdOverlay").classList.add("show"); icons();
 }
 function openStaffEdit(id){
@@ -853,12 +1048,12 @@ function openStaffEdit(id){
   $("sfTitle").textContent=s?"Edit "+(s.role||""):"Add FBC / OM";
   $("sf_id").value=s?s.id:""; $("sf_role").value=s?s.role||"OM":"OM"; $("sf_name").value=s?s.name||"":"";
   $("sf_territory").value=s?s.territory||"":""; $("sf_cell").value=s?cellOf(s):""; $("sf_email").value=s?emailOf(s):"";
-  updateStaffPreview();
-  $("sfOverlay").classList.add("show");
+  updateStaffPreview(); $("sfOverlay").classList.add("show");
 }
 function updateStaffPreview(){
-  const t=$("sf_territory").value; const n=ST.filter(x=>{const ss=terrSet(x.territory);for(const a of ss){if(terrSet(t).has(a))return true;}return false;}).length;
-  $("sf_preview").textContent = t.trim()? ("Handles "+n+" store"+(n!==1?"s":"")+" in territory "+t) : "";
+  const t=$("sf_territory").value;
+  const n=ST.filter(x=>{const ss=terrSet(x.territory);for(const a of ss){if(terrSet(t).has(a))return true;}return false;}).length;
+  $("sf_preview").textContent=t.trim()?("Handles "+n+" store"+(n!==1?"s":"")+" in territory "+t):"";
 }
 async function saveStaff(){
   const id=$("sf_id").value;
@@ -867,49 +1062,93 @@ async function saveStaff(){
   const rec={ role:$("sf_role").value, name:$("sf_name").value.trim(), territory:$("sf_territory").value.trim(), contacts };
   if(!rec.name){toast("Enter a name","err");return;}
   $("sfSave").disabled=true; let error, saved;
-  if(id){ ({error}=await db.from("staff").update(rec).eq("id",+id)); saved={...SF.find(x=>x.id===+id),...rec}; }
+  if(id){ ({error}=await db.from("staff").update(rec).eq("id",+id)); saved=Object.assign(SF.find(x=>x.id===+id),rec); }
   else { const newId=(SF.reduce((m,x)=>Math.max(m,x.id||0),0)||0)+1; rec.id=newId; ({error}=await db.from("staff").insert(rec)); saved=rec; }
   $("sfSave").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
-  if(id){ Object.assign(SF.find(x=>x.id===+id),rec); } else { SF.push(saved); $("cnt-sf").textContent=SF.length; }
-  toast("Saved","ok"); $("sfOverlay").classList.remove("show"); render();
+  if(!id){ SF.push(saved); }
+  updCounts(); toast("Saved","ok"); $("sfOverlay").classList.remove("show"); render();
 }
 
 /* confirm delete */
+async function runImport(d){
+  const btn=$("confirmOk"); btn.disabled=true; btn.textContent="Restoring…";
+  const chunk=(a,n)=>{const o=[];for(let i=0;i<a.length;i+=n)o.push(a.slice(i,i+n));return o;};
+  try{
+    for(const c of chunk(d.sf,400)){ const {error}=await db.from("staff").upsert(c,{onConflict:"id"}); if(error)throw error; }
+    for(const c of chunk(d.fr,400)){ const {error}=await db.from("franchisees").upsert(c,{onConflict:"id"}); if(error)throw error; }
+    for(const c of chunk(d.st,300)){ const {error}=await db.from("stores").upsert(c,{onConflict:"id"}); if(error)throw error; }
+    const issues=d.is.map(x=>{const {id,...r}=x;return r;});
+    for(const c of chunk(issues,300)){ const {error}=await db.from("issues").insert(c); if(error)throw error; }
+    $("confirmOverlay").classList.remove("show"); pending=null; btn.disabled=false; btn.textContent="Delete";
+    toast("Backup restored","ok"); closeSettings(); loadAll();
+  }catch(err){ btn.disabled=false; btn.textContent="Restore"; toast(friendly(err).t,"err"); }
+}
 async function doDelete(){
   if(!pending)return; const p=pending;
+  if(p.kind==="import"){ runImport(p.data); return; }
   $("confirmOk").disabled=true; let error;
   if(p.kind==="issue"){ ({error}=await db.from("issues").delete().eq("id",p.id)); }
   else if(p.kind==="staff"){ ({error}=await db.from("staff").delete().eq("id",p.id)); }
   $("confirmOk").disabled=false; $("confirmOverlay").classList.remove("show"); pending=null;
   if(error){toast(friendly(error).t,"err");return;}
   toast("Deleted","ok");
-  if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); $("cnt-is").textContent=IS.filter(i=>i.status!=="Resolved").length; if(curStore) openStore(curStore); }
-  if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); $("cnt-sf").textContent=SF.length; $("sdOverlay").classList.remove("show"); }
+  if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); updCounts(); if(curStore) renderStoreRight(); }
+  if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); updCounts(); $("sdOverlay").classList.remove("show"); }
   render();
 }
 
-function primaryAdd(){ if(tab==="issues") openIssue(); else if(tab==="staff") openStaffEdit(null); }
+function primaryAdd(){ if(tab==="issues") openLogIssue(null); else if(tab==="staff") openStaffEdit(null); }
 
 /* events */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; render(); });
 $("search").oninput=render;
 $("terrFilter").onchange=e=>{ terrFilter=e.target.value; render(); };
+$("issuesOnlyBtn").onclick=()=>{ issuesOnly=!issuesOnly; $("issuesOnlyBtn").classList.toggle("on",issuesOnly); render(); };
 $("refreshBtn").onclick=loadAll;
 $("primaryAdd").onclick=primaryAdd;
 
 $("settingsBtn").onclick=openSettings; $("settingsX").onclick=closeSettings; $("settingsCloseBtn").onclick=closeSettings;
 $("connectBtn").onclick=()=>connect($("c_url").value,$("c_key").value); $("disconnectBtn").onclick=disconnect;
+$("backupBtn").onclick=backup;
+$("importBtn").onclick=()=>$("importFile").click();
+$("importFile").onchange=async e=>{
+  const file=e.target.files[0]; e.target.value="";
+  if(!file)return;
+  if(!db){toast("Connect first","err");return;}
+  let data; try{ data=JSON.parse(await file.text()); }catch(err){ toast("That file isn't valid JSON","err"); return; }
+  const fr=data.franchisees||[], st=data.stores||[], sf=data.staff||[], is=data.issues||[];
+  if(!fr.length&&!st.length&&!sf.length&&!is.length){ toast("No data found in that file","err"); return; }
+  impData={fr,st,sf,is};
+  $("imp_pw").value=""; $("impPwOverlay").classList.add("show"); setTimeout(()=>$("imp_pw").focus(),50);
+};
+function unlockImport(){
+  if(!impData) return;
+  if($("imp_pw").value!==IMPORT_PW){ toast("Wrong password","err"); return; }
+  $("impPwOverlay").classList.remove("show");
+  const d=impData; pending={kind:"import", data:d};
+  $("confirmOk").textContent="Restore";
+  $("confirmText").textContent="Restore "+d.fr.length+" franchisees, "+d.st.length+" stores, "+d.sf.length+" FBC/OM and "+d.is.length+" issues into the shared database. Matching records are overwritten. Continue?";
+  $("confirmOverlay").classList.add("show");
+}
+$("impPwOk").onclick=unlockImport;
+$("impPwX").onclick=$("impPwCancel").onclick=()=>{$("impPwOverlay").classList.remove("show");impData=null;};
+$("impPwOverlay").onclick=e=>{if(e.target===$("impPwOverlay")){$("impPwOverlay").classList.remove("show");impData=null;}};
+$("imp_pw").onkeydown=e=>{if(e.key==="Enter")unlockImport();};
 $("settingsOverlay").onclick=e=>{if(e.target===$("settingsOverlay"))closeSettings();};
 
 $("frX").onclick=$("frCancel").onclick=()=>$("frOverlay").classList.remove("show"); $("frSave").onclick=saveFr;
 $("frOverlay").onclick=e=>{if(e.target===$("frOverlay"))$("frOverlay").classList.remove("show");};
 
 /* store window: NO outside-click close */
-$("storeX").onclick=closeStore; $("storeClose").onclick=closeStore; $("sw_saveStore").onclick=saveStoreDetails;
+$("storeX").onclick=closeStore;
 
-$("isX").onclick=$("isCancel").onclick=()=>$("isOverlay").classList.remove("show"); $("isSave").onclick=saveIssue;
-$("isOverlay").onclick=e=>{if(e.target===$("isOverlay"))$("isOverlay").classList.remove("show");};
+$("logX").onclick=$("logCancel").onclick=()=>$("logOverlay").classList.remove("show"); $("logSave").onclick=saveLogIssue;
+$("logOverlay").onclick=e=>{if(e.target===$("logOverlay"))$("logOverlay").classList.remove("show");};
+$("updX").onclick=$("updCancel").onclick=()=>$("updOverlay").classList.remove("show"); $("updSave").onclick=saveUpdateIssue;
+$("updOverlay").onclick=e=>{if(e.target===$("updOverlay"))$("updOverlay").classList.remove("show");};
+$("noteX").onclick=$("noteCancel").onclick=()=>$("noteOverlay").classList.remove("show"); $("noteSave").onclick=saveNote;
+$("noteOverlay").onclick=e=>{if(e.target===$("noteOverlay"))$("noteOverlay").classList.remove("show");};
 
 $("sdX").onclick=$("sdClose").onclick=()=>$("sdOverlay").classList.remove("show");
 $("sdOverlay").onclick=e=>{if(e.target===$("sdOverlay"))$("sdOverlay").classList.remove("show");};
@@ -917,7 +1156,7 @@ $("sfX").onclick=$("sfCancel").onclick=()=>$("sfOverlay").classList.remove("show
 $("sf_territory").oninput=updateStaffPreview;
 $("sfOverlay").onclick=e=>{if(e.target===$("sfOverlay"))$("sfOverlay").classList.remove("show");};
 
-$("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;}; $("confirmOk").onclick=doDelete;
+$("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;$("confirmOk").textContent="Delete";}; $("confirmOk").onclick=doDelete;
 $("confirmOverlay").onclick=e=>{if(e.target===$("confirmOverlay")){$("confirmOverlay").classList.remove("show");pending=null;}};
 
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySelectorAll(".overlay.show").forEach(o=>{ if(o.id!=="storeOverlay") o.classList.remove("show"); }); } });
