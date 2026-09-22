@@ -89,6 +89,37 @@
   .btn.outline:hover{background:var(--green-soft)}
   .btn.outline.warn{color:var(--yellow-dark);border-color:#e0b400}
   .btn.outline.warn:hover{background:var(--yellow-soft)}
+  .btn.outline.danger{color:var(--danger);border-color:#e3a39b}
+  .btn.outline.danger:hover{background:var(--danger-soft)}
+  .panel .ph .ph-act{margin-left:auto}
+  .hd-actions{display:flex;align-items:center;gap:6px;flex:none}
+  .btn.xs{height:30px;padding:0 11px;font-size:12.5px;gap:5px}
+  .btn.xs [data-lucide]{width:14px;height:14px}
+  .iconbtn.del:hover{background:var(--danger-soft);border-color:#e3a39b;color:var(--danger)}
+  .store-line .rm{opacity:.35;transition:opacity .15s}
+  .store-line:hover .rm{opacity:1}
+  .store-line .rm:hover{background:var(--danger-soft);border-color:#e3a39b;color:var(--danger)}
+  .lk-sec{margin-bottom:18px}
+  .lk-sec:last-child{margin-bottom:0}
+  .lk-sec h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
+  .lk-sec h4 [data-lucide]{width:15px;height:15px;color:var(--green)}
+  .lk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+  .lk{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--surface)}
+  .lk:hover{border-color:var(--green);background:var(--green-soft)}
+  .lk .fav{width:28px;height:28px;border-radius:7px;background:var(--idle-soft);display:grid;place-items:center;flex:none;overflow:hidden}
+  .lk .fav img{width:18px;height:18px}
+  .lk .fav [data-lucide]{width:15px;height:15px;color:var(--ink-soft)}
+  .lk .t{flex:1;min-width:0}
+  .lk .t b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lk .t small{display:block;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lk .ext{width:14px;height:14px;color:var(--ink-soft);flex:none}
+  .lke-sec{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:12px;background:#fafcfa}
+  .lke-sec .sh{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+  .lke-sec .sh input{flex:1;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-weight:700;font-size:13px}
+  .lke-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+  .lke-row input{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-size:13px;min-width:0}
+  .lke-row input.nm{width:38%}
+  .lke-row input.url{flex:1}
   #issuesOnlyBtn.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
   .list-head{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px}
   .list-head .lh-title{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--ink);flex:1;min-width:0}
@@ -135,7 +166,9 @@
   .ckrow:last-child{border-bottom:none}
   .ckrow:hover{background:#f6faf7}
   .ckrow.all{background:#f6faf7;font-weight:700}
-  .ckrow input{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+  .ckrow input{width:12px;height:12px;accent-color:#6b7470;cursor:pointer;margin:0 0 0 auto;flex:none;order:99}
+  .ckrow .o{margin-right:8px}
+  .ckrow.all span{flex:1}
   .ckrow .n{font-weight:700;color:var(--green-dark);min-width:52px}
   .ckrow .o{flex:1;min-width:0;color:var(--ink-soft)}
   .btn.link{background:none;border:none;color:var(--green-dark);padding:4px 6px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
@@ -346,7 +379,8 @@
     </div>
     <div class="clock" id="clock"></div>
     <div class="top-right">
-      <div id="statusDot" class="status-dot"><i class="d"></i><span>Not connected</span></div>
+      <div id="statusDot" class="status-dot" style="display:none"><i class="d"></i><span>Not connected</span></div>
+      <button class="ghost-icon" id="linksBtn" title="Links" aria-label="Links"><i data-lucide="link"></i></button>
       <button class="ghost-icon" id="settingsBtn" title="Settings" aria-label="Settings"><i data-lucide="settings"></i></button>
     </div>
   </div>
@@ -525,8 +559,49 @@
 <div class="overlay top" id="impPwOverlay">
   <div class="modal small">
     <div class="head"><i data-lucide="lock"></i><h2>Enter password</h2><button class="x" id="impPwX">&times;</button></div>
-    <div class="body"><div class="field"><label>Import password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
+    <div class="body"><div class="field"><label id="imp_pw_lbl">Password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
     <footer><button class="btn ghost" id="impPwCancel">Cancel</button><button class="btn" id="impPwOk"><i data-lucide="unlock"></i>Unlock</button></footer>
+  </div>
+</div>
+
+<!-- Add store popup -->
+<div class="overlay top" id="addStOverlay">
+  <div class="modal">
+    <div class="head"><i data-lucide="store"></i><div><h2>Add store</h2><div class="subt" id="as_sub"></div></div><button class="x" id="asX">&times;</button></div>
+    <div class="body">
+      <div class="ecard">
+        <div class="ech"><i data-lucide="hash"></i>Store</div>
+        <div class="ecb"><div class="fgrid">
+          <div class="field"><label>Store number</label><input id="as_num" placeholder="e.g. 12345" inputmode="numeric"></div>
+          <div class="field"><label>Territory</label><input id="as_terr" placeholder="e.g. 540"></div>
+        </div></div>
+      </div>
+      <div class="ecard">
+        <div class="ech"><i data-lucide="map-pin"></i>Location</div>
+        <div class="ecb"><div class="fgrid">
+          <div class="field full"><label>Address</label><input id="as_addr" placeholder="Street address"></div>
+          <div class="field"><label>City</label><input id="as_city"></div>
+          <div class="field"><label>State</label><input id="as_state" placeholder="CA" maxlength="2" style="text-transform:uppercase"></div>
+          <div class="field"><label>ZIP</label><input id="as_zip"></div>
+          <div class="field"><label>Store Phone Number</label><input id="as_phone" placeholder="(555) 123-4567"></div>
+        </div></div>
+      </div>
+    </div>
+    <footer><button class="btn ghost" id="asCancel">Cancel</button><button class="btn" id="asSave"><i data-lucide="plus"></i>Add store</button></footer>
+  </div>
+</div>
+
+<!-- Links popup -->
+<div class="overlay" id="linksOverlay">
+  <div class="modal" style="max-width:760px">
+    <div class="head"><i data-lucide="link"></i><h2 id="lk_title">Links</h2>
+      <button class="iconbtn" id="lkEditBtn" title="Edit links" style="margin-left:auto"><i data-lucide="pencil"></i></button>
+      <button class="x" id="lkX" style="margin-left:4px">&times;</button></div>
+    <div class="body" id="lk_body"></div>
+    <footer id="lk_foot" style="display:none">
+      <button class="btn link" id="lkReset" style="margin-right:auto"><i data-lucide="rotate-ccw"></i>Reset to default</button>
+      <button class="btn ghost" id="lkCancel">Cancel</button><button class="btn" id="lkSave"><i data-lucide="save"></i>Save links</button>
+    </footer>
   </div>
 </div>
 
@@ -819,7 +894,9 @@ function detailHtml(id){
   const pageStores=stores.slice((frStorePage-1)*PAGE_FRST, frStorePage*PAGE_FRST);
   const storeHtml=stores.length?pageStores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><div class="idot-col">'+openDot(storeOpenIssues(s.num))+'</div><span class="num">'+esc(s.num)+'</span><div class="meta">'
       +'<div class="a">'+esc(s.address||"")+'</div><div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
-      +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal):'<p class="muted">No stores.</p>';
+      +platChips(platOf(s))
+      +'<button class="iconbtn mini rm" title="Remove store from franchisee" aria-label="Remove store" onclick="event.stopPropagation();askRemoveStore('+s.id+')"><i data-lucide="trash-2"></i></button>'
+      +'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal):'<p class="muted">No stores.</p>';
   const issueHtml=issues.length?issues.map(i=>{ const s=storeByNum[String(i.store_num)];
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
     +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
@@ -827,14 +904,15 @@ function detailHtml(id){
   const staffHtml=arr=>arr.length?arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join(""):'<span class="muted">None for this territory</span>';
   return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
     +'<div class="muted" style="font-size:13.5px">Territory '+esc(f.territory||"—")+' · '+stores.length+' store'+(stores.length!==1?'s':'')+'</div></div>'
-    +'<button class="btn outline round" onclick="openFr('+f.id+')"><i data-lucide="pencil"></i>Edit</button></div>'
+    +'<div class="hd-actions"><button class="btn outline round xs" onclick="openFr('+f.id+')" title="Edit franchisee"><i data-lucide="pencil"></i>Edit</button>'
+    +'<button class="iconbtn del" onclick="askDeleteFr('+f.id+')" title="Delete franchisee (password required)" aria-label="Delete franchisee"><i data-lucide="trash-2"></i></button></div></div>'
     +'<div class="grid2">'
       +'<div class="panel"><div class="ph"><i data-lucide="mail"></i>Contacts</div><div class="pb">'+contactHtml+'</div></div>'
       +'<div class="panel"><div class="ph"><i data-lucide="badge-check"></i>Support team</div><div class="pb">'
         +'<div class="kv"><span class="k">OM</span><span>'+staffHtml(om)+'</span></div>'
         +'<div class="kv"><span class="k">FBC</span><span>'+staffHtml(fbc)+'</span></div>'
         +'<div class="kv"><span class="k">Area</span><span class="muted">'+esc(f.territory||"—")+'</span></div></div></div>'
-      +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="store"></i>Stores <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+stores.length+'</span></div><div class="pb">'+storeHtml+'</div></div>'
+      +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="store"></i>Stores <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+stores.length+'</span><span class="ph-act"><button class="iconbtn" title="Add store" onclick="openAddStore('+f.id+')"><i data-lucide="plus"></i></button></span></div><div class="pb">'+storeHtml+'</div></div>'
       +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="triangle-alert"></i>Issues</div><div class="pb">'+issueHtml+'</div></div>'
       +(f.notes?'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="sticky-note"></i>Notes</div><div class="pb" style="white-space:pre-wrap;font-size:13.5px">'+esc(f.notes)+'</div></div>':'')
     +'</div>';
@@ -1286,12 +1364,23 @@ async function doDelete(){
   $("confirmOk").disabled=true; let error;
   if(p.kind==="issue"){ ({error}=await db.from("issues").delete().eq("id",p.id)); }
   else if(p.kind==="issues"){ ({error}=await db.from("issues").delete().in("id",p.ids)); }
+  else if(p.kind==="franchisee"){ ({error}=await db.from("franchisees").delete().eq("id",p.id)); }
+  else if(p.kind==="store"){ const st=ST.find(x=>x.id===p.id);
+    if(st){ const r=await db.from("issues").delete().eq("store_num",String(st.num)); error=r.error;
+      if(!error){ ({error}=await db.from("stores").delete().eq("id",p.id)); } } }
   else if(p.kind==="staff"){ ({error}=await db.from("staff").delete().eq("id",p.id)); }
   $("confirmOk").disabled=false; $("confirmOverlay").classList.remove("show"); pending=null;
   if(error){toast(friendly(error).t,"err");return;}
   toast("Deleted","ok");
   if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); updCounts(); if(curStore) renderStoreRight(); }
   if(p.kind==="issues"){ IS=IS.filter(i=>!p.ids.includes(i.id)); updCounts(); $("grpOverlay").classList.remove("show"); if(curStore) renderStoreRight(); }
+  if(p.kind==="store"){ const st=ST.find(x=>x.id===p.id);
+    if(st){ IS=IS.filter(i=>String(i.store_num)!==String(st.num)); ST=ST.filter(x=>x.id!==p.id); }
+    reindex(); buildTerrFilter(); updCounts(); }
+  if(p.kind==="franchisee"){ const nums=new Set((storesByFr[p.id]||[]).map(x=>String(x.num)));
+    FR=FR.filter(f=>f.id!==p.id); ST=ST.filter(x=>x.franchisee_id!==p.id);
+    IS=IS.filter(i=>i.franchisee_id!==p.id && !nums.has(String(i.store_num)));
+    if(selFr===p.id) selFr=null; reindex(); buildTerrFilter(); updCounts(); }
   if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); updCounts(); $("sdOverlay").classList.remove("show"); }
   render();
 }
@@ -1311,6 +1400,131 @@ function pageSet(which,val){
   else if(which==='st'){ stPage=n; render(); }
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
+
+/* ===== Delete franchisee (password) ===== */
+function askDeleteFr(id){
+  const f=FR.find(x=>x.id===id); if(!f) return;
+  askPassword("Password to delete a franchisee", ()=>{
+    const ns=(storesByFr[id]||[]).length, ni=IS.filter(i=>i.franchisee_id===id).length;
+    pending={kind:"franchisee", id}; $("confirmOk").textContent="Delete";
+    $("confirmText").textContent='Delete "'+(f.name||"")+'" with '+ns+' store'+(ns!==1?'s':'')+' and '+ni+' issue'+(ni!==1?'s':'')+'? This cannot be undone — save a backup first if unsure.';
+    $("confirmOverlay").classList.add("show");
+  });
+}
+
+/* ===== Remove store ===== */
+function askRemoveStore(id){
+  const st=ST.find(x=>x.id===id); if(!st) return;
+  const f=FR.find(x=>x.id===st.franchisee_id);
+  const ni=IS.filter(i=>String(i.store_num)===String(st.num)).length;
+  pending={kind:"store", id}; $("confirmOk").textContent="Remove";
+  $("confirmText").textContent='Remove store '+st.num+(f?' from "'+f.name+'"':'')+'?'+(ni?' Its '+ni+' issue'+(ni>1?'s':'')+' will also be deleted.':'')+' This cannot be undone.';
+  $("confirmOverlay").classList.add("show");
+}
+
+/* ===== Add store ===== */
+let addStFr=null;
+function openAddStore(frId){
+  const f=FR.find(x=>x.id===frId); if(!f) return; addStFr=frId;
+  $("as_sub").textContent=f.name||"";
+  ["as_num","as_addr","as_city","as_state","as_zip","as_phone"].forEach(k=>$(k).value="");
+  $("as_terr").value=[...terrSet(f.territory)][0]||"";
+  $("addStOverlay").classList.add("show"); icons(); setTimeout(()=>$("as_num").focus(),60);
+}
+async function saveAddStore(){
+  const num=$("as_num").value.trim().replace(/^#/,"");
+  if(!num){ toast("Enter a store number","err"); return; }
+  if(storeByNum[num]){ const o=FR.find(x=>x.id===storeByNum[num].franchisee_id); toast("Store "+num+" already exists"+(o?" ("+o.name+")":""),"err"); return; }
+  const phone=$("as_phone").value.trim();
+  if(phone && !isCell(phone)){ toast("Phone must look like (555) 123-4567","err"); return; }
+  const rec={ franchisee_id:addStFr, num, address:$("as_addr").value.trim(), city:$("as_city").value.trim(),
+    state:$("as_state").value.trim().toUpperCase(), zip:$("as_zip").value.trim(), phone, territory:$("as_terr").value.trim(),
+    closed:false, platforms:Object.fromEntries(PLATFORMS.map(([k])=>[k,"Not enrolled"])), gbp:"", notes:[] };
+  $("asSave").disabled=true;
+  const {data,error}=await db.from("stores").insert(rec).select();
+  $("asSave").disabled=false;
+  if(error){ toast(friendly(error).t,"err"); return; }
+  if(data&&data[0]) ST.push(data[0]);
+  reindex(); buildTerrFilter(); updCounts(); $("addStOverlay").classList.remove("show");
+  toast("Store "+num+" added","ok"); render();
+}
+
+/* ===== Links ===== */
+const DEFAULT_LINKS=[
+  {title:"Subway", icon:"utensils", links:[
+    {name:"The Feed Website", url:"https://thefeed.subway.com/"}]},
+  {title:"Platforms", icon:"layout-dashboard", links:[
+    {name:"Uber Eats Manager Portal", url:"https://merchants.ubereats.com/manager/stores"},
+    {name:"DoorDash Merchant Portal", url:"https://merchant-portal.doordash.com/merchant/select-profile"},
+    {name:"Grubhub Merchant Portal", url:"https://restaurant.grubhub.com/dashboard/8138584"},
+    {name:"Foodja", url:"https://foodja.com/user/login/"},
+    {name:"ezCater", url:"https://www.ezcater.com/partner_portal/sign_in?iss=https%3A%2F%2Faccount.ezcater.com%2F"}]},
+  {title:"Customer View", icon:"eye", links:[
+    {name:"Uber Eats", url:"https://www.ubereats.com/"},
+    {name:"DoorDash", url:"https://www.doordash.com/home"},
+    {name:"Grubhub", url:"https://www.grubhub.com/"}]},
+  {title:"Others", icon:"bookmark", links:[
+    {name:"Calendly", url:"https://calendly.com/3pd-helpdesk/helpdesk-3pd-support-franchisee-call"},
+    {name:"Outlook", url:"https://outlook.cloud.microsoft/mail/"},
+    {name:"Google Business Profile", url:"https://business.google.com/locations"},
+    {name:"Subway Restaurant Locator", url:"https://www.subway.com/en-us/locator"}]}
+];
+let LINKS=null, lkEditing=false, lkShared=true;
+function normUrl(u){ u=(u||"").trim(); if(!u) return ""; return /^https?:\/\//i.test(u)?u:"https://"+u; }
+function hostOf(u){ try{ return new URL(normUrl(u)).host.replace(/^www\./,""); }catch(e){ return u; } }
+async function loadLinks(){
+  if(db){
+    const {data,error}=await db.from("app_settings").select("value").eq("key","links").maybeSingle();
+    if(!error){ lkShared=true; if(data&&Array.isArray(data.value)){ LINKS=data.value; return; } }
+    else lkShared=false;
+  }
+  try{ const l=JSON.parse(localStorage.getItem("ft2_links")||"null"); if(Array.isArray(l)){ LINKS=l; return; } }catch(e){}
+  LINKS=JSON.parse(JSON.stringify(DEFAULT_LINKS));
+}
+async function openLinks(){ lkEditing=false; $("lk_body").innerHTML='<div class="state"><div class="spinner"></div></div>'; $("linksOverlay").classList.add("show"); await loadLinks(); renderLinks(); }
+function renderLinks(){
+  $("lk_title").textContent=lkEditing?"Edit links":"Links";
+  $("lkEditBtn").style.display=lkEditing?"none":"grid";
+  $("lk_foot").style.display=lkEditing?"flex":"none";
+  if(!lkEditing){
+    const secs=LINKS.filter(sec=>(sec.links||[]).length);
+    $("lk_body").innerHTML=secs.length?secs.map(sec=>'<div class="lk-sec"><h4><i data-lucide="'+esc(sec.icon||"folder")+'"></i>'+esc(sec.title)+'</h4><div class="lk-grid">'
+      +sec.links.map(l=>{ const u=normUrl(l.url), h=hostOf(l.url);
+        return '<a class="lk" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" title="'+esc(u)+'">'
+          +'<span class="fav"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(h)+'&sz=64" alt="" onerror="this.outerHTML=\'<i data-lucide=&quot;globe&quot;></i>\';icons()"></span>'
+          +'<span class="t"><b>'+esc(l.name||h)+'</b><small>'+esc(h)+'</small></span><i data-lucide="external-link" class="ext"></i></a>'; }).join("")
+      +'</div></div>').join(""):emptyBox("link","No links yet","Click the pencil to add some.");
+  } else {
+    $("lk_body").innerHTML='<div id="lke">'+LINKS.map((sec,si)=>lkSecHtml(sec)).join("")+'</div>'
+      +'<button class="btn outline round sm" onclick="lkAddSec()"><i data-lucide="folder-plus"></i>Add section</button>'
+      +(lkShared?'':'<div class="help" style="margin-top:10px">Links table not set up yet — edits save on this computer only. Run migrate-links.sql to share with the team.</div>');
+  }
+  icons();
+}
+function lkRowHtml(l){ return '<div class="lke-row"><input class="nm" placeholder="Name" value="'+esc(l?l.name:"")+'"><input class="url" placeholder="https://…" value="'+esc(l?l.url:"")+'">'
+  +'<button class="iconbtn mini" title="Remove link" onclick="this.closest(\'.lke-row\').remove()"><i data-lucide="x"></i></button></div>'; }
+function lkSecHtml(sec){ return '<div class="lke-sec" data-icon="'+esc(sec.icon||"folder")+'"><div class="sh"><input class="st" placeholder="Section name" value="'+esc(sec.title||"")+'">'
+  +'<button class="iconbtn mini" title="Remove section" onclick="this.closest(\'.lke-sec\').remove()"><i data-lucide="trash-2"></i></button></div>'
+  +'<div class="rows">'+(sec.links||[]).map(lkRowHtml).join("")+'</div>'
+  +'<button class="btn link" onclick="lkAddRow(this)"><i data-lucide="plus"></i>Add link</button></div>'; }
+function lkAddRow(btn){ btn.closest(".lke-sec").querySelector(".rows").insertAdjacentHTML("beforeend",lkRowHtml()); icons(); }
+function lkAddSec(){ $("lke").insertAdjacentHTML("beforeend",lkSecHtml({title:"",icon:"folder",links:[{name:"",url:""}]})); icons(); }
+function lkRead(){
+  return [...document.querySelectorAll("#lke .lke-sec")].map(sec=>({
+    title:sec.querySelector(".st").value.trim()||"Links", icon:sec.dataset.icon||"folder",
+    links:[...sec.querySelectorAll(".lke-row")].map(r=>({name:r.querySelector(".nm").value.trim(), url:normUrl(r.querySelector(".url").value)})).filter(l=>l.url)
+  }));
+}
+async function saveLinks(data){
+  const next=data||lkRead();
+  $("lkSave").disabled=true; let shared=false;
+  if(db){ const {error}=await db.from("app_settings").upsert({key:"links", value:next},{onConflict:"key"}); shared=!error; lkShared=shared; }
+  try{ localStorage.setItem("ft2_links", JSON.stringify(next)); }catch(e){}
+  $("lkSave").disabled=false;
+  LINKS=next; lkEditing=false; renderLinks();
+  toast(shared?"Links saved for the team":"Saved on this computer only","ok");
+}
+
 /* ===== Multi-store issue ===== */
 function openMultiIssue(){
   mStores=[];
@@ -1368,14 +1582,15 @@ function openGroupUpdate(gid, preselectId){
   if(!m.length){ toast("Issue not found","err"); return; }
   grpId=gid; const f=m[0];
   $("grp_sub").textContent=m.length+" stores · logged "+fmtTs(f.created_at);
-  const rows=m.map(i=>'<label class="ckrow"><input type="checkbox" class="grp-ck" value="'+i.id+'"'+((!preselectId||preselectId===i.id)?' checked':'')+' onchange="syncGrpAll()">'
-    +'<span class="n">'+esc(i.store_num)+'</span><span class="o">'+esc(frNameById(i.franchisee_id))+'</span>'+statusBadge(i.status)+'</label>').join("");
+  const rows=m.map(i=>'<label class="ckrow">'
+    +'<span class="n">'+esc(i.store_num)+'</span><span class="o">'+esc(frNameById(i.franchisee_id))+'</span>'+statusBadge(i.status)
+    +'<input type="checkbox" class="grp-ck" value="'+i.id+'"'+((!preselectId||preselectId===i.id)?' checked':'')+' onchange="syncGrpAll()"></label>').join("");
   const pls=issuePlatforms(f);
   $("grp_body").innerHTML=
     '<div class="field" style="margin-bottom:12px"><label>Issue</label><div style="font-size:14px">'+esc(f.title)+'</div>'
       +(pls.length?'<div class="chips" style="margin-top:6px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')+'</div>'
     +'<div class="field" style="margin-bottom:13px"><label>Stores to update — pick which ones</label><div class="cklist">'
-      +'<label class="ckrow all"><input type="checkbox" id="grp_all" onchange="toggleGrpAll(this.checked)"><span>All stores</span></label>'+rows+'</div>'
+      +'<label class="ckrow all"><span>All stores</span><input type="checkbox" id="grp_all" onchange="toggleGrpAll(this.checked)"></label>'+rows+'</div>'
       +'<div class="help" id="grp_selcount"></div></div>'
     +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="grp_status">'
       +ISSUE_STATES.map(st=>'<button type="button" class="sbtn" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("")+'</div></div>'
@@ -1422,6 +1637,17 @@ $("stClosedFilter").onclick=toggleClosed;
 $("refreshBtn").onclick=loadAll;
 $("primaryAdd").onclick=primaryAdd;
 $("multiAdd").onclick=openMultiIssue;
+$("asX").onclick=$("asCancel").onclick=()=>$("addStOverlay").classList.remove("show");
+$("addStOverlay").onclick=e=>{if(e.target===$("addStOverlay"))$("addStOverlay").classList.remove("show");};
+$("asSave").onclick=saveAddStore;
+$("as_phone").oninput=e=>{ e.target.value=formatCellStr(e.target.value); };
+$("linksBtn").onclick=openLinks;
+$("lkX").onclick=()=>{ $("linksOverlay").classList.remove("show"); lkEditing=false; };
+$("linksOverlay").onclick=e=>{ if(e.target===$("linksOverlay")&&!lkEditing) $("linksOverlay").classList.remove("show"); };
+$("lkEditBtn").onclick=()=>{ lkEditing=true; renderLinks(); };
+$("lkCancel").onclick=()=>{ lkEditing=false; renderLinks(); };
+$("lkSave").onclick=()=>saveLinks();
+$("lkReset").onclick=()=>{ LINKS=JSON.parse(JSON.stringify(DEFAULT_LINKS)); renderLinks(); };
 $("multiX").onclick=$("multiCancel").onclick=()=>$("multiOverlay").classList.remove("show");
 $("multiOverlay").onclick=e=>{if(e.target===$("multiOverlay"))$("multiOverlay").classList.remove("show");};
 $("multiSave").onclick=saveMultiIssue;
@@ -1447,21 +1673,29 @@ $("importFile").onchange=async e=>{
   const fr=data.franchisees||[], st=data.stores||[], sf=data.staff||[], is=data.issues||[];
   if(!fr.length&&!st.length&&!sf.length&&!is.length){ toast("No data found in that file","err"); return; }
   impData={fr,st,sf,is};
-  $("imp_pw").value=""; $("impPwOverlay").classList.add("show"); setTimeout(()=>$("imp_pw").focus(),50);
+  askPassword("Import password", ()=>{
+    const d=impData; pending={kind:"import", data:d};
+    $("confirmOk").textContent="Restore";
+    $("confirmText").textContent="Restore "+d.fr.length+" franchisees, "+d.st.length+" stores, "+d.sf.length+" FBC/OM and "+d.is.length+" issues into the shared database. Matching records are overwritten. Continue?";
+    $("confirmOverlay").classList.add("show");
+  });
 };
-function unlockImport(){
-  if(!impData) return;
+let pwCallback=null;
+function askPassword(label, cb){
+  pwCallback=cb; $("imp_pw_lbl").textContent=label||"Password";
+  $("imp_pw").value=""; $("impPwOverlay").classList.add("show"); setTimeout(()=>$("imp_pw").focus(),50);
+}
+function unlockPw(){
+  if(!pwCallback) return;
   if($("imp_pw").value!==IMPORT_PW){ toast("Wrong password","err"); return; }
   $("impPwOverlay").classList.remove("show");
-  const d=impData; pending={kind:"import", data:d};
-  $("confirmOk").textContent="Restore";
-  $("confirmText").textContent="Restore "+d.fr.length+" franchisees, "+d.st.length+" stores, "+d.sf.length+" FBC/OM and "+d.is.length+" issues into the shared database. Matching records are overwritten. Continue?";
-  $("confirmOverlay").classList.add("show");
+  const cb=pwCallback; pwCallback=null; cb();
 }
-$("impPwOk").onclick=unlockImport;
-$("impPwX").onclick=$("impPwCancel").onclick=()=>{$("impPwOverlay").classList.remove("show");impData=null;};
-$("impPwOverlay").onclick=e=>{if(e.target===$("impPwOverlay")){$("impPwOverlay").classList.remove("show");impData=null;}};
-$("imp_pw").onkeydown=e=>{if(e.key==="Enter")unlockImport();};
+function closePw(){ $("impPwOverlay").classList.remove("show"); pwCallback=null; impData=null; }
+$("impPwOk").onclick=unlockPw;
+$("impPwX").onclick=$("impPwCancel").onclick=closePw;
+$("impPwOverlay").onclick=e=>{if(e.target===$("impPwOverlay"))closePw();};
+$("imp_pw").onkeydown=e=>{if(e.key==="Enter")unlockPw();};
 $("settingsOverlay").onclick=e=>{if(e.target===$("settingsOverlay"))closeSettings();};
 
 $("frX").onclick=$("frCancel").onclick=()=>$("frOverlay").classList.remove("show"); $("frSave").onclick=saveFr;
