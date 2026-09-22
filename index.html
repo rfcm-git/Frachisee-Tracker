@@ -92,6 +92,10 @@
   .btn.outline.danger{color:var(--danger);border-color:#e3a39b}
   .btn.outline.danger:hover{background:var(--danger-soft)}
   .panel .ph .ph-act{margin-left:auto}
+  .dupwarn{display:none;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;color:var(--danger);background:var(--danger-soft);border-radius:7px;padding:6px 9px}
+  .dupwarn.show{display:flex}
+  .dupwarn [data-lucide]{width:14px;height:14px;flex:none}
+  input.bad{border-color:var(--danger)!important}
   .hd-actions{display:flex;align-items:center;gap:6px;flex:none}
   .btn.xs{height:30px;padding:0 11px;font-size:12.5px;gap:5px}
   .btn.xs [data-lucide]{width:14px;height:14px}
@@ -453,7 +457,8 @@
       <div class="ecard">
         <div class="ech"><i data-lucide="user-round"></i>Franchisee</div>
         <div class="ecb"><div class="fgrid">
-          <div class="field full"><label>Franchisee name</label><input id="fr_name" placeholder="Last, First"></div>
+          <div class="field full"><label>Franchisee name</label><input id="fr_name" placeholder="Last, First" autocomplete="off">
+            <div class="dupwarn" id="fr_dup"><i data-lucide="circle-alert"></i><span></span></div></div>
           <div class="field"><label>Territory</label><input id="fr_territory" placeholder="540, 584"></div>
           <div class="field"><label>Status</label><select id="fr_closed"><option value="false">Active</option><option value="true">Closed</option></select></div>
         </div></div>
@@ -547,6 +552,14 @@
 </div>
 
 <!-- Confirm -->
+<div class="overlay top" id="conflictOverlay" style="z-index:95">
+  <div class="modal small">
+    <div class="head"><i data-lucide="users" style="color:var(--warn)"></i><h2>Someone else changed this</h2></div>
+    <div class="body"><p class="hint" id="conflictText"></p></div>
+    <footer><button class="btn ghost" id="conflictClose">Close</button><button class="btn" id="conflictReload"><i data-lucide="refresh-cw"></i>Reload latest</button></footer>
+  </div>
+</div>
+
 <div class="overlay top" id="confirmOverlay">
   <div class="modal small">
     <div class="head"><i data-lucide="trash-2"></i><h2>Confirm delete</h2></div>
@@ -572,7 +585,8 @@
       <div class="ecard">
         <div class="ech"><i data-lucide="hash"></i>Store</div>
         <div class="ecb"><div class="fgrid">
-          <div class="field"><label>Store number</label><input id="as_num" placeholder="e.g. 12345" inputmode="numeric"></div>
+          <div class="field"><label>Store number</label><input id="as_num" placeholder="e.g. 12345" inputmode="numeric" autocomplete="off">
+            <div class="dupwarn" id="as_dup"><i data-lucide="circle-alert"></i><span></span></div></div>
           <div class="field"><label>Territory</label><input id="as_terr" placeholder="e.g. 540"></div>
         </div></div>
       </div>
@@ -688,8 +702,13 @@ function setStatus(state, header, popup){
 }
 function friendly(err){
   const m=(err&&err.message?err.message:"").toLowerCase(), code=(err&&err.code)?String(err.code):"";
+  if(code==="23505"||m.includes("duplicate key")){
+    if(m.includes("stores_num_unique")) return {t:"That store number already exists",b:"Each store number can only be used once."};
+    if(m.includes("franchisees_name_unique")) return {t:"A franchisee with that name already exists",b:"Use the existing franchisee instead."};
+    return {t:"That record already exists",b:"Refresh and try again."};
+  }
   if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
-  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run migrate-multi-issue.sql (and migrate-issues.sql if not yet done) in Supabase SQL Editor, then Refresh.",a:"settings"};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run the latest migration files (migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",a:"settings"};
   if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
   if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
   if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
@@ -867,6 +886,7 @@ function renderFranchisees(){
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
+    +'<button class="iconbtn" title="Add franchisee" aria-label="Add franchisee" onclick="openFr(null)"><i data-lucide="user-plus"></i></button>'
     +'<button class="iconbtn'+(issuesOnly?' on':'')+'" title="Only franchisees with an issue" onclick="toggleIssues()"><i data-lucide="triangle-alert"></i></button></div>';
   setView('<div class="split"><div class="card fr-panel">'+head+'<div class="fr-list" id="frList">'+items+'</div>'+pagerHtml('fr',frPage,frTotal)+'</div><div id="frDetailPane">'+detail+'</div></div>');
 }
@@ -1127,25 +1147,29 @@ function renderStoreLeft(){
 function swEdit(card){ swEditing[card]=!swEditing[card]; platMenu=null; renderStoreLeft(); }
 function pickPlat(k){ platMenu=(platMenu===k?null:k); renderStoreLeft(); }
 async function setPlat(k,st){
-  const s=ST.find(x=>x.id===curStore); const p=platOf(s); p[k]=st;
-  const platforms=Object.fromEntries(PLATFORMS.map(([kk])=>[kk, normPlat(p[kk]||"Not enrolled")]));
-  const {error}=await db.from("stores").update({platforms}).eq("id",s.id);
-  if(error){toast(friendly(error).t,"err");return;}
-  s.platforms=platforms; reindex(); platMenu=null; renderStoreLeft();
+  const s=ST.find(x=>x.id===curStore);
+  const r=await mergeStoreSave(s.id, fresh=>{ const p=platOf(fresh); p[k]=st;
+    return {platforms:Object.fromEntries(PLATFORMS.map(([kk])=>[kk, normPlat(p[kk]||"Not enrolled")]))}; });
+  if(r.error){toast(friendly(r.error).t,"err");return;}
+  if(r.gone){ showConflict("Store "+s.num); return; }
+  if(r.conflict){ toast("Busy — please try again","err"); return; }
+  Object.assign(s,r.row); reindex(); platMenu=null; renderStoreLeft();
   toast(PLATFORMS.find(x=>x[0]===k)[1]+" → "+st,"ok");
 }
 async function saveStoreLoc(){
   const s=ST.find(x=>x.id===curStore);
   const rec={ address:$("sw_address").value.trim(), city:$("sw_city").value.trim(), state:$("sw_state").value.trim(), zip:$("sw_zip").value.trim(), phone:$("sw_phone").value.trim() };
-  const {error}=await db.from("stores").update(rec).eq("id",s.id);
-  if(error){toast(friendly(error).t,"err");return;}
-  Object.assign(s,rec); reindex(); swEditing.location=false; renderStoreLeft(); toast("Location saved","ok");
+  const r=await guardedUpdate("stores",s,rec);
+  if(r.error){toast(friendly(r.error).t,"err");return;}
+  if(r.conflict){ showConflict("Store "+s.num); return; }
+  Object.assign(s,r.row); reindex(); swEditing.location=false; renderStoreLeft(); toast("Location saved","ok");
 }
 async function saveStoreGbp(){
   const s=ST.find(x=>x.id===curStore); const gbp=$("sw_gbp").value.trim();
-  const {error}=await db.from("stores").update({gbp}).eq("id",s.id);
-  if(error){toast(friendly(error).t,"err");return;}
-  s.gbp=gbp; swEditing.gbp=false; renderStoreLeft(); toast("Saved","ok");
+  const r=await guardedUpdate("stores",s,{gbp});
+  if(r.error){toast(friendly(r.error).t,"err");return;}
+  if(r.conflict){ showConflict("Store "+s.num); return; }
+  Object.assign(s,r.row); swEditing.gbp=false; renderStoreLeft(); toast("Saved","ok");
 }
 
 function renderStoreRight(){
@@ -1219,10 +1243,11 @@ async function saveUpdateIssue(){
   const status=(document.querySelector("#upd_status .sbtn.active")||{dataset:{}}).dataset.v||i.status;
   const rec={ status, action_taken:$("upd_action").value.trim(), updated_at:nowIso() };
   $("updSave").disabled=true;
-  const {error}=await db.from("issues").update(rec).eq("id",i.id);
+  const r=await guardedUpdate("issues",i,rec);
   $("updSave").disabled=false;
-  if(error){toast(friendly(error).t,"err");return;}
-  Object.assign(i,rec); updCounts(); $("updOverlay").classList.remove("show"); toast("Issue updated","ok");
+  if(r.error){toast(friendly(r.error).t,"err");return;}
+  if(r.conflict){ showConflict("This issue"); return; }
+  Object.assign(i,r.row); updCounts(); $("updOverlay").classList.remove("show"); toast("Issue updated","ok");
   if(curStore) renderStoreRight(); render();
 }
 
@@ -1231,12 +1256,14 @@ function openAddNote(storeId){ noteStoreCtx=storeId; const s=ST.find(x=>x.id===s
 async function saveNote(){
   const s=ST.find(x=>x.id===noteStoreCtx); if(!s)return;
   const text=$("note_text").value.trim(); if(!text){toast("Type a note first","err");return;}
-  const notes=notesOf(s); notes.push({ts:nowIso(),text});
+  const note={ts:nowIso(),text};
   $("noteSave").disabled=true;
-  const {error}=await db.from("stores").update({notes}).eq("id",s.id);
+  const r=await mergeStoreSave(s.id, fresh=>{ const notes=notesOf(fresh); notes.push(note); return {notes}; });
   $("noteSave").disabled=false;
-  if(error){toast(friendly(error).t,"err");return;}
-  s.notes=notes; $("noteOverlay").classList.remove("show"); toast("Note added","ok");
+  if(r.error){toast(friendly(r.error).t,"err");return;}
+  if(r.gone){ $("noteOverlay").classList.remove("show"); showConflict("Store "+s.num); return; }
+  if(r.conflict){ toast("Busy — please try again","err"); return; }
+  Object.assign(s,r.row); $("noteOverlay").classList.remove("show"); toast("Note added","ok");
   if(curStore) renderStoreRight();
 }
 
@@ -1276,11 +1303,16 @@ function fillContactEditor(id,contacts){ const list=(contacts&&contacts.length)?
 function readContactEditor(id){ return [...$(id).querySelectorAll(".c-edit-row")].map(r=>({type:r.querySelector(".ctype").value,value:r.querySelector(".cval").value.trim()})).filter(c=>c.value); }
 
 function openFr(id){
-  const f=FR.find(x=>x.id===id); if(!f)return;
-  $("fr_id").value=f.id; $("fr_name").value=f.name||""; $("fr_territory").value=f.territory||"";
-  $("fr_closed").value=String(!!f.closed); $("fr_notes").value=f.notes||""; $("frSub").textContent=f.name||"";
-  fillContactEditor("fr_contacts", contactsOf(f));
-  $("frOverlay").classList.add("show");
+  const f=id!=null?FR.find(x=>x.id===id):null;
+  if(id!=null && !f) return;
+  $("frTitle").textContent=f?"Edit franchisee":"Add franchisee";
+  $("frSave").innerHTML=f?'<i data-lucide="save"></i>Save':'<i data-lucide="user-plus"></i>Add franchisee';
+  $("fr_id").value=f?f.id:""; $("fr_name").value=f?f.name||"":""; $("fr_territory").value=f?f.territory||"":(terrFilter||"");
+  $("fr_closed").value=String(!!(f&&f.closed)); $("fr_notes").value=f?f.notes||"":""; $("frSub").textContent=f?f.name||"":"New franchisee";
+  fillContactEditor("fr_contacts", f?contactsOf(f):[]);
+  showDup("fr_dup","fr_name","");
+  $("frOverlay").classList.add("show"); icons();
+  if(!f) setTimeout(()=>$("fr_name").focus(),60);
 }
 $("fr_addContact").onclick=()=>{ $("fr_contacts").insertAdjacentHTML("beforeend",contactEditorRow()); icons(); };
 async function saveFr(){
@@ -1290,14 +1322,40 @@ async function saveFr(){
     if(c.type==="email" && !isEmail(c.value)){ toast("Check the email address format","err"); return; }
     if(c.type==="cell" && !isCell(c.value)){ toast("Phone must look like (555) 123-4567","err"); return; }
   }
-  const rec={ name:$("fr_name").value.trim(), territory:$("fr_territory").value.trim(),
+  const rec={ name:$("fr_name").value.trim().replace(/\s+/g," "), territory:$("fr_territory").value.trim(),
     closed:$("fr_closed").value==="true", notes:$("fr_notes").value.trim(), contacts };
+  if(!rec.name){ toast("Enter the franchisee name","err"); $("fr_name").focus(); return; }
+  if(!checkFrDup()){ toast("That franchisee already exists","err"); return; }
   $("frSave").disabled=true;
-  const {error}=await db.from("franchisees").update(rec).eq("id",id);
+  if(id){
+    const loc=FR.find(x=>x.id===id);
+    const r=await guardedUpdate("franchisees",loc,rec);
+    $("frSave").disabled=false;
+    if(r.error){toast(friendly(r.error).t,"err");return;}
+    if(r.conflict){ showConflict('"'+loc.name+'"'); return; }
+    Object.assign(loc,r.row); reindex(); buildTerrFilter();
+    toast("Saved","ok"); $("frOverlay").classList.remove("show"); render(); if(selFr===id) selectFranchisee(id);
+    return;
+  }
+  // new franchisee: take the next free id from the database; retry if a teammate took it first
+  let row=null, lastErr=null;
+  for(let a=0;a<4 && !row;a++){
+    const mx=await db.from("franchisees").select("id").order("id",{ascending:false}).limit(1);
+    if(mx.error){ lastErr=mx.error; break; }
+    const newId=((mx.data&&mx.data[0]&&mx.data[0].id)||0)+1;
+    const {data,error}=await db.from("franchisees").insert({...rec,id:newId}).select();
+    if(!error){ row=data&&data[0]; break; }
+    lastErr=error;
+    const m=(error.message||"").toLowerCase();
+    if(!(error.code==="23505" && m.includes("pkey"))) break;
+  }
   $("frSave").disabled=false;
-  if(error){toast(friendly(error).t,"err");return;}
-  Object.assign(FR.find(x=>x.id===id),rec); reindex(); buildTerrFilter();
-  toast("Saved","ok"); $("frOverlay").classList.remove("show"); render(); if(selFr===id) selectFranchisee(id);
+  if(!row){ toast(friendly(lastErr).t,"err"); return; }
+  FR.push(row); reindex(); buildTerrFilter(); updCounts();
+  $("frOverlay").classList.remove("show");
+  tab="franchisees"; issuesOnly=false; frPage=1; selFr=row.id; $("search").value="@"+row.name;
+  render(); selectFranchisee(row.id);
+  toast("Franchisee added — use + on Stores to add their stores","ok");
 }
 
 function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete this issue: "'+(i?i.title:"")+'"?'; $("confirmOverlay").classList.add("show"); }
@@ -1336,7 +1394,9 @@ async function saveStaff(){
   const rec={ role:$("sf_role").value, name:$("sf_name").value.trim(), territory:$("sf_territory").value.trim(), contacts };
   if(!rec.name){toast("Enter a name","err");return;}
   $("sfSave").disabled=true; let error, saved;
-  if(id){ ({error}=await db.from("staff").update(rec).eq("id",+id)); saved=Object.assign(SF.find(x=>x.id===+id),rec); }
+  if(id){ const loc=SF.find(x=>x.id===+id); const r=await guardedUpdate("staff",loc,rec);
+    if(r.conflict){ $("sfSave").disabled=false; showConflict("This "+(loc.role||"staff")+" record"); return; }
+    error=r.error; if(r.row) saved=Object.assign(loc,r.row); }
   else { const newId=(SF.reduce((m,x)=>Math.max(m,x.id||0),0)||0)+1; rec.id=newId; ({error}=await db.from("staff").insert(rec)); saved=rec; }
   $("sfSave").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
@@ -1401,6 +1461,53 @@ function pageSet(which,val){
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 
+
+/* ===== Team-safe saving ===== */
+// Saves only if nobody changed the record since we loaded it. Returns {row} | {conflict} | {error}
+async function guardedUpdate(table, row, rec){
+  let q=db.from(table).update(rec).eq("id",row.id);
+  if(row.updated_at) q=q.eq("updated_at",row.updated_at);
+  const {data,error}=await q.select();
+  if(error) return {error};
+  if(!data||!data.length) return {conflict:true};
+  return {row:data[0]};
+}
+// Loads the latest store, applies the change, saves; retries if someone saved in between
+async function mergeStoreSave(id, mutate){
+  for(let a=0;a<4;a++){
+    const {data:fresh,error}=await db.from("stores").select("*").eq("id",id).maybeSingle();
+    if(error) return {error};
+    if(!fresh) return {gone:true};
+    const r=await guardedUpdate("stores",fresh,mutate(fresh));
+    if(r.error||r.row) return r;
+  }
+  return {conflict:true};
+}
+function showConflict(what){
+  $("conflictText").textContent=(what||"This record")+" was changed or removed by a teammate while you were working on it. Your change was NOT saved, so nothing was overwritten. Reload to get the latest version, then make your change again.";
+  $("conflictOverlay").classList.add("show"); icons();
+}
+async function reloadAfterConflict(){
+  $("conflictOverlay").classList.remove("show");
+  ["frOverlay","updOverlay","grpOverlay","sfOverlay","sdOverlay"].forEach(o=>$(o).classList.remove("show"));
+  const cs=curStore; swEditing={}; platMenu=null;
+  await loadAll();
+  if(cs){ if(ST.find(x=>x.id===cs)){ renderStoreLeft(); renderStoreRight(); } else { closeStore(); toast("That store was removed by a teammate","err"); } }
+  toast("Loaded the latest data","ok");
+}
+function normName(n){ return (n||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function findDupFr(name, exceptId){ const nn=normName(name); if(!nn) return null; return FR.find(f=>normName(f.name)===nn && f.id!==exceptId)||null; }
+function showDup(boxId, inputId, msg){
+  const b=$(boxId); if(!b) return;
+  b.querySelector("span").textContent=msg||""; b.classList.toggle("show",!!msg);
+  $(inputId).classList.toggle("bad",!!msg); icons();
+}
+function checkFrDup(){ const id=$("fr_id").value?+$("fr_id").value:null; const d=findDupFr($("fr_name").value,id);
+  showDup("fr_dup","fr_name", d?'Already exists: "'+d.name+'" ('+(storesByFr[d.id]||[]).length+' stores). Use the existing franchisee.':""); return !d; }
+function checkStoreDup(){ const n=$("as_num").value.trim().replace(/^#/,""); const s=n&&storeByNum[n];
+  const o=s?FR.find(x=>x.id===s.franchisee_id):null;
+  showDup("as_dup","as_num", s?"Store "+n+" already exists"+(o?' under "'+o.name+'"':"")+".":""); return !s; }
+
 /* ===== Delete franchisee (password) ===== */
 function askDeleteFr(id){
   const f=FR.find(x=>x.id===id); if(!f) return;
@@ -1428,13 +1535,14 @@ function openAddStore(frId){
   const f=FR.find(x=>x.id===frId); if(!f) return; addStFr=frId;
   $("as_sub").textContent=f.name||"";
   ["as_num","as_addr","as_city","as_state","as_zip","as_phone"].forEach(k=>$(k).value="");
+  showDup("as_dup","as_num","");
   $("as_terr").value=[...terrSet(f.territory)][0]||"";
   $("addStOverlay").classList.add("show"); icons(); setTimeout(()=>$("as_num").focus(),60);
 }
 async function saveAddStore(){
   const num=$("as_num").value.trim().replace(/^#/,"");
   if(!num){ toast("Enter a store number","err"); return; }
-  if(storeByNum[num]){ const o=FR.find(x=>x.id===storeByNum[num].franchisee_id); toast("Store "+num+" already exists"+(o?" ("+o.name+")":""),"err"); return; }
+  if(!checkStoreDup()){ toast("Store "+num+" already exists","err"); $("as_num").focus(); return; }
   const phone=$("as_phone").value.trim();
   if(phone && !isCell(phone)){ toast("Phone must look like (555) 123-4567","err"); return; }
   const rec={ franchisee_id:addStFr, num, address:$("as_addr").value.trim(), city:$("as_city").value.trim(),
@@ -1611,10 +1719,15 @@ async function saveGroupUpdate(){
   if(!stBtn && !action){ toast("Pick a status or write the action taken","err"); return; }
   const rec={ updated_at:nowIso() }; if(stBtn) rec.status=stBtn.dataset.v; if(action) rec.action_taken=action;
   $("grpSave").disabled=true;
-  const {error}=await db.from("issues").update(rec).in("id",ids);
+  const chk=await db.from("issues").select("id,updated_at").in("id",ids);
+  if(chk.error){ $("grpSave").disabled=false; toast(friendly(chk.error).t,"err"); return; }
+  const now={}; (chk.data||[]).forEach(x=>now[x.id]=x.updated_at);
+  const changed=ids.some(id=>{ const loc=IS.find(i=>i.id===id); return !(id in now) || (loc&&loc.updated_at&&now[id]&&new Date(now[id]).getTime()!==new Date(loc.updated_at).getTime()); });
+  if(changed){ $("grpSave").disabled=false; showConflict("This multi-store issue"); return; }
+  const {data,error}=await db.from("issues").update(rec).in("id",ids).select();
   $("grpSave").disabled=false;
   if(error){ toast(friendly(error).t,"err"); return; }
-  IS.forEach(i=>{ if(ids.includes(i.id)) Object.assign(i,rec); });
+  (data||[]).forEach(row=>{ const loc=IS.find(i=>i.id===row.id); if(loc) Object.assign(loc,row); });
   updCounts(); $("grpOverlay").classList.remove("show");
   toast(ids.length+" store"+(ids.length>1?"s":"")+" updated","ok");
   if(curStore) renderStoreRight(); render();
@@ -1640,6 +1753,10 @@ $("multiAdd").onclick=openMultiIssue;
 $("asX").onclick=$("asCancel").onclick=()=>$("addStOverlay").classList.remove("show");
 $("addStOverlay").onclick=e=>{if(e.target===$("addStOverlay"))$("addStOverlay").classList.remove("show");};
 $("asSave").onclick=saveAddStore;
+$("as_num").oninput=checkStoreDup;
+$("fr_name").oninput=checkFrDup;
+$("conflictReload").onclick=reloadAfterConflict;
+$("conflictClose").onclick=()=>$("conflictOverlay").classList.remove("show");
 $("as_phone").oninput=e=>{ e.target.value=formatCellStr(e.target.value); };
 $("linksBtn").onclick=openLinks;
 $("lkX").onclick=()=>{ $("linksOverlay").classList.remove("show"); lkEditing=false; };
