@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
   :root{
@@ -92,6 +93,115 @@
   .btn.outline.danger{color:var(--danger);border-color:#e3a39b}
   .btn.outline.danger:hover{background:var(--danger-soft)}
   .panel .ph .ph-act{margin-left:auto}
+  .iconbtn.round{border-radius:999px}
+  .ic-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:2px 0 2px}
+  .ic-meta .chips{gap:6px}
+  .ic-div{width:1px;height:18px;background:var(--line);flex:none}
+  .fr-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .lc.collapsible .lch{cursor:pointer;user-select:none}
+  .lc.collapsible .lch:hover{background:#f6faf7}
+  .lc.collapsible.closed .lch{border-bottom:none}
+  .lc.collapsible.closed .lcb{display:none}
+  .lc .tog [data-lucide]{transition:transform .15s}
+  .lc.collapsible:not(.closed) .tog [data-lucide]{transform:rotate(180deg)}
+  .lch .peek{font-weight:500;color:var(--ink-soft);font-size:12px;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .fr-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1.5px solid var(--green);border-radius:999px;background:#fbfaf5;color:var(--green-dark);font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font)}
+  .fr-btn:hover{background:var(--green-soft)}
+  .fr-btn [data-lucide]{width:13px;height:13px}
+  .ckrow{flex-wrap:nowrap;align-items:center}
+  .ck-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .ck-l1{display:flex;align-items:center;gap:10px;min-width:0}
+  .ck-l1 .n{min-width:0!important;margin-right:0!important}
+  .ck-addr{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ck-st .badge{font-size:11px;padding:1px 8px}
+  .field label.ckrow{display:flex;align-items:center;margin-bottom:0;font-size:13px;font-weight:400;color:var(--ink)}
+  .field label.ckrow.all{font-weight:700}
+  .field label.ckrow.all span{flex:1}
+  .ckrow input.grp-ck,.ckrow input#grp_all{width:15px!important;height:15px!important;margin:0 4px 0 14px!important;flex:none;order:9;cursor:pointer}
+  .ckrow .n{order:1;flex:none;min-width:56px;margin-right:6px}
+  .ckrow .fr-link{display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:2px 0;font-family:var(--font);font-size:13px;color:var(--green-dark);cursor:pointer;text-align:left;justify-content:flex-start}
+  .ckrow .fr-link .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .ckrow .fr-link [data-lucide]{width:14px;height:14px;flex:none;opacity:.8}
+  .ckrow .fr-link:hover .nm{text-decoration:underline}
+  .ckrow .fr-link:hover [data-lucide]{opacity:1}
+  .ckrow .o{order:2;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ckrow .badge{order:3;flex:none}
+  .ckrow input.grp-ck{order:4;margin:0 0 0 8px}
+  .ckrow .fi{order:5;flex:none;margin-left:8px}
+  .ckrow.all span{order:1}
+  .ckrow.all input{order:4}
+  .sw-titlerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .sw-hc{display:flex;flex-wrap:wrap;gap:6px}
+  .hc-pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 9px;border:1px solid var(--line);border-radius:999px;background:#fbfaf5;font-size:12.5px;color:var(--ink);max-width:280px}
+  .hc-pill [data-lucide]{width:13px;height:13px;color:var(--green);flex:none}
+  .hc-pill a{color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hc-pill a:hover{color:var(--green-dark);text-decoration:underline}
+  .hc-pill .hc-copy{width:22px;height:22px;border:none;background:none;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);flex:none}
+  .hc-pill .hc-copy:hover{background:var(--green-soft);color:var(--green-dark)}
+  .hc-pill .hc-copy [data-lucide]{color:inherit;width:12px;height:12px}
+  .hc-none{font-size:12px;color:var(--ink-soft);font-style:italic}
+  .st-cell{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .is-table{table-layout:auto}
+  .is-table th.c-status,.is-table td.c-status{width:150px;white-space:nowrap}
+  .is-table th.c-upd,.is-table td.c-upd{width:84px;text-align:center}
+  .is-table th.c-store,.is-table td.c-store{width:110px}
+  .is-table th.c-logged,.is-table td.c-logged{width:140px;white-space:nowrap}
+  .is-table th.c-go,.is-table td.c-go{width:32px;text-align:right}
+  .is-table td.c-issue{min-width:220px}
+  .upd-pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+  .upd-pill:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-soft)}
+  .upd-pill [data-lucide]{width:14px;height:14px}
+  .fnum{width:58px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--font);font-size:13px;color:var(--ink)}
+  .fr-cline{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .fr-cline:last-child{border-bottom:none}
+  .fr-cline .ci{width:26px;height:26px;border-radius:7px;background:var(--green-soft);color:var(--green-dark);display:grid;place-items:center;flex:none}
+  .fr-cline .ci [data-lucide]{width:13px;height:13px}
+  .fr-cline .cv{flex:1;min-width:0;word-break:break-all;font-size:13px}
+  .fr-cline .cv a{color:var(--green-dark);text-decoration:none}
+  .fr-cline .cv a:hover{text-decoration:underline}
+  .store-line.hit{background:var(--yellow-soft);border-radius:8px;margin:0 -8px 4px;padding:10px 8px;box-shadow:inset 3px 0 0 var(--yellow)}
+  .hit-tag{font-size:10.5px;font-weight:700;background:var(--yellow);color:var(--green-dark);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+  .bk-steps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  @media(max-width:620px){.bk-steps{grid-template-columns:1fr}}
+  .bk-step{border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:#f6faf7}
+  .bk-step h4{margin:0 0 5px;font-size:13px;display:flex;align-items:center;gap:7px}
+  .bk-step h4 .n{width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;display:grid;place-items:center}
+  .bk-step p{margin:0 0 10px;font-size:12.5px;color:var(--ink-soft)}
+  .bk-cols{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+  .bk-cols span{font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink-soft)}
+  .bk-cols span.req{border-color:var(--green);color:var(--green-dark);font-weight:700}
+  .bk-sum{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .bk-sum .s{border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-size:12px;color:var(--ink-soft);background:var(--surface)}
+  .bk-sum .s b{display:block;font-size:17px;color:var(--ink)}
+  .bk-sum .s.ok b{color:var(--ok)} .bk-sum .s.bad b{color:var(--danger)}
+  .bk-table{border:1px solid var(--line);border-radius:10px;max-height:300px;overflow:auto}
+  .bk-table table{font-size:12.5px}
+  .bk-table thead th{position:sticky;top:0;background:var(--surface);z-index:1}
+  .bk-table td,.bk-table th{padding:7px 10px}
+  .bk-ok{color:var(--ok);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .bk-skip{color:var(--danger);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .bk-ok [data-lucide],.bk-skip [data-lucide]{width:14px;height:14px}
+  .hbtn{position:relative}
+  .hbtn .cnt{position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;border-radius:999px;background:var(--green);color:#fff;font-size:9.5px;font-weight:700;display:grid;place-items:center;padding:0 3px;border:1.5px solid #fff}
+  .h-issue{border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:#f6faf7;margin-bottom:16px}
+  .h-issue .ttl{font-size:14.5px;font-weight:600;margin:6px 0 4px}
+  .h-issue .meta{font-size:12px;color:var(--ink-soft)}
+  .tl{position:relative;padding-left:4px}
+  .tl-item{position:relative;display:flex;gap:12px;padding-bottom:16px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-item:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line)}
+  .tl-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:12px;font-weight:700;color:#fff}
+  .tl-body{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+  .tl-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .tl-head .what{font-weight:600;font-size:13px}
+  .tl-head .arrow{color:var(--ink-soft);width:14px;height:14px}
+  .tl-time{margin-left:auto;font-size:11.5px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .tl-time [data-lucide]{width:12px;height:12px}
+  .tl-act{margin-top:7px;font-size:13px;white-space:pre-wrap;background:var(--green-soft);color:var(--green-dark);border-radius:7px;padding:7px 9px}
+  .tl-act.none{background:none;color:var(--ink-soft);padding:0;font-style:italic}
+  .tl-stores{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px}
+  .tl-stores span{font-size:11px;background:var(--idle-soft);color:var(--ink-soft);border-radius:5px;padding:1px 6px;font-weight:600}
+  .tl-legacy{font-size:11.5px;color:var(--ink-soft);margin-top:5px}
   .dupwarn{display:none;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;color:var(--danger);background:var(--danger-soft);border-radius:7px;padding:6px 9px}
   .dupwarn.show{display:flex}
   .dupwarn [data-lucide]{width:14px;height:14px;flex:none}
@@ -131,7 +241,11 @@
   .list-head .lh-title b{color:var(--green-dark)}
   .iconbtn.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
   .iconbtn.on-alt{background:var(--idle-soft);border-color:var(--idle);color:var(--idle)}
-  .pager{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-top:1px solid var(--line)}
+  .pager{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 12px;border-top:1px solid var(--line)}
+  .pager .pg-nav{display:flex;align-items:center;gap:6px}
+  .pager .pg-size{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-soft)}
+  .pager .pg-size select{height:30px;border:1px solid var(--line);border-radius:7px;padding:0 6px;font-family:var(--font);font-size:12.5px;color:var(--ink);background:var(--surface);cursor:pointer}
+  .pager .pg-range{font-size:12px;color:var(--ink-soft);white-space:nowrap}
   .pico{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);border-radius:7px;color:var(--ink-soft);cursor:pointer}
   .pico:hover{background:#e9efe9;color:var(--ink)}
   .pico:disabled{opacity:.4;cursor:default}
@@ -165,7 +279,7 @@
   .warnbox{display:none;margin-top:12px;background:var(--warn-soft);color:#8a5600;border-radius:9px;padding:10px 12px;font-size:13px;gap:8px;align-items:flex-start}
   .warnbox.show{display:flex}
   .warnbox [data-lucide]{width:17px;height:17px;flex:none;margin-top:1px}
-  .cklist{border:1px solid var(--line);border-radius:9px;max-height:230px;overflow:auto}
+  .cklist{border:1px solid var(--line);border-radius:9px;max-height:320px;overflow:auto}
   .ckrow{display:flex;align-items:center;gap:10px;padding:8px 11px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
   .ckrow:last-child{border-bottom:none}
   .ckrow:hover{background:#f6faf7}
@@ -432,6 +546,16 @@
       <div class="field"><label>Database key (publishable or anon)</label><input id="c_key" placeholder="sb_publishable_…" spellcheck="false"></div>
       <div class="help">Saved on this computer so you stay connected. Share the file with your team and it connects automatically.</div>
       <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:15px">
+        <label style="display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:7px">Auto-refresh when idle</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <i data-lucide="timer" style="color:var(--green)"></i>
+          <span style="font-size:13.5px">Refresh after</span>
+          <input type="number" id="idleMin" min="0" max="120" step="1" class="fnum" style="width:70px">
+          <span style="font-size:13.5px">minute(s) of no activity</span>
+        </div>
+        <div class="help">Set to 0 to turn it off. It waits if you have a form open, so nothing you're typing is lost. <span id="lastRefresh"></span></div>
+      </div>
+      <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:15px">
         <label style="display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:7px">Backup</label>
         <button class="btn ghost" id="backupBtn"><i data-lucide="download"></i>Save database backup (.json)</button>
         <div class="help">Downloads every franchisee, store, FBC/OM and issue as one file. Do this before any database change so nothing is lost.</div>
@@ -482,7 +606,7 @@
 <!-- STORE WINDOW (full screen, no outside-click close) -->
 <div class="overlay blur" id="storeOverlay">
   <div class="modal">
-    <div class="head"><i data-lucide="store"></i><div><h2 id="sw_title">Store</h2><div class="subt" id="sw_sub"></div></div><button class="x" id="storeX">&times;</button></div>
+    <div class="head"><i data-lucide="store"></i><div style="flex:1;min-width:0"><h2 id="sw_title">Store</h2><div class="subt" id="sw_sub"></div></div><button class="x" id="storeX">&times;</button></div>
     <div class="sw-cols">
       <div class="sw-left" id="sw_left"></div>
       <div class="sw-right" id="sw_right"></div>
@@ -574,6 +698,50 @@
     <div class="head"><i data-lucide="lock"></i><h2>Enter password</h2><button class="x" id="impPwX">&times;</button></div>
     <div class="body"><div class="field"><label id="imp_pw_lbl">Password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
     <footer><button class="btn ghost" id="impPwCancel">Cancel</button><button class="btn" id="impPwOk"><i data-lucide="unlock"></i>Unlock</button></footer>
+  </div>
+</div>
+
+<!-- Franchisee info popup -->
+<div class="overlay top" id="frInfoOverlay" style="z-index:93">
+  <div class="modal small">
+    <div class="head"><i data-lucide="user-round"></i><div><h2 id="fi_name">Franchisee</h2><div class="subt" id="fi_sub"></div></div><button class="x" id="fiX">&times;</button></div>
+    <div class="body" id="fi_body"></div>
+    <footer><button class="btn ghost" id="fiClose">Close</button><button class="btn outline round" id="fiOpen"><i data-lucide="external-link"></i>Open franchisee page</button></footer>
+  </div>
+</div>
+
+<!-- Bulk import popup -->
+<div class="overlay top" id="bulkOverlay">
+  <div class="modal" style="max-width:860px">
+    <div class="head"><i data-lucide="file-spreadsheet"></i><div><h2>Bulk add franchisees &amp; stores</h2><div class="subt">Upload a spreadsheet using the template</div></div><button class="x" id="bulkX">&times;</button></div>
+    <div class="body">
+      <div class="bk-steps">
+        <div class="bk-step">
+          <h4><span class="n">1</span>Download the template</h4>
+          <p>One row = one store. Leave Store Number blank to add a franchisee only. Don't rename or move the columns.</p>
+          <div class="bk-cols" id="bk_cols"></div>
+          <button class="btn sm outline round" id="bkTemplate"><i data-lucide="download"></i>Download template</button>
+        </div>
+        <div class="bk-step">
+          <h4><span class="n">2</span>Upload your filled file</h4>
+          <p>Accepts .xlsx or .csv. You'll see a preview first — nothing is saved until you click Import.</p>
+          <button class="btn sm round" id="bkChoose"><i data-lucide="upload"></i>Choose file</button>
+          <input type="file" id="bkFile" accept=".xlsx,.xls,.csv" style="display:none">
+          <div class="help" id="bk_fname"></div>
+        </div>
+      </div>
+      <div id="bk_preview"></div>
+    </div>
+    <footer><button class="btn ghost" id="bulkCancel">Cancel</button><button class="btn" id="bulkImport" disabled><i data-lucide="database"></i><span id="bk_btnlbl">Import</span></button></footer>
+  </div>
+</div>
+
+<!-- Issue history popup -->
+<div class="overlay top" id="histOverlay">
+  <div class="modal" style="max-width:640px">
+    <div class="head"><i data-lucide="history"></i><div><h2 id="hist_title">Issue updates</h2><div class="subt" id="hist_sub"></div></div><button class="x" id="histX">&times;</button></div>
+    <div class="body" id="hist_body"></div>
+    <footer><button class="btn ghost" id="histClose">Close</button><button class="btn outline round" id="histUpdate"><i data-lucide="refresh-cw"></i>Update status</button></footer>
   </div>
 </div>
 
@@ -670,9 +838,12 @@ const IMPORT_PW="Sup3rUs3r!";
 
 let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
 let frPage=1, stPage=1, frStorePage=1;
-const PAGE_FR=25, PAGE_ST=50, PAGE_FRST=12;
+const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50]};
+const PAGE_DEF={fr:25, frst:12, st:50};
+function loadPageSize(w){ let v=PAGE_DEF[w]; try{ const x=+localStorage.getItem("ft2_ps_"+w); if(PAGE_OPTS[w].includes(x)) v=x; }catch(e){} return v; }
+let PAGE_FR=loadPageSize("fr"), PAGE_ST=loadPageSize("st"), PAGE_FRST=loadPageSize("frst");
 let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
-let isStatus="", isPeriod="all", isDate="", isSort="new";
+let isStatus="", isPeriod="all", isDate="", isSort="new", isDays=7, isYear=new Date().getFullYear(), isFrom="", isTo="";
 let mStores=[], grpId=null;
 let FR=[], ST=[], SF=[], IS=[];
 let storesByFr={}, storeByNum={};
@@ -708,7 +879,7 @@ function friendly(err){
     return {t:"That record already exists",b:"Refresh and try again."};
   }
   if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
-  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run the latest migration files (migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",a:"settings"};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run the latest migration files (migrate-issue-history.sql, migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",a:"settings"};
   if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
   if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
   if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
@@ -775,14 +946,43 @@ function buildTerrFilter(){
   $("terrFilter").innerHTML='<option value="">All territories</option>'+opts.map(t=>'<option value="'+esc(t)+'">Territory '+esc(t)+'</option>').join("");
   $("terrFilter").value=terrFilter;
 }
-async function loadAll(){
-  if(!db){viewDisconnected();return;}
-  viewLoading("Loading data…");
-  try{ [FR,ST,SF,IS]=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]); }
-  catch(err){ setStatus("err","Connection issue",friendly(err).t); viewError(err); return; }
+async function loadAll(silent){
+  if(!db){ if(!silent) viewDisconnected(); return; }
+  const y=window.scrollY, listEl=$("frList"), ly=listEl?listEl.scrollTop:0;
+  if(!silent) viewLoading("Loading data…");
+  let data;
+  try{ data=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]); }
+  catch(err){ setStatus("err","Connection issue",friendly(err).t); if(!silent) viewError(err); return; }
+  [FR,ST,SF,IS]=data;
   setStatus("ok","Connected");
   reindex(); buildTerrFilter(); updCounts(); render();
+  lastRefreshAt=new Date(); showLastRefresh();
+  if(silent){
+    window.scrollTo(0,y); const l2=$("frList"); if(l2) l2.scrollTop=ly;
+    if(curStore){ if(ST.find(x=>x.id===curStore)){ renderStoreLeft(); renderStoreRight(); } else closeStore(); }
+  }
 }
+/* ===== Idle auto-refresh ===== */
+let lastActive=Date.now(), lastRefreshAt=null;
+function idleMinutes(){ let v=3; try{ const s=localStorage.getItem("ft2_idle"); if(s!==null&&s!=="") v=+s; }catch(e){} return isNaN(v)?3:Math.max(0,Math.min(120,Math.round(v))); }
+function setIdleMinutes(v){ v=Math.max(0,Math.min(120,Math.round(+v||0))); try{ localStorage.setItem("ft2_idle",String(v)); }catch(e){} $("idleMin").value=v; lastActive=Date.now();
+  toast(v?"Auto-refresh after "+v+" min idle":"Auto-refresh turned off","ok"); }
+function showLastRefresh(){ const el=$("lastRefresh"); if(el&&lastRefreshAt) el.textContent="Last refreshed "+lastRefreshAt.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"."; }
+function busyEditing(){
+  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay"];
+  if(forms.some(id=>$(id)&&$(id).classList.contains("show"))) return true;
+  if(lkEditing && $("linksOverlay").classList.contains("show")) return true;
+  if(curStore && (Object.values(swEditing||{}).some(Boolean) || platMenu)) return true;
+  return false;
+}
+["mousemove","mousedown","keydown","scroll","touchstart","wheel"].forEach(ev=>window.addEventListener(ev,()=>{ lastActive=Date.now(); },{passive:true,capture:true}));
+setInterval(()=>{
+  const m=idleMinutes(); if(!m||!db) return;
+  if(Date.now()-lastActive < m*60000) return;
+  if(busyEditing()) return;
+  lastActive=Date.now();
+  loadAll(true);
+}, 15000);
 function updCounts(){
   $("cnt-fr").textContent=FR.length; $("cnt-st").textContent=ST.length;
   $("cnt-sf").textContent=SF.length; $("cnt-is").textContent=IS.filter(isOpen).length;
@@ -886,9 +1086,10 @@ function renderFranchisees(){
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
+    +'<button class="iconbtn" title="Bulk add from spreadsheet" aria-label="Bulk add from spreadsheet" onclick="openBulk()"><i data-lucide="file-spreadsheet"></i></button>'
     +'<button class="iconbtn" title="Add franchisee" aria-label="Add franchisee" onclick="openFr(null)"><i data-lucide="user-plus"></i></button>'
     +'<button class="iconbtn'+(issuesOnly?' on':'')+'" title="Only franchisees with an issue" onclick="toggleIssues()"><i data-lucide="triangle-alert"></i></button></div>';
-  setView('<div class="split"><div class="card fr-panel">'+head+'<div class="fr-list" id="frList">'+items+'</div>'+pagerHtml('fr',frPage,frTotal)+'</div><div id="frDetailPane">'+detail+'</div></div>');
+  setView('<div class="split"><div class="card fr-panel">'+head+'<div class="fr-list" id="frList">'+items+'</div>'+pagerHtml('fr',frPage,frTotal,list.length)+'</div><div id="frDetailPane">'+detail+'</div></div>');
 }
 function selectFranchisee(id){
   selFr=id; frStorePage=1;
@@ -899,7 +1100,9 @@ function detailHtml(id){
   const f=FR.find(x=>x.id===id); if(!f) return '';
   let stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
   const _sq=parseQuery();
-  if(_sq.mode==="store" && _sq.q) stores=stores.filter(s=>(s.num||"").toLowerCase().includes(_sq.q));
+  const hitQ=(_sq.mode==="store" && _sq.q)?_sq.q:null;
+  const isHit=s=>!!hitQ && (s.num||"").toLowerCase().includes(hitQ);
+  if(hitQ) stores.sort((a,b)=>(isHit(b)-isHit(a)) || (a.num||"").localeCompare(b.num||""));
   const contacts=contactsOf(f);
   const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const {om,fbc}=staffFor(f.territory);
@@ -912,11 +1115,11 @@ function detailHtml(id){
   const stTotal=Math.max(1,Math.ceil(stores.length/PAGE_FRST));
   if(frStorePage>stTotal)frStorePage=stTotal; if(frStorePage<1)frStorePage=1;
   const pageStores=stores.slice((frStorePage-1)*PAGE_FRST, frStorePage*PAGE_FRST);
-  const storeHtml=stores.length?pageStores.map(s=>'<div class="store-line" onclick="openStore('+s.id+')"><div class="idot-col">'+openDot(storeOpenIssues(s.num))+'</div><span class="num">'+esc(s.num)+'</span><div class="meta">'
-      +'<div class="a">'+esc(s.address||"")+'</div><div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
+  const storeHtml=stores.length?pageStores.map(s=>'<div class="store-line'+(isHit(s)?' hit':'')+'" onclick="openStore('+s.id+')"><div class="idot-col">'+openDot(storeOpenIssues(s.num))+'</div><span class="num">'+esc(s.num)+'</span><div class="meta">'
+      +'<div class="a">'+esc(s.address||"")+(isHit(s)?'<span class="hit-tag">Searched</span>':'')+'</div><div class="b">'+[esc(s.city),esc(s.state)].filter(Boolean).join(", ")+(s.phone?' · '+esc(s.phone):'')+'</div></div>'
       +platChips(platOf(s))
       +'<button class="iconbtn mini rm" title="Remove store from franchisee" aria-label="Remove store" onclick="event.stopPropagation();askRemoveStore('+s.id+')"><i data-lucide="trash-2"></i></button>'
-      +'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal):'<p class="muted">No stores.</p>';
+      +'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal,stores.length):'<p class="muted">No stores.</p>';
   const issueHtml=issues.length?issues.map(i=>{ const s=storeByNum[String(i.store_num)];
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
     +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
@@ -962,7 +1165,7 @@ function renderStores(){
     +'<td class="hide-sm muted">'+esc(s.phone||"")+'</td>'
     +'<td>'+platChips(platOf(s))+'</td>'
     +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>').join("");
-  setView('<div class="card"><table><thead><tr><th>Store #</th><th>Franchisee</th><th class="hide-sm">Address</th><th class="hide-sm">Phone</th><th>Platforms</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'+pagerHtml('st',stPage,stTotal)+'</div>');
+  setView('<div class="card"><table><thead><tr><th>Store #</th><th>Franchisee</th><th class="hide-sm">Address</th><th class="hide-sm">Phone</th><th>Platforms</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'+pagerHtml('st',stPage,stTotal,list.length)+'</div>');
 }
 
 /* FBC / OM */
@@ -983,20 +1186,27 @@ function renderStaff(){
 }
 
 /* Issues log */
+function localDate(str){ return str?new Date(str+"T00:00:00"):null; }
 function issueInPeriod(i){
   if(isPeriod==="all") return true;
   const d=new Date(i.created_at); if(isNaN(d)) return false;
   const now=new Date();
   const dayStart=x=>{const t=new Date(x); t.setHours(0,0,0,0); return t;};
-  let from,to;
-  const base=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month")?(isDate?new Date(isDate+"T00:00:00"):null):now;
-  if(!base) return true;
+  let from=null,to=null;
+  const picked=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month");
+  const base=picked?localDate(isDate):now;
+  if(picked && !base) return true;
   if(isPeriod==="today"||isPeriod==="day"){ from=dayStart(base); to=new Date(from); to.setDate(to.getDate()+1); }
   else if(isPeriod==="thisweek"||isPeriod==="week"){ from=dayStart(base); from.setDate(from.getDate()-from.getDay()); to=new Date(from); to.setDate(to.getDate()+7); }
   else if(isPeriod==="thismonth"||isPeriod==="month"){ from=new Date(base.getFullYear(),base.getMonth(),1); to=new Date(base.getFullYear(),base.getMonth()+1,1); }
+  else if(isPeriod==="thisyear"){ from=new Date(now.getFullYear(),0,1); to=new Date(now.getFullYear()+1,0,1); }
+  else if(isPeriod==="year"){ const y=+isYear||now.getFullYear(); from=new Date(y,0,1); to=new Date(y+1,0,1); }
+  else if(isPeriod==="lastdays"){ const n=Math.max(1,+isDays||1); to=dayStart(now); to.setDate(to.getDate()+1); from=new Date(to); from.setDate(from.getDate()-n); }
+  else if(isPeriod==="range"){ from=localDate(isFrom); const t=localDate(isTo); if(t){ to=new Date(t); to.setDate(to.getDate()+1); } }
   else return true;
-  return d>=from && d<to;
+  return (!from||d>=from) && (!to||d<to);
 }
+function issueYears(){ const ys=new Set([new Date().getFullYear()]); IS.forEach(i=>{ const d=new Date(i.created_at); if(!isNaN(d)) ys.add(d.getFullYear()); }); return [...ys].sort((a,b)=>b-a); }
 function groupStatusBadge(members){
   const counts={}; members.forEach(m=>{const s=normIssueStatus(m.status); counts[s]=(counts[s]||0)+1;});
   const keys=Object.keys(counts);
@@ -1028,16 +1238,21 @@ function renderIssues(){
 
   const sChip=(v,label,color)=>'<button class="fchip'+(isStatus===v?' on':'')+'" onclick="setIsStatus(\''+v+'\')">'+(color?'<span class="d" style="background:'+color+'"></span>':'')+label+'</button>';
   const needDate=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month");
+  let extra='';
+  if(needDate) extra='<input type="date" class="fdate" value="'+esc(isDate)+'" title="'+(isPeriod==="week"?"Any day in the week":isPeriod==="month"?"Any day in the month":"Day")+'" onchange="setIsDate(this.value)">';
+  else if(isPeriod==="year") extra='<select class="fsel" onchange="isYear=+this.value;render()">'+issueYears().map(y=>'<option'+(+isYear===y?' selected':'')+'>'+y+'</option>').join("")+'</select>';
+  else if(isPeriod==="lastdays") extra='<span class="lbl" style="font-weight:500">Last</span><input type="number" min="1" max="3650" class="fnum" value="'+esc(isDays)+'" onchange="isDays=Math.max(1,+this.value||1);render()"><span class="lbl" style="font-weight:500">days</span>';
+  else if(isPeriod==="range") extra='<input type="date" class="fdate" value="'+esc(isFrom)+'" title="From" onchange="isFrom=this.value;render()"><span class="lbl" style="font-weight:500">to</span><input type="date" class="fdate" value="'+esc(isTo)+'" title="To" onchange="isTo=this.value;render()">';
   const bar='<div class="ifbar">'
     +'<div class="grp"><span class="lbl"><i data-lucide="filter"></i>Status</span>'
       +sChip("","All")+sChip("Pending","Pending","var(--danger)")+sChip("Work in Progress","Work in Progress","var(--warn)")+sChip("Resolved","Resolved","var(--ok)")+'</div>'
     +'<span class="sep"></span>'
     +'<div class="grp"><span class="lbl"><i data-lucide="calendar"></i>Date logged</span>'
       +'<select class="fsel" onchange="setIsPeriod(this.value)">'
-        +[["all","All dates"],["today","Today"],["thisweek","This week"],["thismonth","This month"],["day","Pick a day…"],["week","Pick a week…"],["month","Pick a month…"]]
+        +[["all","All dates"],["today","Today"],["thisweek","This week"],["thismonth","This month"],["thisyear","This year"],["lastdays","Last N days…"],["day","Pick a day…"],["week","Pick a week…"],["month","Pick a month…"],["year","Pick a year…"],["range","Date range…"]]
           .map(([v,l])=>'<option value="'+v+'"'+(isPeriod===v?' selected':'')+'>'+l+'</option>').join("")
       +'</select>'
-      +(needDate?'<input type="date" class="fdate" value="'+esc(isDate)+'" title="'+(isPeriod==="week"?"Any day in the week":isPeriod==="month"?"Any day in the month":"Day")+'" onchange="setIsDate(this.value)">':'')
+      +extra
     +'</div>'
     +'<span class="sep"></span>'
     +'<div class="grp"><span class="lbl"><i data-lucide="arrow-down-up"></i>Sort</span>'
@@ -1052,32 +1267,34 @@ function renderIssues(){
     if(e.kind==="single"){
       const i=e.items[0]; const s=storeByNum[String(i.store_num)]; const pls=issuePlatforms(i);
       return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
-        +'<td>'+statusBadge(i.status)+'</td>'
-        +'<td>'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
-        +'<td class="hide-sm store">'+(i.store_num?esc(i.store_num):'—')+'</td>'
+        +'<td class="c-status">'+statusBadge(i.status)+'</td>'
+        +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
+        +'<td class="c-issue">'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+        +'<td class="hide-sm store c-store">'+(i.store_num?esc(i.store_num):'—')+'</td>'
         +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
-        +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
-        +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+        +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
+        +'<td class="c-go"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
     }
     const m=e.items, f=m[0], pls=issuePlatforms(f);
     const nums=m.map(x=>x.store_num); const shown=nums.slice(0,4).join(", ")+(nums.length>4?' +'+(nums.length-4)+' more':'');
     const owners=[...new Set(m.map(x=>frName[x.franchisee_id]).filter(Boolean))];
     const lastUpd=m.map(x=>x.updated_at||x.created_at).sort().pop();
     return '<tr class="click" onclick="openGroupUpdate(\''+e.gid+'\')">'
-      +'<td>'+groupStatusBadge(m)+'</td>'
-      +'<td><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+esc(f.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
-      +'<td class="hide-sm store" style="font-size:12.5px">'+esc(shown)+'</td>'
+      +'<td class="c-status">'+groupStatusBadge(m)+'</td>'
+      +'<td class="c-upd">'+updPill('openHistoryGroup(\''+e.gid+'\')', Math.max(...m.map(x=>historyEntries(x).length)))+'</td>'
+      +'<td class="c-issue"><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+esc(f.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+      +'<td class="hide-sm store c-store" style="font-size:12.5px">'+esc(shown)+'</td>'
       +'<td class="hide-sm">'+esc(owners.length>1?owners.length+' franchisees':(owners[0]||""))+'</td>'
-      +'<td class="hide-sm muted" style="font-size:12px">'+fmtTs(f.created_at)+(lastUpd&&lastUpd!==f.created_at?'<br>upd. '+fmtTs(lastUpd):'')+'</td>'
-      +'<td style="text-align:right"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+      +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(f.created_at)+(lastUpd&&lastUpd!==f.created_at?'<br>upd. '+fmtTs(lastUpd):'')+'</td>'
+      +'<td class="c-go"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
   }).join("");
-  setView(bar+'<div class="card"><table><thead><tr><th>Status</th><th>Issue</th><th class="hide-sm">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm">Logged</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
+  setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th class="c-status">Status</th><th class="c-upd">Updates</th><th class="c-issue">Issue</th><th class="hide-sm c-store">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm c-logged">Logged</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
 }
 function setIsStatus(v){ isStatus=v; render(); }
 function setIsPeriod(v){ isPeriod=v; if((v==="day"||v==="week"||v==="month")&&!isDate){ const t=new Date(); isDate=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); } render(); }
 function setIsDate(v){ isDate=v; render(); }
 function setIsSort(v){ isSort=v; render(); }
-function clearIsFilters(){ isStatus=""; isPeriod="all"; isDate=""; $("search").value=""; render(); }
+function clearIsFilters(){ isStatus=""; isPeriod="all"; isDate=""; isFrom=""; isTo=""; isDays=7; isYear=new Date().getFullYear(); $("search").value=""; render(); }
 
 /* ============ STORE WINDOW ============ */
 function openStore(id, focusIssueId){
@@ -1133,9 +1350,25 @@ function renderStoreLeft(){
   }
 
   const edBtn=(card)=>'<button class="iconbtn mini ed" title="Edit" onclick="swEdit(\''+card+'\')"><i data-lucide="pencil"></i></button>';
+  const fo=FR.find(x=>x.id===s.franchisee_id);
+  const fcs=fo?contactsOf(fo):[];
+  const frCard='<div class="lc collapsible'+(frCardOpen?'':' closed')+'" id="frContactCard"><div class="lch" onclick="toggleFrCard()" title="'+(frCardOpen?'Hide':'Show')+' franchisee contact information">'
+    +'<i data-lucide="contact"></i>Franchisee Contact Information'
+    +(!frCardOpen&&fcs.length?'<span class="peek">· '+fcs.length+' contact'+(fcs.length>1?'s':'')+'</span>':'')
+    +'<button class="iconbtn mini ed tog" aria-label="Show or hide contact information" onclick="event.stopPropagation();toggleFrCard()"><i data-lucide="chevron-down"></i></button></div><div class="lcb">'
+    +'<div class="line" style="margin-bottom:4px"><span class="k">Name</span><span class="v"><b>'+esc(fo?fo.name:"—")+'</b></span>'+(fo?copyBtn(fo.name):'')+'</div>'
+    +(fcs.length?fcs.map(c=>{ const t=c.type||"other";
+        const ic=t==="email"?"mail":(t==="cell"?"phone":"tag");
+        const href=t==="email"?"mailto:"+c.value:(t==="cell"?"tel:"+String(c.value).replace(/[^\d+]/g,""):null);
+        return '<div class="fr-cline"><span class="ci" title="'+(t==="email"?"Email":t==="cell"?"Cellphone":"Other")+'"><i data-lucide="'+ic+'"></i></span>'
+          +'<span class="cv">'+(href?'<a href="'+esc(href)+'">'+esc(c.value)+'</a>':esc(c.value))+'</span>'+copyBtn(c.value)+'</div>'; }).join("")
+      :'<div class="muted" style="font-size:12.5px">No contact info saved. Add it with Edit on the franchisee.</div>')
+    +'</div></div>';
 
   $("sw_left").innerHTML=
-    '<div class="lc"><div class="lch"><i data-lucide="map-pin"></i>Location'+edBtn('location')+'</div><div class="lcb">'+locBody+'</div></div>'
+    frCard
+    +'<div class="lc"><div class="lch"><i data-lucide="map-pin"></i>Location'+edBtn('location')+'</div><div class="lcb">'+locBody+'</div></div>'
+
     +'<div class="lc"><div class="lch"><i data-lucide="badge-check"></i>Support Team</div><div class="lcb">'
       +'<div class="line"><span class="k">OM</span><span class="v">'+staffLine(om)+'</span></div>'
       +'<div class="line"><span class="k">FBC</span><span class="v">'+staffLine(fbc)+'</span></div>'
@@ -1179,11 +1412,13 @@ function renderStoreRight(){
   const issuesHtml=issues.length?issues.map(i=>{ const pls=issuePlatforms(i);
     const gsize=i.group_id?IS.filter(x=>x.group_id===i.group_id).length:0;
     const upd=i.group_id?'openGroupUpdate(\''+i.group_id+'\','+i.id+')':'openUpdateIssue('+i.id+')';
-    return '<div class="issue-card" id="issc_'+i.id+'"><div class="top">'+statusBadge(i.status)+'<b>'+esc(i.title)+'</b>'
+    return '<div class="issue-card" id="issc_'+i.id+'"><div class="top"><b>'+esc(i.title)+'</b>'
       +(gsize?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')
+      +histBtn('openHistory('+i.id+')', historyEntries(i).length)
       +'<button class="iconbtn mini" title="Update" onclick="'+upd+'"><i data-lucide="refresh-cw"></i></button>'
       +'<button class="iconbtn mini" title="Delete" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button></div>'
-      +(pls.length?'<div class="chips" style="margin-bottom:2px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')
+      +'<div class="ic-meta">'+statusBadge(i.status)
+        +(pls.length?'<span class="ic-div" aria-hidden="true"></span><div class="chips">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')+'</div>'
       +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
       +(i.action_taken?'<div class="act"><b>Action taken:</b> '+esc(i.action_taken)+'</div>':'')+'</div>';
   }).join(""):'<p class="muted">No issues logged for this store.</p>';
@@ -1217,7 +1452,9 @@ async function saveLogIssue(){
   const platforms=[...document.querySelectorAll("#log_platforms .mchip.sel")].map(x=>x.dataset.v);
   const status=(document.querySelector("#log_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
   const st=storeByNum[storeNum];
-  const rec={ franchisee_id:st?st.franchisee_id:(s?s.franchisee_id:null), store_num:storeNum, title, status, platforms, action_taken:"", notes:"", updated_at:nowIso() };
+  const ts0=nowIso();
+  const rec={ franchisee_id:st?st.franchisee_id:(s?s.franchisee_id:null), store_num:storeNum, title, status, platforms, action_taken:"", notes:"", updated_at:ts0,
+    history:[{ts:ts0, kind:"created", status}] };
   $("logSave").disabled=true;
   const {data,error}=await db.from("issues").insert(rec).select();
   $("logSave").disabled=false;
@@ -1235,13 +1472,20 @@ function openUpdateIssue(id){
   const sbtns=ISSUE_STATES.map(st=>'<button type="button" class="sbtn'+(st===cur?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
   $("upd_body").innerHTML='<div class="field" style="margin-bottom:12px"><label>Issue</label><div class="muted" style="font-size:13.5px">'+esc(i.title)+'</div></div>'
     +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="upd_status">'+sbtns+'</div></div>'
-    +'<div class="field"><label>Action taken</label><textarea id="upd_action" placeholder="What did you do?">'+esc(i.action_taken||"")+'</textarea></div>';
+    +(i.action_taken?'<div class="field" style="margin-bottom:12px"><label>Last action taken</label><div class="muted" style="font-size:13px;white-space:pre-wrap">'+esc(i.action_taken)+'</div></div>':'')
+    +'<div class="field"><label>Action taken (this update)</label><textarea id="upd_action" placeholder="What did you do this time?"></textarea></div>'
+    +'<div class="help"><button class="btn link" style="padding:0" onclick="openHistory('+i.id+')"><i data-lucide="history"></i>View all updates ('+historyEntries(i).length+')</button></div>';
   $("updOverlay").classList.add("show"); icons();
 }
 async function saveUpdateIssue(){
   const i=IS.find(x=>x.id===updIssueId); if(!i)return;
-  const status=(document.querySelector("#upd_status .sbtn.active")||{dataset:{}}).dataset.v||i.status;
-  const rec={ status, action_taken:$("upd_action").value.trim(), updated_at:nowIso() };
+  const prev=normIssueStatus(i.status);
+  const status=(document.querySelector("#upd_status .sbtn.active")||{dataset:{}}).dataset.v||prev;
+  const action=$("upd_action").value.trim();
+  if(status===prev && !action){ toast("Change the status or write the action taken","err"); return; }
+  const ts=nowIso();
+  const rec={ status, updated_at:ts, history:[...historyEntries(i), {ts, kind:"update", prev, status, action}] };
+  if(action) rec.action_taken=action;
   $("updSave").disabled=true;
   const r=await guardedUpdate("issues",i,rec);
   $("updSave").disabled=false;
@@ -1447,12 +1691,27 @@ async function doDelete(){
 
 function toggleIssues(){ issuesOnly=!issuesOnly; frPage=1; stPage=1; render(); }
 function toggleClosed(){ closedOnly=!closedOnly; stPage=1; render(); }
-function pagerHtml(which, page, total){
-  if(total<=1) return '';
+function pageSizeOf(w){ return w==="fr"?PAGE_FR:(w==="st"?PAGE_ST:PAGE_FRST); }
+function pagerHtml(which, page, total, count){
+  const opts=PAGE_OPTS[which], size=pageSizeOf(which);
+  if(count==null) count=total*size;
+  if(count<=opts[0] && total<=1) return '';
+  const from=count?((page-1)*size+1):0, to=Math.min(count,page*size);
   const b=(icon,title,target,dis)=>'<button class="pico" title="'+title+'"'+(dis?' disabled':'')+' onclick="pageSet(\''+which+'\','+target+')"><i data-lucide="'+icon+'"></i></button>';
-  return '<div class="pager">'+b('chevrons-left','Start',1,page<=1)+b('chevron-left','Previous',page-1,page<=1)
+  const sizeSel='<label class="pg-size" title="Items per page">Show <select onchange="setPageSize(\''+which+'\',this.value)">'
+    +opts.map(o=>'<option'+(o===size?' selected':'')+'>'+o+'</option>').join("")+'</select>'
+    +'<span class="pg-range">'+from+'–'+to+' of '+count+'</span></label>';
+  const nav=total>1?'<div class="pg-nav">'+b('chevrons-left','Start',1,page<=1)+b('chevron-left','Previous',page-1,page<=1)
     +'<span class="pg"><input class="pgin" value="'+page+'" title="Type a page number, then Enter" onkeydown="if(event.key===\'Enter\')pageSet(\''+which+'\',this.value)" onchange="pageSet(\''+which+'\',this.value)"> / '+total+'</span>'
-    +b('chevron-right','Next',page+1,page>=total)+b('chevrons-right','End',total,page>=total)+'</div>';
+    +b('chevron-right','Next',page+1,page>=total)+b('chevrons-right','End',total,page>=total)+'</div>':'';
+  return '<div class="pager">'+sizeSel+nav+'</div>';
+}
+function setPageSize(which,val){
+  const v=+val; if(!PAGE_OPTS[which].includes(v)) return;
+  try{ localStorage.setItem("ft2_ps_"+which,String(v)); }catch(e){}
+  if(which==="fr"){ PAGE_FR=v; frPage=1; render(); }
+  else if(which==="st"){ PAGE_ST=v; stPage=1; render(); }
+  else { PAGE_FRST=v; frStorePage=1; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 function pageSet(which,val){
   let n=parseInt(val,10); if(isNaN(n)||n<1)n=1;
@@ -1461,6 +1720,281 @@ function pageSet(which,val){
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 
+
+
+
+
+let frCardOpen=false; try{ frCardOpen=localStorage.getItem("ft2_frcard")==="1"; }catch(e){}
+function toggleFrCard(){ frCardOpen=!frCardOpen; try{ localStorage.setItem("ft2_frcard",frCardOpen?"1":"0"); }catch(e){} renderStoreLeft(); }
+
+/* ===== Franchisee info popup ===== */
+function frButtons(members){
+  const ids=[...new Set(members.map(m=>m.franchisee_id).filter(Boolean))];
+  if(!ids.length) return '';
+  const gid=members[0].group_id||"";
+  return '<div class="fr-btns">'+ids.map(id=>{ const f=FR.find(x=>x.id===id); if(!f) return '';
+    return '<button class="fr-btn" title="View franchisee info" onclick="openFrInfo('+id+',\''+esc(gid)+'\')"><i data-lucide="user-round"></i>'+esc(f.name)+'</button>'; }).join("")+'</div>';
+}
+let fiCtx=null;
+function openFrInfo(id, gid){
+  const f=FR.find(x=>x.id===id); if(!f){ toast("Franchisee not found","err"); return; }
+  fiCtx=id;
+  const stores=storesByFr[id]||[];
+  $("fi_name").textContent=f.name||"—";
+  $("fi_sub").textContent="Territory "+(f.territory||"—")+" · "+stores.length+" store"+(stores.length!==1?"s":"");
+  const cs=contactsOf(f).filter(c=>c.value);
+  const contacts=cs.length?cs.map(c=>{ const t=c.type||"other";
+      const ic=t==="email"?"mail":(t==="cell"?"phone":"tag");
+      const href=t==="email"?"mailto:"+c.value:(t==="cell"?"tel:"+String(c.value).replace(/[^\d+]/g,""):null);
+      return '<div class="fr-cline"><span class="ci" title="'+(t==="email"?"Email":t==="cell"?"Cellphone":"Other")+'"><i data-lucide="'+ic+'"></i></span>'
+        +'<span class="cv">'+(href?'<a href="'+esc(href)+'">'+esc(c.value)+'</a>':esc(c.value))+'</span>'+copyBtn(c.value)+'</div>'; }).join("")
+    :'<div class="muted" style="font-size:12.5px">No contact info saved.</div>';
+  const inIssue=gid?IS.filter(x=>x.group_id===gid && x.franchisee_id===id).map(x=>x.store_num).sort():[];
+  const {om,fbc}=staffFor(f.territory);
+  const staffLine=arr=>arr.length?arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>"):'<span class="muted">—</span>';
+  $("fi_body").innerHTML=
+    '<div class="lc"><div class="lch"><i data-lucide="contact"></i>Franchisee Contact Information</div><div class="lcb">'
+      +'<div class="line" style="margin-bottom:4px"><span class="k">Name</span><span class="v"><b>'+esc(f.name)+'</b></span>'+copyBtn(f.name)+'</div>'+contacts+'</div></div>'
+    +(inIssue.length?'<div class="lc"><div class="lch"><i data-lucide="layers"></i>Their stores in this issue</div><div class="lcb"><div class="tl-stores" style="margin:0">'+inIssue.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div></div></div>':'')
+    +'<div class="lc" style="margin-bottom:0"><div class="lch"><i data-lucide="badge-check"></i>Support Team</div><div class="lcb">'
+      +'<div class="line"><span class="k">OM</span><span class="v">'+staffLine(om)+'</span></div>'
+      +'<div class="line"><span class="k">FBC</span><span class="v">'+staffLine(fbc)+'</span></div></div></div>';
+  $("frInfoOverlay").classList.add("show"); icons();
+}
+function openFrPageFromInfo(){
+  const id=fiCtx; const f=FR.find(x=>x.id===id); if(!f) return;
+  ["frInfoOverlay","grpOverlay","histOverlay","updOverlay"].forEach(o=>$(o).classList.remove("show"));
+  if($("storeOverlay").classList.contains("show")) closeStore();
+  tab="franchisees"; issuesOnly=false; frPage=1; $("search").value="@"+f.name; selFr=id;
+  render(); selectFranchisee(id);
+}
+
+/* ===== Bulk add from spreadsheet ===== */
+const BULK_COLS=["Franchisee Name","Franchisee Email","Franchisee Cell","Territory","Store Number","Address","City","State","ZIP","Store Phone"];
+const BULK_REQ=["Franchisee Name"];
+let bulkPlan=null;
+function openBulk(){
+  bulkPlan=null; $("bk_preview").innerHTML=""; $("bk_fname").textContent=""; $("bulkImport").disabled=true; $("bk_btnlbl").textContent="Import";
+  $("bk_cols").innerHTML=BULK_COLS.map(c=>'<span class="'+(BULK_REQ.includes(c)?'req':'')+'">'+esc(c)+(BULK_REQ.includes(c)?' *':'')+'</span>').join("");
+  $("bulkOverlay").classList.add("show"); icons();
+}
+function bulkTemplate(){
+  if(!window.XLSX){ toast("Spreadsheet tool didn't load — check internet","err"); return; }
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([BULK_COLS]);
+  ws["!cols"]=[30,28,16,10,13,32,16,7,9,16].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, "Stores");
+  const help=XLSX.utils.aoa_to_sheet([
+    ["How to fill the Stores sheet"],[""],
+    ["• One row = one store. Put the franchisee name on every row of their stores."],
+    ["• Franchisee Name is required. Match the exact name if the franchisee already exists, e.g. \"Agrawal, Govind\"."],
+    ["• Leave Store Number blank to add only the franchisee (no store)."],
+    ["• Phones: any 10-digit number is fine — it is formatted to (555) 123-4567."],
+    ["• Territory: one number per row, e.g. 540."],
+    ["• Don't rename, remove or reorder the columns."],[""],
+    ["Example rows (do not paste these into the Stores sheet):"],
+    BULK_COLS,
+    ["Doe, John","john@email.com","5551234567","540","99901","123 Main St","Fresno","CA","93701","5559876543"],
+    ["Doe, John","","","540","99902","456 Oak Ave","Clovis","CA","93612","5551112222"],
+    ["Smith, Anna","anna@email.com","","626","","","","","",""]
+  ]);
+  help["!cols"]=[{wch:30},{wch:22},{wch:14},{wch:10},{wch:13},{wch:18},{wch:12},{wch:7},{wch:9},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, help, "Instructions");
+  XLSX.writeFile(wb, "franchisee-bulk-template.xlsx");
+}
+function phone10(v){ let d=String(v||"").replace(/\D/g,""); if(d.length===11&&d[0]==="1") d=d.slice(1); return d.length===10?formatCellStr(d):null; }
+async function bulkRead(file){
+  if(!window.XLSX){ toast("Spreadsheet tool didn't load — check internet","err"); return; }
+  $("bk_fname").textContent=file.name;
+  let rows;
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
+    const ws=wb.Sheets["Stores"]||wb.Sheets[wb.SheetNames[0]];
+    rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:false,blankrows:false});
+  }catch(e){ bulkShowError("Couldn't read that file. Save it as .xlsx or .csv and try again."); return; }
+  const head=(rows[0]||[]).map(h=>String(h).replace(/\*/g,"").trim().toLowerCase());
+  const want=BULK_COLS.map(c=>c.toLowerCase());
+  const okHead=want.every((c,i)=>head[i]===c);
+  if(!okHead){ bulkShowError("Wrong format. The first row must be exactly: "+BULK_COLS.join(" | ")+". Download the template and copy your data into it."); return; }
+  bulkPlan=bulkValidate(rows.slice(1));
+  bulkRender();
+}
+function bulkShowError(msg){
+  bulkPlan=null; $("bulkImport").disabled=true;
+  $("bk_preview").innerHTML='<div class="warnbox show" style="background:var(--danger-soft);color:var(--danger)"><i data-lucide="circle-alert"></i><div>'+esc(msg)+'</div></div>'; icons();
+}
+function bulkValidate(data){
+  const res=[], newFr=new Map(), seenNum={}; let rowNo=1;
+  data.forEach(r=>{
+    rowNo++;
+    const cell=k=>String(r[BULK_COLS.indexOf(k)]??"").trim();
+    if(BULK_COLS.every(k=>!cell(k))) return; // empty row
+    const name=cell("Franchisee Name").replace(/\s+/g," ");
+    const num=cell("Store Number").replace(/^#/,"");
+    const out={row:rowNo, name, num, ok:false, msg:""};
+    res.push(out);
+    if(!name){ out.msg="Franchisee Name is missing"; return; }
+    const emails=cell("Franchisee Email").split(/[;,\s]+/).filter(Boolean);
+    const badEmail=emails.find(e=>!isEmail(e)); if(badEmail){ out.msg="Email not valid: "+badEmail; return; }
+    let fcell=""; if(cell("Franchisee Cell")){ fcell=phone10(cell("Franchisee Cell")); if(!fcell){ out.msg="Franchisee Cell must be 10 digits"; return; } }
+    let sphone=""; if(cell("Store Phone")){ sphone=phone10(cell("Store Phone")); if(!sphone){ out.msg="Store Phone must be 10 digits"; return; } }
+    const existing=findDupFr(name,null);
+    if(num){
+      if(storeByNum[num]){ const o=FR.find(x=>x.id===storeByNum[num].franchisee_id); out.msg="Store "+num+" already exists"+(o?' ("'+o.name+'")':""); return; }
+      if(seenNum[num]){ out.msg="Store "+num+" is repeated (row "+seenNum[num]+")"; return; }
+      seenNum[num]=rowNo;
+    } else if(existing || newFr.has(normName(name))){ out.msg="Franchisee already listed — no store to add"; return; }
+    const terr=cell("Territory");
+    if(!existing){
+      const k=normName(name);
+      if(!newFr.has(k)) newFr.set(k,{name, emails:new Set(), cells:new Set(), terrs:new Set()});
+      const nf=newFr.get(k); emails.forEach(e=>nf.emails.add(e)); if(fcell) nf.cells.add(fcell); if(terr) nf.terrs.add(terr);
+    }
+    out.ok=true; out.isNewFr=!existing; out.frKey=normName(name); out.frId=existing?existing.id:null;
+    out.msg=num?(existing?'Add store to existing franchisee':'Add store + new franchisee'):'Add franchisee only';
+    if(num) out.store={num, address:cell("Address"), city:cell("City"), state:cell("State").toUpperCase(), zip:cell("ZIP"), phone:sphone, territory:terr};
+  });
+  return {rows:res, newFr};
+}
+function bulkRender(){
+  const p=bulkPlan; if(!p) return;
+  const ok=p.rows.filter(r=>r.ok), bad=p.rows.filter(r=>!r.ok);
+  const stores=ok.filter(r=>r.store).length;
+  const usedExisting=new Set(ok.filter(r=>!r.isNewFr).map(r=>r.frId)).size;
+  $("bk_preview").innerHTML=
+    '<div class="bk-sum">'
+      +'<div class="s ok"><b>'+p.newFr.size+'</b>New franchisees</div>'
+      +'<div class="s ok"><b>'+stores+'</b>New stores</div>'
+      +'<div class="s"><b>'+usedExisting+'</b>Existing franchisees used</div>'
+      +'<div class="s'+(bad.length?' bad':'')+'"><b>'+bad.length+'</b>Rows skipped</div></div>'
+    +(p.rows.length?'<div class="bk-table"><table><thead><tr><th>Row</th><th>Franchisee</th><th>Store #</th><th>Result</th></tr></thead><tbody>'
+      +p.rows.slice().sort((a,b)=>(a.ok-b.ok)||(a.row-b.row)).map(r=>'<tr><td class="muted">'+r.row+'</td><td>'+esc(r.name||"—")+'</td><td class="store">'+esc(r.num||"—")+'</td><td>'
+        +(r.ok?'<span class="bk-ok"><i data-lucide="circle-check"></i>'+esc(r.msg)+'</span>':'<span class="bk-skip"><i data-lucide="circle-x"></i>Skipped: '+esc(r.msg)+'</span>')+'</td></tr>').join("")
+      +'</tbody></table></div>':'<p class="muted">No data rows found in the file.</p>')
+    +(bad.length&&ok.length?'<div class="help">Skipped rows are not imported. Fix them in the file and upload again, or import the ready rows now.</div>':'');
+  $("bulkImport").disabled=!ok.length;
+  $("bk_btnlbl").textContent=ok.length?("Import "+ok.length+" row"+(ok.length>1?"s":"")):"Import";
+  icons();
+}
+async function bulkImport(){
+  const p=bulkPlan; if(!p) return;
+  const ok=p.rows.filter(r=>r.ok); if(!ok.length) return;
+  const btn=$("bulkImport"); btn.disabled=true; $("bk_btnlbl").textContent="Importing…";
+  const idByKey={};
+  ok.filter(r=>!r.isNewFr).forEach(r=>idByKey[r.frKey]=r.frId);
+  const chunk=(a,n)=>{const o=[];for(let i=0;i<a.length;i+=n)o.push(a.slice(i,i+n));return o;};
+  let addedFr=0, addedSt=0;
+  try{
+    // 1) new franchisees — ids taken from the database; retry if a teammate took them first
+    const list=[...p.newFr.entries()];
+    for(const part of chunk(list,200)){
+      let done=false;
+      for(let a=0;a<4 && !done;a++){
+        const mx=await db.from("franchisees").select("id").order("id",{ascending:false}).limit(1);
+        if(mx.error) throw mx.error;
+        let next=((mx.data&&mx.data[0]&&mx.data[0].id)||0)+1;
+        const recs=part.map(([k,f])=>({ id:next++, name:f.name, closed:false, territory:[...f.terrs].join(", "), notes:"",
+          contacts:[...[...f.emails].map(v=>({type:"email",value:v})), ...[...f.cells].map(v=>({type:"cell",value:v}))] }));
+        const {data,error}=await db.from("franchisees").insert(recs).select("id,name");
+        if(!error){ (data||[]).forEach(r=>idByKey[normName(r.name)]=r.id); addedFr+=(data||[]).length; done=true; break; }
+        const m=(error.message||"").toLowerCase();
+        if(!(error.code==="23505" && m.includes("pkey"))) throw error;
+      }
+      if(!done) throw new Error("Couldn't get free franchisee IDs — try again");
+    }
+    // 2) stores
+    const stRecs=ok.filter(r=>r.store).map(r=>({ franchisee_id:idByKey[r.frKey], ...r.store, closed:false,
+      platforms:Object.fromEntries(PLATFORMS.map(([k])=>[k,"Not enrolled"])), gbp:"", notes:[] }));
+    for(const part of chunk(stRecs,300)){
+      const {data,error}=await db.from("stores").insert(part).select("id");
+      if(error) throw error;
+      addedSt+=(data||[]).length;
+    }
+    $("bulkOverlay").classList.remove("show");
+    toast("Added "+addedFr+" franchisee"+(addedFr!==1?"s":"")+" and "+addedSt+" store"+(addedSt!==1?"s":""),"ok");
+  }catch(err){
+    toast(friendly(err).t+(addedFr||addedSt?" — "+addedFr+" franchisees, "+addedSt+" stores were added before the stop":""),"err");
+  }
+  btn.disabled=false; $("bk_btnlbl").textContent="Import";
+  await loadAll();
+}
+
+/* ===== Issue history ===== */
+function historyOf(i){ try{ const h=Array.isArray(i.history)?i.history:JSON.parse(i.history||"[]"); return Array.isArray(h)?h:[]; }catch(e){ return []; } }
+// Full list of steps. Older issues (before history existed) get their known steps rebuilt.
+function historyEntries(i){
+  const h=historyOf(i).slice();
+  if(h.length) return h.sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  const out=[];
+  const changed=(i.action_taken)||(i.updated_at&&i.created_at&&Math.abs(new Date(i.updated_at)-new Date(i.created_at))>60000);
+  out.push({ts:i.created_at, kind:"created", status:changed?null:normIssueStatus(i.status)});
+  if(changed) out.push({ts:i.updated_at||i.created_at, kind:"update", status:normIssueStatus(i.status), action:i.action_taken||"", legacy:true});
+  return out;
+}
+let histCtx=null;
+function openHistory(id){
+  const i=IS.find(x=>x.id===id); if(!i){ toast("Issue not found","err"); return; }
+  if(i.group_id && IS.filter(x=>x.group_id===i.group_id).length>1){ openHistoryGroup(i.group_id, id); return; }
+  histCtx={kind:"single", id};
+  $("hist_title").textContent="Issue updates · Store "+(i.store_num||"");
+  const f=FR.find(x=>x.id===i.franchisee_id);
+  $("hist_sub").textContent=f?f.name:"";
+  renderHistory(i, historyEntries(i).map(e=>({...e, stores:null})), [i]);
+}
+function openHistoryGroup(gid, fromId){
+  const m=IS.filter(x=>x.group_id===gid).sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||""));
+  if(!m.length) return;
+  histCtx={kind:"group", gid, fromId};
+  $("hist_title").textContent="Issue updates · Multi-store issue";
+  $("hist_sub").textContent=m.length+" stores";
+  // merge identical steps done to several stores at once
+  const map=new Map();
+  m.forEach(i=>historyEntries(i).forEach(e=>{
+    const key=[e.ts,e.kind,e.prev||"",e.status||"",e.action||""].join("|");
+    if(!map.has(key)) map.set(key,{...e, stores:[]});
+    map.get(key).stores.push(i.store_num);
+  }));
+  const entries=[...map.values()].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  entries.forEach(e=>{ if(e.stores.length===m.length) e.stores=["All "+m.length+" stores"]; });
+  renderHistory(m[0], entries, m);
+}
+function renderHistory(i, entries, members){
+  const pls=issuePlatforms(i);
+  const statusNow=members.length>1?groupStatusBadge(members):statusBadge(i.status);
+  const head='<div class="h-issue"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+statusNow
+      +(members.length>1?'<span class="mtag"><i data-lucide="layers"></i>'+members.length+' stores</span>':'')+'</div>'
+    +'<div class="ttl">'+esc(i.title)+'</div>'
+    +(pls.length?'<div class="chips" style="margin:6px 0">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')
+    +'<div class="meta">Logged '+fmtTs(i.created_at)+' · '+entries.length+' step'+(entries.length!==1?'s':'')+'</div>'
+    +frButtons(members)+'</div>';
+  const items=entries.map((e,idx)=>{
+    const st=e.status?normIssueStatus(e.status):null;
+    const color=st==="Resolved"?"var(--ok)":(st==="Work in Progress"?"var(--warn)":(st==="Pending"?"var(--danger)":"var(--idle)"));
+    let what;
+    if(e.kind==="created") what='<span class="what">Issue logged</span>'+(st?statusBadge(st):'');
+    else if(e.prev && st && normIssueStatus(e.prev)!==st) what='<span class="what">Status changed</span>'+statusBadge(e.prev)+'<i data-lucide="arrow-right" class="arrow"></i>'+statusBadge(st);
+    else what='<span class="what">Update</span>'+(st?statusBadge(st):'');
+    const act=e.kind==="created"?'':(e.action?'<div class="tl-act">'+esc(e.action)+'</div>':'<div class="tl-act none">No action description</div>');
+    const stores=(e.stores&&e.stores.length)?'<div class="tl-stores">'+e.stores.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div>':'';
+    return '<div class="tl-item"><div class="tl-dot" style="background:'+color+'">'+(idx+1)+'</div><div class="tl-body">'
+      +'<div class="tl-head">'+what+'<span class="tl-time"><i data-lucide="clock"></i>'+esc(fmtTs(e.ts))+'</span></div>'
+      +act+stores+(e.legacy?'<div class="tl-legacy">Latest update only — earlier steps were not recorded before history tracking started.</div>':'')
+      +'</div></div>';
+  }).join("");
+  $("hist_body").innerHTML=head+'<div class="tl">'+items+'</div>';
+  $("histOverlay").classList.add("show"); icons();
+}
+function histGoUpdate(){
+  const c=histCtx; if(!c) return;
+  $("histOverlay").classList.remove("show");
+  if(c.kind==="group") openGroupUpdate(c.gid, c.fromId); else openUpdateIssue(c.id);
+}
+function updPill(onclick, n){
+  return '<button class="upd-pill" title="View all updates ('+n+' step'+(n!==1?'s':'')+')" aria-label="View all updates" onclick="event.stopPropagation();'+onclick+'"><i data-lucide="history"></i>'+n+'</button>';
+}
+function histBtn(onclick, n){
+  return '<button class="iconbtn mini round hbtn" title="View all updates" aria-label="View all updates" onclick="event.stopPropagation();'+onclick+'"><i data-lucide="history"></i>'+(n>1?'<span class="cnt">'+n+'</span>':'')+'</button>';
+}
 
 /* ===== Team-safe saving ===== */
 // Saves only if nobody changed the record since we loaded it. Returns {row} | {conflict} | {error}
@@ -1674,7 +2208,8 @@ async function saveMultiIssue(){
   const status=(document.querySelector("#m_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
   const gid="G"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const ts=nowIso();
-  const recs=mStores.map(n=>({ franchisee_id:storeByNum[n]?storeByNum[n].franchisee_id:null, store_num:n, title, status, platforms, action_taken:"", notes:"", group_id:gid, created_at:ts, updated_at:ts }));
+  const recs=mStores.map(n=>({ franchisee_id:storeByNum[n]?storeByNum[n].franchisee_id:null, store_num:n, title, status, platforms, action_taken:"", notes:"", group_id:gid, created_at:ts, updated_at:ts,
+    history:[{ts, kind:"created", status}] }));
   $("multiSave").disabled=true;
   const {data,error}=await db.from("issues").insert(recs).select();
   $("multiSave").disabled=false;
@@ -1691,7 +2226,12 @@ function openGroupUpdate(gid, preselectId){
   grpId=gid; const f=m[0];
   $("grp_sub").textContent=m.length+" stores · logged "+fmtTs(f.created_at);
   const rows=m.map(i=>'<label class="ckrow">'
-    +'<span class="n">'+esc(i.store_num)+'</span><span class="o">'+esc(frNameById(i.franchisee_id))+'</span>'+statusBadge(i.status)
+    +'<div class="ck-main"><div class="ck-l1"><span class="n">'+esc(i.store_num)+'</span>'
+    +(i.franchisee_id
+      ?'<button class="o fr-link" title="View franchisee info" onclick="event.preventDefault();event.stopPropagation();openFrInfo('+i.franchisee_id+',\''+gid+'\')"><span class="nm">'+esc(frNameById(i.franchisee_id))+'</span></button>'
+      :'<span class="o">—</span>')+'</div>'
+    +(()=>{ const st=storeByNum[String(i.store_num)]; const a=st?[st.address,[st.city,st.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "):""; return a?'<div class="ck-addr">'+esc(a)+'</div>':''; })()
+    +'<div class="ck-st">'+statusBadge(i.status)+'</div></div>'
     +'<input type="checkbox" class="grp-ck" value="'+i.id+'"'+((!preselectId||preselectId===i.id)?' checked':'')+' onchange="syncGrpAll()"></label>').join("");
   const pls=issuePlatforms(f);
   $("grp_body").innerHTML=
@@ -1702,7 +2242,8 @@ function openGroupUpdate(gid, preselectId){
       +'<div class="help" id="grp_selcount"></div></div>'
     +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="grp_status">'
       +ISSUE_STATES.map(st=>'<button type="button" class="sbtn" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("")+'</div></div>'
-    +'<div class="field"><label>Action taken (applies to selected stores)</label><textarea id="grp_action" placeholder="What did you do?"></textarea></div>';
+    +'<div class="field"><label>Action taken (applies to selected stores)</label><textarea id="grp_action" placeholder="What did you do this time?"></textarea></div>'
+    +'<div class="help"><button class="btn link" style="padding:0" onclick="$(\'grpOverlay\').classList.remove(\'show\');openHistoryGroup(\''+gid+'\')"><i data-lucide="history"></i>View all updates</button></div>';
   syncGrpAll(); $("grpOverlay").classList.add("show"); icons();
 }
 function toggleGrpAll(on){ document.querySelectorAll(".grp-ck").forEach(c=>c.checked=on); syncGrpAll(); }
@@ -1724,10 +2265,15 @@ async function saveGroupUpdate(){
   const now={}; (chk.data||[]).forEach(x=>now[x.id]=x.updated_at);
   const changed=ids.some(id=>{ const loc=IS.find(i=>i.id===id); return !(id in now) || (loc&&loc.updated_at&&now[id]&&new Date(now[id]).getTime()!==new Date(loc.updated_at).getTime()); });
   if(changed){ $("grpSave").disabled=false; showConflict("This multi-store issue"); return; }
-  const {data,error}=await db.from("issues").update(rec).in("id",ids).select();
+  const ts=rec.updated_at;
+  const results=await Promise.all(ids.map(id=>{ const loc=IS.find(i=>i.id===id); const prev=normIssueStatus(loc.status);
+    const r={...rec, history:[...historyEntries(loc), {ts, kind:"update", prev, status:rec.status||prev, action}]};
+    return guardedUpdate("issues",loc,r); }));
   $("grpSave").disabled=false;
-  if(error){ toast(friendly(error).t,"err"); return; }
-  (data||[]).forEach(row=>{ const loc=IS.find(i=>i.id===row.id); if(loc) Object.assign(loc,row); });
+  const err=results.find(r=>r.error); const conf=results.some(r=>r.conflict);
+  results.forEach(r=>{ if(r.row){ const loc=IS.find(i=>i.id===r.row.id); if(loc) Object.assign(loc,r.row); } });
+  if(err){ toast(friendly(err.error).t,"err"); if(curStore) renderStoreRight(); render(); return; }
+  if(conf){ showConflict("Some stores in this issue"); if(curStore) renderStoreRight(); render(); return; }
   updCounts(); $("grpOverlay").classList.remove("show");
   toast(ids.length+" store"+(ids.length>1?"s":"")+" updated","ok");
   if(curStore) renderStoreRight(); render();
@@ -1747,7 +2293,7 @@ $("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; render(); };
 $("terrFilter").onchange=e=>{ terrFilter=e.target.value; frPage=1; stPage=1; render(); };
 $("stIssueFilter").onclick=toggleIssues;
 $("stClosedFilter").onclick=toggleClosed;
-$("refreshBtn").onclick=loadAll;
+$("refreshBtn").onclick=()=>loadAll();
 $("primaryAdd").onclick=primaryAdd;
 $("multiAdd").onclick=openMultiIssue;
 $("asX").onclick=$("asCancel").onclick=()=>$("addStOverlay").classList.remove("show");
@@ -1756,6 +2302,19 @@ $("asSave").onclick=saveAddStore;
 $("as_num").oninput=checkStoreDup;
 $("fr_name").oninput=checkFrDup;
 $("conflictReload").onclick=reloadAfterConflict;
+$("fiX").onclick=$("fiClose").onclick=()=>$("frInfoOverlay").classList.remove("show");
+$("frInfoOverlay").onclick=e=>{ if(e.target===$("frInfoOverlay")) $("frInfoOverlay").classList.remove("show"); };
+$("fiOpen").onclick=openFrPageFromInfo;
+$("idleMin").value=idleMinutes();
+$("idleMin").onchange=e=>setIdleMinutes(e.target.value);
+$("bulkX").onclick=$("bulkCancel").onclick=()=>$("bulkOverlay").classList.remove("show");
+$("bkTemplate").onclick=bulkTemplate;
+$("bkChoose").onclick=()=>$("bkFile").click();
+$("bkFile").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) bulkRead(f); };
+$("bulkImport").onclick=bulkImport;
+$("histX").onclick=$("histClose").onclick=()=>$("histOverlay").classList.remove("show");
+$("histOverlay").onclick=e=>{ if(e.target===$("histOverlay")) $("histOverlay").classList.remove("show"); };
+$("histUpdate").onclick=histGoUpdate;
 $("conflictClose").onclick=()=>$("conflictOverlay").classList.remove("show");
 $("as_phone").oninput=e=>{ e.target.value=formatCellStr(e.target.value); };
 $("linksBtn").onclick=openLinks;
