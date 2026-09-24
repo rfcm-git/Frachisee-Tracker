@@ -2922,21 +2922,17 @@ $("refreshBtn").onclick=()=>loadAll();
 $("primaryAdd").onclick=primaryAdd;
 $("multiAdd").onclick=openMultiIssue;
 $("asX").onclick=$("asCancel").onclick=()=>$("addStOverlay").classList.remove("show");
-$("addStOverlay").onclick=e=>{if(e.target===$("addStOverlay"))$("addStOverlay").classList.remove("show");};
 $("asSave").onclick=saveAddStore;
 $("as_num").oninput=checkStoreDup;
 $("fr_name").oninput=checkFrDup;
 $("conflictReload").onclick=reloadAfterConflict;
 $("reportBtn").onclick=openReport;
 $("rpX").onclick=$("rpCancel").onclick=()=>$("rpOverlay").classList.remove("show");
-$("rpOverlay").onclick=e=>{ if(e.target===$("rpOverlay")) $("rpOverlay").classList.remove("show"); };
 $("rpGo").onclick=downloadReport;
 $("siX").onclick=$("siClose").onclick=()=>$("stIssOverlay").classList.remove("show");
-$("stIssOverlay").onclick=e=>{ if(e.target===$("stIssOverlay")) $("stIssOverlay").classList.remove("show"); };
 $("siStore").onclick=siOpenStore;
 $("siLog").onclick=siLogIssue;
 $("fiX").onclick=$("fiClose").onclick=()=>$("frInfoOverlay").classList.remove("show");
-$("frInfoOverlay").onclick=e=>{ if(e.target===$("frInfoOverlay")) $("frInfoOverlay").classList.remove("show"); };
 $("fiOpen").onclick=openFrPageFromInfo;
 $("idleMin").value=idleMinutes();
 $("idleMin").onchange=e=>setIdleMinutes(e.target.value);
@@ -2946,19 +2942,16 @@ $("bkChoose").onclick=()=>$("bkFile").click();
 $("bkFile").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) bulkRead(f); };
 $("bulkImport").onclick=bulkImport;
 $("histX").onclick=$("histClose").onclick=()=>$("histOverlay").classList.remove("show");
-$("histOverlay").onclick=e=>{ if(e.target===$("histOverlay")) $("histOverlay").classList.remove("show"); };
 $("histUpdate").onclick=histGoUpdate;
 $("conflictClose").onclick=()=>$("conflictOverlay").classList.remove("show");
 $("as_phone").oninput=e=>{ e.target.value=formatCellStr(e.target.value); };
 $("linksBtn").onclick=openLinks;
 $("lkX").onclick=()=>{ $("linksOverlay").classList.remove("show"); lkEditing=false; };
-$("linksOverlay").onclick=e=>{ if(e.target===$("linksOverlay")&&!lkEditing) $("linksOverlay").classList.remove("show"); };
 $("lkEditBtn").onclick=()=>{ lkEditing=true; renderLinks(); };
 $("lkCancel").onclick=()=>{ lkEditing=false; renderLinks(); };
 $("lkSave").onclick=()=>saveLinks();
 $("lkReset").onclick=()=>{ LINKS=JSON.parse(JSON.stringify(DEFAULT_LINKS)); renderLinks(); };
 $("multiX").onclick=$("multiCancel").onclick=()=>$("multiOverlay").classList.remove("show");
-$("multiOverlay").onclick=e=>{if(e.target===$("multiOverlay"))$("multiOverlay").classList.remove("show");};
 $("multiSave").onclick=saveMultiIssue;
 $("m_store_add").onclick=()=>addMStores($("m_store_in").value);
 $("m_store_in").oninput=mSuggest;
@@ -2966,7 +2959,6 @@ $("m_store_in").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); addMStor
 $("m_store_in").onblur=()=>setTimeout(()=>$("m_sug").classList.remove("show"),120);
 $("m_store_in").onpaste=()=>setTimeout(()=>{ const v=$("m_store_in").value; if(/[\s,;]/.test(v.trim())) addMStores(v); },0);
 $("grpX").onclick=$("grpCancel").onclick=()=>$("grpOverlay").classList.remove("show");
-$("grpOverlay").onclick=e=>{if(e.target===$("grpOverlay"))$("grpOverlay").classList.remove("show");};
 $("grpSave").onclick=saveGroupUpdate;
 $("grpDelete").onclick=askDeleteGroupSel;
 
@@ -3003,31 +2995,22 @@ function unlockPw(){
 function closePw(){ $("impPwOverlay").classList.remove("show"); pwCallback=null; impData=null; }
 $("impPwOk").onclick=unlockPw;
 $("impPwX").onclick=$("impPwCancel").onclick=closePw;
-$("impPwOverlay").onclick=e=>{if(e.target===$("impPwOverlay"))closePw();};
 $("imp_pw").onkeydown=e=>{if(e.key==="Enter")unlockPw();};
-$("settingsOverlay").onclick=e=>{if(e.target===$("settingsOverlay"))closeSettings();};
 
 $("frX").onclick=$("frCancel").onclick=()=>$("frOverlay").classList.remove("show"); $("frSave").onclick=saveFr;
-$("frOverlay").onclick=e=>{if(e.target===$("frOverlay"))$("frOverlay").classList.remove("show");};
 
 /* store window: NO outside-click close */
 $("storeX").onclick=closeStore;
 
 $("logX").onclick=$("logCancel").onclick=()=>$("logOverlay").classList.remove("show"); $("logSave").onclick=saveLogIssue;
-$("logOverlay").onclick=e=>{if(e.target===$("logOverlay"))$("logOverlay").classList.remove("show");};
 $("updX").onclick=$("updCancel").onclick=()=>$("updOverlay").classList.remove("show"); $("updSave").onclick=saveUpdateIssue;
-$("updOverlay").onclick=e=>{if(e.target===$("updOverlay"))$("updOverlay").classList.remove("show");};
 $("noteX").onclick=$("noteCancel").onclick=()=>$("noteOverlay").classList.remove("show"); $("noteSave").onclick=saveNote;
-$("noteOverlay").onclick=e=>{if(e.target===$("noteOverlay"))$("noteOverlay").classList.remove("show");};
 
 $("sdX").onclick=$("sdClose").onclick=()=>$("sdOverlay").classList.remove("show");
-$("sdOverlay").onclick=e=>{if(e.target===$("sdOverlay"))$("sdOverlay").classList.remove("show");};
 $("sfX").onclick=$("sfCancel").onclick=()=>$("sfOverlay").classList.remove("show"); $("sfSave").onclick=saveStaff;
 $("sf_territory").oninput=updateStaffPreview;
-$("sfOverlay").onclick=e=>{if(e.target===$("sfOverlay"))$("sfOverlay").classList.remove("show");};
 
 $("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;$("confirmOk").textContent="Delete";}; $("confirmOk").onclick=doDelete;
-$("confirmOverlay").onclick=e=>{if(e.target===$("confirmOverlay")){$("confirmOverlay").classList.remove("show");pending=null;}};
 
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySelectorAll(".overlay.show").forEach(o=>{ if(o.id!=="storeOverlay") o.classList.remove("show"); }); } });
 
