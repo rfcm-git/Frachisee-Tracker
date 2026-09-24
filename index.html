@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
 <style>
   :root{
@@ -94,6 +95,78 @@
   .btn.outline.danger:hover{background:var(--danger-soft)}
   .panel .ph .ph-act{margin-left:auto}
   .iconbtn.round{border-radius:999px}
+  .iss-sum{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .iss-big{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;height:58px;border-radius:10px;background:var(--green-soft);color:var(--green-dark)}
+  .iss-big b{font-size:22px;line-height:1}
+  .iss-big span{font-size:11px;font-weight:600}
+  .iss-info{flex:1;min-width:180px}
+  .fdd-grp{display:flex;gap:8px;flex-wrap:wrap}
+  .rte{border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden}
+  .rte:focus-within{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .rte-bar{display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--line);background:#f7faf8}
+  .rte-bar button{width:30px;height:28px;border:none;background:none;border-radius:6px;display:grid;place-items:center;color:var(--ink-soft);cursor:pointer}
+  .rte-bar button:hover{background:var(--idle-soft);color:var(--ink)}
+  .rte-bar button.on{background:var(--green-soft);color:var(--green-dark)}
+  .rte-bar button [data-lucide]{width:15px;height:15px}
+  .rte-sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+  .rte-ed{min-height:84px;max-height:260px;overflow:auto;padding:9px 11px;font-size:14px;line-height:1.5;outline:none;color:var(--ink)}
+  .rte-ed:empty::before{content:attr(data-placeholder);color:#9aa59e;pointer-events:none}
+  .rte-ed ul,.rt ul{margin:4px 0;padding-left:22px}
+  .rte-ed ol,.rt ol{margin:4px 0;padding-left:22px}
+  .rte-ed blockquote,.rt blockquote{margin:2px 0 2px 24px;padding:0;border:none}
+  .rte-ed div,.rt div{min-height:1em}
+  .rt{line-height:1.5}
+  .rt ul li,.rte-ed ul li{margin:1px 0}
+  .ic-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
+  .ic-top:empty{display:none}
+  .ino{display:inline-flex;align-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;font-weight:600;color:var(--ink-soft);background:var(--idle-soft);border-radius:5px;padding:1px 6px;letter-spacing:.02em;white-space:nowrap;vertical-align:middle}
+  .rp-sec{border:1px solid var(--line);border-radius:11px;margin-bottom:14px;overflow:hidden}
+  .rp-sec:last-child{margin-bottom:0}
+  .rp-sh{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#f6faf7;border-bottom:1px solid var(--line);font-weight:700;font-size:13px}
+  .rp-sh .n{width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;display:grid;place-items:center}
+  .rp-sh .act{margin-left:auto;display:flex;gap:4px}
+  .rp-sb{padding:13px}
+  .rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+  @media(max-width:640px){.rp-grid{grid-template-columns:1fr}}
+  .rp-f .l{display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+  .rp-f input[type=text],.rp-f select{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-size:13.5px;background:var(--surface);color:var(--ink)}
+  .rp-f .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:7px}
+  .rp-f .row input{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--font);font-size:13px}
+  .rp-f .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+  .rp-f .hint.bad{color:var(--danger)}
+  .rp-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+  .rp-ck{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;background:var(--surface)}
+  .rp-ck:hover{border-color:var(--green)}
+  .rp-ck.on{background:var(--green-soft);border-color:var(--green)}
+  .rp-ck input{width:15px;height:15px;accent-color:var(--green);margin:1px 0 0;flex:none;cursor:pointer}
+  .rp-ck small{display:block;color:var(--ink-soft);font-size:11.5px}
+  .rp-count{font-size:13px;color:var(--ink-soft)}
+  .rp-count b{color:var(--ink)}
+  .fdd{position:relative}
+  .fdd-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)}
+  .fdd-btn:hover{border-color:var(--green)}
+  .fdd-btn [data-lucide]{width:15px;height:15px;color:var(--ink-soft)}
+  .fdd-btn .car{width:14px;height:14px;transition:transform .15s}
+  .fdd.open .fdd-btn .car{transform:rotate(180deg)}
+  .fdd.open .fdd-btn{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .fdd-btn.active{border-color:var(--green);background:var(--green-soft);color:var(--green-dark)}
+  .fdd-btn.active [data-lucide]{color:var(--green-dark)}
+  .fdd-val{font-weight:700;color:var(--green-dark);background:var(--surface);border-radius:999px;padding:1px 8px;font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fdd-btn:not(.active) .fdd-val{background:var(--idle-soft);color:var(--ink-soft)}
+  .fdd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(19,32,26,.16);padding:6px;min-width:220px}
+  .fdd-opt{display:flex;align-items:center;gap:9px;width:100%;border:none;background:none;border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;font-family:var(--font);white-space:nowrap}
+  .fdd-opt:hover{background:#f3f7f4}
+  .fdd-opt.on{background:var(--green-soft);color:var(--green-dark);font-weight:600}
+  .fdd-opt .d{width:9px;height:9px;border-radius:50%;flex:none}
+  .fdd-opt [data-lucide]{width:15px;height:15px;flex:none}
+  .fdd-opt .ck{margin-left:auto;color:var(--green)}
+  .fdd-cols{display:flex;gap:6px}
+  .fdd-extra{border-left:1px solid var(--line);padding:6px 6px 6px 12px;display:flex;flex-direction:column;gap:5px;min-width:190px}
+  .fdd-lbl{font-size:12px;color:var(--ink-soft);font-weight:600;margin-top:4px}
+  .vtog{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+  .vtog button{border:none;background:none;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-family:var(--font)}
+  .vtog button.on{background:var(--green);color:#fff}
+  .vtog button [data-lucide]{width:14px;height:14px}
   .ic-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:2px 0 2px}
   .ic-meta .chips{gap:6px}
   .ic-div{width:1px;height:18px;background:var(--line);flex:none}
@@ -148,6 +221,14 @@
   .is-table th.c-logged,.is-table td.c-logged{width:140px;white-space:nowrap}
   .is-table th.c-go,.is-table td.c-go{width:32px;text-align:right}
   .is-table td.c-issue{min-width:220px}
+  .is-table th.c-snum,.is-table td.c-snum{width:120px;white-space:nowrap}
+  .is-table th.c-cnt,.is-table td.c-cnt{width:120px;white-space:nowrap}
+  .is-table th.c-act,.is-table td.c-act{width:84px;text-align:right}
+  .row-acts{display:inline-flex;gap:6px}
+  .cnt-pill{display:inline-grid;place-items:center;min-width:26px;height:22px;padding:0 7px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-weight:700;font-size:12.5px}
+  .ssum{display:flex;flex-wrap:wrap;gap:4px 10px}
+  .ssum .ss{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .ssum .d{width:8px;height:8px;border-radius:50%}
   .upd-pill{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
   .upd-pill:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-soft)}
   .upd-pill [data-lucide]{width:14px;height:14px}
@@ -197,7 +278,7 @@
   .tl-head .arrow{color:var(--ink-soft);width:14px;height:14px}
   .tl-time{margin-left:auto;font-size:11.5px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
   .tl-time [data-lucide]{width:12px;height:12px}
-  .tl-act{margin-top:7px;font-size:13px;white-space:pre-wrap;background:var(--green-soft);color:var(--green-dark);border-radius:7px;padding:7px 9px}
+  .tl-act{margin-top:7px;font-size:13px;white-space:normal;background:var(--green-soft);color:var(--green-dark);border-radius:7px;padding:7px 9px}
   .tl-act.none{background:none;color:var(--ink-soft);padding:0;font-style:italic}
   .tl-stores{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px}
   .tl-stores span{font-size:11px;background:var(--idle-soft);color:var(--ink-soft);border-radius:5px;padding:1px 6px;font-weight:600}
@@ -256,7 +337,8 @@
   .ifbar .grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .ifbar .lbl{font-size:12px;color:var(--ink-soft);font-weight:600;display:inline-flex;align-items:center;gap:5px}
   .ifbar .lbl [data-lucide]{width:14px;height:14px}
-  .ifbar .sep{width:1px;height:26px;background:var(--line)}
+  .ifbar .sep{display:none}
+  .ifbar{column-gap:22px;row-gap:10px}
   .fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px}
   .fchip:hover{border-color:var(--green)}
   .fchip.on{background:var(--green);border-color:var(--green);color:#fff}
@@ -527,6 +609,7 @@
     <span id="count" class="count"></span>
     <button class="btn round" id="primaryAdd"><i data-lucide="plus"></i><span id="primaryAddLabel">Add</span></button>
     <button class="btn outline round" id="multiAdd" style="display:none"><i data-lucide="layers"></i>Multi-store issue</button>
+    <button class="btn outline round" id="reportBtn" style="display:none" title="Download an Excel report of issues"><i data-lucide="file-bar-chart"></i>Report</button>
     <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
   </div>
   <div class="hintbar" id="hintbar">
@@ -636,7 +719,7 @@
 <div class="overlay top" id="noteOverlay">
   <div class="modal small">
     <div class="head"><i data-lucide="sticky-note"></i><h2 id="note_title">Add note</h2><button class="x" id="noteX">&times;</button></div>
-    <div class="body"><div class="field"><label>Note</label><textarea id="note_text" placeholder="Type your note… (a date &amp; time stamp is added automatically)"></textarea></div></div>
+    <div class="body"><div class="field"><label>Note</label><div id="note_wrap"></div><div class="help">A date &amp; time stamp is added automatically.</div></div></div>
     <footer><button class="btn ghost" id="noteCancel">Cancel</button><button class="btn yellow" id="noteSave"><i data-lucide="plus"></i>Add note</button></footer>
   </div>
 </div>
@@ -698,6 +781,30 @@
     <div class="head"><i data-lucide="lock"></i><h2>Enter password</h2><button class="x" id="impPwX">&times;</button></div>
     <div class="body"><div class="field"><label id="imp_pw_lbl">Password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
     <footer><button class="btn ghost" id="impPwCancel">Cancel</button><button class="btn" id="impPwOk"><i data-lucide="unlock"></i>Unlock</button></footer>
+  </div>
+</div>
+
+<!-- Report builder -->
+<div class="overlay top" id="rpOverlay">
+  <div class="modal" style="max-width:900px">
+    <div class="head"><i data-lucide="file-bar-chart"></i><div><h2>Issue report</h2><div class="subt">Choose what to include, then download as Excel (.xlsx)</div></div><button class="x" id="rpX">&times;</button></div>
+    <div class="body" id="rp_body"></div>
+    <footer>
+      <div class="rp-count" id="rp_count" style="margin-right:auto"></div>
+      <button class="btn ghost" id="rpCancel">Cancel</button>
+      <button class="btn" id="rpGo"><i data-lucide="download"></i>Download Excel</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Store issues popup -->
+<div class="overlay" id="stIssOverlay" style="z-index:85">
+  <div class="modal" style="max-width:920px">
+    <div class="head"><i data-lucide="store"></i><div style="flex:1;min-width:0"><h2 id="si_title">Store</h2><div class="subt" id="si_sub"></div></div>
+      <button class="btn sm outline round" id="siStore" style="margin-left:auto"><i data-lucide="info"></i>View store information</button>
+      <button class="x" id="siX" style="margin-left:6px">&times;</button></div>
+    <div class="body" id="si_body"></div>
+    <footer><button class="btn ghost" id="siClose">Close</button><button class="btn outline round" id="siLog"><i data-lucide="plus"></i>Log issue</button></footer>
   </div>
 </div>
 
@@ -804,7 +911,7 @@
         <div class="schips" id="m_chips"></div>
         <div class="help" id="m_count">No stores selected yet.</div>
       </div>
-      <div class="field" style="margin-bottom:13px"><label>What is the issue?</label><textarea id="m_issue" placeholder="e.g. DoorDash menu prices not matching the store menu"></textarea></div>
+      <div class="field" style="margin-bottom:13px"><label>What is the issue?</label><div id="m_issue_wrap"></div></div>
       <div class="field" style="margin-bottom:13px"><label>Platform(s) affected — pick one or more</label><div class="chips" id="m_platforms"></div></div>
       <div class="field"><label>Status (applies to all selected stores)</label><div class="sbtns" id="m_status"></div></div>
       <div class="warnbox" id="m_warn"><i data-lucide="info"></i><div>A multi-store issue needs <b>2 or more stores</b>. For just one store, please use the <b>Log issue</b> button instead.</div></div>
@@ -838,11 +945,12 @@ const IMPORT_PW="Sup3rUs3r!";
 
 let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
 let frPage=1, stPage=1, frStorePage=1;
-const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50]};
-const PAGE_DEF={fr:25, frst:12, st:50};
+const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50], is:[10,25,50,100]};
+const PAGE_DEF={fr:25, frst:12, st:50, is:25};
 function loadPageSize(w){ let v=PAGE_DEF[w]; try{ const x=+localStorage.getItem("ft2_ps_"+w); if(PAGE_OPTS[w].includes(x)) v=x; }catch(e){} return v; }
-let PAGE_FR=loadPageSize("fr"), PAGE_ST=loadPageSize("st"), PAGE_FRST=loadPageSize("frst");
+let PAGE_FR=loadPageSize("fr"), PAGE_ST=loadPageSize("st"), PAGE_FRST=loadPageSize("frst"), PAGE_IS=loadPageSize("is"), isPage=1;
 let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
+let isView="store"; try{ const v=localStorage.getItem("ft2_isview"); if(v==="issue"||v==="fr") isView=v; }catch(e){}
 let isStatus="", isPeriod="all", isDate="", isSort="new", isDays=7, isYear=new Date().getFullYear(), isFrom="", isTo="";
 let mStores=[], grpId=null;
 let FR=[], ST=[], SF=[], IS=[];
@@ -969,7 +1077,7 @@ function setIdleMinutes(v){ v=Math.max(0,Math.min(120,Math.round(+v||0))); try{ 
   toast(v?"Auto-refresh after "+v+" min idle":"Auto-refresh turned off","ok"); }
 function showLastRefresh(){ const el=$("lastRefresh"); if(el&&lastRefreshAt) el.textContent="Last refreshed "+lastRefreshAt.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"."; }
 function busyEditing(){
-  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay"];
+  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay"];
   if(forms.some(id=>$(id)&&$(id).classList.contains("show"))) return true;
   if(lkEditing && $("linksOverlay").classList.contains("show")) return true;
   if(curStore && (Object.values(swEditing||{}).some(Boolean) || platMenu)) return true;
@@ -1055,6 +1163,8 @@ function render(){
   const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
   $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
   $("multiAdd").style.display=(tab==="issues")?"inline-flex":"none";
+  $("reportBtn").style.display=(tab==="issues")?"inline-flex":"none";
+  if($("stIssOverlay") && $("stIssOverlay").classList.contains("show")) renderStoreIssues();
   if(tab==="franchisees") renderFranchisees();
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
@@ -1084,7 +1194,7 @@ function renderFranchisees(){
       +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
       +'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
-  const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="hand-pointer"></i><div>Select a franchisee to see details</div></div></div>';
+  const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="mouse-pointer-click"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
     +'<button class="iconbtn" title="Bulk add from spreadsheet" aria-label="Bulk add from spreadsheet" onclick="openBulk()"><i data-lucide="file-spreadsheet"></i></button>'
     +'<button class="iconbtn" title="Add franchisee" aria-label="Add franchisee" onclick="openFr(null)"><i data-lucide="user-plus"></i></button>'
@@ -1122,7 +1232,7 @@ function detailHtml(id){
       +'<i data-lucide="chevron-right" class="muted"></i></div>').join("")+pagerHtml('frst',frStorePage,stTotal,stores.length):'<p class="muted">No stores.</p>';
   const issueHtml=issues.length?issues.map(i=>{ const s=storeByNum[String(i.store_num)];
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
-    +'<span class="val">'+esc(i.title)+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
+    +'<span class="val">'+noTag(i)+' '+esc(oneLine(i.title))+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
     +'<span class="muted" style="font-size:11.5px">'+fmtTs(i.updated_at||i.created_at)+'</span></div>';}).join(""):'<p class="muted">No issues logged.</p>';
   const staffHtml=arr=>arr.length?arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join(""):'<span class="muted">None for this territory</span>';
   return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
@@ -1218,58 +1328,570 @@ function renderIssues(){
   const {mode,q}=parseQuery();
   const matchSearch=i=>{
     if(!q) return true;
-    if(mode==="store") return String(i.store_num||"").toLowerCase().includes(q);
+    if(mode==="store") return String(i.store_num||"").toLowerCase().includes(q) || (q.length>=6 && issueNo(i).includes(q));
     if(mode==="fr") return (frName[i.franchisee_id]||"").toLowerCase().includes(q);
-    return [i.title,i.action_taken,i.store_num,frName[i.franchisee_id],issuePlatforms(i).join(" ")].join(" ").toLowerCase().includes(q);
+    return [richToPlain(i.title),richToPlain(i.action_taken),i.store_num,issueNo(i),frName[i.franchisee_id],issuePlatforms(i).join(" ")].join(" ").toLowerCase().includes(q);
   };
-  // build entries: singles + groups (a group shows if ANY member passes the filters)
-  const groups={}, entries=[];
-  IS.forEach(i=>{
-    if(i.group_id){ (groups[i.group_id]=groups[i.group_id]||[]).push(i); }
-    else entries.push({kind:"single", items:[i], created:i.created_at});
-  });
-  Object.keys(groups).forEach(g=>{ const m=groups[g].sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||"")); entries.push({kind:"group", gid:g, items:m, created:m[0].created_at}); });
   const pass=i=>(!isStatus||normIssueStatus(i.status)===isStatus) && issueInPeriod(i) && matchSearch(i);
-  let list=entries.filter(e=>e.items.some(pass));
-  list.sort((a,b)=>{ const da=new Date(a.created).getTime()||0, dbb=new Date(b.created).getTime()||0; return isSort==="new"? dbb-da : da-dbb; });
+  const byStore=new Map();
+  IS.filter(pass).forEach(i=>{ const k=String(i.store_num||""); if(!byStore.has(k)) byStore.set(k,[]); byStore.get(k).push(i); });
+  const tms=x=>new Date(x).getTime()||0;
+  let list=[...byStore.entries()].map(([num,items])=>{
+    const st=storeByNum[num]; const fid=st?st.franchisee_id:(items.find(x=>x.franchisee_id)||{}).franchisee_id;
+    return { num, items, st, fid, open:items.filter(isOpen).length,
+      last:Math.max(...items.map(x=>tms(x.updated_at||x.created_at))), first:Math.min(...items.map(x=>tms(x.created_at))) };
+  });
+  list.sort((a,b)=>isSort==="new"?(b.last-a.last):(a.first-b.first));
 
   const openCount=IS.filter(isOpen).length;
-  $("count").textContent=list.length+" shown · "+openCount+" open";
+  $("count").textContent=list.length+" store"+(list.length!==1?"s":"")+" · "+openCount+" open issue"+(openCount!==1?"s":"");
 
-  const sChip=(v,label,color)=>'<button class="fchip'+(isStatus===v?' on':'')+'" onclick="setIsStatus(\''+v+'\')">'+(color?'<span class="d" style="background:'+color+'"></span>':'')+label+'</button>';
-  const needDate=(isPeriod==="day"||isPeriod==="week"||isPeriod==="month");
-  let extra='';
-  if(needDate) extra='<input type="date" class="fdate" value="'+esc(isDate)+'" title="'+(isPeriod==="week"?"Any day in the week":isPeriod==="month"?"Any day in the month":"Day")+'" onchange="setIsDate(this.value)">';
-  else if(isPeriod==="year") extra='<select class="fsel" onchange="isYear=+this.value;render()">'+issueYears().map(y=>'<option'+(+isYear===y?' selected':'')+'>'+y+'</option>').join("")+'</select>';
-  else if(isPeriod==="lastdays") extra='<span class="lbl" style="font-weight:500">Last</span><input type="number" min="1" max="3650" class="fnum" value="'+esc(isDays)+'" onchange="isDays=Math.max(1,+this.value||1);render()"><span class="lbl" style="font-weight:500">days</span>';
-  else if(isPeriod==="range") extra='<input type="date" class="fdate" value="'+esc(isFrom)+'" title="From" onchange="isFrom=this.value;render()"><span class="lbl" style="font-weight:500">to</span><input type="date" class="fdate" value="'+esc(isTo)+'" title="To" onchange="isTo=this.value;render()">';
-  const bar='<div class="ifbar">'
-    +'<div class="grp"><span class="lbl"><i data-lucide="filter"></i>Status</span>'
-      +sChip("","All")+sChip("Pending","Pending","var(--danger)")+sChip("Work in Progress","Work in Progress","var(--warn)")+sChip("Resolved","Resolved","var(--ok)")+'</div>'
-    +'<span class="sep"></span>'
-    +'<div class="grp"><span class="lbl"><i data-lucide="calendar"></i>Date logged</span>'
-      +'<select class="fsel" onchange="setIsPeriod(this.value)">'
-        +[["all","All dates"],["today","Today"],["thisweek","This week"],["thismonth","This month"],["thisyear","This year"],["lastdays","Last N days…"],["day","Pick a day…"],["week","Pick a week…"],["month","Pick a month…"],["year","Pick a year…"],["range","Date range…"]]
-          .map(([v,l])=>'<option value="'+v+'"'+(isPeriod===v?' selected':'')+'>'+l+'</option>').join("")
-      +'</select>'
-      +extra
-    +'</div>'
-    +'<span class="sep"></span>'
-    +'<div class="grp"><span class="lbl"><i data-lucide="arrow-down-up"></i>Sort</span>'
-      +'<select class="fsel" onchange="setIsSort(this.value)"><option value="new"'+(isSort==="new"?' selected':'')+'>Most recent first</option><option value="old"'+(isSort==="old"?' selected':'')+'>Oldest first</option></select></div>'
-    +((isStatus||isPeriod!=="all"||q)?'<button class="btn link" onclick="clearIsFilters()" style="margin-left:auto"><i data-lucide="x"></i>Clear filters</button>':'')
-    +'</div>';
+  const bar=issueFilterBar(q);
 
   if(!IS.length){ setView(bar+emptyBox("clipboard-list","No issues logged","Use “Log issue” or “Multi-store issue” to add one.")); return; }
+  if(isView==="issue"){ renderIssuesByIssue(bar, pass, frName); return; }
+  if(isView==="fr"){ renderIssuesByFr(bar, pass, frName); return; }
   if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
 
-  const rows=list.map(e=>{
+  const isTotal=Math.max(1,Math.ceil(list.length/PAGE_IS));
+  if(isPage>isTotal) isPage=isTotal; if(isPage<1) isPage=1;
+  const rows=list.slice((isPage-1)*PAGE_IS, isPage*PAGE_IS).map(g=>{
+    const counts={}; g.items.forEach(x=>{ const k=normIssueStatus(x.status); counts[k]=(counts[k]||0)+1; });
+    const sum=ISSUE_STATES.filter(k=>counts[k]).map(k=>{ const c=k==="Resolved"?"var(--ok)":(k==="Work in Progress"?"var(--warn)":"var(--danger)");
+      return '<span class="ss"><span class="d" style="background:'+c+'"></span>'+counts[k]+' '+(k==="Work in Progress"?"WIP":k)+'</span>'; }).join("");
+    return '<tr class="click" onclick="openStoreIssues(\''+esc(g.num)+'\')">'
+      +'<td class="store c-snum"><span class="idot-col" style="display:inline-flex;width:14px">'+(g.open?openDot(g.open):'')+'</span>'+(g.num?esc(g.num):'—')+'</td>'
+      +'<td class="c-cnt"><span class="cnt-pill">'+g.items.length+'</span>'+(g.open?'<span class="muted" style="font-size:11.5px;margin-left:6px">'+g.open+' open</span>':'')+'</td>'
+      +'<td>'+esc(frName[g.fid]||"—")+'</td>'
+      +'<td class="hide-sm"><div class="ssum">'+sum+'</div></td>'
+      +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(new Date(g.last).toISOString())+'</td>'
+      +'<td class="c-go"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+  }).join("");
+  setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th class="c-snum">Store #</th><th class="c-cnt">Issues</th><th>Franchisee</th><th class="hide-sm">Status</th><th class="hide-sm c-logged">Last activity</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +pagerHtml('is',isPage,isTotal,list.length)+'</div>');
+}
+
+
+
+/* ===== Rich text (bold, bullets, indent) — cleaned before saving and before showing ===== */
+const RICH_OK={B:1,STRONG:"B",I:1,EM:"I",UL:1,OL:1,LI:1,BR:1,DIV:1,P:"DIV",BLOCKQUOTE:1};
+const RICH_DROP={SCRIPT:1,STYLE:1,IFRAME:1,OBJECT:1,EMBED:1,TEMPLATE:1,SVG:1,MATH:1,LINK:1,META:1};
+function sanitizeRich(html){
+  const doc=new DOMParser().parseFromString("<div>"+String(html||"")+"</div>","text/html");
+  const root=doc.body.firstChild; if(!root) return "";
+  const clean=node=>{
+    [...node.childNodes].forEach(ch=>{
+      if(ch.nodeType===3) return;
+      if(ch.nodeType!==1){ ch.remove(); return; }
+      const tag=ch.tagName.toUpperCase();
+      if(RICH_DROP[tag]){ ch.remove(); return; }
+      clean(ch);
+      if(tag==="SPAN" && /font-weight\s*:\s*(bold|[6-9]00)/i.test(ch.getAttribute("style")||"")){
+        const b=doc.createElement("b"); while(ch.firstChild) b.appendChild(ch.firstChild); ch.replaceWith(b); return; }
+      const ok=RICH_OK[tag];
+      if(!ok){ ch.replaceWith(...[...ch.childNodes]); return; }
+      if(typeof ok==="string"){ const n=doc.createElement(ok); while(ch.firstChild) n.appendChild(ch.firstChild); ch.replaceWith(n); return; }
+      [...ch.attributes].forEach(a=>ch.removeAttribute(a.name));
+    });
+  };
+  clean(root);
+  return root.innerHTML;
+}
+const RICH_RE=/<\/?(b|strong|i|em|ul|ol|li|br|div|p|blockquote)\b/i;
+function richHtml(v){ const t=String(v??""); return RICH_RE.test(t)?sanitizeRich(t):esc(t).replace(/\n/g,"<br>"); }
+function richToPlain(v){
+  const t=String(v??""); if(!RICH_RE.test(t)) return t;
+  const doc=new DOMParser().parseFromString("<div>"+sanitizeRich(t)+"</div>","text/html");
+  let out=""; const nl=()=>{ if(out && !out.endsWith("\n")) out+="\n"; };
+  const walk=(n,ind)=>n.childNodes.forEach(c=>{
+    if(c.nodeType===3){ out+=c.textContent; return; }
+    const g=c.tagName;
+    if(g==="BR"){ out+="\n"+ind; return; }
+    if(g==="LI"){ nl(); out+=ind+"• "; walk(c,ind+"   "); nl(); return; }
+    if(g==="UL"||g==="OL"){ walk(c,ind); return; }
+    if(g==="BLOCKQUOTE"){ nl(); out+=ind+"    "; walk(c,ind+"    "); nl(); return; }
+    if(g==="DIV"){ nl(); out+=ind; walk(c,ind); nl(); return; }
+    walk(c,ind);
+  });
+  walk(doc.body.firstChild,"");
+  return out.replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+function oneLine(v,max){ max=max||140; const t=richToPlain(v).replace(/\s*\n+\s*/g," · ").replace(/\s+/g," ").trim(); return t.length>max?t.slice(0,max-1)+"…":t; }
+function richEditor(id, placeholder, minH){
+  return '<div class="rte"><div class="rte-bar" role="toolbar" aria-label="Text formatting">'
+    +'<button type="button" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold"><i data-lucide="bold"></i></button>'
+    +'<span class="rte-sep"></span>'
+    +'<button type="button" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><i data-lucide="list"></i></button>'
+    +'<button type="button" data-cmd="outdent" title="Decrease indent (Shift+Tab)" aria-label="Decrease indent"><i data-lucide="indent-decrease"></i></button>'
+    +'<button type="button" data-cmd="indent" title="Increase indent (Tab)" aria-label="Increase indent"><i data-lucide="indent-increase"></i></button>'
+    +'</div><div class="rte-ed" id="'+id+'" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="'+esc(placeholder||"")+'"'+(minH?' style="min-height:'+minH+'px"':'')+'></div></div>';
+}
+function getRich(id){
+  const el=$(id); if(!el) return "";
+  let h=sanitizeRich(el.innerHTML).replace(/(<br>|<div><br><\/div>|\s|&nbsp;)+$/gi,"").trim();
+  const plain=richToPlain(h).trim();
+  if(!plain) return "";
+  if(!/<(b|i|ul|ol|li|blockquote)\b/i.test(h)) return plain;
+  return h;
+}
+function setRich(id,v){ const el=$(id); if(el) el.innerHTML=v?richHtml(v):""; rteState(); }
+function rteState(){
+  document.querySelectorAll(".rte").forEach(r=>{
+    const ed=r.querySelector(".rte-ed"); const act=ed && ed.contains(document.getSelection().anchorNode);
+    r.querySelectorAll(".rte-bar button").forEach(b=>{ let on=false; try{ on=act && document.queryCommandState(b.dataset.cmd); }catch(e){} b.classList.toggle("on",!!on); });
+  });
+}
+document.addEventListener("mousedown",e=>{
+  const b=e.target.closest && e.target.closest(".rte-bar button"); if(!b) return;
+  e.preventDefault();
+  const ed=b.closest(".rte").querySelector(".rte-ed");
+  if(!ed.contains(document.getSelection().anchorNode)){ ed.focus(); const r=document.createRange(); r.selectNodeContents(ed); r.collapse(false); const sel=document.getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+  document.execCommand(b.dataset.cmd,false,null); rteState();
+});
+document.addEventListener("keydown",e=>{
+  const ed=e.target.closest && e.target.closest(".rte-ed"); if(!ed) return;
+  if(e.key==="Tab"){ e.preventDefault(); document.execCommand(e.shiftKey?"outdent":"indent",false,null); rteState(); }
+});
+document.addEventListener("paste",e=>{
+  const ed=e.target.closest && e.target.closest(".rte-ed"); if(!ed) return;
+  e.preventDefault(); const t=(e.clipboardData||window.clipboardData).getData("text/plain");
+  document.execCommand("insertText",false,t);
+});
+document.addEventListener("selectionchange",rteState);
+function issueNo(i){ return i&&i.issue_no?String(i.issue_no):""; }
+function noTag(i,extra){ const n=issueNo(i); return n?'<span class="ino" title="Issue number">#'+n+(extra||"")+'</span>':''; }
+
+/* ===== Issue report (Excel) ===== */
+const RP_SHEETS=[
+  ["summary","Summary","Totals, status counts, filters used"],
+  ["issues","Issues","One row per issue per store"],
+  ["updates","Updates / Action taken","Every step with date, status change and action taken"],
+  ["byfr","By franchisee","Issue counts per franchisee"],
+  ["bystore","By store","Issue counts per store"],
+  ["bymonth","By month","Issue counts per month logged"],
+  ["bystatus","By status","Issue counts per status"]
+];
+const RP_COLS=[
+  ["id","Issue #"],["store","Store #"],["fr","Franchisee"],["terr","Territory"],["addr","Store address"],["city","City"],["state","State"],
+  ["title","Issue description"],["plat","Platforms"],["status","Status"],["multi","Multi-store (store count)"],
+  ["logged","Date logged"],["updated","Last updated"],["days","Days open / days to resolve"],["nupd","Number of updates"],
+  ["lastact","Latest action taken"],["allact","All actions taken (with dates)"],["om","OM"],["fbc","FBC"],["frcontact","Franchisee email / cell"]
+];
+const RP_DEF_OFF=["addr","frcontact"];
+let RP=null;
+function rpDefaults(){
+  let saved={}; try{ saved=JSON.parse(localStorage.getItem("ft2_report")||"{}"); }catch(e){}
+  return { fr:"", store:"", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"",
+    statuses:new Set(ISSUE_STATES), tz:saved.tz||"local",
+    sheets:new Set(saved.sheets||["summary","issues","updates","byfr","bystore","bystatus"]),
+    cols:new Set(saved.cols||RP_COLS.map(c=>c[0]).filter(k=>!RP_DEF_OFF.includes(k))) };
+}
+function rpSave(){ try{ localStorage.setItem("ft2_report",JSON.stringify({tz:RP.tz,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
+function openReport(){ RP=rpDefaults(); renderReport(); $("rpOverlay").classList.add("show"); }
+function rpUseTabFilters(){
+  RP.period=isPeriod; RP.date=isDate; RP.days=isDays; RP.year=isYear; RP.from=isFrom; RP.to=isTo;
+  RP.statuses=new Set(isStatus?[isStatus]:ISSUE_STATES);
+  const {mode,q}=parseQuery();
+  if(mode==="store"&&q&&storeByNum[q]) RP.store=q;
+  if(mode==="fr"&&q){ const f=FR.find(x=>normName(x.name)===normName(q))||FR.find(x=>(x.name||"").toLowerCase().includes(q)); if(f) RP.fr=f.name; }
+  renderReport(); toast("Copied the Issues tab filters","ok");
+}
+function rpBounds(){
+  const now=new Date(), ds=x=>{const t=new Date(x); t.setHours(0,0,0,0); return t;}, ld=v=>v?new Date(v+"T00:00:00"):null;
+  let from=null,to=null; const p=RP.period;
+  const base=(p==="day"||p==="week"||p==="month")?ld(RP.date):now;
+  if((p==="day"||p==="week"||p==="month")&&!base) return [null,null];
+  if(p==="today"||p==="day"){ from=ds(base); to=new Date(from); to.setDate(to.getDate()+1); }
+  else if(p==="thisweek"||p==="week"){ from=ds(base); from.setDate(from.getDate()-from.getDay()); to=new Date(from); to.setDate(to.getDate()+7); }
+  else if(p==="thismonth"||p==="month"){ from=new Date(base.getFullYear(),base.getMonth(),1); to=new Date(base.getFullYear(),base.getMonth()+1,1); }
+  else if(p==="thisyear"){ from=new Date(now.getFullYear(),0,1); to=new Date(now.getFullYear()+1,0,1); }
+  else if(p==="year"){ const y=+RP.year||now.getFullYear(); from=new Date(y,0,1); to=new Date(y+1,0,1); }
+  else if(p==="lastdays"){ to=ds(now); to.setDate(to.getDate()+1); from=new Date(to); from.setDate(from.getDate()-Math.max(1,+RP.days||1)); }
+  else if(p==="range"){ from=ld(RP.from); const t=ld(RP.to); if(t){ to=new Date(t); to.setDate(to.getDate()+1); } }
+  return [from,to];
+}
+function rpFrMatch(){ if(!RP.fr.trim()) return {all:true}; const f=findDupFr(RP.fr,null); return f?{f}:{bad:true}; }
+function rpSelected(){
+  const fm=rpFrMatch(); const st=RP.store.trim().replace(/^#/,"");
+  const [from,to]=rpBounds();
+  return IS.filter(i=>{
+    if(fm.bad) return false;
+    if(fm.f && (issueFid(i)||0)!==fm.f.id) return false;
+    if(st && String(i.store_num||"")!==st) return false;
+    if(!RP.statuses.has(normIssueStatus(i.status))) return false;
+    const d=new Date(i.created_at); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
+    return true;
+  });
+}
+function rpPeriodLabel(){
+  const p=RP.period, L={all:"All dates",today:"Today",thisweek:"This week",thismonth:"This month",thisyear:"This year"};
+  if(L[p]) return L[p];
+  if(p==="lastdays") return "Last "+RP.days+" days";
+  if(p==="year") return "Year "+RP.year;
+  if(p==="day") return "Day: "+(RP.date||"not set");
+  if(p==="week") return "Week of "+(RP.date||"not set");
+  if(p==="month") return "Month of "+(RP.date||"not set");
+  if(p==="range") return (RP.from||"start")+" to "+(RP.to||"today");
+  return p;
+}
+function renderReport(){
+  const fm=rpFrMatch();
+  const frStores=fm.f?(storesByFr[fm.f.id]||[]).map(x=>x.num).sort():null;
+  const stVal=RP.store.trim().replace(/^#/,"");
+  const stBad=stVal && !storeByNum[stVal] && !IS.some(i=>String(i.store_num)===stVal);
+  const stWrongFr=stVal && fm.f && storeByNum[stVal] && storeByNum[stVal].franchisee_id!==fm.f.id;
+  const p=RP.period;
+  let extra='';
+  if(p==="day"||p==="week"||p==="month") extra='<div class="row"><span class="hint" style="margin:0">'+(p==="week"?"Any day in the week":p==="month"?"Any day in the month":"Day")+'</span><input type="date" value="'+esc(RP.date)+'" onchange="RP.date=this.value;renderReport()"></div>';
+  else if(p==="year") extra='<div class="row"><select onchange="RP.year=+this.value;renderReport()" style="width:120px;height:34px">'+issueYears().map(y=>'<option'+(+RP.year===y?' selected':'')+'>'+y+'</option>').join("")+'</select></div>';
+  else if(p==="lastdays") extra='<div class="row"><span class="hint" style="margin:0">Last</span><input type="number" min="1" max="3650" style="width:80px" value="'+esc(RP.days)+'" onchange="RP.days=Math.max(1,+this.value||1);renderReport()"><span class="hint" style="margin:0">days</span></div>';
+  else if(p==="range") extra='<div class="row"><span class="hint" style="margin:0">From</span><input type="date" value="'+esc(RP.from)+'" onchange="RP.from=this.value;renderReport()"><span class="hint" style="margin:0">To</span><input type="date" value="'+esc(RP.to)+'" onchange="RP.to=this.value;renderReport()"></div>';
+  const ck=(on,label,sub,onchange)=>'<label class="rp-ck'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="'+onchange+'"><span>'+label+(sub?'<small>'+sub+'</small>':'')+'</span></label>';
+  const stColor={"Pending":"var(--danger)","Work in Progress":"var(--warn)","Resolved":"var(--ok)"};
+
+  $("rp_body").innerHTML=
+    '<datalist id="rp_frlist">'+FR.map(f=>'<option value="'+esc(f.name)+'">').join("")+'</datalist>'
+   +'<datalist id="rp_stlist">'+(frStores||ST.map(x=>x.num).sort()).map(n=>'<option value="'+esc(n)+'">').join("")+'</datalist>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">1</span>Which issues<span class="act"><button class="btn link" onclick="rpUseTabFilters()"><i data-lucide="copy"></i>Use Issues tab filters</button></span></div><div class="rp-sb"><div class="rp-grid">'
+     +'<div class="rp-f"><span class="l">Franchisee</span><input type="text" list="rp_frlist" placeholder="All franchisees — or type a name" value="'+esc(RP.fr)+'" onchange="RP.fr=this.value;renderReport()">'
+       +(fm.bad?'<div class="hint bad">No franchisee with that exact name. Pick one from the list.</div>':(fm.f?'<div class="hint">'+(storesByFr[fm.f.id]||[]).length+' stores</div>':'<div class="hint">Leave empty for all franchisees</div>'))+'</div>'
+     +'<div class="rp-f"><span class="l">Store #</span><input type="text" list="rp_stlist" placeholder="All stores — or type a store #" value="'+esc(RP.store)+'" onchange="RP.store=this.value;renderReport()">'
+       +(stBad?'<div class="hint bad">Store not found.</div>':(stWrongFr?'<div class="hint bad">This store belongs to a different franchisee.</div>':'<div class="hint">Leave empty for all stores'+(fm.f?' of this franchisee':'')+'</div>'))+'</div>'
+     +'<div class="rp-f"><span class="l">Date logged</span><select onchange="RP.period=this.value;if([\'day\',\'week\',\'month\'].includes(this.value)&&!RP.date){const t=new Date();RP.date=t.getFullYear()+\'-\'+String(t.getMonth()+1).padStart(2,\'0\')+\'-\'+String(t.getDate()).padStart(2,\'0\');}renderReport()">'
+       +PERIODS.map(([v,l])=>'<option value="'+v+'"'+(p===v?' selected':'')+'>'+l+'</option>').join("")+'</select>'+extra+'</div>'
+     +'<div class="rp-f"><span class="l">Status</span><div class="chips">'
+       +ISSUE_STATES.map(st=>'<button type="button" class="mchip'+(RP.statuses.has(st)?' sel':'')+'" onclick="rpToggleStatus(\''+st+'\')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+stColor[st]+';margin-right:5px"></span>'+st+'</button>').join("")
+       +'</div><div class="hint">'+(RP.statuses.size===3?"All statuses":RP.statuses.size?"Only the selected statuses":"Pick at least one")+'</div></div>'
+   +'</div></div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">2</span>Sheets in the Excel file<span class="act"><button class="btn link" onclick="rpAll(\'sheets\',true)">All</button><button class="btn link" onclick="rpAll(\'sheets\',false)">None</button></span></div><div class="rp-sb"><div class="rp-checks">'
+     +RP_SHEETS.map(([k,l,sub])=>ck(RP.sheets.has(k),l,sub,"rpToggle('sheets','"+k+"')")).join("")+'</div></div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">3</span>Columns in the Issues sheet<span class="act"><button class="btn link" onclick="rpAll(\'cols\',true)">All</button><button class="btn link" onclick="rpAll(\'cols\',false)">None</button></span></div><div class="rp-sb"'+(RP.sheets.has("issues")?'':' style="opacity:.5"')+'><div class="rp-checks">'
+     +RP_COLS.map(([k,l])=>ck(RP.cols.has(k),l,"","rpToggle('cols','"+k+"')")).join("")+'</div>'
+     +(RP.sheets.has("issues")?'':'<div class="hint" style="margin-top:8px">Turn on the Issues sheet to use these columns.</div>')+'</div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb"><div class="rp-f" style="max-width:340px"><span class="l">Show dates and times in</span>'
+     +'<select onchange="RP.tz=this.value;rpSave()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div></div></div>';
+  const sel=rpSelected();
+  const nSt=new Set(sel.map(i=>String(i.store_num||""))).size, nFr=new Set(sel.map(i=>issueFid(i)||0)).size;
+  $("rp_count").innerHTML=sel.length?'<b>'+sel.length+'</b> issue'+(sel.length!==1?'s':'')+' · <b>'+nSt+'</b> store'+(nSt!==1?'s':'')+' · <b>'+nFr+'</b> franchisee'+(nFr!==1?'s':''):'No issues match these choices';
+  $("rpGo").disabled=!sel.length || !RP.sheets.size || (RP.sheets.has("issues")&&!RP.cols.size&&RP.sheets.size===1);
+  icons();
+}
+function rpToggleStatus(st){ RP.statuses.has(st)?RP.statuses.delete(st):RP.statuses.add(st); renderReport(); }
+function rpToggle(kind,k){ const set=RP[kind]; set.has(k)?set.delete(k):set.add(k); rpSave(); renderReport(); }
+function rpAll(kind,on){ RP[kind]=new Set(on?(kind==="sheets"?RP_SHEETS:RP_COLS).map(x=>x[0]):[]); rpSave(); renderReport(); }
+
+function rpDate(ts){
+  if(!ts) return null; const d=new Date(ts); if(isNaN(d)) return null;
+  if(RP.tz==="local") return new Date(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours(),d.getMinutes(),d.getSeconds());
+  const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:RP.tz,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d).map(x=>[x.type,x.value]));
+  return new Date(+parts.year,+parts.month-1,+parts.day,+parts.hour,+parts.minute,+parts.second);
+}
+function rpDateText(ts){ const d=rpDate(ts); if(!d) return ""; const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()); }
+function rpTzName(){ return RP.tz==="local"?(Intl.DateTimeFormat().resolvedOptions().timeZone||"computer time"):(RP.tz==="America/Los_Angeles"?"Pacific Time":"Philippine Time"); }
+function issueDays(i){
+  const start=new Date(i.created_at); if(isNaN(start)) return "";
+  let end=new Date();
+  if(!isOpen(i)){ const h=historyEntries(i).filter(e=>normIssueStatus(e.status||"")==="Resolved"); end=new Date((h.length?h[h.length-1].ts:null)||i.updated_at||i.created_at); }
+  return Math.max(0,Math.round((end-start)/864e5*10)/10);
+}
+function rpSheet(rows, widths, opts){
+  const X=window.XLSX;
+  const ws=X.utils.aoa_to_sheet(rows,{cellDates:true});
+  ws["!cols"]=widths.map(w=>({wch:w}));
+  const range=X.utils.decode_range(ws["!ref"]||"A1");
+  const hr=(opts&&opts.headerRow)||0;
+  for(let R=range.s.r;R<=range.e.r;R++) for(let C=range.s.c;C<=range.e.c;C++){
+    const a=X.utils.encode_cell({r:R,c:C}); const cell=ws[a]; if(!cell) continue;
+    if(cell.t==="d"){ cell.z="yyyy-mm-dd hh:mm"; }
+    const st={font:{name:"Arial",sz:10},alignment:{vertical:"top",wrapText:true}};
+    if(R===hr){ st.font={name:"Arial",sz:10,bold:true,color:{rgb:"FFFFFF"}}; st.fill={fgColor:{rgb:"0B8043"}}; st.alignment={vertical:"center",wrapText:true}; }
+    if(opts&&opts.titleRows&&R<opts.titleRows){ st.font={name:"Arial",sz:R===0?14:10,bold:R===0}; }
+    if(opts&&opts.boldCol0&&C===0&&R>=hr) st.font={...st.font,bold:true};
+    cell.s=st;
+  }
+  if(opts&&opts.filter) ws["!autofilter"]={ref:X.utils.encode_range({s:{r:hr,c:0},e:{r:range.e.r,c:range.e.c}})};
+  return ws;
+}
+function countRow(items){ const c={}; items.forEach(x=>{ const k=normIssueStatus(x.status); c[k]=(c[k]||0)+1; }); return [items.length, c["Pending"]||0, c["Work in Progress"]||0, c["Resolved"]||0]; }
+function lastActivity(items){ return items.map(x=>x.updated_at||x.created_at).sort().pop(); }
+
+function downloadReport(){
+  const X=window.XLSX; if(!X){ toast("Excel tool didn't load — check your internet and reopen the app","err"); return; }
+  const sel=rpSelected().slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  if(!sel.length){ toast("No issues match these choices","err"); return; }
+  const wb=X.utils.book_new();
+  const frOf=i=>FR.find(x=>x.id===issueFid(i));
+  const gsize=i=>i.group_id?IS.filter(x=>x.group_id===i.group_id).length:1;
+  const fm=rpFrMatch();
+
+  if(RP.sheets.has("summary")){
+    const [tot,pen,wip,res]=countRow(sel);
+    const resolved=sel.filter(i=>!isOpen(i)).map(issueDays).filter(v=>v!=="");
+    const avg=resolved.length?Math.round(resolved.reduce((a,b)=>a+b,0)/resolved.length*10)/10:"—";
+    const rows=[
+      ["Issue Report — 3PD Helpdesk"],
+      ["Generated: "+rpDateText(new Date().toISOString())+" ("+rpTzName()+")"],
+      [],
+      ["Filters used",""],
+      ["Franchisee", fm.f?fm.f.name:"All franchisees"],
+      ["Store #", RP.store.trim()||"All stores"],
+      ["Date logged", rpPeriodLabel()],
+      ["Status", RP.statuses.size===3?"All statuses":[...RP.statuses].join(", ")],
+      [],
+      ["Totals",""],
+      ["Issues (per store)", tot],
+      ["Stores with issues", new Set(sel.map(i=>String(i.store_num||""))).size],
+      ["Franchisees with issues", new Set(sel.map(i=>issueFid(i)||0)).size],
+      ["Pending", pen],["Work in Progress", wip],["Resolved", res],
+      ["Resolved rate", tot?Math.round(res/tot*1000)/10+"%":"—"],
+      ["Average days to resolve", avg],
+      ["Total update steps", sel.reduce((n,i)=>n+historyEntries(i).length,0)],
+      [],
+      ["Note: a multi-store issue is counted once for each store it was logged to."]
+    ];
+    const ws=rpSheet(rows,[30,40],{headerRow:-1,titleRows:2,boldCol0:false});
+    ["A4","A10"].forEach(a=>{ if(ws[a]) ws[a].s={font:{name:"Arial",sz:11,bold:true,color:{rgb:"0B8043"}}}; });
+    X.utils.book_append_sheet(wb, ws, "Summary");
+  }
+
+  if(RP.sheets.has("issues") && RP.cols.size){
+    const cols=RP_COLS.filter(c=>RP.cols.has(c[0]));
+    const W={id:9,store:10,fr:28,terr:10,addr:30,city:14,state:7,title:44,plat:22,status:16,multi:12,logged:17,updated:17,days:12,nupd:10,lastact:40,allact:60,om:20,fbc:20,frcontact:32};
+    const rows=[cols.map(c=>c[1])];
+    sel.forEach(i=>{
+      const st=storeByNum[String(i.store_num||"")], f=frOf(i), {om,fbc}=staffFor(st?st.territory:(f?f.territory:""));
+      const h=historyEntries(i), acts=h.filter(e=>e.kind!=="created"&&e.action);
+      const val={
+        id:issueNo(i)||i.id, store:i.store_num||"", fr:f?f.name:"", terr:st?st.territory||"":(f?f.territory||"":""), addr:st?st.address||"":"", city:st?st.city||"":"", state:st?st.state||"":"",
+        title:richToPlain(i.title||""), plat:issuePlatforms(i).join(", "), status:normIssueStatus(i.status), multi:i.group_id&&gsize(i)>1?"Yes ("+gsize(i)+")":"No",
+        logged:rpDate(i.created_at), updated:rpDate(i.updated_at||i.created_at), days:issueDays(i), nupd:h.filter(e=>e.kind!=="created").length,
+        lastact:richToPlain(i.action_taken||(acts.length?acts[acts.length-1].action:"")),
+        allact:acts.map(e=>rpDateText(e.ts)+" — "+(e.prev&&e.status&&normIssueStatus(e.prev)!==normIssueStatus(e.status)?"["+normIssueStatus(e.prev)+" → "+normIssueStatus(e.status)+"] ":(e.status?"["+normIssueStatus(e.status)+"] ":""))+richToPlain(e.action)).join("\n"),
+        om:om.map(x=>x.name).join(", "), fbc:fbc.map(x=>x.name).join(", "),
+        frcontact:f?contactsOf(f).filter(c=>c.value).map(c=>c.value).join(", "):""
+      };
+      rows.push(cols.map(c=>val[c[0]]));
+    });
+    X.utils.book_append_sheet(wb, rpSheet(rows, cols.map(c=>W[c[0]]||14), {filter:true}), "Issues");
+  }
+
+  if(RP.sheets.has("updates")){
+    const rows=[["Issue #","Store #","Franchisee","Issue description","Step #","Date / time","Step","From status","To status","Action taken"]];
+    sel.forEach(i=>{ const f=frOf(i);
+      historyEntries(i).forEach((e,idx)=>{
+        const to=e.status?normIssueStatus(e.status):"", from=e.prev?normIssueStatus(e.prev):"";
+        const kind=e.kind==="created"?"Issue logged":(from&&to&&from!==to?"Status changed":"Update");
+        rows.push([issueNo(i)||i.id, i.store_num||"", f?f.name:"", richToPlain(i.title||""), idx+1, rpDate(e.ts), kind, e.kind==="created"?"":from, to, e.kind==="created"?"":richToPlain(e.action||"")]);
+      });
+    });
+    X.utils.book_append_sheet(wb, rpSheet(rows,[9,10,28,40,7,17,15,16,16,60],{filter:true}), "Updates");
+  }
+
+  const groupSheet=(title,keyFn,headFn,headers,widths,sortFn)=>{
+    const m=new Map(); sel.forEach(i=>{ const k=keyFn(i); if(!m.has(k)) m.set(k,[]); m.get(k).push(i); });
+    let groups=[...m.entries()]; if(sortFn) groups.sort(sortFn);
+    const rows=[headers]; groups.forEach(([k,items])=>rows.push([...headFn(k,items), ...countRow(items), rpDate(lastActivity(items))]));
+    X.utils.book_append_sheet(wb, rpSheet(rows,widths,{filter:true}), title);
+  };
+  const cHead=["Total issues","Pending","Work in Progress","Resolved","Last activity"];
+  if(RP.sheets.has("byfr")) groupSheet("By franchisee", i=>issueFid(i)||0,
+    (fid,items)=>{ const f=FR.find(x=>x.id===fid); return [f?f.name:"Unknown", f?f.territory||"":"", new Set(items.map(x=>String(x.store_num||""))).size]; },
+    ["Franchisee","Territory","Stores with issues",...cHead],[30,12,12,11,10,12,10,17], (a,b)=>b[1].length-a[1].length);
+  if(RP.sheets.has("bystore")) groupSheet("By store", i=>String(i.store_num||""),
+    (num,items)=>{ const st=storeByNum[num]; const f=FR.find(x=>x.id===(st?st.franchisee_id:issueFid(items[0]))); return [num, f?f.name:"", st?st.city||"":"", st?st.state||"":""]; },
+    ["Store #","Franchisee","City","State",...cHead],[10,30,16,7,11,10,12,10,17], (a,b)=>b[1].length-a[1].length);
+  if(RP.sheets.has("bymonth")) groupSheet("By month", i=>{ const d=rpDate(i.created_at); return d?d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"):"Unknown"; },
+    (k)=>[k], ["Month logged",...cHead],[14,11,10,12,10,17], (a,b)=>a[0].localeCompare(b[0]));
+  if(RP.sheets.has("bystatus")){
+    const rows=[["Status","Issues","Share","Stores","Franchisees","Average days open / to resolve"]];
+    ISSUE_STATES.forEach(stt=>{ const it=sel.filter(i=>normIssueStatus(i.status)===stt); if(!RP.statuses.has(stt)) return;
+      const days=it.map(issueDays).filter(v=>v!==""); rows.push([stt, it.length, sel.length?Math.round(it.length/sel.length*1000)/10+"%":"0%",
+        new Set(it.map(i=>String(i.store_num||""))).size, new Set(it.map(i=>issueFid(i)||0)).size,
+        days.length?Math.round(days.reduce((a,b)=>a+b,0)/days.length*10)/10:""]); });
+    X.utils.book_append_sheet(wb, rpSheet(rows,[18,9,9,9,12,28],{}), "By status");
+  }
+
+  if(!wb.SheetNames.length){ toast("Pick at least one sheet","err"); return; }
+  const tag=(fm.f?"_"+fm.f.name.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,""):"")+(RP.store.trim()?"_store-"+RP.store.trim().replace(/^#/,""):"");
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  X.writeFile(wb, "issue-report"+tag+"_"+d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+".xlsx", {cellStyles:true});
+  rpSave(); toast("Report downloaded","ok");
+}
+
+/* ===== Store issues popup ===== */
+let stIssNum=null, stIssMode="store", stIssFr=null;
+function openStoreIssues(num){ stIssMode="store"; stIssNum=String(num); renderStoreIssues(); $("stIssOverlay").classList.add("show"); icons(); }
+function openFrIssues(fid){ stIssMode="fr"; stIssFr=fid||0; renderStoreIssues(); $("stIssOverlay").classList.add("show"); icons(); }
+function renderFrIssues(){
+  const fid=stIssFr; const f=FR.find(x=>x.id===fid);
+  const items=IS.filter(i=>(issueFid(i)||0)===fid).sort((a,b)=>(!isOpen(a))-(!isOpen(b)) || (new Date(b.updated_at||b.created_at)-new Date(a.updated_at||a.created_at)));
+  const open=items.filter(isOpen).length, nStores=new Set(items.map(x=>String(x.store_num||""))).size;
+  $("si_title").textContent=f?f.name:"Unknown franchisee";
+  $("si_sub").textContent=nStores+" store"+(nStores!==1?"s":"")+" with issues · "+items.length+" issue"+(items.length!==1?"s":"")+(open?" · "+open+" open":"");
+  $("siStore").innerHTML='<i data-lucide="user-round"></i>View franchisee information';
+  $("siStore").disabled=!f; $("siStore").title=f?"Franchisee contact info and support team":"";
+  $("siLog").style.display="none";
+  if(!items.length){ $("si_body").innerHTML=emptyBox("circle-check","No issues for this franchisee","All issues were deleted."); icons(); return; }
+  const rows=items.map(i=>{
+    const pls=issuePlatforms(i);
+    const gsize=i.group_id?IS.filter(x=>x.group_id===i.group_id).length:0;
+    const upd=gsize>1?'openGroupUpdate(\''+i.group_id+'\','+i.id+')':'openUpdateIssue('+i.id+')';
+    return '<tr>'
+      +'<td class="c-status">'+statusBadge(i.status)+'</td>'
+      +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
+      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div><div class="rt">'+richHtml(i.title)+'</div>'
+        +(pls.length?'<div class="muted" style="font-size:11.5px;margin-top:3px">'+esc(pls.join(", "))+'</div>':'')
+        +(i.action_taken?'<div class="muted" style="font-size:11.5px;margin-top:3px">Last action: '+esc(oneLine(i.action_taken,120))+'</div>':'')+'</td>'
+      +'<td class="c-store"><button class="btn link" style="padding:0;font-weight:700" title="Show only this store\'s issues" onclick="openStoreIssues(\''+esc(String(i.store_num||""))+'\')">'+esc(i.store_num||"—")+'</button></td>'
+      +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
+      +'<td class="c-act"><div class="row-acts">'
+        +'<button class="iconbtn mini" title="Update status" aria-label="Update status" onclick="'+upd+'"><i data-lucide="refresh-cw"></i></button>'
+        +'<button class="iconbtn mini del" title="Delete issue'+(gsize>1?' (this store only)':'')+'" aria-label="Delete issue" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button>'
+      +'</div></td></tr>';
+  }).join("");
+  $("si_body").innerHTML='<div class="card" style="overflow-x:auto;box-shadow:none"><table class="is-table"><thead><tr><th class="c-status">Status</th><th class="c-upd">Updates</th><th class="c-issue">Issue</th><th class="c-store">Store</th><th class="hide-sm c-logged">Logged</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  icons();
+}
+function renderStoreIssues(){
+  if(stIssMode==="fr"){ renderFrIssues(); return; }
+  $("siStore").innerHTML='<i data-lucide="info"></i>View store information';
+  const num=stIssNum; const st=storeByNum[num];
+  const items=IS.filter(i=>String(i.store_num||"")===num).sort((a,b)=>(!isOpen(a))-(!isOpen(b)) || (new Date(b.updated_at||b.created_at)-new Date(a.updated_at||a.created_at)));
+  const fid=st?st.franchisee_id:(items.find(x=>x.franchisee_id)||{}).franchisee_id;
+  const f=FR.find(x=>x.id===fid);
+  $("si_title").textContent="Store "+(num||"—");
+  const open=items.filter(isOpen).length;
+  $("si_sub").textContent=(f?f.name+" · ":"")+items.length+" issue"+(items.length!==1?"s":"")+(open?" · "+open+" open":"");
+  $("siStore").disabled=!st; $("siStore").title=st?"Open store information":"This store is not in the store list";
+  $("siLog").style.display=st?"inline-flex":"none";
+  if(!items.length){ $("si_body").innerHTML=emptyBox("circle-check","No issues for this store","All issues were deleted."); icons(); return; }
+  const rows=items.map(i=>{
+    const pls=issuePlatforms(i);
+    const gsize=i.group_id?IS.filter(x=>x.group_id===i.group_id).length:0;
+    const upd=gsize>1?'openGroupUpdate(\''+i.group_id+'\','+i.id+')':'openUpdateIssue('+i.id+')';
+    return '<tr>'
+      +'<td class="c-status">'+statusBadge(i.status)+'</td>'
+      +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
+      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div><div class="rt">'+richHtml(i.title)+'</div>'
+        +(pls.length?'<div class="muted" style="font-size:11.5px;margin-top:3px">'+esc(pls.join(", "))+'</div>':'')
+        +(i.action_taken?'<div class="muted" style="font-size:11.5px;margin-top:3px">Last action: '+esc(oneLine(i.action_taken,120))+'</div>':'')+'</td>'
+      +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
+      +'<td class="c-act"><div class="row-acts">'
+        +'<button class="iconbtn mini" title="Update status" aria-label="Update status" onclick="'+upd+'"><i data-lucide="refresh-cw"></i></button>'
+        +'<button class="iconbtn mini del" title="Delete issue'+(gsize>1?' (this store only)':'')+'" aria-label="Delete issue" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button>'
+      +'</div></td></tr>';
+  }).join("");
+  $("si_body").innerHTML='<div class="card" style="overflow-x:auto;box-shadow:none"><table class="is-table"><thead><tr><th class="c-status">Status</th><th class="c-upd">Updates</th><th class="c-issue">Issue</th><th class="hide-sm c-logged">Logged</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  icons();
+}
+function siOpenStore(){ if(stIssMode==="fr"){ if(stIssFr) openFrInfo(stIssFr); return; }
+  const st=storeByNum[stIssNum]; if(!st) return; $("stIssOverlay").classList.remove("show");
+  if(!(curStore===st.id && $("storeOverlay").classList.contains("show"))) openStore(st.id); }
+function siLogIssue(){ const st=storeByNum[stIssNum]; if(st) openLogIssue(st.id); }
+
+
+/* ===== Issues filter bar (dropdown buttons) ===== */
+let fMenu=null;
+const PERIODS=[["all","All dates"],["today","Today"],["thisweek","This week"],["thismonth","This month"],["thisyear","This year"],["lastdays","Last N days…"],["day","Pick a day…"],["week","Pick a week…"],["month","Pick a month…"],["year","Pick a year…"],["range","Date range…"]];
+function periodLabel(){
+  const base=(PERIODS.find(x=>x[0]===isPeriod)||PERIODS[0])[1].replace("…","");
+  if(isPeriod==="lastdays") return "Last "+isDays+" days";
+  if(isPeriod==="year") return String(isYear);
+  if(isPeriod==="range") return (!isFrom&&!isTo)?"Choose dates":(isFrom?isFrom:"Start")+" → "+(isTo?isTo:"Today");
+  if((isPeriod==="day"||isPeriod==="week"||isPeriod==="month") && isDate) return base.replace("Pick a ","")+" of "+isDate;
+  return base;
+}
+function toggleFMenu(k){ fMenu=(fMenu===k?null:k); render(); }
+function issueFilterBar(q){
+  const statusColor={"Pending":"var(--danger)","Work in Progress":"var(--warn)","Resolved":"var(--ok)"};
+  const dd=(key,icon,label,value,active,menu)=>'<div class="fdd'+(fMenu===key?' open':'')+'">'
+    +'<button class="fdd-btn'+(active?' active':'')+'" onclick="event.stopPropagation();toggleFMenu(\''+key+'\')" aria-expanded="'+(fMenu===key)+'">'
+      +'<i data-lucide="'+icon+'"></i><span>'+label+'</span>'+(value?'<span class="fdd-val">'+esc(value)+'</span>':'')+'<i data-lucide="chevron-down" class="car"></i></button>'
+    +(fMenu===key?'<div class="fdd-menu" onclick="event.stopPropagation()">'+menu+'</div>':'')+'</div>';
+  const opt=(on,html,onclick)=>'<button class="fdd-opt'+(on?' on':'')+'" onclick="'+onclick+'">'+html+(on?'<i data-lucide="check" class="ck"></i>':'')+'</button>';
+
+  const statusMenu=[["","All statuses"],["Pending","Pending"],["Work in Progress","Work in Progress"],["Resolved","Resolved"]]
+    .map(([v,l])=>opt(isStatus===v,(v?'<span class="d" style="background:'+statusColor[v]+'"></span>':'<span class="d" style="background:var(--line)"></span>')+l,"fMenu=null;setIsStatus('"+v+"')")).join("");
+
+  let extra='';
+  if(isPeriod==="day"||isPeriod==="week"||isPeriod==="month") extra='<label class="fdd-lbl">'+(isPeriod==="week"?"Any day in the week":isPeriod==="month"?"Any day in the month":"Day")+'</label><input type="date" class="fdate" value="'+esc(isDate)+'" onchange="setIsDate(this.value)">';
+  else if(isPeriod==="year") extra='<label class="fdd-lbl">Year</label><select class="fsel" onchange="isYear=+this.value;isPage=1;render()">'+issueYears().map(y=>'<option'+(+isYear===y?' selected':'')+'>'+y+'</option>').join("")+'</select>';
+  else if(isPeriod==="lastdays") extra='<label class="fdd-lbl">Number of days</label><input type="number" min="1" max="3650" class="fnum" style="width:90px" value="'+esc(isDays)+'" onchange="isDays=Math.max(1,+this.value||1);isPage=1;render()">';
+  else if(isPeriod==="range") extra='<label class="fdd-lbl">From</label><input type="date" class="fdate" value="'+esc(isFrom)+'" onchange="isFrom=this.value;isPage=1;render()"><label class="fdd-lbl">To</label><input type="date" class="fdate" value="'+esc(isTo)+'" onchange="isTo=this.value;isPage=1;render()">';
+  const needsInput=["day","week","month","year","lastdays","range"];
+  const dateMenu='<div class="fdd-cols"><div>'+PERIODS.map(([v,l])=>opt(isPeriod===v,l,(needsInput.includes(v)?"":"fMenu=null;")+"setIsPeriod('"+v+"')")).join("")+'</div>'
+    +(extra?'<div class="fdd-extra">'+extra+'<button class="btn sm round" style="margin-top:10px" onclick="fMenu=null;render()"><i data-lucide="check"></i>Done</button></div>':'')+'</div>';
+
+  const sortMenu=opt(isSort==="new",'<i data-lucide="arrow-down-wide-narrow"></i>Most recent first',"fMenu=null;setIsSort('new')")
+    +opt(isSort==="old",'<i data-lucide="arrow-up-narrow-wide"></i>Oldest first',"fMenu=null;setIsSort('old')");
+
+  return '<div class="ifbar">'
+    +'<div class="grp"><div class="vtog">'
+      +'<button class="'+(isView==="store"?'on':'')+'" onclick="setIsView(\'store\')" title="One row per store"><i data-lucide="store"></i>By store</button>'
+      +'<button class="'+(isView==="fr"?'on':'')+'" onclick="setIsView(\'fr\')" title="One row per franchisee"><i data-lucide="users"></i>By franchisee</button>'
+      +'<button class="'+(isView==="issue"?'on':'')+'" onclick="setIsView(\'issue\')" title="One row per issue"><i data-lucide="list"></i>By issue</button></div></div>'
+    +'<div class="grp fdd-grp">'
+      +dd("status","filter","Filter by status",isStatus||"",!!isStatus,statusMenu)
+      +dd("date","calendar","Filter by date logged",isPeriod!=="all"?periodLabel():"",isPeriod!=="all",dateMenu)
+      +dd("sort","arrow-down-up","Sort",isSort==="new"?"Most recent":"Oldest",false,sortMenu)
+    +'</div>'
+    +((isStatus||isPeriod!=="all"||q)?'<button class="btn link" onclick="clearIsFilters()" style="margin-left:auto"><i data-lucide="x"></i>Clear filters</button>':'')
+    +'</div>';
+}
+document.addEventListener("click",()=>{ if(fMenu){ fMenu=null; if(tab==="issues") render(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && fMenu){ fMenu=null; if(tab==="issues") render(); } });
+
+function setIsView(v){ isView=v; isPage=1; try{ localStorage.setItem("ft2_isview",v); }catch(e){} render(); }
+function issueFid(i){ if(i.franchisee_id) return i.franchisee_id; const st=storeByNum[String(i.store_num||"")]; return st?st.franchisee_id:null; }
+function statusSummary(items, long){
+  const counts={}; items.forEach(x=>{ const k=normIssueStatus(x.status); counts[k]=(counts[k]||0)+1; });
+  return ISSUE_STATES.filter(k=>counts[k]).map(k=>{ const c=k==="Resolved"?"var(--ok)":(k==="Work in Progress"?"var(--warn)":"var(--danger)");
+    return '<span class="ss"><span class="d" style="background:'+c+'"></span>'+counts[k]+' '+(k==="Work in Progress"&&!long?"WIP":k)+'</span>'; }).join("");
+}
+function renderIssuesByFr(bar, pass, frName){
+  const tms=x=>new Date(x).getTime()||0;
+  const by=new Map();
+  IS.filter(pass).forEach(i=>{ const k=issueFid(i)||0; if(!by.has(k)) by.set(k,[]); by.get(k).push(i); });
+  let list=[...by.entries()].map(([fid,items])=>({ fid, items, open:items.filter(isOpen).length,
+    stores:new Set(items.map(x=>String(x.store_num||""))).size,
+    last:Math.max(...items.map(x=>tms(x.updated_at||x.created_at))), first:Math.min(...items.map(x=>tms(x.created_at))) }));
+  list.sort((a,b)=>isSort==="new"?(b.last-a.last):(a.first-b.first));
+  const openFr=list.filter(g=>g.open).length;
+  $("count").textContent=list.length+" franchisee"+(list.length!==1?"s":"")+" · "+openFr+" with open issues";
+  if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
+  const total=Math.max(1,Math.ceil(list.length/PAGE_IS));
+  if(isPage>total) isPage=total; if(isPage<1) isPage=1;
+  const rows=list.slice((isPage-1)*PAGE_IS, isPage*PAGE_IS).map(g=>{
+    return '<tr class="click" onclick="openFrIssues('+(g.fid||0)+')">'
+      +'<td><span class="idot-col" style="display:inline-flex;width:14px">'+(g.open?openDot(g.open):'')+'</span><b style="font-weight:600">'+esc(frName[g.fid]||"Unknown franchisee")+'</b></td>'
+      +'<td class="c-cnt"><span class="cnt-pill">'+g.items.length+'</span>'+(g.open?'<span class="muted" style="font-size:11.5px;margin-left:6px">'+g.open+' open</span>':'')+'</td>'
+      +'<td class="c-cnt muted" style="font-size:12.5px">'+g.stores+' store'+(g.stores!==1?'s':'')+'</td>'
+      +'<td class="hide-sm"><div class="ssum">'+statusSummary(g.items)+'</div></td>'
+      +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(new Date(g.last).toISOString())+'</td>'
+      +'<td class="c-go"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
+  }).join("");
+  setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th>Franchisee</th><th class="c-cnt">Issues</th><th class="c-cnt">Stores</th><th class="hide-sm">Status</th><th class="hide-sm c-logged">Last activity</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +pagerHtml('is',isPage,total,list.length)+'</div>');
+}
+function renderIssuesByIssue(bar, pass, frName){
+  const groups={}, entries=[];
+  IS.forEach(i=>{ if(i.group_id){ (groups[i.group_id]=groups[i.group_id]||[]).push(i); } else entries.push({kind:"single", items:[i], created:i.created_at}); });
+  Object.keys(groups).forEach(g=>{ const m=groups[g].sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||""));
+    entries.push({kind:m.length>1?"group":"single", gid:g, items:m, created:m[0].created_at}); });
+  let list=entries.filter(e=>e.items.some(pass));
+  list.sort((a,b)=>{ const da=new Date(a.created).getTime()||0, dbb=new Date(b.created).getTime()||0; return isSort==="new"? dbb-da : da-dbb; });
+  const openCount=list.filter(e=>e.items.some(isOpen)).length;
+  $("count").textContent=list.length+" issue"+(list.length!==1?"s":"")+" · "+openCount+" open";
+  if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
+  const total=Math.max(1,Math.ceil(list.length/PAGE_IS));
+  if(isPage>total) isPage=total; if(isPage<1) isPage=1;
+  const rows=list.slice((isPage-1)*PAGE_IS, isPage*PAGE_IS).map(e=>{
     if(e.kind==="single"){
-      const i=e.items[0]; const s=storeByNum[String(i.store_num)]; const pls=issuePlatforms(i);
-      return '<tr class="click" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store found for #'+esc(i.store_num)+'\')')+'">'
+      const i=e.items[0]; const pls=issuePlatforms(i);
+      return '<tr class="click" onclick="openStoreIssues(\''+esc(String(i.store_num||""))+'\')" title="Open this store\'s issues">'
         +'<td class="c-status">'+statusBadge(i.status)+'</td>'
         +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
-        +'<td class="c-issue">'+esc(i.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+        +'<td class="c-issue">'+noTag(i)+' '+esc(oneLine(i.title))+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
         +'<td class="hide-sm store c-store">'+(i.store_num?esc(i.store_num):'—')+'</td>'
         +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
         +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
@@ -1279,21 +1901,22 @@ function renderIssues(){
     const nums=m.map(x=>x.store_num); const shown=nums.slice(0,4).join(", ")+(nums.length>4?' +'+(nums.length-4)+' more':'');
     const owners=[...new Set(m.map(x=>frName[x.franchisee_id]).filter(Boolean))];
     const lastUpd=m.map(x=>x.updated_at||x.created_at).sort().pop();
-    return '<tr class="click" onclick="openGroupUpdate(\''+e.gid+'\')">'
+    return '<tr class="click" onclick="openGroupUpdate(\''+e.gid+'\')" title="Update this multi-store issue">'
       +'<td class="c-status">'+groupStatusBadge(m)+'</td>'
       +'<td class="c-upd">'+updPill('openHistoryGroup(\''+e.gid+'\')', Math.max(...m.map(x=>historyEntries(x).length)))+'</td>'
-      +'<td class="c-issue"><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+esc(f.title)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+      +'<td class="c-issue"><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+noTag(f,m.length>1?' +'+(m.length-1):'')+' '+esc(oneLine(f.title))+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
       +'<td class="hide-sm store c-store" style="font-size:12.5px">'+esc(shown)+'</td>'
       +'<td class="hide-sm">'+esc(owners.length>1?owners.length+' franchisees':(owners[0]||""))+'</td>'
       +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(f.created_at)+(lastUpd&&lastUpd!==f.created_at?'<br>upd. '+fmtTs(lastUpd):'')+'</td>'
       +'<td class="c-go"><i data-lucide="chevron-right" class="muted"></i></td></tr>';
   }).join("");
-  setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th class="c-status">Status</th><th class="c-upd">Updates</th><th class="c-issue">Issue</th><th class="hide-sm c-store">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm c-logged">Logged</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table></div>');
+  setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th class="c-status">Status</th><th class="c-upd">Updates</th><th class="c-issue">Issue</th><th class="hide-sm c-store">Store</th><th class="hide-sm">Franchisee</th><th class="hide-sm c-logged">Logged</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +pagerHtml('is',isPage,total,list.length)+'</div>');
 }
-function setIsStatus(v){ isStatus=v; render(); }
+function setIsStatus(v){ isStatus=v; isPage=1; render(); }
 function setIsPeriod(v){ isPeriod=v; if((v==="day"||v==="week"||v==="month")&&!isDate){ const t=new Date(); isDate=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); } render(); }
-function setIsDate(v){ isDate=v; render(); }
-function setIsSort(v){ isSort=v; render(); }
+function setIsDate(v){ isDate=v; isPage=1; render(); }
+function setIsSort(v){ isSort=v; isPage=1; render(); }
 function clearIsFilters(){ isStatus=""; isPeriod="all"; isDate=""; isFrom=""; isTo=""; isDays=7; isYear=new Date().getFullYear(); $("search").value=""; render(); }
 
 /* ============ STORE WINDOW ============ */
@@ -1305,7 +1928,7 @@ function openStore(id, focusIssueId){
   $("sw_sub").textContent=(f?f.name+" · ":"")+"Territory "+(s.territory||"—");
   renderStoreLeft(); renderStoreRight();
   $("storeOverlay").classList.add("show"); icons();
-  if(focusIssueId){ setTimeout(()=>{ const el=$("issc_"+focusIssueId); if(el){ el.scrollIntoView({block:"center"}); el.style.boxShadow="0 0 0 2px var(--yellow)"; setTimeout(()=>el.style.boxShadow="",1600);} },60); }
+  if(focusIssueId){ setTimeout(()=>openStoreIssues(String(s.num)),60); }
 }
 function closeStore(){ $("storeOverlay").classList.remove("show"); curStore=null; render(); }
 
@@ -1409,20 +2032,18 @@ function renderStoreRight(){
   const s=ST.find(x=>x.id===curStore); if(!s)return;
   const issues=IS.filter(i=>String(i.store_num)===String(s.num)).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const notes=notesOf(s);
-  const issuesHtml=issues.length?issues.map(i=>{ const pls=issuePlatforms(i);
-    const gsize=i.group_id?IS.filter(x=>x.group_id===i.group_id).length:0;
-    const upd=i.group_id?'openGroupUpdate(\''+i.group_id+'\','+i.id+')':'openUpdateIssue('+i.id+')';
-    return '<div class="issue-card" id="issc_'+i.id+'"><div class="top"><b>'+esc(i.title)+'</b>'
-      +(gsize?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')
-      +histBtn('openHistory('+i.id+')', historyEntries(i).length)
-      +'<button class="iconbtn mini" title="Update" onclick="'+upd+'"><i data-lucide="refresh-cw"></i></button>'
-      +'<button class="iconbtn mini" title="Delete" onclick="askDeleteIssue('+i.id+')"><i data-lucide="trash-2"></i></button></div>'
-      +'<div class="ic-meta">'+statusBadge(i.status)
-        +(pls.length?'<span class="ic-div" aria-hidden="true"></span><div class="chips">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')+'</div>'
-      +'<div class="ts">Logged '+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?' · updated '+fmtTs(i.updated_at):'')+'</div>'
-      +(i.action_taken?'<div class="act"><b>Action taken:</b> '+esc(i.action_taken)+'</div>':'')+'</div>';
-  }).join(""):'<p class="muted">No issues logged for this store.</p>';
-  const notesHtml=notes.length?notes.slice().reverse().map(n=>'<div class="note-row"><span class="nt">'+esc(fmtTs(n.ts))+'</span><span>'+esc(n.text)+'</span></div>').join(""):'<p class="muted">No notes yet.</p>';
+  const iOpen=issues.filter(isOpen).length;
+  const iCounts={}; issues.forEach(x=>{ const k=normIssueStatus(x.status); iCounts[k]=(iCounts[k]||0)+1; });
+  const iSum=ISSUE_STATES.filter(k=>iCounts[k]).map(k=>{ const c=k==="Resolved"?"var(--ok)":(k==="Work in Progress"?"var(--warn)":"var(--danger)");
+    return '<span class="ss"><span class="d" style="background:'+c+'"></span>'+iCounts[k]+' '+k+'</span>'; }).join("");
+  const latest=issues.slice().sort((a,b)=>new Date(b.updated_at||b.created_at)-new Date(a.updated_at||a.created_at))[0];
+  const issuesHtml=issues.length
+    ?'<div class="iss-sum"><div class="iss-big"><b>'+issues.length+'</b><span>issue'+(issues.length!==1?'s':'')+'</span></div>'
+      +'<div class="iss-info"><div class="ssum">'+iSum+'</div>'
+      +(latest?'<div class="muted" style="font-size:12px;margin-top:5px">Latest: '+noTag(latest)+' '+esc(oneLine(latest.title,70))+' · '+fmtTs(latest.updated_at||latest.created_at)+'</div>':'')+'</div>'
+      +'<button class="btn sm round" onclick="openStoreIssues(\''+esc(String(s.num))+'\')"><i data-lucide="list"></i>View all issues</button></div>'
+    :'<p class="muted">No issues logged for this store.</p>';
+  const notesHtml=notes.length?notes.slice().reverse().map(n=>'<div class="note-row"><span class="nt">'+esc(fmtTs(n.ts))+'</span><span class="rt">'+richHtml(n.text)+'</span></div>').join(""):'<p class="muted">No notes yet.</p>';
   $("sw_right").innerHTML=
     '<div class="rpanel"><div class="rph"><i data-lucide="triangle-alert"></i>Issues<span class="act"><button class="btn sm outline round" onclick="openLogIssue('+s.id+')"><i data-lucide="plus"></i>Log issue</button></span></div><div class="rpb">'+issuesHtml+'</div></div>'
     +'<div class="rpanel"><div class="rph"><i data-lucide="sticky-note"></i>Notes<span class="act"><button class="btn sm outline warn round" onclick="openAddNote('+s.id+')"><i data-lucide="plus"></i>Add note</button></span></div><div class="rpb">'+notesHtml+'</div></div>';
@@ -1440,7 +2061,7 @@ function openLogIssue(storeId){
   const chips=ISSUE_PLATFORMS.map(pl=>'<button type="button" class="mchip" data-v="'+esc(pl)+'" onclick="toggleChip(this)">'+esc(pl)+'</button>').join("");
   const sbtns=ISSUE_STATES.map((st,idx)=>'<button type="button" class="sbtn'+(idx===0?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
   $("log_body").innerHTML=storeField
-    +'<div class="field" style="margin-bottom:13px"><label>What is the issue?</label><textarea id="log_issue" placeholder="e.g. Uber Eats tablet offline since this morning — orders not coming through"></textarea></div>'
+    +'<div class="field" style="margin-bottom:13px"><label>What is the issue?</label>'+richEditor("log_issue","e.g. Uber Eats tablet offline since this morning — orders not coming through")+'</div>'
     +'<div class="field" style="margin-bottom:13px"><label>Platform(s) affected — pick one or more</label><div class="chips" id="log_platforms">'+chips+'</div></div>'
     +'<div class="field"><label>Status</label><div class="sbtns" id="log_status">'+sbtns+'</div></div>';
   $("logOverlay").classList.add("show"); icons();
@@ -1448,7 +2069,7 @@ function openLogIssue(storeId){
 async function saveLogIssue(){
   const s=logStoreCtx!=null?ST.find(x=>x.id===logStoreCtx):null;
   const storeNum=s?String(s.num||""):($("log_store")?$("log_store").value.trim():"");
-  const title=$("log_issue").value.trim(); if(!title){toast("Describe the issue first","err");return;}
+  const title=getRich("log_issue"); if(!title){toast("Describe the issue first","err");return;}
   const platforms=[...document.querySelectorAll("#log_platforms .mchip.sel")].map(x=>x.dataset.v);
   const status=(document.querySelector("#log_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
   const st=storeByNum[storeNum];
@@ -1460,7 +2081,7 @@ async function saveLogIssue(){
   $("logSave").disabled=false;
   if(error){toast(friendly(error).t,"err");return;}
   if(data&&data[0]) IS.push(data[0]);
-  updCounts(); $("logOverlay").classList.remove("show"); toast("Issue logged","ok");
+  updCounts(); $("logOverlay").classList.remove("show"); toast("Issue "+(data&&data[0]&&data[0].issue_no?"#"+data[0].issue_no+" ":"")+"logged","ok");
   if(curStore) renderStoreRight(); render();
 }
 
@@ -1470,10 +2091,10 @@ function openUpdateIssue(id){
   $("upd_title").textContent="Update Status · Store #"+(i.store_num||"");
   const cur=normIssueStatus(i.status);
   const sbtns=ISSUE_STATES.map(st=>'<button type="button" class="sbtn'+(st===cur?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
-  $("upd_body").innerHTML='<div class="field" style="margin-bottom:12px"><label>Issue</label><div class="muted" style="font-size:13.5px">'+esc(i.title)+'</div></div>'
+  $("upd_body").innerHTML='<div class="field" style="margin-bottom:12px"><label>Issue '+noTag(i)+'</label><div class="rt" style="font-size:13.5px">'+richHtml(i.title)+'</div></div>'
     +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="upd_status">'+sbtns+'</div></div>'
-    +(i.action_taken?'<div class="field" style="margin-bottom:12px"><label>Last action taken</label><div class="muted" style="font-size:13px;white-space:pre-wrap">'+esc(i.action_taken)+'</div></div>':'')
-    +'<div class="field"><label>Action taken (this update)</label><textarea id="upd_action" placeholder="What did you do this time?"></textarea></div>'
+    +(i.action_taken?'<div class="field" style="margin-bottom:12px"><label>Last action taken</label><div class="muted rt" style="font-size:13px">'+richHtml(i.action_taken)+'</div></div>':'')
+    +'<div class="field"><label>Action taken (this update)</label>'+richEditor("upd_action","What did you do this time?")+'</div>'
     +'<div class="help"><button class="btn link" style="padding:0" onclick="openHistory('+i.id+')"><i data-lucide="history"></i>View all updates ('+historyEntries(i).length+')</button></div>';
   $("updOverlay").classList.add("show"); icons();
 }
@@ -1481,7 +2102,7 @@ async function saveUpdateIssue(){
   const i=IS.find(x=>x.id===updIssueId); if(!i)return;
   const prev=normIssueStatus(i.status);
   const status=(document.querySelector("#upd_status .sbtn.active")||{dataset:{}}).dataset.v||prev;
-  const action=$("upd_action").value.trim();
+  const action=getRich("upd_action");
   if(status===prev && !action){ toast("Change the status or write the action taken","err"); return; }
   const ts=nowIso();
   const rec={ status, updated_at:ts, history:[...historyEntries(i), {ts, kind:"update", prev, status, action}] };
@@ -1496,10 +2117,11 @@ async function saveUpdateIssue(){
 }
 
 /* Add note popup */
-function openAddNote(storeId){ noteStoreCtx=storeId; const s=ST.find(x=>x.id===storeId); $("note_title").textContent="Add note · Store #"+(s?s.num:""); $("note_text").value=""; $("noteOverlay").classList.add("show"); }
+function openAddNote(storeId){ noteStoreCtx=storeId; const s=ST.find(x=>x.id===storeId); $("note_title").textContent="Add note · Store #"+(s?s.num:"");
+  $("note_wrap").innerHTML=richEditor("note_text","Type your note…",110); $("noteOverlay").classList.add("show"); icons(); setTimeout(()=>$("note_text").focus(),60); }
 async function saveNote(){
   const s=ST.find(x=>x.id===noteStoreCtx); if(!s)return;
-  const text=$("note_text").value.trim(); if(!text){toast("Type a note first","err");return;}
+  const text=getRich("note_text"); if(!text){toast("Type a note first","err");return;}
   const note={ts:nowIso(),text};
   $("noteSave").disabled=true;
   const r=await mergeStoreSave(s.id, fresh=>{ const notes=notesOf(fresh); notes.push(note); return {notes}; });
@@ -1602,7 +2224,7 @@ async function saveFr(){
   toast("Franchisee added — use + on Stores to add their stores","ok");
 }
 
-function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete this issue: "'+(i?i.title:"")+'"?'; $("confirmOverlay").classList.add("show"); }
+function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete issue '+(issueNo(i)?'#'+issueNo(i)+' ':'')+'"'+(i?oneLine(i.title,80):"")+'"?'; $("confirmOverlay").classList.add("show"); }
 
 /* staff */
 function openStaff(id){
@@ -1691,7 +2313,7 @@ async function doDelete(){
 
 function toggleIssues(){ issuesOnly=!issuesOnly; frPage=1; stPage=1; render(); }
 function toggleClosed(){ closedOnly=!closedOnly; stPage=1; render(); }
-function pageSizeOf(w){ return w==="fr"?PAGE_FR:(w==="st"?PAGE_ST:PAGE_FRST); }
+function pageSizeOf(w){ return w==="fr"?PAGE_FR:(w==="st"?PAGE_ST:(w==="is"?PAGE_IS:PAGE_FRST)); }
 function pagerHtml(which, page, total, count){
   const opts=PAGE_OPTS[which], size=pageSizeOf(which);
   if(count==null) count=total*size;
@@ -1711,12 +2333,14 @@ function setPageSize(which,val){
   try{ localStorage.setItem("ft2_ps_"+which,String(v)); }catch(e){}
   if(which==="fr"){ PAGE_FR=v; frPage=1; render(); }
   else if(which==="st"){ PAGE_ST=v; stPage=1; render(); }
+  else if(which==="is"){ PAGE_IS=v; isPage=1; render(); }
   else { PAGE_FRST=v; frStorePage=1; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 function pageSet(which,val){
   let n=parseInt(val,10); if(isNaN(n)||n<1)n=1;
   if(which==='fr'){ frPage=n; render(); }
   else if(which==='st'){ stPage=n; render(); }
+  else if(which==='is'){ isPage=n; render(); }
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 
@@ -1962,8 +2586,9 @@ function renderHistory(i, entries, members){
   const pls=issuePlatforms(i);
   const statusNow=members.length>1?groupStatusBadge(members):statusBadge(i.status);
   const head='<div class="h-issue"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+statusNow
-      +(members.length>1?'<span class="mtag"><i data-lucide="layers"></i>'+members.length+' stores</span>':'')+'</div>'
-    +'<div class="ttl">'+esc(i.title)+'</div>'
+      +(members.length>1?'<span class="mtag"><i data-lucide="layers"></i>'+members.length+' stores</span>':'')
+      +(members.length>1?members.map(m=>noTag(m)).join(""):noTag(i))+'</div>'
+    +'<div class="ttl rt">'+richHtml(i.title)+'</div>'
     +(pls.length?'<div class="chips" style="margin:6px 0">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')
     +'<div class="meta">Logged '+fmtTs(i.created_at)+' · '+entries.length+' step'+(entries.length!==1?'s':'')+'</div>'
     +frButtons(members)+'</div>';
@@ -1974,7 +2599,7 @@ function renderHistory(i, entries, members){
     if(e.kind==="created") what='<span class="what">Issue logged</span>'+(st?statusBadge(st):'');
     else if(e.prev && st && normIssueStatus(e.prev)!==st) what='<span class="what">Status changed</span>'+statusBadge(e.prev)+'<i data-lucide="arrow-right" class="arrow"></i>'+statusBadge(st);
     else what='<span class="what">Update</span>'+(st?statusBadge(st):'');
-    const act=e.kind==="created"?'':(e.action?'<div class="tl-act">'+esc(e.action)+'</div>':'<div class="tl-act none">No action description</div>');
+    const act=e.kind==="created"?'':(e.action?'<div class="tl-act rt">'+richHtml(e.action)+'</div>':'<div class="tl-act none">No action description</div>');
     const stores=(e.stores&&e.stores.length)?'<div class="tl-stores">'+e.stores.map(n=>'<span>'+esc(n)+'</span>').join("")+'</div>':'';
     return '<div class="tl-item"><div class="tl-dot" style="background:'+color+'">'+(idx+1)+'</div><div class="tl-body">'
       +'<div class="tl-head">'+what+'<span class="tl-time"><i data-lucide="clock"></i>'+esc(fmtTs(e.ts))+'</span></div>'
@@ -2170,7 +2795,7 @@ async function saveLinks(data){
 /* ===== Multi-store issue ===== */
 function openMultiIssue(){
   mStores=[];
-  $("m_store_in").value=""; $("m_issue").value=""; $("m_warn").classList.remove("show"); $("m_sug").classList.remove("show");
+  $("m_store_in").value=""; $("m_issue_wrap").innerHTML=richEditor("m_issue","e.g. DoorDash menu prices not matching the store menu"); $("m_warn").classList.remove("show"); $("m_sug").classList.remove("show");
   $("m_platforms").innerHTML=ISSUE_PLATFORMS.map(pl=>'<button type="button" class="mchip" data-v="'+esc(pl)+'" onclick="toggleChip(this)">'+esc(pl)+'</button>').join("");
   $("m_status").innerHTML=ISSUE_STATES.map((st,idx)=>'<button type="button" class="sbtn'+(idx===0?' active':'')+'" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("");
   renderMChips(); $("multiOverlay").classList.add("show"); icons();
@@ -2203,7 +2828,7 @@ function mSuggest(){
 async function saveMultiIssue(){
   if($("m_store_in").value.trim()) addMStores($("m_store_in").value);
   if(mStores.length<2){ $("m_warn").classList.add("show"); icons(); toast("Select 2 or more stores — or use Log issue for one store","err"); return; }
-  const title=$("m_issue").value.trim(); if(!title){ toast("Describe the issue first","err"); return; }
+  const title=getRich("m_issue"); if(!title){ toast("Describe the issue first","err"); return; }
   const platforms=[...document.querySelectorAll("#m_platforms .mchip.sel")].map(x=>x.dataset.v);
   const status=(document.querySelector("#m_status .sbtn.active")||{dataset:{}}).dataset.v||"Pending";
   const gid="G"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -2229,20 +2854,20 @@ function openGroupUpdate(gid, preselectId){
     +'<div class="ck-main"><div class="ck-l1"><span class="n">'+esc(i.store_num)+'</span>'
     +(i.franchisee_id
       ?'<button class="o fr-link" title="View franchisee info" onclick="event.preventDefault();event.stopPropagation();openFrInfo('+i.franchisee_id+',\''+gid+'\')"><span class="nm">'+esc(frNameById(i.franchisee_id))+'</span></button>'
-      :'<span class="o">—</span>')+'</div>'
+      :'<span class="o">—</span>')+noTag(i)+'</div>'
     +(()=>{ const st=storeByNum[String(i.store_num)]; const a=st?[st.address,[st.city,st.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "):""; return a?'<div class="ck-addr">'+esc(a)+'</div>':''; })()
     +'<div class="ck-st">'+statusBadge(i.status)+'</div></div>'
     +'<input type="checkbox" class="grp-ck" value="'+i.id+'"'+((!preselectId||preselectId===i.id)?' checked':'')+' onchange="syncGrpAll()"></label>').join("");
   const pls=issuePlatforms(f);
   $("grp_body").innerHTML=
-    '<div class="field" style="margin-bottom:12px"><label>Issue</label><div style="font-size:14px">'+esc(f.title)+'</div>'
+    '<div class="field" style="margin-bottom:12px"><label>Issue</label><div class="rt" style="font-size:14px">'+richHtml(f.title)+'</div>'
       +(pls.length?'<div class="chips" style="margin-top:6px">'+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>':'')+'</div>'
     +'<div class="field" style="margin-bottom:13px"><label>Stores to update — pick which ones</label><div class="cklist">'
       +'<label class="ckrow all"><span>All stores</span><input type="checkbox" id="grp_all" onchange="toggleGrpAll(this.checked)"></label>'+rows+'</div>'
       +'<div class="help" id="grp_selcount"></div></div>'
     +'<div class="field" style="margin-bottom:13px"><label>Pick a status</label><div class="sbtns" id="grp_status">'
       +ISSUE_STATES.map(st=>'<button type="button" class="sbtn" data-v="'+esc(st)+'" onclick="pickSbtn(this)">'+esc(st)+'</button>').join("")+'</div></div>'
-    +'<div class="field"><label>Action taken (applies to selected stores)</label><textarea id="grp_action" placeholder="What did you do this time?"></textarea></div>'
+    +'<div class="field"><label>Action taken (applies to selected stores)</label>'+richEditor("grp_action","What did you do this time?")+'</div>'
     +'<div class="help"><button class="btn link" style="padding:0" onclick="$(\'grpOverlay\').classList.remove(\'show\');openHistoryGroup(\''+gid+'\')"><i data-lucide="history"></i>View all updates</button></div>';
   syncGrpAll(); $("grpOverlay").classList.add("show"); icons();
 }
@@ -2256,7 +2881,7 @@ function grpSelectedIds(){ return [...document.querySelectorAll(".grp-ck:checked
 async function saveGroupUpdate(){
   const ids=grpSelectedIds(); if(!ids.length){ toast("Select at least one store","err"); return; }
   const stBtn=document.querySelector("#grp_status .sbtn.active");
-  const action=$("grp_action").value.trim();
+  const action=getRich("grp_action");
   if(!stBtn && !action){ toast("Pick a status or write the action taken","err"); return; }
   const rec={ updated_at:nowIso() }; if(stBtn) rec.status=stBtn.dataset.v; if(action) rec.action_taken=action;
   $("grpSave").disabled=true;
@@ -2289,7 +2914,7 @@ function primaryAdd(){ if(tab==="issues") openLogIssue(null); else if(tab==="sta
 
 /* events */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; frPage=1; stPage=1; render(); });
-$("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; render(); };
+$("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; isPage=1; render(); };
 $("terrFilter").onchange=e=>{ terrFilter=e.target.value; frPage=1; stPage=1; render(); };
 $("stIssueFilter").onclick=toggleIssues;
 $("stClosedFilter").onclick=toggleClosed;
@@ -2302,6 +2927,14 @@ $("asSave").onclick=saveAddStore;
 $("as_num").oninput=checkStoreDup;
 $("fr_name").oninput=checkFrDup;
 $("conflictReload").onclick=reloadAfterConflict;
+$("reportBtn").onclick=openReport;
+$("rpX").onclick=$("rpCancel").onclick=()=>$("rpOverlay").classList.remove("show");
+$("rpOverlay").onclick=e=>{ if(e.target===$("rpOverlay")) $("rpOverlay").classList.remove("show"); };
+$("rpGo").onclick=downloadReport;
+$("siX").onclick=$("siClose").onclick=()=>$("stIssOverlay").classList.remove("show");
+$("stIssOverlay").onclick=e=>{ if(e.target===$("stIssOverlay")) $("stIssOverlay").classList.remove("show"); };
+$("siStore").onclick=siOpenStore;
+$("siLog").onclick=siLogIssue;
 $("fiX").onclick=$("fiClose").onclick=()=>$("frInfoOverlay").classList.remove("show");
 $("frInfoOverlay").onclick=e=>{ if(e.target===$("frInfoOverlay")) $("frInfoOverlay").classList.remove("show"); };
 $("fiOpen").onclick=openFrPageFromInfo;
