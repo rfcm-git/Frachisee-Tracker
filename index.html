@@ -429,6 +429,9 @@
   .fr-item.active{background:var(--green-soft);box-shadow:inset 3px 0 0 var(--green)}
   .fr-item .nm{font-weight:600;font-size:13.5px;flex:1;min-width:0}
   .fr-item .nm small{display:block;color:var(--ink-soft);font-weight:400;font-size:12px}
+  .fr-stc{display:inline-flex;align-items:center;gap:5px;flex:none;align-self:center;height:24px;padding:0 9px;border-radius:999px;background:var(--yellow-soft);color:var(--yellow-dark);font-size:12px;font-weight:700}
+  .fr-stc [data-lucide]{width:13px;height:13px}
+  .fr-item.active .fr-stc{background:#fff}
   .fr-detail-placeholder{padding:60px 24px;text-align:center;color:var(--ink-soft)}
   .fr-detail-placeholder [data-lucide]{width:30px;height:30px;margin-bottom:10px}
 
@@ -1192,7 +1195,8 @@ function renderFranchisees(){
     return '<div class="fr-item'+(f.id===selFr?' active':'')+'" data-fr="'+f.id+'" onclick="selectFranchisee('+f.id+')">'
       +'<div class="idot-col">'+openDot(frOpenIssues(f.id))+'</div>'
       +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
-      +'<small>Terr '+esc(f.territory||"—")+' · '+stc+' store'+(stc!==1?'s':'')+'</small></div></div>';
+      +'<small>Terr '+esc(f.territory||"—")+'</small></div>'
+      +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="mouse-pointer-click"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
