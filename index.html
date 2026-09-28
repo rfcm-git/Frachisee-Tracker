@@ -1091,6 +1091,7 @@ async function loadAll(silent){
   setStatus("ok","Connected");
   reindex(); buildTerrFilter(); updCounts(); render();
   lastRefreshAt=new Date(); showLastRefresh();
+  if(uiRestore){ applyUiRestore(); return; }
   if(silent){
     window.scrollTo(0,y); const l2=$("frList"); if(l2) l2.scrollTop=ly;
     if(curStore){ if(ST.find(x=>x.id===curStore)){ renderStoreLeft(); renderStoreRight(); } else closeStore(); }
@@ -3092,6 +3093,61 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySel
 
 /* startup */
 icons();
+
+/* ===== Keep the screen after a browser refresh ===== */
+const UI_KEY="ft2_ui_state";
+let uiRestore=null;
+function saveUiState(){
+  try{
+    const list=$("frList");
+    const st={
+      tab, search:$("search").value, terrFilter, selFr, frPage, stPage, frStorePage, isPage,
+      issuesOnly, closedOnly, isStatus, isPeriod, isDate, isDays, isYear, isFrom, isTo, isSort,
+      store: ($("storeOverlay").classList.contains("show") && curStore) ? curStore : null,
+      stIss: $("stIssOverlay").classList.contains("show") ? {mode:stIssMode, num:stIssNum, fr:stIssFr} : null,
+      scrollY: window.scrollY, frListScroll: list?list.scrollTop:0,
+      swLeft: $("sw_left")?$("sw_left").scrollTop:0, swRight: $("sw_right")?$("sw_right").scrollTop:0,
+      at: Date.now()
+    };
+    sessionStorage.setItem(UI_KEY, JSON.stringify(st));
+  }catch(e){}
+}
+function loadUiState(){
+  let st=null; try{ st=JSON.parse(sessionStorage.getItem(UI_KEY)||"null"); }catch(e){}
+  if(!st) return;
+  if(["franchisees","stores","staff","issues"].includes(st.tab)) tab=st.tab;
+  $("search").value=st.search||"";
+  terrFilter=st.terrFilter||""; selFr=st.selFr??null;
+  frPage=st.frPage||1; stPage=st.stPage||1; frStorePage=st.frStorePage||1; isPage=st.isPage||1;
+  issuesOnly=!!st.issuesOnly; closedOnly=!!st.closedOnly;
+  isStatus=st.isStatus||""; isPeriod=st.isPeriod||"all"; isDate=st.isDate||""; isDays=st.isDays||7;
+  isYear=st.isYear||new Date().getFullYear(); isFrom=st.isFrom||""; isTo=st.isTo||""; isSort=st.isSort||"new";
+  uiRestore=st;
+}
+// called once, right after the first data load
+function applyUiRestore(){
+  const st=uiRestore; uiRestore=null; if(!st) return;
+  if(terrFilter && $("terrFilter")) $("terrFilter").value=terrFilter;
+  render();
+  if(tab==="franchisees" && selFr && FR.find(f=>f.id===selFr)){ const keep=frStorePage; selectFranchisee(selFr); frStorePage=keep; $("frDetailPane").innerHTML=detailHtml(selFr); icons(); }
+  requestAnimationFrame(()=>{
+    window.scrollTo(0, st.scrollY||0);
+    const l=$("frList"); if(l) l.scrollTop=st.frListScroll||0;
+    if(st.store && ST.find(x=>x.id===st.store)){
+      openStore(st.store);
+      requestAnimationFrame(()=>{ if($("sw_left")) $("sw_left").scrollTop=st.swLeft||0; if($("sw_right")) $("sw_right").scrollTop=st.swRight||0; });
+    }
+    if(st.stIss){
+      if(st.stIss.mode==="fr" && st.stIss.fr!=null) openFrIssues(st.stIss.fr);
+      else if(st.stIss.num!=null) openStoreIssues(st.stIss.num);
+    }
+  });
+}
+window.addEventListener("beforeunload", saveUiState);
+window.addEventListener("pagehide", saveUiState);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") saveUiState(); });
+
+loadUiState();
 (function start(){ const c=getCreds(); $("c_url").value=c.url; $("c_key").value=c.key; if(c.url&&c.key) connect(c.url,c.key,true); else viewDisconnected(); })();
 </script>
 </body>
