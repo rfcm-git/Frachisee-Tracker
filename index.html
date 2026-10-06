@@ -374,7 +374,7 @@
   .lk-sec:last-child{margin-bottom:0}
   .lk-sec h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
   .lk-sec h4 [data-lucide]{width:15px;height:15px;color:var(--green)}
-  .lk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+  .lk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
   .lk{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--surface)}
   .lk:hover{border-color:var(--green);background:var(--green-soft)}
   .lk .fav{width:28px;height:28px;border-radius:7px;background:var(--idle-soft);display:grid;place-items:center;flex:none;overflow:hidden}
@@ -1022,7 +1022,7 @@
 
 <!-- Links popup -->
 <div class="overlay" id="linksOverlay">
-  <div class="modal" style="max-width:760px">
+  <div class="modal" style="max-width:880px">
     <div class="head"><i data-lucide="link"></i><h2 id="lk_title">Links</h2>
       <button class="iconbtn" id="lkEditBtn" title="Edit links" style="margin-left:auto"><i data-lucide="pencil"></i></button>
       <button class="x" id="lkX" style="margin-left:4px">&times;</button></div>
@@ -2994,19 +2994,53 @@ const DEFAULT_LINKS=[
     {name:"Calendly", url:"https://calendly.com/3pd-helpdesk/helpdesk-3pd-support-franchisee-call"},
     {name:"Outlook", url:"https://outlook.cloud.microsoft/mail/"},
     {name:"Google Business Profile", url:"https://business.google.com/locations"},
-    {name:"Subway Restaurant Locator", url:"https://www.subway.com/en-us/locator"}]}
+    {name:"Subway Restaurant Locator", url:"https://www.subway.com/en-us/locator"}]},
+  {key:"onboarding", title:"Third-Party Delivery Onboarding", icon:"rocket", links:[
+    {name:"Grubhub Onboarding", url:"https://l.gourl.es/l/ab4cb1a44ddfdcb2ba1732b5be4714f2e0117698?w=QXppemFAbWFyd2FoYWdyb3VwLmNvbQ&u=11148230"},
+    {name:"DoorDash Onboarding", url:"https://lemonade.workflowcloud.com/forms/9545858c-0dac-4807-be4a-95fa9a996880?rID=92fde755a6c6bb5ae5814c58c579d2a4bc1ee187f58cc77d214f608354fb42d5"},
+    {name:"Uber Eats Onboarding", url:"https://docs.google.com/forms/d/e/1FAIpQLSekSmIewMphDAruo9m-ux0lfscclGNjByCRMjvNya4LVcX8Tg/viewform"},
+    {name:"Subway ezCater — Franchisee Agreement", url:"https://www.ezcater.com/company/grow-catering-business/subway/franchise-agreement/"},
+    {name:"ezCater — Marketplace Opt-In Form", url:"https://ezcaterforms.formstack.com/forms/ezcater_marketplace_opt_in"},
+    {name:"ezCater — ACH Collection Form", url:"https://ezcaterforms.formstack.com/forms/ach_collection_form_subway"}]},
+  {key:"forms", title:"Additional Forms", icon:"file-text", links:[
+    {name:"DoorDash — Change of Ownership", url:"https://www.doordash.com/merchant/change-of-ownership/store-transfer?store_id=67344"}]}
 ];
+// sections added after launch: added once for the whole team, then edits/deletes stick
+const LINK_SEED_KEYS=["onboarding","forms"];
 let LINKS=null, lkEditing=false, lkShared=true;
 function normUrl(u){ u=(u||"").trim(); if(!u) return ""; return /^https?:\/\//i.test(u)?u:"https://"+u; }
 function hostOf(u){ try{ return new URL(normUrl(u)).host.replace(/^www\./,""); }catch(e){ return u; } }
 async function loadLinks(){
+  let stored=null, seeded=[];
   if(db){
     const {data,error}=await db.from("app_settings").select("value").eq("key","links").maybeSingle();
-    if(!error){ lkShared=true; if(data&&Array.isArray(data.value)){ LINKS=data.value; return; } }
+    if(!error){ lkShared=true; if(data&&Array.isArray(data.value)) stored=data.value;
+      const sd=await db.from("app_settings").select("value").eq("key","links_seeded").maybeSingle();
+      if(!sd.error && sd.data && Array.isArray(sd.data.value)) seeded=sd.data.value; }
     else lkShared=false;
   }
-  try{ const l=JSON.parse(localStorage.getItem("ft2_links")||"null"); if(Array.isArray(l)){ LINKS=l; return; } }catch(e){}
-  LINKS=JSON.parse(JSON.stringify(DEFAULT_LINKS));
+  if(!lkShared){
+    try{ const l=JSON.parse(localStorage.getItem("ft2_links")||"null"); if(Array.isArray(l)) stored=l; }catch(e){}
+    try{ const sd=JSON.parse(localStorage.getItem("ft2_links_seeded")||"[]"); if(Array.isArray(sd)) seeded=sd; }catch(e){}
+  }
+  if(!stored){ LINKS=JSON.parse(JSON.stringify(DEFAULT_LINKS)); await saveSeeded(LINK_SEED_KEYS); return; }
+  LINKS=stored;
+  // add new default sections once (skip any the team already has or already received)
+  const missing=DEFAULT_LINKS.filter(sec=>sec.key && LINK_SEED_KEYS.includes(sec.key) && !seeded.includes(sec.key) && !LINKS.some(x=>x.key===sec.key||x.title===sec.title));
+  const newly=LINK_SEED_KEYS.filter(k=>!seeded.includes(k));
+  if(missing.length) LINKS=LINKS.concat(JSON.parse(JSON.stringify(missing)));
+  if(newly.length){
+    if(missing.length){
+      if(lkShared && db){ await db.from("app_settings").upsert({key:"links", value:LINKS},{onConflict:"key"}); }
+      try{ localStorage.setItem("ft2_links", JSON.stringify(LINKS)); }catch(e){}
+    }
+    await saveSeeded(seeded.concat(newly));
+  }
+}
+async function saveSeeded(keys){
+  const v=[...new Set(keys)];
+  if(lkShared && db){ await db.from("app_settings").upsert({key:"links_seeded", value:v},{onConflict:"key"}); }
+  try{ localStorage.setItem("ft2_links_seeded", JSON.stringify(v)); }catch(e){}
 }
 async function openLinks(){ lkEditing=false; $("lk_body").innerHTML='<div class="state"><div class="spinner"></div></div>'; $("linksOverlay").classList.add("show"); await loadLinks(); renderLinks(); }
 function renderLinks(){
@@ -3017,7 +3051,7 @@ function renderLinks(){
     const secs=LINKS.filter(sec=>(sec.links||[]).length);
     $("lk_body").innerHTML=secs.length?secs.map(sec=>'<div class="lk-sec"><h4><i data-lucide="'+esc(sec.icon||"folder")+'"></i>'+esc(sec.title)+'</h4><div class="lk-grid">'
       +sec.links.map(l=>{ const u=normUrl(l.url), h=hostOf(l.url);
-        return '<a class="lk" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" title="'+esc(u)+'">'
+        return '<a class="lk" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" title="'+esc((l.name?l.name+'\n':'')+u)+'">'
           +'<span class="fav"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(h)+'&sz=64" alt="" onerror="this.outerHTML=\'<i data-lucide=&quot;globe&quot;></i>\';icons()"></span>'
           +'<span class="t"><b>'+esc(l.name||h)+'</b><small>'+esc(h)+'</small></span><i data-lucide="external-link" class="ext"></i></a>'; }).join("")
       +'</div></div>').join(""):emptyBox("link","No links yet","Click the pencil to add some.");
@@ -3030,7 +3064,7 @@ function renderLinks(){
 }
 function lkRowHtml(l){ return '<div class="lke-row"><input class="nm" placeholder="Name" value="'+esc(l?l.name:"")+'"><input class="url" placeholder="https://…" value="'+esc(l?l.url:"")+'">'
   +'<button class="iconbtn mini" title="Remove link" onclick="this.closest(\'.lke-row\').remove()"><i data-lucide="x"></i></button></div>'; }
-function lkSecHtml(sec){ return '<div class="lke-sec" data-icon="'+esc(sec.icon||"folder")+'"><div class="sh"><input class="st" placeholder="Section name" value="'+esc(sec.title||"")+'">'
+function lkSecHtml(sec){ return '<div class="lke-sec" data-icon="'+esc(sec.icon||"folder")+'" data-key="'+esc(sec.key||"")+'"><div class="sh"><input class="st" placeholder="Section name" value="'+esc(sec.title||"")+'">'
   +'<button class="iconbtn mini" title="Remove section" onclick="this.closest(\'.lke-sec\').remove()"><i data-lucide="trash-2"></i></button></div>'
   +'<div class="rows">'+(sec.links||[]).map(lkRowHtml).join("")+'</div>'
   +'<button class="btn link" onclick="lkAddRow(this)"><i data-lucide="plus"></i>Add link</button></div>'; }
@@ -3038,7 +3072,7 @@ function lkAddRow(btn){ btn.closest(".lke-sec").querySelector(".rows").insertAdj
 function lkAddSec(){ $("lke").insertAdjacentHTML("beforeend",lkSecHtml({title:"",icon:"folder",links:[{name:"",url:""}]})); icons(); }
 function lkRead(){
   return [...document.querySelectorAll("#lke .lke-sec")].map(sec=>({
-    title:sec.querySelector(".st").value.trim()||"Links", icon:sec.dataset.icon||"folder",
+    title:sec.querySelector(".st").value.trim()||"Links", icon:sec.dataset.icon||"folder", ...(sec.dataset.key?{key:sec.dataset.key}:{}),
     links:[...sec.querySelectorAll(".lke-row")].map(r=>({name:r.querySelector(".nm").value.trim(), url:normUrl(r.querySelector(".url").value)})).filter(l=>l.url)
   }));
 }
