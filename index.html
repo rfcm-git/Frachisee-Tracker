@@ -118,6 +118,34 @@
   .btn.outline.danger:hover{background:var(--danger-soft)}
   .panel .ph .ph-act{margin-left:auto}
   .iconbtn.round{border-radius:999px}
+  .st-mail{display:flex;align-items:center;gap:6px;font-size:12px;margin:1px 0 8px}
+  .lc .line .v .btn.link{height:auto;line-height:1.3;padding:0}
+  .rl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--yellow-dark);background:var(--yellow-soft);border-radius:5px;padding:2px 7px;display:inline-block}
+  .st-mail a{color:var(--ink-soft);text-decoration:none;word-break:break-all}
+  .st-mail a:hover{color:var(--green-dark);text-decoration:underline}
+  .sf-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;margin:4px 0 10px;color:var(--ink)}
+  .sf-h [data-lucide]{color:var(--green)}
+  .sf-h .badge-num{background:var(--lime-soft);color:var(--lime-dark);border-radius:999px;font-size:11.5px;padding:1px 8px}
+  .sf-cards{margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .sf-card{display:flex;flex-direction:column;gap:10px}
+  .sf-top{display:flex;align-items:center;gap:11px}
+  .sf-av{width:38px;height:38px;border-radius:50%;background:var(--lime-soft);color:var(--green-dark);display:grid;place-items:center;font-weight:800;flex:none}
+  .sf-card h3{margin:0 0 3px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sf-roles{display:flex;gap:4px}
+  .sf-mail{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-soft);min-width:0}
+  .sf-mail [data-lucide]{width:14px;height:14px;flex:none}
+  .sf-mail span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sf-stats{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;padding-top:9px;border-top:1px dashed var(--line)}
+  .sf-stats b{color:var(--green-dark)}
+  .sd-top{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch}
+  @media(max-width:700px){.sd-top{grid-template-columns:1fr}}
+  .sd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sd-stats div{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--lime-tint);display:flex;flex-direction:column}
+  .sd-stats b{font-size:20px;color:var(--green-dark);line-height:1.1}
+  .sd-stats span{font-size:11.5px;color:var(--ink-soft)}
+  .sd-stats .warn b{color:var(--danger)}
+  .sd-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .sd-tags{display:flex;gap:4px;flex:none}
   .iss-sum{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .iss-big{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;height:58px;border-radius:10px;background:var(--green-soft);color:var(--green-dark)}
   .iss-big b{font-size:22px;line-height:1}
@@ -842,7 +870,7 @@
 
 <!-- Staff detail -->
 <div class="overlay" id="sdOverlay">
-  <div class="modal small">
+  <div class="modal wide">
     <div class="head"><i data-lucide="id-card"></i><div><h2 id="sd_name">—</h2><div class="subt" id="sd_role"></div></div><button class="x" id="sdX">&times;</button></div>
     <div class="body" id="sd_body"></div>
     <footer>
@@ -860,15 +888,11 @@
     <div class="body">
       <input type="hidden" id="sf_id">
       <div class="fgrid" style="margin-bottom:13px">
-        <div class="field"><label>Role</label><select id="sf_role"><option>OM</option><option>FBC</option></select></div>
-        <div class="field"><label>Name</label><input id="sf_name"></div>
+        <div class="field"><label>Name</label><input id="sf_name" placeholder="e.g. Chrystal"></div>
+        <div class="field"><label>Role</label><select id="sf_role"><option>FBC</option><option>OM</option><option>OM &amp; FBC</option></select></div>
       </div>
-      <div class="field" style="margin-bottom:13px"><label>Territory (stores they handle are matched by this)</label><input id="sf_territory" placeholder="e.g. 540, 584"></div>
-      <div class="fgrid">
-        <div class="field"><label>Cellphone</label><input id="sf_cell" placeholder="+1 …"></div>
-        <div class="field"><label>Email</label><input id="sf_email" placeholder="name@…"></div>
-      </div>
-      <div id="sf_preview" class="help"></div>
+      <div class="field"><label>Email</label><input id="sf_email" type="email" placeholder="name@marwahagroup.com"></div>
+      <div id="sf_preview" class="help">Assign stores from each store's Support Team card.</div>
     </div>
     <footer><button class="btn ghost" id="sfCancel">Cancel</button><button class="btn" id="sfSave">Save</button></footer>
   </div>
@@ -1220,17 +1244,20 @@ function platOf(s){ let p; try{p=(typeof s.platforms==="object"&&s.platforms)?s.
 function notesOf(s){ try{return Array.isArray(s.notes)?s.notes:JSON.parse(s.notes||"[]");}catch(e){return [];} }
 function issuePlatforms(i){ try{return Array.isArray(i.platforms)?i.platforms:JSON.parse(i.platforms||"[]");}catch(e){return [];} }
 function terrSet(str){ return new Set((str||"").split(",").map(x=>x.trim()).filter(Boolean)); }
-function staffFor(territory){
-  const set=terrSet(territory); const om=[],fbc=[];
-  SF.forEach(s=>{ const ss=terrSet(s.territory); for(const t of set){ if(ss.has(t)){ (s.role==="OM"?om:fbc).push(s); break; } } });
-  return {om,fbc};
+// FBC / OM are assigned per store (stores.fbc_id / stores.om_id), not by territory
+function staffById(id){ return id==null?null:SF.find(x=>x.id===id)||null; }
+function staffForStore(st){ const f=st?staffById(st.fbc_id):null, o=st?staffById(st.om_id):null; return {fbc:f?[f]:[], om:o?[o]:[]}; }
+function staffForStores(stores){
+  const fb=new Map(), om=new Map();
+  (stores||[]).forEach(st=>{ const f=staffById(st.fbc_id), o=staffById(st.om_id);
+    if(f) fb.set(f.id,{s:f,n:(fb.get(f.id)||{n:0}).n+1}); if(o) om.set(o.id,{s:o,n:(om.get(o.id)||{n:0}).n+1}); });
+  const srt=m=>[...m.values()].sort((a,b)=>b.n-a.n||(a.s.name||"").localeCompare(b.s.name||""));
+  return {fbc:srt(fb), om:srt(om)};
 }
-function storesHandled(staff){
-  const set=terrSet(staff.territory);
-  return ST.filter(s=>{ const ss=terrSet(s.territory); for(const t of ss){ if(set.has(t)) return true; } return false; });
-}
+function storesHandled(staff){ return ST.filter(s=>s.fbc_id===staff.id||s.om_id===staff.id); }
+function hasRole(s,r){ return String(s.role||"").split("&").map(x=>x.trim()).includes(r); }
 function cellOf(o){ const c=contactsOf(o).find(x=>x.type==="cell"); return c?c.value:""; }
-function emailOf(o){ const c=contactsOf(o).find(x=>x.type==="email"); return c?c.value:""; }
+function emailOf(o){ if(o&&o.email) return o.email; const c=contactsOf(o).find(x=>x.type==="email"); return c?c.value:""; }
 function normPlat(v){ return (v==="Active"||v==="Pending")?v:"Not enrolled"; }
 function platColor(v){ v=normPlat(v); return v==="Active"?"var(--ok)":(v==="Pending"?"var(--warn)":"var(--danger)"); }
 function normIssueStatus(s){ if(s==="Open")return "Pending"; if(s==="In progress")return "Work in Progress"; return s||"Pending"; }
@@ -1272,14 +1299,14 @@ function render(){
   document.querySelectorAll(".tab").forEach(t=>{ const on=t.dataset.tab===tab; t.classList.toggle("active",on); if(on) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current"); });
   const PT={franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:["Issues","Log, track and report 3PD issues"]}[tab];
   if(PT){ $("pageTitle").textContent=PT[0]; $("pageSub").textContent=PT[1]; document.title=PT[0]+" · Franchisee Tracker"; }
-  const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues");
+  const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff");
   $("searchWrap").style.display=showSearch?"flex":"none";
-  $("search").placeholder=(tab==="issues")?"Search issues, #store or @franchisee":"Search…  (#store or @franchisee)";
+  $("search").placeholder=(tab==="staff")?"Search name, email, or #store":(tab==="issues")?"Search issues, #store or @franchisee":"Search…  (#store or @franchisee)";
   $("terrFilter").style.display=(tab==="franchisees"||tab==="stores")?"block":"none";
   $("storeFilters").style.display=(tab==="stores")?"inline-flex":"none";
   $("stIssueFilter").classList.toggle("on", issuesOnly);
   $("stClosedFilter").classList.toggle("on-alt", closedOnly);
-  $("hintbar").style.display=showSearch?"flex":"none";
+  $("hintbar").style.display=(showSearch&&tab!=="staff")?"flex":"none";
   const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:"Log issue"}[tab];
   $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
   $("multiAdd").style.display=(tab==="issues")?"inline-flex":"none";
@@ -1336,7 +1363,7 @@ function detailHtml(id){
   if(hitQ) stores.sort((a,b)=>(isHit(b)-isHit(a)) || (a.num||"").localeCompare(b.num||""));
   const contacts=contactsOf(f);
   const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
-  const {om,fbc}=staffFor(f.territory);
+  const team=staffForStores(storesByFr[id]||[]); const om=team.om, fbc=team.fbc;
   const contactHtml=contacts.length?contacts.map(c=>{
     const cp=(c.type==="email"||c.type==="cell")?copyBtn(c.value):"";
     const href=c.type==="email"?'mailto:'+esc(c.value):(c.type==="cell"?'tel:'+esc(c.value):null);
@@ -1355,7 +1382,7 @@ function detailHtml(id){
     return '<div class="issue-line" onclick="'+(s?'openStore('+s.id+','+i.id+')':'toast(\'No matching store to open\')')+'">'+statusBadge(i.status)
     +'<span class="val">'+noTag(i)+' '+esc(oneLine(i.title))+(i.store_num?' <span class="muted">(#'+esc(i.store_num)+')</span>':'')+'</span>'
     +'<span class="muted" style="font-size:11.5px">'+fmtTs(i.updated_at||i.created_at)+'</span></div>';}).join(""):'<p class="muted">No issues logged.</p>';
-  const staffHtml=arr=>arr.length?arr.map(s=>'<span class="staff-badge" onclick="openStaff('+s.id+')" title="'+esc([cellOf(s),emailOf(s)].filter(Boolean).join(" · ")||"no contact")+'"><i data-lucide="user-round"></i>'+esc(s.name)+' <span class="muted">('+esc(s.territory)+')</span></span>').join(""):'<span class="muted">None for this territory</span>';
+  const staffHtml=arr=>arr.length?arr.map(x=>'<span class="staff-badge" onclick="openStaff('+x.s.id+')" title="'+esc(emailOf(x.s)||"no email")+'"><i data-lucide="user-round"></i>'+esc(x.s.name)+' <span class="muted">· '+x.n+' store'+(x.n!==1?'s':'')+'</span></span>').join(""):'<span class="muted">Not assigned</span>';
   return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
     +'<div class="muted" style="font-size:13.5px">Territory '+esc(f.territory||"—")+' · '+stores.length+' store'+(stores.length!==1?'s':'')+'</div></div>'
     +'<div class="hd-actions"><button class="btn outline round xs" onclick="openFr('+f.id+')" title="Edit franchisee"><i data-lucide="pencil"></i>Edit</button>'
@@ -1400,19 +1427,29 @@ function renderStores(){
 }
 
 /* FBC / OM */
+let sfRole="all";
 function renderStaff(){
-  let html='';
-  [["OM","Operations Managers (OM)","user-cog"],["FBC","Field Business Consultants (FBC)","badge-check"]].forEach(([role,label,icon])=>{
-    const people=SF.filter(s=>s.role===role).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
-    html+='<div style="margin:6px 0 8px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px"><i data-lucide="'+icon+'" style="color:var(--green)"></i>'+label+' <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+people.length+'</span></div>';
-    html+='<div class="cards" style="margin-bottom:18px">'+(people.length?people.map(s=>{
-      const handled=storesHandled(s).length;
-      return '<div class="pcard" onclick="openStaff('+s.id+')"><span class="rl">'+esc(s.role)+'</span><h3>'+esc(s.name)+'</h3>'
-        +'<div class="terr"><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px"></i> Territory '+esc(s.territory||"—")+'</div>'
-        +'<div class="mini"><span><i data-lucide="phone" style="width:13px;height:13px;vertical-align:-2px"></i> '+(cellOf(s)?'yes':'—')+'</span><span><i data-lucide="mail" style="width:13px;height:13px;vertical-align:-2px"></i> '+(emailOf(s)?'yes':'—')+'</span><span><i data-lucide="store" style="width:13px;height:13px;vertical-align:-2px"></i> '+handled+'</span></div></div>';
-    }).join(""):'<p class="muted">None. Use “Add FBC / OM”.</p>')+'</div>';
+  const {mode,q}=parseQuery();
+  const cnt=id=>{ let f=0,o=0; ST.forEach(x=>{ if(x.fbc_id===id) f++; if(x.om_id===id) o++; }); return {f,o}; };
+  const match=x=>{ if(!q) return true;
+    if(mode==="store") return storesHandled(x).some(st=>String(st.num||"").toLowerCase().includes(q));
+    return [x.name,emailOf(x),x.role].join(" ").toLowerCase().includes(q); };
+  const list=SF.filter(match).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  const groups=[["OM","Operations Managers (OM)","user-cog"],["FBC","Field Business Consultants (FBC)","badge-check"]];
+  const tabs='<div class="vtog" style="margin-bottom:14px">'+[["all","Everyone"],["OM","OM"],["FBC","FBC"]].map(([v,l])=>'<button class="'+(sfRole===v?'on':'')+'" onclick="sfRole=\''+v+'\';render()">'+l+'</button>').join("")+'</div>';
+  let html=tabs+'<div class="help" style="margin:-6px 0 14px">Each store has one FBC and one OM. Aziza and Charlena lead all of California. Click a person to see their stores.</div>';
+  groups.filter(([r])=>sfRole==="all"||sfRole===r).forEach(([role,label,icon])=>{
+    const people=list.filter(x=>hasRole(x,role));
+    html+='<div class="sf-h"><i data-lucide="'+icon+'"></i>'+label+'<span class="badge-num">'+people.length+'</span></div>';
+    html+='<div class="cards sf-cards">'+(people.length?people.map(x=>{ const c=cnt(x.id); const n=role==="FBC"?c.f:c.o; const em=emailOf(x);
+      return '<div class="pcard sf-card" onclick="openStaff('+x.id+')">'
+        +'<div class="sf-top"><span class="sf-av">'+esc((x.name||"?").slice(0,1).toUpperCase())+'</span><div style="min-width:0;flex:1"><h3>'+esc(x.name)+'</h3>'
+        +'<div class="sf-roles">'+String(x.role||"").split("&").map(r=>'<span class="rl">'+esc(r.trim())+'</span>').join("")+'</div></div></div>'
+        +'<div class="sf-mail">'+(em?'<i data-lucide="mail"></i><span>'+esc(em)+'</span>':'<span class="muted">No email</span>')+'</div>'
+        +'<div class="sf-stats"><span><b>'+n+'</b> store'+(n!==1?'s':'')+' as '+role+'</span>'+(role==="FBC"&&c.o?'<span class="muted">+'+c.o+' as OM</span>':'')+(role==="OM"&&c.f?'<span class="muted">+'+c.f+' as FBC</span>':'')+'</div></div>';
+    }).join(""):'<p class="muted">None found.</p>')+'</div>';
   });
-  $("count").textContent=SF.length+" people";
+  $("count").textContent=list.length+" people";
   setView(html);
 }
 
@@ -1780,7 +1817,7 @@ function downloadReport(){
     const W={id:9,store:10,fr:28,terr:10,addr:30,city:14,state:7,title:44,plat:22,status:16,multi:12,logged:17,updated:17,days:12,nupd:10,lastact:40,allact:60,om:20,fbc:20,frcontact:32};
     const rows=[cols.map(c=>c[1])];
     sel.forEach(i=>{
-      const st=storeByNum[String(i.store_num||"")], f=frOf(i), {om,fbc}=staffFor(st?st.territory:(f?f.territory:""));
+      const st=storeByNum[String(i.store_num||"")], f=frOf(i), {om,fbc}=staffForStore(st);
       const h=historyEntries(i), acts=h.filter(e=>e.kind!=="created"&&e.action);
       const val={
         id:issueNo(i)||i.id, store:i.store_num||"", fr:f?f.name:"", terr:st?st.territory||"":(f?f.territory||"":""), addr:st?st.address||"":"", city:st?st.city||"":"", state:st?st.state||"":"",
@@ -2059,8 +2096,9 @@ function closeStore(){ $("storeOverlay").classList.remove("show"); curStore=null
 
 function renderStoreLeft(){
   const s=ST.find(x=>x.id===curStore); if(!s)return;
-  const {om,fbc}=staffFor(s.territory); const p=platOf(s); const gurl=googleSearchUrl(s);
-  const staffLine=arr=>arr.length?arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>"):'<span class="muted">—</span>';
+  const {om,fbc}=staffForStore(s); const p=platOf(s); const gurl=googleSearchUrl(s);
+  const staffLine=arr=>arr.length?arr.map(x=>'<button class="btn link" style="padding:0;font-weight:600" onclick="openStaff('+x.id+')">'+esc(x.name)+'</button>'
+      +(emailOf(x)?'<div class="st-mail"><a href="mailto:'+esc(emailOf(x))+'">'+esc(emailOf(x))+'</a>'+copyBtn(emailOf(x))+'</div>':'')).join(""):'<span class="muted">Not assigned</span>';
 
   // Location card
   let locBody;
@@ -2118,10 +2156,16 @@ function renderStoreLeft(){
     frCard
     +'<div class="lc"><div class="lch"><i data-lucide="map-pin"></i>Location'+edBtn('location')+'</div><div class="lcb">'+locBody+'</div></div>'
 
-    +'<div class="lc"><div class="lch"><i data-lucide="badge-check"></i>Support Team</div><div class="lcb">'
-      +'<div class="line"><span class="k">OM</span><span class="v">'+staffLine(om)+'</span></div>'
-      +'<div class="line"><span class="k">FBC</span><span class="v">'+staffLine(fbc)+'</span></div>'
-      +'<div class="line"><span class="k">Area</span><span class="v muted">Territory '+esc(s.territory||"—")+'</span></div></div></div>'
+    +'<div class="lc"><div class="lch"><i data-lucide="badge-check"></i>Support Team'+edBtn('team')+'</div><div class="lcb">'
+      +(swEditing.team
+        ?'<div class="fgrid">'
+          +'<div class="field"><label>FBC</label><select id="sw_fbc"><option value="">— Not assigned —</option>'+SF.filter(x=>hasRole(x,"FBC")).sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(x=>'<option value="'+x.id+'"'+(s.fbc_id===x.id?' selected':'')+'>'+esc(x.name)+(emailOf(x)?' · '+esc(emailOf(x)):'')+'</option>').join("")+'</select></div>'
+          +'<div class="field"><label>OM</label><select id="sw_om"><option value="">— Not assigned —</option>'+SF.filter(x=>hasRole(x,"OM")).sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(x=>'<option value="'+x.id+'"'+(s.om_id===x.id?' selected':'')+'>'+esc(x.name)+(emailOf(x)?' · '+esc(emailOf(x)):'')+'</option>').join("")+'</select></div></div>'
+          +'<div style="display:flex;gap:8px;margin-top:11px"><button class="btn sm" onclick="saveStoreTeam()"><i data-lucide="save"></i>Save</button><button class="btn sm ghost" onclick="swEditing.team=false;renderStoreLeft()">Cancel</button></div>'
+        :'<div class="line"><span class="k">FBC</span><span class="v">'+staffLine(fbc)+'</span></div>'
+          +'<div class="line"><span class="k">OM</span><span class="v">'+staffLine(om)+'</span></div>'
+          +'<div class="line"><span class="k">Territory</span><span class="v muted">'+esc(s.territory||"—")+'</span></div>')
+      +'</div></div>'
     +'<div class="lc"><div class="lch"><i data-lucide="bike"></i>Delivery Platforms</div><div class="lcb">'+legend+'<div class="pbtns">'+pbtns+'</div>'+pmenu+'</div></div>'
     +'<div class="lc"><div class="lch"><i data-lucide="map"></i>Google Business Profile'+edBtn('gbp')+'</div><div class="lcb">'+gbpBody+'</div></div>';
   icons();
@@ -2145,6 +2189,14 @@ async function saveStoreLoc(){
   if(r.error){toast(friendly(r.error).t,"err");return;}
   if(r.conflict){ showConflict("Store "+s.num); return; }
   Object.assign(s,r.row); reindex(); swEditing.location=false; renderStoreLeft(); toast("Location saved","ok");
+}
+async function saveStoreTeam(){
+  const s=ST.find(x=>x.id===curStore); if(!s) return;
+  const v=id=>{ const x=$(id).value; return x?+x:null; };
+  const r=await guardedUpdate("stores",s,{fbc_id:v("sw_fbc"), om_id:v("sw_om")});
+  if(r.error){ toast(friendly(r.error).t,"err"); return; }
+  if(r.conflict){ showConflict("Store "+s.num); return; }
+  Object.assign(s,r.row); swEditing.team=false; renderStoreLeft(); toast("Support team saved","ok");
 }
 async function saveStoreGbp(){
   const s=ST.find(x=>x.id===curStore); const gbp=$("sw_gbp").value.trim();
@@ -2402,38 +2454,71 @@ async function saveFr(){
 function askDeleteIssue(id){ const i=IS.find(x=>x.id===id); pending={kind:"issue",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete issue '+(issueNo(i)?'#'+issueNo(i)+' ':'')+'"'+(i?oneLine(i.title,80):"")+'"?'; $("confirmOverlay").classList.add("show"); }
 
 /* staff */
+let sdCtx={id:null,q:"",role:"all",page:1};
 function openStaff(id){
   const s=SF.find(x=>x.id===id); if(!s)return;
-  $("sd_name").textContent=s.name||"—"; $("sd_role").textContent=(s.role||"")+" · Territory "+(s.territory||"—");
-  const handled=storesHandled(s); const frIds=new Set(handled.map(x=>x.franchisee_id));
-  const cell=cellOf(s), email=emailOf(s);
-  $("sd_body").innerHTML=
-    '<div class="lc"><div class="lch"><i data-lucide="phone"></i>Contact</div><div class="lcb">'
-      +'<div class="contact-row"><span class="type">cell</span><span class="val">'+(cell?esc(cell):'<span class="muted">—</span>')+'</span>'+(cell?copyBtn(cell):'')+'</div>'
-      +'<div class="contact-row"><span class="type">email</span><span class="val">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'<span class="muted">—</span>')+'</span>'+(email?copyBtn(email):'')+'</div></div></div>'
-    +'<div class="lc"><div class="lch"><i data-lucide="store"></i>Handles (by territory)</div><div class="lcb"><div style="display:flex;gap:18px;font-size:13.5px"><span><b>'+frIds.size+'</b> franchisees</span><span><b>'+handled.length+'</b> stores</span></div></div></div>';
+  if(sdCtx.id!==id) sdCtx={id,q:"",role:"all",page:1};
+  $("sd_name").textContent=s.name||"—"; $("sd_role").textContent=(s.role||"")+(emailOf(s)?" · "+emailOf(s):"");
   $("sd_edit").onclick=()=>{ $("sdOverlay").classList.remove("show"); openStaffEdit(id); };
-  $("sd_delete").onclick=()=>{ pending={kind:"staff",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete '+(s.role||"")+' "'+(s.name||"")+'"?'; $("confirmOverlay").classList.add("show"); };
+  $("sd_delete").onclick=()=>{ pending={kind:"staff",id}; $("confirmOk").textContent="Delete"; $("confirmText").textContent='Delete '+(s.role||"")+' "'+(s.name||"")+'"? Their stores will show "Not assigned".'; $("confirmOverlay").classList.add("show"); };
+  renderStaffDetail();
   $("sdOverlay").classList.add("show"); icons();
+}
+function sdSearch(v){ sdCtx.q=v; sdCtx.page=1; renderStaffDetail(); const e=$("sd_q"); if(e){ e.focus(); e.setSelectionRange(e.value.length,e.value.length); } }
+function sdOpenStore(id){ $("sdOverlay").classList.remove("show"); openStore(id); }
+function renderStaffDetail(){
+  const s=SF.find(x=>x.id===sdCtx.id); if(!s) return;
+  const all=storesHandled(s), asF=all.filter(x=>x.fbc_id===s.id), asO=all.filter(x=>x.om_id===s.id);
+  const frIds=new Set(all.map(x=>x.franchisee_id));
+  const email=emailOf(s);
+  const q=sdCtx.q.trim().toLowerCase().replace(/^#/,"");
+  let list=all.filter(x=>sdCtx.role==="all"||(sdCtx.role==="FBC"?x.fbc_id===s.id:x.om_id===s.id));
+  if(q) list=list.filter(x=>[x.num,x.city,x.state,x.address,frNameById(x.franchisee_id)].join(" ").toLowerCase().includes(q));
+  list.sort((a,b)=>(a.num||"").localeCompare(b.num||"",undefined,{numeric:true}));
+  const per=12, total=Math.max(1,Math.ceil(list.length/per)); if(sdCtx.page>total) sdCtx.page=total;
+  const page=list.slice((sdCtx.page-1)*per, sdCtx.page*per);
+  const openIs=all.reduce((n,x)=>n+storeOpenIssues(x.num),0);
+  const roleTog=(asF.length&&asO.length)?'<div class="vtog">'+[["all","All "+all.length],["FBC","As FBC "+asF.length],["OM","As OM "+asO.length]].map(([v,l])=>'<button class="'+(sdCtx.role===v?'on':'')+'" onclick="sdCtx.role=\''+v+'\';sdCtx.page=1;renderStaffDetail()">'+l+'</button>').join("")+'</div>':'';
+  $("sd_body").innerHTML=
+    '<div class="sd-top">'
+      +'<div class="lc" style="margin:0"><div class="lch"><i data-lucide="contact"></i>Contact</div><div class="lcb">'
+        +'<div class="line"><span class="k">Name</span><span class="v"><b>'+esc(s.name||"—")+'</b></span>'+copyBtn(s.name||"")+'</div>'
+        +'<div class="line"><span class="k">Email</span><span class="v">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'<span class="muted">—</span>')+'</span>'+(email?copyBtn(email):'')+'</div>'
+        +'<div class="line"><span class="k">Role</span><span class="v">'+String(s.role||"—").split("&").map(r=>'<span class="rl">'+esc(r.trim())+'</span>').join(" ")+'</span></div></div></div>'
+      +'<div class="sd-stats"><div><b>'+all.length+'</b><span>stores</span></div><div><b>'+frIds.size+'</b><span>franchisees</span></div><div><b>'+asF.length+'</b><span>as FBC</span></div><div><b>'+asO.length+'</b><span>as OM</span></div><div class="'+(openIs?'warn':'')+'"><b>'+openIs+'</b><span>open issues</span></div></div>'
+    +'</div>'
+    +'<div class="lc" style="margin:14px 0 0"><div class="lch"><i data-lucide="store"></i>Stores they handle</div><div class="lcb">'
+      +'<div class="sd-tools"><div class="search-wrap" style="min-width:220px"><span class="lead"><i data-lucide="search"></i></span><input id="sd_q" type="search" placeholder="Search store #, city or franchisee" value="'+esc(sdCtx.q)+'" oninput="sdSearch(this.value)"></div>'+roleTog+'</div>'
+      +(page.length?'<div class="sd-list">'+page.map(x=>{ const f=FR.find(y=>y.id===x.franchisee_id); const n=storeOpenIssues(x.num);
+          const tags=(x.fbc_id===s.id?'<span class="rl">FBC</span>':'')+(x.om_id===s.id?'<span class="rl">OM</span>':'');
+          return '<div class="store-line" onclick="sdOpenStore('+x.id+')"><div class="idot-col">'+openDot(n)+'</div><span class="num">'+esc(x.num)+'</span>'
+            +'<div class="meta"><div class="a">'+esc(f?f.name:"—")+(storeStatusIfNotOpen(x)?' '+storeStatusIfNotOpen(x):'')+'</div><div class="b">'+esc([x.address,[x.city,x.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "))+'</div></div>'
+            +'<span class="sd-tags">'+tags+'</span><i data-lucide="chevron-right" class="muted"></i></div>'; }).join("")+'</div>'
+        :'<p class="muted" style="margin:8px 0">'+(all.length?'No stores match.':'No stores assigned yet.')+'</p>')
+      +(total>1?'<div class="pager" style="border-top:none;padding:10px 0 0"><span class="pg-range">'+((sdCtx.page-1)*per+1)+'–'+Math.min(list.length,sdCtx.page*per)+' of '+list.length+'</span><div class="pg-nav">'
+        +'<button class="pico" title="Previous"'+(sdCtx.page<=1?' disabled':'')+' onclick="sdCtx.page--;renderStaffDetail()"><i data-lucide="chevron-left"></i></button>'
+        +'<span class="pg">'+sdCtx.page+' / '+total+'</span>'
+        +'<button class="pico" title="Next"'+(sdCtx.page>=total?' disabled':'')+' onclick="sdCtx.page++;renderStaffDetail()"><i data-lucide="chevron-right"></i></button></div></div>':'')
+    +'</div></div>';
+  icons();
 }
 function openStaffEdit(id){
   const s=id?SF.find(x=>x.id===id):null;
   $("sfTitle").textContent=s?"Edit "+(s.role||""):"Add FBC / OM";
-  $("sf_id").value=s?s.id:""; $("sf_role").value=s?s.role||"OM":"OM"; $("sf_name").value=s?s.name||"":"";
-  $("sf_territory").value=s?s.territory||"":""; $("sf_cell").value=s?cellOf(s):""; $("sf_email").value=s?emailOf(s):"";
-  updateStaffPreview(); $("sfOverlay").classList.add("show");
-}
-function updateStaffPreview(){
-  const t=$("sf_territory").value;
-  const n=ST.filter(x=>{const ss=terrSet(x.territory);for(const a of ss){if(terrSet(t).has(a))return true;}return false;}).length;
-  $("sf_preview").textContent=t.trim()?("Handles "+n+" store"+(n!==1?"s":"")+" in territory "+t):"";
+  $("sf_id").value=s?s.id:""; $("sf_role").value=s?(["OM","FBC","OM & FBC"].includes(s.role)?s.role:"FBC"):"FBC"; $("sf_name").value=s?s.name||"":"";
+  $("sf_email").value=s?emailOf(s):"";
+  $("sfOverlay").classList.add("show"); setTimeout(()=>$("sf_name").focus(),60);
 }
 async function saveStaff(){
   const id=$("sf_id").value;
-  const contacts=[]; const cell=$("sf_cell").value.trim(), email=$("sf_email").value.trim();
-  if(cell) contacts.push({type:"cell",value:cell}); if(email) contacts.push({type:"email",value:email});
-  const rec={ role:$("sf_role").value, name:$("sf_name").value.trim(), territory:$("sf_territory").value.trim(), contacts };
+  const email=$("sf_email").value.trim().toLowerCase();
+  const rec={ role:$("sf_role").value, name:$("sf_name").value.trim(), email:email||null };
   if(!rec.name){toast("Enter a name","err");return;}
+  if(email && !isEmail(email)){ toast("Check the email address","err"); return; }
+  const dup=email && SF.find(x=>String(emailOf(x)).toLowerCase()===email && String(x.id)!==String(id));
+  if(dup){ toast("That email already belongs to "+dup.name,"err"); return; }
+  const loc0=id?SF.find(x=>x.id===+id):null;
+  rec.contacts=[...(loc0?contactsOf(loc0).filter(c=>c.type!=="email"):[]), ...(email?[{type:"email",value:email}]:[])];
   $("sfSave").disabled=true; let error, saved;
   if(id){ const loc=SF.find(x=>x.id===+id); const r=await guardedUpdate("staff",loc,rec);
     if(r.conflict){ $("sfSave").disabled=false; showConflict("This "+(loc.role||"staff")+" record"); return; }
@@ -2482,7 +2567,7 @@ async function doDelete(){
     FR=FR.filter(f=>f.id!==p.id); ST=ST.filter(x=>x.franchisee_id!==p.id);
     IS=IS.filter(i=>i.franchisee_id!==p.id && !nums.has(String(i.store_num)));
     if(selFr===p.id) selFr=null; reindex(); buildTerrFilter(); updCounts(); }
-  if(p.kind==="staff"){ SF=SF.filter(s=>s.id!==p.id); updCounts(); $("sdOverlay").classList.remove("show"); }
+  if(p.kind==="staff"){ ST.forEach(x=>{ if(x.fbc_id===p.id) x.fbc_id=null; if(x.om_id===p.id) x.om_id=null; }); SF=SF.filter(s=>s.id!==p.id); updCounts(); $("sdOverlay").classList.remove("show"); }
   render();
 }
 
@@ -2549,8 +2634,8 @@ function openFrInfo(id, gid){
         +'<span class="cv">'+(href?'<a href="'+esc(href)+'">'+esc(c.value)+'</a>':esc(c.value))+'</span>'+copyBtn(c.value)+'</div>'; }).join("")
     :'<div class="muted" style="font-size:12.5px">No contact info saved.</div>';
   const inIssue=gid?IS.filter(x=>x.group_id===gid && x.franchisee_id===id).map(x=>x.store_num).sort():[];
-  const {om,fbc}=staffFor(f.territory);
-  const staffLine=arr=>arr.length?arr.map(x=>esc(x.name)+(cellOf(x)?' · '+esc(cellOf(x)):'')).join("<br>"):'<span class="muted">—</span>';
+  const team=staffForStores(stores); const om=team.om.map(x=>x.s), fbc=team.fbc.map(x=>x.s);
+  const staffLine=arr=>arr.length?arr.map(x=>esc(x.name)+(emailOf(x)?' · <a href="mailto:'+esc(emailOf(x))+'">'+esc(emailOf(x))+'</a>':'')).join("<br>"):'<span class="muted">Not assigned</span>';
   $("fi_body").innerHTML=
     '<div class="lc"><div class="lch"><i data-lucide="contact"></i>Franchisee Contact Information</div><div class="lcb">'
       +'<div class="line" style="margin-bottom:4px"><span class="k">Name</span><span class="v"><b>'+esc(f.name)+'</b></span>'+copyBtn(f.name)+'</div>'+contacts+'</div></div>'
@@ -3232,7 +3317,6 @@ $("noteX").onclick=$("noteCancel").onclick=()=>$("noteOverlay").classList.remove
 
 $("sdX").onclick=$("sdClose").onclick=()=>$("sdOverlay").classList.remove("show");
 $("sfX").onclick=$("sfCancel").onclick=()=>$("sfOverlay").classList.remove("show"); $("sfSave").onclick=saveStaff;
-$("sf_territory").oninput=updateStaffPreview;
 
 $("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;$("confirmOk").textContent="Delete";}; $("confirmOk").onclick=doDelete;
 
