@@ -708,6 +708,121 @@
   .modal .head [data-lucide]{color:var(--green)}
   .toast.ok{background:var(--green)}
   .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
+
+  /* ---------- Dashboard ---------- */
+  .db-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+  .db-head h2{margin:0;font-size:20px;color:var(--green-dark)}
+  .db-head .muted{font-size:12.5px}
+  .db-filter{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 6px 0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--green-dark)}
+  .db-filter [data-lucide]{width:16px;height:16px}
+  .db-filter select{border:none;background:none;height:34px;font-family:var(--font);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;padding-right:6px}
+  .db-kpis{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+  .db-kpis .db-kpi{flex:1 1 210px}
+  .db-kpi{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s,border-color .15s}
+  .db-kpi.click{cursor:pointer}
+  .db-kpi.click:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,80,30,.10);border-color:var(--lime)}
+  .db-kpi .ic{width:40px;height:40px;border-radius:12px;background:var(--lime-soft);color:var(--green-dark);display:grid;place-items:center;flex:none}
+  .db-kpi .ic [data-lucide]{width:20px;height:20px}
+  .db-kpi.warn .ic{background:var(--danger-soft);color:var(--danger)}
+  .db-kpi .tx{display:flex;flex-direction:column;min-width:0}
+  .db-kpi .lb{font-size:12px;color:var(--ink-soft);font-weight:600}
+  .db-kpi b{font-size:24px;line-height:1.15;color:var(--ink);letter-spacing:-.01em}
+  .db-kpi b small{font-size:13px;color:var(--ink-soft);font-weight:600}
+  .db-kpi.warn b{color:var(--danger)}
+  .db-kpi .sb{font-size:11.5px;color:var(--ink-soft);margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot.g{background:var(--ok)} .dot.o{background:var(--warn)} .dot.x{background:#8b948f}
+  .db-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+  @media(max-width:1200px){.db-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:720px){.db-grid{grid-template-columns:1fr}}
+  .db-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+  .db-card.span2{grid-column:span 2} .db-card.span4{grid-column:1/-1}
+  @media(max-width:720px){.db-card.span2{grid-column:auto}}
+  .db-card header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--lime-tint);border-radius:14px 14px 0 0}
+  .db-card header [data-lucide]{width:17px;height:17px;color:var(--green)}
+  .db-card header h3{margin:0;font-size:14px;color:var(--ink)}
+  .db-body{padding:14px;flex:1}
+  .db-i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:var(--ink-soft);cursor:help;margin-left:2px}
+  .db-i:hover,.db-i:focus{color:var(--green-dark);background:var(--lime-soft);outline:none}
+  .db-i [data-lucide]{width:14px!important;height:14px!important;color:inherit!important}
+  .db-sub{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+  .db-split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:900px){.db-split{grid-template-columns:1fr}}
+  .db-hb{display:flex;flex-direction:column;gap:12px}
+  .db-hr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"l v" "t t";align-items:center;gap:5px 10px;font-size:13px}
+  .db-hr .l{grid-area:l} .db-hr .v{grid-area:v} .db-hr .track{grid-area:t}
+  .db-hr.click{cursor:pointer}
+  .db-hr .l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .db-hr .track{height:12px;background:#eef3e8;border-radius:999px;overflow:hidden;display:flex}
+  .db-hr .seg{height:100%;transition:filter .15s,width .5s ease}
+  .db-hr .seg.click{cursor:pointer}
+  .db-hr .seg:hover{filter:brightness(.88)}
+  .db-hr .v{font-size:12.5px;color:var(--ink);min-width:44px;text-align:right;white-space:nowrap}
+  .db-hr .v small{color:var(--ink-soft);font-weight:600}
+  .db-key{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+  .db-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .db-donut{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
+  .db-dw{position:relative;width:150px;height:150px;flex:none}
+  .db-arc{transition:stroke-width .15s;cursor:default}
+  .db-arc[data-act]{cursor:pointer}
+  .db-arc:hover{stroke-width:27}
+  .db-dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .db-dc b{font-size:24px;color:var(--ink);line-height:1}
+  .db-dc span{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+  .db-legend{display:flex;flex-direction:column;gap:6px;min-width:160px;flex:1}
+  .db-lg{display:grid;grid-template-columns:12px 1fr auto auto;align-items:center;gap:8px;font-size:12.5px;padding:4px 6px;border-radius:7px}
+  .db-lg.click{cursor:pointer} .db-lg.click:hover{background:var(--lime-soft)}
+  .db-lg .sw{width:10px;height:10px;border-radius:3px}
+  .db-lg b{font-size:13px} .db-lg .p{color:var(--ink-soft);font-size:11.5px;min-width:42px;text-align:right}
+  .db-cols{display:flex;align-items:flex-end;gap:6px;height:190px;padding-top:6px}
+  .db-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;min-width:0}
+  .db-col .bars{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px;border-bottom:1px solid var(--line)}
+  .db-col .b{width:38%;max-width:16px;min-height:2px;border-radius:4px 4px 0 0;transition:height .5s ease,filter .15s}
+  .db-col .b:hover{filter:brightness(.88)}
+  .db-col .b.logged{background:var(--green)} .db-col .b.resolved{background:var(--lime)}
+  .db-col .x{font-size:10.5px;color:var(--ink-soft);margin-top:5px;white-space:nowrap}
+  .db-tablewrap{overflow-x:auto}
+  .db-table{width:100%;border-collapse:collapse;font-size:13px}
+  .db-table th{font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .db-table th.sortable{cursor:pointer;user-select:none} .db-table th.sortable:hover{color:var(--green-dark)}
+  .db-table th.on{color:var(--green-dark)} .db-table th [data-lucide]{width:12px;height:12px;vertical-align:-1px;margin-left:3px}
+  .db-table td{padding:9px 10px;border-bottom:1px solid var(--line)}
+  .db-table tr.click{cursor:pointer} .db-table tr.click:hover{background:var(--lime-soft)}
+  .db-table small.g{color:var(--ok);font-weight:600}
+  .db-mc{display:flex;align-items:center;gap:8px;min-width:120px}
+  .db-mc span:last-child{font-size:12px;min-width:38px;text-align:right}
+  .db-meter{flex:1;height:8px;background:#eef3e8;border-radius:999px;overflow:hidden}
+  .db-meter span{display:block;height:100%;border-radius:999px}
+  .db-pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700}
+  .db-pill.red{background:var(--danger-soft);color:var(--danger)}
+  .db-sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+  .db-sech{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:15px;color:var(--ink)}
+  .db-sech [data-lucide]{width:18px;height:18px;color:var(--green)}
+  .db-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .db-mini div{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--lime-tint);display:flex;flex-direction:column}
+  .db-mini b{font-size:21px;color:var(--ink)} .db-mini span{font-size:11.5px;color:var(--ink-soft)}
+  .db-mini .red b{color:var(--danger)} .db-mini .g b{color:var(--ok)}
+  .db-top{display:flex;flex-direction:column}
+  .db-tr{display:grid;grid-template-columns:64px 1fr auto 44px;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed var(--line);border-radius:8px}
+  .db-tr:last-child{border-bottom:none}
+  .db-tr.click{cursor:pointer} .db-tr.click:hover{background:var(--lime-soft)}
+  .db-tr .n{font-weight:700;color:var(--green-dark)}
+  .db-tr .f{font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .db-tr .f small{display:block;color:var(--ink-soft);font-size:11.5px}
+  .db-tr .age{font-size:12px;color:var(--ink-soft);text-align:right} .db-tr .age.old{color:var(--danger);font-weight:700}
+  .db-gaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+  .db-gap{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 12px;cursor:pointer;font-family:var(--font);text-align:left;transition:border-color .15s,background .15s}
+  .db-gap:hover{border-color:var(--lime);background:var(--lime-tint)}
+  .db-gap [data-lucide]{width:17px;height:17px;color:var(--green);flex:none}
+  .db-gap .l{flex:1;font-size:13px;color:var(--ink)}
+  .db-gap b{font-size:16px;color:var(--danger)}
+  .db-gap.zero b{color:var(--ok)}
+  .db-gap .ch{color:var(--ink-soft);width:15px;height:15px}
+  .db-empty{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink-soft);font-size:13px;min-height:120px}
+  .db-empty [data-lucide]{width:18px;height:18px;color:var(--ok)}
+  .dl-list{max-height:55vh;overflow:auto}
+  #dbTip{position:fixed;z-index:400;max-width:300px;background:var(--green-dark);color:#fff;font-size:12.5px;line-height:1.4;padding:7px 10px;border-radius:8px;box-shadow:0 8px 22px rgba(0,60,25,.25);pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s}
+  #dbTip.show{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -720,7 +835,8 @@
   </div>
   <nav class="sb-nav">
     <div class="sb-label">Menu</div>
-    <button class="tab active" data-tab="franchisees" title="Franchisees"><span class="t-ic"><i data-lucide="users"></i></span><span class="t-lb">Franchisees</span><span class="badge-num" id="cnt-fr">0</span></button>
+    <button class="tab" data-tab="dashboard" title="Dashboard"><span class="t-ic"><i data-lucide="layout-dashboard"></i></span><span class="t-lb">Dashboard</span></button>
+    <button class="tab" data-tab="franchisees" title="Franchisees"><span class="t-ic"><i data-lucide="users"></i></span><span class="t-lb">Franchisees</span><span class="badge-num" id="cnt-fr">0</span></button>
     <button class="tab" data-tab="stores" title="All Stores"><span class="t-ic"><i data-lucide="store"></i></span><span class="t-lb">All Stores</span><span class="badge-num" id="cnt-st">0</span></button>
     <button class="tab" data-tab="staff" title="FBC / OM"><span class="t-ic"><i data-lucide="contact"></i></span><span class="t-lb">FBC / OM</span><span class="badge-num" id="cnt-sf">0</span></button>
     <button class="tab" data-tab="issues" title="Issues"><span class="t-ic"><i data-lucide="triangle-alert"></i></span><span class="t-lb">Issues</span><span class="badge-num" id="cnt-is">0</span></button>
@@ -740,7 +856,7 @@
 </header>
 
 <div class="wrap">
-  <div class="toolbar">
+  <div class="toolbar" id="toolbar">
     <div class="search-wrap" id="searchWrap">
       <span class="lead"><i data-lucide="search"></i></span>
       <input id="search" type="search" placeholder="Search store #, name, phone, address, city, ZIP, territory, email…">
@@ -927,6 +1043,17 @@
   </div>
 </div>
 
+<!-- Dashboard drill-down list -->
+<div class="overlay top" id="dlOverlay">
+  <div class="modal wide">
+    <div class="head"><i data-lucide="list"></i><div style="flex:1;min-width:0"><h2 id="dl_title">Stores</h2><div class="subt" id="dl_sub"></div></div>
+      <button class="btn sm outline round" id="dlDownload" style="margin-left:auto" data-tip="Download this list as an Excel file"><i data-lucide="download"></i>Download Excel</button>
+      <button class="x" id="dlX" style="margin-left:6px">&times;</button></div>
+    <div class="body" id="dl_body"></div>
+    <footer><button class="btn ghost" id="dlClose">Close</button></footer>
+  </div>
+</div>
+
 <!-- Report builder -->
 <div class="overlay top" id="rpOverlay">
   <div class="modal" style="max-width:900px">
@@ -1087,7 +1214,7 @@ const ISSUE_PLATFORMS=["Uber Eats","DoorDash","Grubhub","ezCater","Google Busine
 const ISSUE_STATES=["Pending","Work in Progress","Resolved"];
 const IMPORT_PW="Sup3rUs3r!";
 
-let db=null, tab="franchisees", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
+let db=null, tab="dashboard", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
 let frPage=1, stPage=1, frStorePage=1;
 const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50], is:[10,25,50,100]};
 const PAGE_DEF={fr:25, frst:12, st:50, is:25};
@@ -1256,7 +1383,7 @@ function setIdleMinutes(v){ v=Math.max(0,Math.min(120,Math.round(+v||0))); try{ 
   toast(v?"Auto-refresh after "+v+" min idle":"Auto-refresh turned off","ok"); }
 function showLastRefresh(){ const el=$("lastRefresh"); if(el&&lastRefreshAt) el.textContent="Last refreshed "+lastRefreshAt.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"."; }
 function busyEditing(){
-  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay"];
+  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay","dlOverlay"];
   if(forms.some(id=>$(id)&&$(id).classList.contains("show"))) return true;
   if(lkEditing && $("linksOverlay").classList.contains("show")) return true;
   if(curStore && (Object.values(swEditing||{}).some(Boolean) || platMenu)) return true;
@@ -1334,7 +1461,7 @@ function emptyBox(icon,title,sub){ return '<div class="card"><div class="state">
 function render(){
   if(!db){viewDisconnected();return;}
   document.querySelectorAll(".tab").forEach(t=>{ const on=t.dataset.tab===tab; t.classList.toggle("active",on); if(on) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current"); });
-  const PT={franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:["Issues","Log, track and report 3PD issues"]}[tab];
+  const PT={dashboard:["Dashboard","Stores, 3PD coverage and issues at a glance"],franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:["Issues","Log, track and report 3PD issues"]}[tab];
   if(PT){ $("pageTitle").textContent=PT[0]; $("pageSub").textContent=PT[1]; document.title=PT[0]+" · Franchisee Tracker"; }
   const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff");
   $("searchWrap").style.display=showSearch?"flex":"none";
@@ -1349,7 +1476,9 @@ function render(){
   $("multiAdd").style.display=(tab==="issues")?"inline-flex":"none";
   $("reportBtn").style.display=(tab==="issues")?"inline-flex":"none";
   if($("stIssOverlay") && $("stIssOverlay").classList.contains("show")) renderStoreIssues();
-  if(tab==="franchisees") renderFranchisees();
+  $("toolbar").style.display=(tab==="dashboard")?"none":"flex";
+  if(tab==="dashboard") renderDashboard();
+  else if(tab==="franchisees") renderFranchisees();
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
   else if(tab==="issues") renderIssues();
@@ -3327,6 +3456,8 @@ $("asSave").onclick=saveAddStore;
 $("as_num").oninput=checkStoreDup;
 $("fr_name").oninput=checkFrDup;
 $("conflictReload").onclick=reloadAfterConflict;
+$("dlX").onclick=$("dlClose").onclick=()=>$("dlOverlay").classList.remove("show");
+$("dlDownload").onclick=downloadDashList;
 $("reportBtn").onclick=openReport;
 $("rpX").onclick=$("rpCancel").onclick=()=>$("rpOverlay").classList.remove("show");
 $("rpGo").onclick=downloadReport;
@@ -3418,6 +3549,283 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySel
 /* startup */
 icons();
 
+/* ===================== DASHBOARD ===================== */
+let dbTerr="", dbSort={k:"stores",dir:-1};
+const CORE3=[["ue","Uber Eats"],["dd","DoorDash"],["gh","Grubhub"]];
+const DC={green:"#008938",lime:"#8cc63f",yellow:"#ffc600",red:"#c0392b",redSoft:"#e9968c",orange:"#e08a00",gray:"#c9d3c4",ok:"#1a9850",teal:"#2f9e8f"};
+const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
+const fmtN=n=>Number(n||0).toLocaleString();
+function dInfo(t){ return '<span class="db-i" data-tip="'+esc(t)+'" tabindex="0" aria-label="'+esc(t)+'"><i data-lucide="info"></i></span>'; }
+function dTerrOf(s){ return String(s.territory||"").split(",")[0].trim()||"—"; }
+function dScope(){
+  const stores=ST.filter(s=>!dbTerr||dTerrOf(s)===dbTerr);
+  const nums=new Set(stores.map(s=>String(s.num)));
+  const issues=IS.filter(i=>!dbTerr||nums.has(String(i.store_num||"")));
+  const live=stores.filter(s=>storeStatus(s)==="Open");
+  return {stores, live, issues, frIds:new Set(stores.map(s=>s.franchisee_id))};
+}
+function platSt(s,k){ return normPlat(platOf(s)[k]||"Not enrolled"); }
+function coreActive(s){ return CORE3.filter(([k])=>platSt(s,k)==="Active").length; }
+function hasGbp(s){ return !!String(s.gbp||"").trim(); }
+function resolvedAt(i){ if(isOpen(i)) return null; const h=historyEntries(i).filter(e=>normIssueStatus(e.status||"")==="Resolved"); return new Date((h.length?h[h.length-1].ts:null)||i.updated_at||i.created_at); }
+
+/* ---------- chart helpers ---------- */
+function dDonut(segs, center, sub, act){
+  const total=segs.reduce((a,b)=>a+b.value,0), size=150, th=22, r=(size-th)/2, C=2*Math.PI*r;
+  let acc=0;
+  const arcs=total?segs.filter(x=>x.value>0).map(x=>{ const len=x.value/total*C;
+    const el='<circle class="db-arc" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+x.color+'" stroke-width="'+th+'" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-acc)+'" data-tip="'+esc(x.label+': '+fmtN(x.value)+' ('+pct(x.value,total)+'%)'+(x.tip?' — '+x.tip:''))+'"'+(x.act?' data-act="list" data-arg="'+esc(x.act)+'"':'')+'></circle>';
+    acc+=len; return el; }).join(""):'<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e8eee3" stroke-width="'+th+'"></circle>';
+  const legend=segs.map(x=>'<div class="db-lg'+(x.act?' click':'')+'"'+(x.act?' data-act="list" data-arg="'+esc(x.act)+'"':'')+' data-tip="'+esc(x.tip||x.label)+'"><span class="sw" style="background:'+x.color+'"></span><span class="l">'+esc(x.label)+'</span><b>'+fmtN(x.value)+'</b><span class="p">'+pct(x.value,total)+'%</span></div>').join("");
+  return '<div class="db-donut"><div class="db-dw"><svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'" style="transform:rotate(-90deg)">'+arcs+'</svg>'
+    +'<div class="db-dc"><b>'+esc(center)+'</b><span>'+esc(sub||"")+'</span></div></div><div class="db-legend">'+legend+'</div></div>';
+}
+function dHbars(rows, opts){
+  opts=opts||{}; const max=Math.max(1,...rows.map(r=>r.parts?r.parts.reduce((a,b)=>a+b.value,0):r.value));
+  if(!rows.length) return '<div class="db-empty">'+esc(opts.empty||"No data yet")+'</div>';
+  return '<div class="db-hb">'+rows.map(r=>{
+    const tot=r.parts?r.parts.reduce((a,b)=>a+b.value,0):r.value;
+    const base=opts.full?tot:max;
+    const bar=r.parts
+      ?r.parts.map(p=>p.value?'<span class="seg'+(p.act?' click':'')+'" style="width:'+(p.value/Math.max(1,base)*100)+'%;background:'+p.color+'" data-tip="'+esc(r.label+' · '+p.label+': '+fmtN(p.value)+(tot?' ('+pct(p.value,tot)+'%)':''))+'"'+(p.act?' data-act="list" data-arg="'+esc(p.act)+'"':'')+'></span>':'').join("")
+      :'<span class="seg'+(r.act?' click':'')+'" style="width:'+(r.value/max*100)+'%;background:'+(r.color||DC.green)+'" data-tip="'+esc(r.tip||(r.label+': '+fmtN(r.value)))+'"'+(r.act?' data-act="list" data-arg="'+esc(r.act)+'"':'')+'></span>';
+    return '<div class="db-hr'+(r.rowAct?' click':'')+'"'+(r.rowAct?' data-act="'+r.rowAct[0]+'" data-arg="'+esc(r.rowAct[1])+'"':'')+'><span class="l" title="'+esc(r.label)+'">'+esc(r.label)+'</span><span class="track">'+bar+'</span><b class="v">'+(opts.valueFmt?opts.valueFmt(r,tot):fmtN(tot))+'</b></div>';
+  }).join("")+'</div>';
+}
+function dCols(weeks){
+  const max=Math.max(1,...weeks.map(w=>Math.max(w.logged,w.resolved)));
+  return '<div class="db-cols">'+weeks.map(w=>'<div class="db-col"><div class="bars">'
+      +'<span class="b logged" style="height:'+(w.logged/max*100)+'%" data-tip="Week of '+esc(w.label)+' · Logged: '+w.logged+'"></span>'
+      +'<span class="b resolved" style="height:'+(w.resolved/max*100)+'%" data-tip="Week of '+esc(w.label)+' · Resolved: '+w.resolved+'"></span>'
+    +'</div><span class="x">'+esc(w.label)+'</span></div>').join("")+'</div>'
+    +'<div class="db-key"><span><i style="background:'+DC.green+'"></i>Logged</span><span><i style="background:'+DC.lime+'"></i>Resolved</span></div>';
+}
+function dKpi(icon, label, value, sub, tip, tone, act){
+  return '<div class="db-kpi'+(tone?' '+tone:'')+(act?' click':'')+'"'+(act?' data-act="'+act[0]+'" data-arg="'+esc(act[1]||"")+'"':'')+' data-tip="'+esc(tip)+'">'
+    +'<span class="ic"><i data-lucide="'+icon+'"></i></span><div class="tx"><span class="lb">'+esc(label)+'</span><b>'+value+'</b>'+(sub?'<span class="sb">'+sub+'</span>':'')+'</div></div>';
+}
+function dCard(title, icon, tip, body, cls, extra){
+  return '<section class="db-card '+(cls||'')+'"><header><i data-lucide="'+icon+'"></i><h3>'+esc(title)+'</h3>'+(tip?dInfo(tip):'')+(extra||'')+'</header><div class="db-body">'+body+'</div></section>';
+}
+
+/* ---------- dashboard ---------- */
+function renderDashboard(){
+  $("count").textContent="";
+  const {stores, live, issues, frIds}=dScope();
+  const terrs=[...new Set(ST.map(dTerrOf))].filter(t=>t!=="—").sort((a,b)=>(+a||0)-(+b||0));
+  const stCount={Open:0,"Temporarily closed":0,Closed:0}; stores.forEach(s=>stCount[storeStatus(s)]++);
+  const coreDist=[0,0,0,0]; live.forEach(s=>coreDist[coreActive(s)]++);
+  const avgCore=live.length?(live.reduce((a,s)=>a+coreActive(s),0)/live.length):0;
+  const gbpYes=live.filter(hasGbp).length;
+  const ezC={Active:0,Pending:0,"Not enrolled":0}; live.forEach(s=>ezC[platSt(s,"ez")]++);
+  const openIs=issues.filter(isOpen), resIs=issues.filter(i=>!isOpen(i));
+  const now=Date.now(), day=864e5;
+  const resDays=resIs.map(i=>{ const r=resolvedAt(i); return r?(r-new Date(i.created_at))/day:null; }).filter(v=>v!=null&&v>=0);
+  const avgRes=resDays.length?Math.round(resDays.reduce((a,b)=>a+b,0)/resDays.length*10)/10:null;
+  const storesOpenIs=new Set(openIs.map(i=>String(i.store_num||""))).size;
+  const last7=issues.filter(i=>now-new Date(i.created_at)<=7*day).length;
+  const scopeName=dbTerr?("Territory "+dbTerr):"All territories";
+
+  // header / filter
+  const head='<div class="db-head"><div><h2>'+esc(scopeName)+'</h2><span class="muted">Live from the shared database · '+('updated '+(lastRefreshAt||new Date()).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}))+'</span></div>'
+    +'<label class="db-filter" data-tip="Show the whole dashboard for one territory"><i data-lucide="map-pin"></i><select onchange="dbTerr=this.value;render()"><option value="">All territories</option>'
+    +terrs.map(t=>'<option value="'+esc(t)+'"'+(dbTerr===t?' selected':'')+'>Territory '+esc(t)+'</option>').join("")+'</select></label></div>';
+
+  // KPIs
+  const kpis='<div class="db-kpis">'
+    +dKpi("users","Franchisees",fmtN(frIds.size),"owners with stores here","Number of franchisees (owners) who have at least one store in this view.","",["tab","franchisees"])
+    +dKpi("store","Stores",fmtN(stores.length),'<span class="dot g"></span>'+fmtN(stCount.Open)+' open · <span class="dot o"></span>'+fmtN(stCount["Temporarily closed"])+' temp · <span class="dot x"></span>'+fmtN(stCount.Closed)+' closed',"All stores in this view, split by store status.","",["tab","stores"])
+    +dKpi("map","Territories",dbTerr?"1":fmtN(terrs.length),dbTerr?"filtered":"covered","Number of territories with stores.","",null)
+    +dKpi("bike","Avg 3PD per store",avgCore.toFixed(1)+'<small> / 3</small>',pct(coreDist[3],live.length)+"% on all 3","Average number of core delivery apps (Uber Eats, DoorDash, Grubhub) that are Active, across open stores.","",["list","core:3"])
+    +dKpi("map-pinned","Google Business Profile",pct(gbpYes,live.length)+"%",fmtN(gbpYes)+" of "+fmtN(live.length)+" open stores","Open stores that have a Google Business Profile link saved (synced).","",["list","gbp:no"])
+    +dKpi("utensils","ezCater active",pct(ezC.Active,live.length)+"%",fmtN(ezC.Active)+" active · "+fmtN(ezC.Pending)+" pending","Open stores with ezCater set to Active.","",["list","plat:ez:Active"])
+    +dKpi("triangle-alert","Open issues",fmtN(openIs.length),fmtN(storesOpenIs)+" store"+(storesOpenIs!==1?"s":"")+" affected","Issues that are Pending or Work in Progress.",openIs.length?"warn":"",["issues",""])
+    +'</div>';
+
+  // 3PD coverage
+  const distRows=[0,1,2,3].map(n=>({label:n===0?"None":(n===3?"All 3":n+" of 3"),value:coreDist[n],color:n===0?DC.redSoft:(n===3?DC.green:(n===2?DC.lime:DC.yellow)),act:"core:"+n,
+      tip:(n===0?"Open stores with no core delivery app active":n===3?"Open stores active on Uber Eats, DoorDash and Grubhub":"Open stores active on "+n+" of the 3 core apps")+": "+fmtN(coreDist[n])+" ("+pct(coreDist[n],live.length)+"%) — click to see them"}));
+  const platRows=PLATFORMS.map(([k,name])=>{ const c={Active:0,Pending:0,"Not enrolled":0}; live.forEach(s=>c[platSt(s,k)]++);
+    return {label:name, parts:[{label:"Active",value:c.Active,color:DC.green,act:"plat:"+k+":Active"},{label:"Pending",value:c.Pending,color:DC.yellow,act:"plat:"+k+":Pending"},{label:"Not enrolled",value:c["Not enrolled"],color:DC.redSoft,act:"plat:"+k+":Not enrolled"}]}; });
+  const cov=dCard("3PD coverage","bike","Delivery apps per open store. Core 3PD = Uber Eats, DoorDash and Grubhub. Click any bar to see the stores.",
+    '<div class="db-split"><div><div class="db-sub">Core apps active per store</div>'+dHbars(distRows,{valueFmt:(r,t)=>fmtN(t)+'<small> '+pct(t,live.length)+'%</small>'})+'</div>'
+    +'<div><div class="db-sub">Status by platform</div>'+dHbars(platRows,{full:true,valueFmt:(r,t)=>'<small>'+pct(r.parts[0].value,t)+'% active</small>'})
+    +'<div class="db-key"><span><i style="background:'+DC.green+'"></i>Active</span><span><i style="background:'+DC.yellow+'"></i>Pending</span><span><i style="background:'+DC.redSoft+'"></i>Not enrolled</span></div></div></div>',"span4");
+  const gbp=dCard("Google Business Profile","map-pinned","An open store counts as synced when its Google Business Profile link is saved in the store window.",
+    dDonut([{label:"Synced (link saved)",value:gbpYes,color:DC.green,act:"gbp:yes",tip:"Click to see these stores"},{label:"Not synced",value:live.length-gbpYes,color:DC.gray,act:"gbp:no",tip:"No GBP link saved — click to see these stores"}],pct(gbpYes,live.length)+"%","synced"),"span2");
+  const ez=dCard("ezCater","utensils","ezCater status of open stores (set in Delivery Platforms in the store window).",
+    dDonut([{label:"Active",value:ezC.Active,color:DC.green,act:"plat:ez:Active"},{label:"Pending",value:ezC.Pending,color:DC.yellow,act:"plat:ez:Pending"},{label:"Not enrolled",value:ezC["Not enrolled"],color:DC.gray,act:"plat:ez:Not enrolled"}],pct(ezC.Active,live.length)+"%","active"),"span2");
+
+  // territory table
+  const tRows=(dbTerr?[dbTerr]:terrs).map(t=>{ const sts=ST.filter(s=>dTerrOf(s)===t), lv=sts.filter(s=>storeStatus(s)==="Open");
+    const nums=new Set(sts.map(s=>String(s.num)));
+    return {t, fr:new Set(sts.map(s=>s.franchisee_id)).size, stores:sts.length, open:lv.length,
+      avg:lv.length?lv.reduce((a,s)=>a+coreActive(s),0)/lv.length:0, all3:pct(lv.filter(s=>coreActive(s)===3).length,lv.length),
+      gbp:pct(lv.filter(hasGbp).length,lv.length), ez:pct(lv.filter(s=>platSt(s,"ez")==="Active").length,lv.length),
+      issues:IS.filter(i=>isOpen(i)&&nums.has(String(i.store_num||""))).length };
+  });
+  tRows.sort((a,b)=>(a[dbSort.k]>b[dbSort.k]?1:a[dbSort.k]<b[dbSort.k]?-1:0)*dbSort.dir || (+a.t||0)-(+b.t||0));
+  const th=(k,l,tip)=>'<th class="sortable'+(dbSort.k===k?' on':'')+'" data-act="dsort" data-arg="'+k+'" data-tip="'+esc(tip)+'">'+l+(dbSort.k===k?'<i data-lucide="'+(dbSort.dir<0?'arrow-down':'arrow-up')+'"></i>':'')+'</th>';
+  const meter=(v,max,c)=>'<span class="db-meter"><span style="width:'+Math.min(100,v/max*100)+'%;background:'+c+'"></span></span>';
+  const terrTable=dCard("By territory","map","Totals for each territory. Coverage % is based on open stores. Click a column to sort, or a row to open that territory's stores.",
+    '<div class="db-tablewrap"><table class="db-table"><thead><tr>'+th("t","Territory","Territory number")+th("fr","Franchisees","Owners with stores in the territory")+th("stores","Stores","All stores (open ones in green)")
+      +th("avg","Avg 3PD","Average core apps active per open store (out of 3)")+th("all3","All 3 apps","% of open stores active on Uber Eats, DoorDash and Grubhub")+th("gbp","GBP synced","% of open stores with a GBP link")+th("ez","ezCater","% of open stores active on ezCater")+th("issues","Open issues","Pending + Work in Progress issues")+'</tr></thead><tbody>'
+    +tRows.map(r=>'<tr class="click" data-act="terr" data-arg="'+esc(r.t)+'"><td><b>'+esc(r.t)+'</b></td><td>'+fmtN(r.fr)+'</td><td>'+fmtN(r.stores)+' <small class="g">'+fmtN(r.open)+' open</small></td>'
+      +'<td><div class="db-mc">'+meter(r.avg,3,DC.green)+'<span>'+r.avg.toFixed(1)+'</span></div></td>'
+      +'<td><div class="db-mc">'+meter(r.all3,100,DC.lime)+'<span>'+r.all3+'%</span></div></td>'
+      +'<td><div class="db-mc">'+meter(r.gbp,100,DC.teal)+'<span>'+r.gbp+'%</span></div></td>'
+      +'<td><div class="db-mc">'+meter(r.ez,100,DC.yellow)+'<span>'+r.ez+'%</span></div></td>'
+      +'<td>'+(r.issues?'<span class="db-pill red">'+r.issues+'</span>':'<span class="muted">0</span>')+'</td></tr>').join("")
+    +'</tbody></table></div>',"span4");
+
+  // issues
+  const sc={Pending:0,"Work in Progress":0,Resolved:0}; issues.forEach(i=>sc[normIssueStatus(i.status)]++);
+  const issueKpis='<div class="db-mini">'
+    +'<div data-tip="All issues logged in this view (multi-store issues count once per store)"><b>'+fmtN(issues.length)+'</b><span>Total</span></div>'
+    +'<div class="red" data-tip="Pending or Work in Progress"><b>'+fmtN(openIs.length)+'</b><span>Open</span></div>'
+    +'<div class="g" data-tip="Resolved issues"><b>'+fmtN(resIs.length)+'</b><span>Resolved</span></div>'
+    +'<div data-tip="Resolved ÷ total"><b>'+pct(resIs.length,issues.length)+'%</b><span>Resolved rate</span></div>'
+    +'<div data-tip="Average days from logged to resolved"><b>'+(avgRes==null?"—":avgRes)+'</b><span>Avg days to resolve</span></div>'
+    +'<div data-tip="Issues logged in the last 7 days"><b>'+fmtN(last7)+'</b><span>Last 7 days</span></div></div>';
+  const statusDonut=dDonut([{label:"Pending",value:sc.Pending,color:DC.red},{label:"Work in Progress",value:sc["Work in Progress"],color:DC.orange},{label:"Resolved",value:sc.Resolved,color:DC.ok}],fmtN(issues.length),"issues");
+  // weekly
+  const wk0=new Date(); wk0.setHours(0,0,0,0); wk0.setDate(wk0.getDate()-wk0.getDay());
+  const weeks=[]; for(let w=11;w>=0;w--){ const from=new Date(wk0); from.setDate(from.getDate()-w*7); const to=new Date(from); to.setDate(to.getDate()+7);
+    weeks.push({label:from.toLocaleDateString([], {month:"short",day:"numeric"}),
+      logged:issues.filter(i=>{const d=new Date(i.created_at); return d>=from&&d<to;}).length,
+      resolved:resIs.filter(i=>{const d=resolvedAt(i); return d&&d>=from&&d<to;}).length}); }
+  // aging
+  const buckets=[["0–2 days",0,3],["3–7 days",3,8],["8–14 days",8,15],["15–30 days",15,31],["Over 30 days",31,1e9]];
+  const ageRows=buckets.map(([l,a,b],ix)=>({label:l,value:openIs.filter(i=>{const d=(now-new Date(i.created_at))/day; return d>=a&&d<b;}).length,color:[DC.lime,DC.yellow,DC.orange,DC.red,"#8e2b20"][ix],tip:l+" old (still open)"}));
+  // by platform
+  const platAgg={}; issues.forEach(i=>{ const pl=issuePlatforms(i); (pl.length?pl:["Not set"]).forEach(p=>{ platAgg[p]=platAgg[p]||{o:0,r:0}; isOpen(i)?platAgg[p].o++:platAgg[p].r++; }); });
+  const ipRows=Object.entries(platAgg).sort((a,b)=>(b[1].o+b[1].r)-(a[1].o+a[1].r)).map(([p,c])=>({label:p,parts:[{label:"Open",value:c.o,color:DC.red},{label:"Resolved",value:c.r,color:DC.ok}]}));
+  // top stores
+  const byStore={}; openIs.forEach(i=>{ const k=String(i.store_num||""); byStore[k]=byStore[k]||{n:0,old:Infinity}; byStore[k].n++; byStore[k].old=Math.min(byStore[k].old,new Date(i.created_at).getTime()); });
+  const top=Object.entries(byStore).sort((a,b)=>b[1].n-a[1].n||a[1].old-b[1].old).slice(0,8);
+  const topHtml=top.length?'<div class="db-top">'+top.map(([num,v])=>{ const st=storeByNum[num], f=st?FR.find(x=>x.id===st.franchisee_id):null; const age=Math.floor((now-v.old)/day);
+      return '<div class="db-tr click" data-act="store-issues" data-arg="'+esc(num)+'" data-tip="Open this store\'s issues"><span class="n">'+esc(num)+'</span><span class="f">'+esc(f?f.name:"—")+'<small>'+esc(st?[st.city,st.state].filter(Boolean).join(", "):"")+'</small></span>'
+        +'<span class="db-pill red">'+v.n+' open</span><span class="age'+(age>14?' old':'')+'" data-tip="Oldest open issue">'+age+'d</span></div>'; }).join("")+'</div>'
+    :'<div class="db-empty"><i data-lucide="circle-check"></i>No open issues</div>';
+  // by FBC
+  const fbcAgg={}; openIs.forEach(i=>{ const st=storeByNum[String(i.store_num||"")]; const f=st?staffById(st.fbc_id):null; const k=f?f.name:"No FBC"; fbcAgg[k]=(fbcAgg[k]||0)+1; });
+  const fbcRows=Object.entries(fbcAgg).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([n,v])=>({label:n,value:v,color:DC.orange,tip:n+": "+v+" open issue"+(v!==1?"s":"")}));
+
+  const issuesSection='<div class="db-sec"><h3 class="db-sech"><i data-lucide="triangle-alert"></i>Issues'+dInfo("Issue numbers for stores in this view. Multi-store issues count once per store.")+'</h3>'+issueKpis+'</div>'
+    +'<div class="db-grid">'
+    +dCard("Status","pie-chart","Current status of all issues.",statusDonut)
+    +dCard("Logged vs resolved","bar-chart-3","Issues logged and resolved each week (last 12 weeks). Weeks start on Sunday.",issues.length?dCols(weeks):'<div class="db-empty">No issues yet</div>',"span2")
+    +dCard("Open issue age","hourglass","How long open issues have been waiting since they were logged.",dHbars(ageRows,{empty:"No open issues"}))
+    +dCard("Stores with the most open issues","store","Top stores by number of open issues. 'd' = age of the oldest open issue in days. Click to see the issues.",topHtml,"span2")
+    +dCard("Issues by platform","layers","Which platform each issue was about (an issue can list more than one).",dHbars(ipRows,{empty:"No issues yet"})+(ipRows.length?'<div class="db-key"><span><i style="background:'+DC.red+'"></i>Open</span><span><i style="background:'+DC.ok+'"></i>Resolved</span></div>':''))
+    +dCard("Open issues by FBC","badge-check","Open issues grouped by each store's assigned FBC.",dHbars(fbcRows,{empty:"No open issues"}))
+    +'</div>';
+
+  // gaps
+  const gaps=[
+    ["gap:no3pd","circle-off","No core 3PD active",live.filter(s=>coreActive(s)===0).length,"Open stores with none of Uber Eats, DoorDash or Grubhub active"],
+    ["plat:ue:Not enrolled","bike","Not on Uber Eats",live.filter(s=>platSt(s,"ue")==="Not enrolled").length,"Open stores not enrolled on Uber Eats"],
+    ["plat:dd:Not enrolled","bike","Not on DoorDash",live.filter(s=>platSt(s,"dd")==="Not enrolled").length,"Open stores not enrolled on DoorDash"],
+    ["plat:gh:Not enrolled","bike","Not on Grubhub",live.filter(s=>platSt(s,"gh")==="Not enrolled").length,"Open stores not enrolled on Grubhub"],
+    ["gbp:no","map-pinned","No GBP link",live.length-gbpYes,"Open stores without a Google Business Profile link"],
+    ["plat:ez:Not enrolled","utensils","Not on ezCater",ezC["Not enrolled"],"Open stores not enrolled on ezCater"],
+    ["gap:nofbc","user-x","No FBC assigned",stores.filter(s=>!staffById(s.fbc_id)).length,"Stores without an assigned FBC"],
+    ["gap:noom","user-x","No OM assigned",stores.filter(s=>!staffById(s.om_id)).length,"Stores without an assigned OM"],
+    ["status:Temporarily closed","clock","Temporarily closed",stCount["Temporarily closed"],"Stores marked Temporarily closed"],
+  ];
+  const gapHtml='<div class="db-gaps">'+gaps.map(([k,ic,l,n,tip])=>'<button class="db-gap click'+(n?'':' zero')+'" data-act="list" data-arg="'+esc(k)+'" data-tip="'+esc(tip)+' — click to see the list"><i data-lucide="'+ic+'"></i><span class="l">'+esc(l)+'</span><b>'+fmtN(n)+'</b><i data-lucide="chevron-right" class="ch"></i></button>').join("")+'</div>';
+
+  setView(head+kpis
+    +'<div class="db-grid">'+cov+'</div><div class="db-grid">'+gbp+ez+'</div>'
+    +'<div class="db-grid">'+dCard("Coverage gaps","list-checks","Stores that need follow-up. Click any item to see the stores and download the list.",gapHtml,"span4")+'</div>'
+    +'<div class="db-grid">'+terrTable+'</div>'
+    +issuesSection);
+}
+
+/* ---------- drill-down store list ---------- */
+let dlCtx={key:"",q:"",list:[]};
+function dashStores(key){
+  const {stores, live}=dScope(); const [a,b,c]=key.split(":");
+  if(a==="core") return live.filter(s=>coreActive(s)===+b);
+  if(a==="plat") return live.filter(s=>platSt(s,b)===c);
+  if(a==="gbp") return live.filter(s=>b==="yes"?hasGbp(s):!hasGbp(s));
+  if(a==="gap"&&b==="no3pd") return live.filter(s=>coreActive(s)===0);
+  if(a==="gap"&&b==="nofbc") return stores.filter(s=>!staffById(s.fbc_id));
+  if(a==="gap"&&b==="noom") return stores.filter(s=>!staffById(s.om_id));
+  if(a==="status") return stores.filter(s=>storeStatus(s)===b);
+  return [];
+}
+function dashTitle(key){
+  const [a,b,c]=key.split(":"); const pn=k=>(PLATFORMS.find(x=>x[0]===k)||[k,k])[1];
+  if(a==="core") return +b===0?"Open stores with no core 3PD active":(+b===3?"Open stores active on all 3 core apps":"Open stores active on "+b+" of 3 core apps");
+  if(a==="plat") return pn(b)+" — "+c+" (open stores)";
+  if(a==="gbp") return b==="yes"?"Open stores synced with Google Business Profile":"Open stores without a GBP link";
+  if(key==="gap:no3pd") return "Open stores with no core 3PD active";
+  if(key==="gap:nofbc") return "Stores without an FBC";
+  if(key==="gap:noom") return "Stores without an OM";
+  if(a==="status") return "Stores — "+b;
+  return "Stores";
+}
+function openDashList(key){
+  dlCtx={key,q:"",list:dashStores(key).slice().sort(numCmp)};
+  $("dl_title").textContent=dashTitle(key);
+  renderDashList(); $("dlOverlay").classList.add("show"); icons();
+}
+function renderDashList(){
+  const q=dlCtx.q.trim().toLowerCase();
+  const sq={mode:"any",q,d:dig(q),phoneLike:dig(q).length>=3&&/^[\d\s()+.\-]+$/.test(q)};
+  const list=q?dlCtx.list.filter(s=>storeMatch(s,sq)):dlCtx.list;
+  $("dl_sub").textContent=fmtN(list.length)+" store"+(list.length!==1?"s":"")+(dbTerr?" · Territory "+dbTerr:"");
+  const shown=list.slice(0,300);
+  $("dl_body").innerHTML='<div class="search-wrap" style="margin-bottom:10px"><span class="lead"><i data-lucide="search"></i></span><input id="dl_q" type="search" placeholder="Filter by store #, name, city, ZIP…" value="'+esc(dlCtx.q)+'" oninput="dlCtx.q=this.value;renderDashList();const e=$(\'dl_q\');e.focus();e.setSelectionRange(e.value.length,e.value.length)"></div>'
+    +(shown.length?'<div class="dl-list">'+shown.map(s=>{ const f=FR.find(x=>x.id===s.franchisee_id);
+      return '<div class="store-line" data-act="dl-store" data-arg="'+s.id+'"><div class="idot-col">'+openDot(storeOpenIssues(s.num))+'</div><span class="num">'+esc(s.num)+'</span>'
+        +'<div class="meta"><div class="a">'+esc(f?f.name:"—")+(storeStatusIfNotOpen(s)?' '+storeStatusIfNotOpen(s):'')+'</div><div class="b">'+esc([s.address,[s.city,s.state].filter(Boolean).join(", "),"Terr "+(s.territory||"—")].filter(Boolean).join(" · "))+'</div></div>'
+        +platChips(platOf(s))+'<i data-lucide="chevron-right" class="muted"></i></div>'; }).join("")+'</div>'
+      +(list.length>300?'<div class="help">Showing the first 300. Download Excel for the full list.</div>':'')
+    :'<div class="db-empty"><i data-lucide="circle-check"></i>No stores in this list</div>');
+  icons();
+}
+function downloadDashList(){
+  const X=window.XLSX; if(!X){ toast("Excel tool didn't load","err"); return; }
+  const rows=[["Store #","Franchisee","Status","Address","City","State","ZIP","Territory","Store phone","Uber Eats","DoorDash","Grubhub","ezCater","Foodja","GBP link","FBC","OM","Open issues"]];
+  dlCtx.list.forEach(s=>{ const f=FR.find(x=>x.id===s.franchisee_id), fb=staffById(s.fbc_id), om=staffById(s.om_id);
+    rows.push([s.num,f?f.name:"",storeStatus(s),s.address||"",s.city||"",s.state||"",s.zip||"",s.territory||"",s.phone||"",
+      ...PLATFORMS.map(([k])=>platSt(s,k)),s.gbp||"",fb?fb.name:"",om?om.name:"",storeOpenIssues(s.num)]); });
+  const ws=X.utils.aoa_to_sheet(rows); ws["!cols"]=[9,28,16,30,16,7,9,10,15,11,11,11,11,11,30,16,16,10].map(w=>({wch:w}));
+  ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length-1,c:rows[0].length-1}})};
+  for(let c=0;c<rows[0].length;c++){ const a=X.utils.encode_cell({r:0,c}); if(ws[a]) ws[a].s={font:{bold:true,color:{rgb:"FFFFFF"},name:"Arial",sz:10},fill:{fgColor:{rgb:"008938"}}}; }
+  const wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,"Stores");
+  const name=dashTitle(dlCtx.key).replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase().slice(0,60);
+  X.writeFile(wb,name+(dbTerr?"_terr-"+dbTerr:"")+".xlsx",{cellStyles:true}); toast("List downloaded","ok");
+}
+
+/* ---------- interactions: one handler for all dashboard clicks ---------- */
+document.addEventListener("click",e=>{
+  const el=e.target.closest && e.target.closest("[data-act]"); if(!el) return;
+  const act=el.dataset.act, arg=el.dataset.arg;
+  if(act==="list"){ openDashList(arg); }
+  else if(act==="dsort"){ dbSort=dbSort.k===arg?{k:arg,dir:-dbSort.dir}:{k:arg,dir:arg==="t"?1:-1}; render(); }
+  else if(act==="terr"){ terrFilter=arg; tab="stores"; stPage=1; $("search").value=""; buildTerrFilter(); render(); window.scrollTo(0,0); }
+  else if(act==="tab"){ if(dbTerr&&(arg==="stores"||arg==="franchisees")){ terrFilter=dbTerr; buildTerrFilter(); } tab=arg; $("search").value=""; render(); window.scrollTo(0,0); }
+  else if(act==="issues"){ tab="issues"; isStatus=["Pending","Work in Progress"]; isPage=1; $("search").value=""; render(); window.scrollTo(0,0); }
+  else if(act==="store-issues"){ openStoreIssues(arg); }
+  else if(act==="dl-store"){ $("dlOverlay").classList.remove("show"); openStore(+arg); }
+});
+
+/* ---------- hover info tooltip ---------- */
+(function(){
+  const tip=document.createElement("div"); tip.id="dbTip"; tip.setAttribute("role","tooltip"); document.body.appendChild(tip);
+  let cur=null;
+  const place=(x,y)=>{ const r=tip.getBoundingClientRect(); let L=x+14, T=y+16; if(L+r.width>innerWidth-8) L=x-r.width-14; if(T+r.height>innerHeight-8) T=y-r.height-14; tip.style.left=Math.max(8,L)+"px"; tip.style.top=Math.max(8,T)+"px"; };
+  document.addEventListener("mouseover",e=>{ const el=e.target.closest&&e.target.closest("[data-tip]"); if(!el){ tip.classList.remove("show"); cur=null; return; }
+    if(el!==cur){ cur=el; tip.textContent=el.dataset.tip; tip.classList.add("show"); } place(e.clientX,e.clientY); });
+  document.addEventListener("mousemove",e=>{ if(cur) place(e.clientX,e.clientY); });
+  document.addEventListener("focusin",e=>{ const el=e.target.closest&&e.target.closest("[data-tip]"); if(el){ const r=el.getBoundingClientRect(); cur=el; tip.textContent=el.dataset.tip; tip.classList.add("show"); place(r.left,r.bottom); } });
+  document.addEventListener("focusout",()=>{ tip.classList.remove("show"); cur=null; });
+  document.addEventListener("scroll",()=>{ tip.classList.remove("show"); cur=null; },true);
+})();
+
 /* ===== Sidebar collapse ===== */
 function applySidebar(col){
   $("app").classList.toggle("collapsed",col);
@@ -3454,7 +3862,7 @@ function saveUiState(){
 function loadUiState(){
   let st=null; try{ st=JSON.parse(sessionStorage.getItem(UI_KEY)||"null"); }catch(e){}
   if(!st) return;
-  if(["franchisees","stores","staff","issues"].includes(st.tab)) tab=st.tab;
+  if(["dashboard","franchisees","stores","staff","issues"].includes(st.tab)) tab=st.tab;
   $("search").value=st.search||"";
   terrFilter=st.terrFilter||""; selFr=st.selFr??null;
   frPage=st.frPage||1; stPage=st.stPage||1; frStorePage=st.frStorePage||1; isPage=st.isPage||1;
