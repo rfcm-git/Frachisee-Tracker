@@ -526,6 +526,8 @@
   .fr-item.active{background:var(--green-soft);box-shadow:inset 3px 0 0 var(--green)}
   .fr-item .nm{font-weight:600;font-size:13.5px;flex:1;min-width:0}
   .fr-item .nm small{display:block;color:var(--ink-soft);font-weight:400;font-size:12px}
+  .fr-item .nm small.mhint{display:flex;align-items:center;gap:4px;color:var(--green-dark);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fr-item .nm small.mhint [data-lucide]{width:11px;height:11px;flex:none}
   .fr-stc{display:inline-flex;align-items:center;gap:5px;flex:none;align-self:center;height:24px;padding:0 9px;border-radius:999px;background:var(--yellow-soft);color:var(--yellow-dark);font-size:12px;font-weight:700}
   .fr-stc [data-lucide]{width:13px;height:13px}
   .fr-item.active .fr-stc{background:#fff}
@@ -741,7 +743,7 @@
   <div class="toolbar">
     <div class="search-wrap" id="searchWrap">
       <span class="lead"><i data-lucide="search"></i></span>
-      <input id="search" type="search" placeholder="Search…  (#store or @franchisee)">
+      <input id="search" type="search" placeholder="Search store #, name, phone, address, city, ZIP, territory, email…">
     </div>
     <select class="terr-filter" id="terrFilter"><option value="">All territories</option></select>
     <span id="storeFilters" style="display:none;gap:6px;align-items:center">
@@ -755,8 +757,9 @@
     <button class="btn ghost" id="refreshBtn"><i data-lucide="refresh-cw"></i>Refresh</button>
   </div>
   <div class="hintbar" id="hintbar">
-    <span><kbd>#</kbd> store number — e.g. #12345</span>
-    <span><kbd>@</kbd> franchisee name — e.g. @Aggarwal</span>
+    <span><kbd>#</kbd> store number only — e.g. #123</span>
+    <span><kbd>@</kbd> franchisee name only — e.g. @Aggarwal</span>
+    <span class="muted">Or type anything: store #, name, phone, address, city, ZIP, territory or email</span>
   </div>
   <div id="view"></div>
 </div>
@@ -1186,7 +1189,41 @@ function reindex(){
   FR.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
   storesByFr={}; storeByNum={};
   ST.forEach(s=>{(storesByFr[s.franchisee_id]=storesByFr[s.franchisee_id]||[]).push(s); if(s.num) storeByNum[String(s.num)]=s;});
+  buildSearchIndex();
 }
+/* ===== Search index: store #, name, phone, address, city, state, ZIP, territory, email ===== */
+const dig=v=>String(v||"").replace(/\D/g,"");
+function buildSearchIndex(){
+  const frById={}; FR.forEach(f=>{ frById[f.id]=f;
+    const cs=contactsOf(f).map(c=>c.value).filter(Boolean);
+    f._txt=[f.name,f.territory,...cs].join(" ").toLowerCase();
+    f._dig=cs.map(dig).filter(Boolean).join(" ");
+  });
+  ST.forEach(s=>{ const f=frById[s.franchisee_id];
+    s._txt=[s.num,s.address,s.city,s.state,s.zip,s.territory,s.phone,f?f.name:""].join(" ").toLowerCase();
+    s._dig=[dig(s.phone),dig(s.zip)].filter(Boolean).join(" ");
+  });
+}
+// how a query should be read: plain digits are treated as a store # (exact first) and also as a phone/ZIP piece
+function searchQ(){
+  const {mode,q}=parseQuery();
+  const d=dig(q);
+  return {mode,q,d,phoneLike: d.length>=3 && /^[\d\s()+.\-]+$/.test(q)};
+}
+// 0 = exact store #, 1 = starts with, 2 = contains, 9 = no store # match
+function numRank(num,q){ num=String(num||"").toLowerCase().replace(/^#/,""); q=String(q||"").replace(/^#/,""); if(!q) return 9; if(num===q) return 0; if(num.startsWith(q)) return 1; if(num.includes(q)) return 2; return 9; }
+function storeMatch(s,sq){
+  if(!sq.q) return true;
+  if(sq.mode==="store") return numRank(s.num,sq.q)<9;
+  if(sq.mode==="fr"){ const f=FR.find(x=>x.id===s.franchisee_id); return !!f && (f.name||"").toLowerCase().includes(sq.q); }
+  return (s._txt||"").includes(sq.q) || (sq.phoneLike && (s._dig||"").includes(sq.d)) || frContactMatch(s.franchisee_id,sq);
+}
+function frContactMatch(fid,sq){ const f=FR.find(x=>x.id===fid); if(!f) return false;
+  const cs=contactsOf(f).map(c=>String(c.value||"").toLowerCase());
+  return cs.some(v=>v.includes(sq.q)) || (sq.phoneLike && (f._dig||"").includes(sq.d)); }
+// rank a store for sorting: exact store # first, then starts-with, then contains, then other fields
+function storeRank(s,sq){ const r=numRank(s.num,sq.q); return r<9?r:3; }
+function numCmp(a,b){ return String(a.num||"").localeCompare(String(b.num||""),undefined,{numeric:true}); }
 function buildTerrFilter(){
   const set=new Set();
   FR.forEach(f=>terrSet(f.territory).forEach(t=>set.add(t)));
@@ -1301,7 +1338,7 @@ function render(){
   if(PT){ $("pageTitle").textContent=PT[0]; $("pageSub").textContent=PT[1]; document.title=PT[0]+" · Franchisee Tracker"; }
   const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff");
   $("searchWrap").style.display=showSearch?"flex":"none";
-  $("search").placeholder=(tab==="staff")?"Search name, email, or #store":(tab==="issues")?"Search issues, #store or @franchisee":"Search…  (#store or @franchisee)";
+  $("search").placeholder=(tab==="staff")?"Search name, email, or #store":(tab==="issues")?"Search issues, store #, phone, address, city, ZIP…":"Search store #, name, phone, address, city, ZIP, territory, email…";
   $("terrFilter").style.display=(tab==="franchisees"||tab==="stores")?"block":"none";
   $("storeFilters").style.display=(tab==="stores")?"inline-flex":"none";
   $("stIssueFilter").classList.toggle("on", issuesOnly);
@@ -1319,16 +1356,35 @@ function render(){
 }
 
 /* Franchisees two-panel */
+function frSearchInfo(f,sq){
+  // returns {rank, hint} or null when no match
+  if(!sq.q) return {rank:5,hint:""};
+  const name=(f.name||"").toLowerCase(), sts=storesByFr[f.id]||[];
+  let best=9, bestSt=null;
+  if(sq.mode!=="fr") sts.forEach(s=>{ const r=numRank(s.num,sq.q); if(r<best||(r===best&&bestSt&&numCmp(s,bestSt)<0)){ best=r; bestSt=s; } });
+  if(sq.mode==="store") return best<9?{rank:best,hint:best===0?"":"Store "+bestSt.num}:null;
+  if(sq.mode==="fr") return name.includes(sq.q)?{rank:name.startsWith(sq.q)?1:2,hint:""}:null;
+  if(best<9) return {rank:best, hint:best===0?"":"Store "+bestSt.num};
+  if(name.includes(sq.q)) return {rank:name.startsWith(sq.q)?1:2, hint:""};
+  if(String(f.territory||"").toLowerCase().includes(sq.q)) return {rank:3, hint:"Territory "+f.territory};
+  const c=contactsOf(f).find(c=>String(c.value||"").toLowerCase().includes(sq.q)||(sq.phoneLike&&dig(c.value).includes(sq.d)));
+  if(c) return {rank:3, hint:(c.type==="email"?"Email ":c.type==="cell"?"Cell ":"")+c.value};
+  const st=sts.find(s=>(s._txt||"").includes(sq.q)||(sq.phoneLike&&(s._dig||"").includes(sq.d)));
+  if(st){ const fld=[["phone","Phone"],["zip","ZIP"],["city","City"],["address","Address"]].find(([k])=>String(st[k]||"").toLowerCase().includes(sq.q)||(sq.phoneLike&&k!=="city"&&k!=="address"&&dig(st[k]).includes(sq.d)));
+    return {rank:4, hint:"Store "+st.num+(fld?" · "+fld[1]+" "+st[fld[0]]:"")}; }
+  return null;
+}
+let frHints={};
 function renderFranchisees(){
-  const {mode,q}=parseQuery();
+  const sq=searchQ(), {mode,q}=sq;
+  frHints={};
   let list=FR.filter(f=>{
     if(!frInTerr(f)) return false;
     if(issuesOnly && !frOpenIssues(f.id)) return false;
-    if(mode==="store") return (storesByFr[f.id]||[]).some(s=>(s.num||"").toLowerCase().includes(q));
-    if(mode==="fr") return (f.name||"").toLowerCase().includes(q);
-    if(!q) return true;
-    return (f.name||"").toLowerCase().includes(q)||(f.territory||"").toLowerCase().includes(q);
+    const m=frSearchInfo(f,sq); if(!m) return false;
+    f._rank=m.rank; frHints[f.id]=m.hint; return true;
   });
+  if(q) list.sort((a,b)=>a._rank-b._rank||(a.name||"").localeCompare(b.name||""));
   $("count").textContent=list.length+" of "+FR.length;
   if(selFr && !list.some(f=>f.id===selFr)) selFr=null;
   const frTotal=Math.max(1,Math.ceil(list.length/PAGE_FR));
@@ -1339,7 +1395,7 @@ function renderFranchisees(){
     return '<div class="fr-item'+(f.id===selFr?' active':'')+'" data-fr="'+f.id+'" onclick="selectFranchisee('+f.id+')">'
       +'<div class="idot-col">'+openDot(frOpenIssues(f.id))+'</div>'
       +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
-      +'<small>Terr '+esc(f.territory||"—")+'</small></div>'
+      +'<small>Terr '+esc(f.territory||"—")+'</small>'+(frHints[f.id]?'<small class="mhint"><i data-lucide="search"></i>'+esc(frHints[f.id])+'</small>':'')+'</div>'
       +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="mouse-pointer-click"></i><div>Select a franchisee to see details</div></div></div>';
@@ -1358,9 +1414,10 @@ function detailHtml(id){
   const f=FR.find(x=>x.id===id); if(!f) return '';
   let stores=(storesByFr[id]||[]).slice().sort((a,b)=>(a.num||"").localeCompare(b.num||""));
   const _sq=parseQuery();
-  const hitQ=(_sq.mode==="store" && _sq.q)?_sq.q:null;
-  const isHit=s=>!!hitQ && (s.num||"").toLowerCase().includes(hitQ);
-  if(hitQ) stores.sort((a,b)=>(isHit(b)-isHit(a)) || (a.num||"").localeCompare(b.num||""));
+  const sqd=searchQ();
+  const hitQ=(sqd.q && sqd.mode!=="fr")?sqd.q:null;
+  const isHit=s=>!!hitQ && (sqd.mode==="store"?numRank(s.num,hitQ)<9:storeMatch(s,sqd) && !(FR.find(x=>x.id===s.franchisee_id)||{name:""}).name.toLowerCase().includes(hitQ));
+  if(hitQ) stores.sort((a,b)=>(isHit(b)-isHit(a)) || (isHit(a)&&isHit(b)?storeRank(a,sqd)-storeRank(b,sqd):0) || numCmp(a,b));
   const contacts=contactsOf(f);
   const issues=IS.filter(i=>i.franchisee_id===id).sort((a,b)=>(!isOpen(a))-(!isOpen(b))||(b.id-a.id));
   const team=staffForStores(storesByFr[id]||[]); const om=team.om, fbc=team.fbc;
@@ -1401,17 +1458,15 @@ function detailHtml(id){
 
 /* All Stores */
 function renderStores(){
-  const {mode,q}=parseQuery();
+  const sq=searchQ(), {mode,q}=sq;
   const frName={}; FR.forEach(f=>frName[f.id]=f.name);
   let list=ST.filter(s=>{
     if(!stInTerr(s)) return false;
     if(issuesOnly && !storeOpenIssues(s.num)) return false;
     if(closedOnly && storeStatus(s)==="Open") return false;
-    if(mode==="store") return (s.num||"").toLowerCase().includes(q);
-    if(mode==="fr") return (frName[s.franchisee_id]||"").toLowerCase().includes(q);
-    if(!q) return true;
-    return [s.num,s.address,s.city,frName[s.franchisee_id]].join(" ").toLowerCase().includes(q);
+    return storeMatch(s,sq);
   });
+  list.sort((a,b)=>(q?storeRank(a,sq)-storeRank(b,sq):0)||numCmp(a,b));
   $("count").textContent=list.length+" of "+ST.length;
   if(!list.length){ setView(emptyBox("store","No stores match","Try a different search, territory, or filter.")); return; }
   const stTotal=Math.max(1,Math.ceil(list.length/PAGE_ST));
@@ -1484,12 +1539,16 @@ function groupStatusBadge(members){
 function renderIssues(){
   const frName={}; FR.forEach(f=>frName[f.id]=f.name);
   const {mode,q}=parseQuery();
+  const sqI=searchQ();
   const matchSearch=i=>{
     if(!q) return true;
-    if(mode==="store") return String(i.store_num||"").toLowerCase().includes(q) || (q.length>=6 && issueNo(i).includes(q));
+    if(mode==="store") return numRank(i.store_num,q)<9 || (q.length>=6 && issueNo(i).includes(q));
     if(mode==="fr") return (frName[i.franchisee_id]||"").toLowerCase().includes(q);
-    return [richToPlain(i.title),richToPlain(i.action_taken),i.store_num,issueNo(i),frName[i.franchisee_id],issuePlatforms(i).join(" ")].join(" ").toLowerCase().includes(q);
+    const st=storeByNum[String(i.store_num||"")];
+    return [richToPlain(i.title),richToPlain(i.action_taken),i.store_num,issueNo(i),frName[i.franchisee_id],issuePlatforms(i).join(" ")].join(" ").toLowerCase().includes(q)
+      || (st && storeMatch(st,sqI)) || frContactMatch(issueFid(i),sqI);
   };
+  const issueRank=items=>q && mode!=="fr" ? Math.min(...items.map(i=>numRank(i.store_num,q))) : 9;
   const pass=i=>(!isStatus.length||isStatus.includes(normIssueStatus(i.status))) && issueInPeriod(i) && matchSearch(i);
   const byStore=new Map();
   IS.filter(pass).forEach(i=>{ const k=String(i.store_num||""); if(!byStore.has(k)) byStore.set(k,[]); byStore.get(k).push(i); });
@@ -1499,7 +1558,7 @@ function renderIssues(){
     return { num, items, st, fid, open:items.filter(isOpen).length,
       last:Math.max(...items.map(x=>tms(x.updated_at||x.created_at))), first:Math.min(...items.map(x=>tms(x.created_at))) };
   });
-  list.sort((a,b)=>isSort==="new"?(b.last-a.last):(a.first-b.first));
+  list.sort((a,b)=>(issueRank(a.items)-issueRank(b.items)) || (isSort==="new"?(b.last-a.last):(a.first-b.first)));
 
   const openCount=IS.filter(isOpen).length;
   $("count").textContent=list.length+" store"+(list.length!==1?"s":"")+" · "+openCount+" open issue"+(openCount!==1?"s":"");
@@ -1507,7 +1566,7 @@ function renderIssues(){
   const bar=issueFilterBar(q);
 
   if(!IS.length){ setView(bar+emptyBox("clipboard-list","No issues logged","Use “Log issue” or “Multi-store issue” to add one.")); return; }
-  if(isView==="issue"){ renderIssuesByIssue(bar, pass, frName); return; }
+  if(isView==="issue"){ renderIssuesByIssue(bar, pass, frName, issueRank); return; }
   if(isView==="fr"){ renderIssuesByFr(bar, pass, frName); return; }
   if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
 
@@ -2035,13 +2094,13 @@ function renderIssuesByFr(bar, pass, frName){
   setView(bar+'<div class="card" style="overflow-x:auto"><table class="is-table"><thead><tr><th>Franchisee</th><th class="c-cnt">Issues</th><th class="c-cnt">Stores</th><th class="hide-sm">Status</th><th class="hide-sm c-logged">Last activity</th><th class="c-go"></th></tr></thead><tbody>'+rows+'</tbody></table>'
     +pagerHtml('is',isPage,total,list.length)+'</div>');
 }
-function renderIssuesByIssue(bar, pass, frName){
+function renderIssuesByIssue(bar, pass, frName, issueRank){
   const groups={}, entries=[];
   IS.forEach(i=>{ if(i.group_id){ (groups[i.group_id]=groups[i.group_id]||[]).push(i); } else entries.push({kind:"single", items:[i], created:i.created_at}); });
   Object.keys(groups).forEach(g=>{ const m=groups[g].sort((a,b)=>(a.store_num||"").localeCompare(b.store_num||""));
     entries.push({kind:m.length>1?"group":"single", gid:g, items:m, created:m[0].created_at}); });
   let list=entries.filter(e=>e.items.some(pass));
-  list.sort((a,b)=>{ const da=new Date(a.created).getTime()||0, dbb=new Date(b.created).getTime()||0; return isSort==="new"? dbb-da : da-dbb; });
+  list.sort((a,b)=>{ const r=(issueRank?issueRank(a.items)-issueRank(b.items):0); if(r) return r; const da=new Date(a.created).getTime()||0, dbb=new Date(b.created).getTime()||0; return isSort==="new"? dbb-da : da-dbb; });
   const openCount=list.filter(e=>e.items.some(isOpen)).length;
   $("count").textContent=list.length+" issue"+(list.length!==1?"s":"")+" · "+openCount+" open";
   if(!list.length){ setView(bar+emptyBox("search-x","No issues match","Try a different search or filter.")); return; }
@@ -3162,7 +3221,7 @@ function mSuggest(){
   }
   const v=raw.replace(/^#/,"");
   if(!v || /[\s,;]/.test(v)){ $("m_sug").classList.remove("show"); return; }
-  const hits=ST.filter(s=>(s.num||"").startsWith(v) && !mStores.includes(String(s.num))).slice(0,8);
+  const hits=ST.filter(s=>(s.num||"").startsWith(v) && !mStores.includes(String(s.num))).sort((a,b)=>numRank(a.num,v)-numRank(b.num,v)||numCmp(a,b)).slice(0,8);
   if(!hits.length){ $("m_sug").classList.remove("show"); return; }
   $("m_sug").innerHTML=hits.map(s=>'<div onmousedown="event.preventDefault();addMStores(\''+esc(s.num)+'\')"><b>'+esc(s.num)+'</b><span>'+esc(frNameById(s.franchisee_id))+' · '+esc(s.city||"")+'</span></div>').join("");
   $("m_sug").classList.add("show");
