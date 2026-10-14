@@ -728,8 +728,9 @@
   .subtab .st-n:empty{display:none}
   .badge.ob-pend{background:var(--warn-soft);color:#8a5600}
   .badge.ob-sent{background:#e3effa;color:#225f91}
+  .badge.ob-wip{background:#efe8fa;color:#5b3699}
   .badge.ob-done{background:var(--ok-soft);color:#146c3a}
-  .sst-dot.ob-pend-dot{background:var(--warn)} .sst-dot.ob-sent-dot{background:#2f7fbf} .sst-dot.ob-done-dot{background:var(--ok)}
+  .sst-dot.ob-pend-dot{background:var(--warn)} .sst-dot.ob-sent-dot{background:#2f7fbf} .sst-dot.ob-wip-dot{background:#7a4fc2} .sst-dot.ob-done-dot{background:var(--ok)}
   .ob-plat{display:inline-flex;align-items:center;font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.02em}
   .ob-plat.p-ue{background:#e7f6ec;color:#06603a} .ob-plat.p-dd{background:#fde9e5;color:#b3261e}
   .ob-plat.p-gh{background:#fff1e0;color:#a35200} .ob-plat.p-ez{background:#e9f2ea;color:#2b6b3a}
@@ -2236,7 +2237,7 @@ function renderObReport(){
   else if(p==="lastdays") extra='<div class="row"><span class="hint" style="margin:0">Last</span><input type="number" min="1" max="3650" style="width:80px" value="'+esc(RP.days)+'" onchange="RP.days=Math.max(1,+this.value||1);renderReport()"><span class="hint" style="margin:0">days</span></div>';
   else if(p==="range") extra='<div class="row"><span class="hint" style="margin:0">From</span><input type="date" value="'+esc(RP.from)+'" onchange="RP.from=this.value;renderReport()"><span class="hint" style="margin:0">To</span><input type="date" value="'+esc(RP.to)+'" onchange="RP.to=this.value;renderReport()"></div>';
   const ck=(on,label,sub,onchange)=>'<label class="rp-ck'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="'+onchange+'"><span>'+label+(sub?'<small>'+sub+'</small>':'')+'</span></label>';
-  const dot={"Pending":"var(--warn)","Email Sent/Text Message":"#2f7fbf","Onboarded":"var(--ok)"};
+  const dot=OB_DOT;
   $("rp_title").textContent="Onboarding report";
   $("rp_body").innerHTML=
     '<datalist id="rp_frlist">'+FR.map(f=>'<option value="'+esc(f.name)+'">').join("")+'</datalist>'
@@ -2253,7 +2254,7 @@ function renderObReport(){
        +'</div><div class="hint">'+(RP.plats.size===4?"All platforms":RP.plats.size?"Only the selected platforms":"Pick at least one")+'</div></div>'
      +'<div class="rp-f" style="grid-column:1/-1"><span class="l">Status</span><div class="chips">'
        +OB_STATES.map(st=>'<button type="button" class="mchip'+(RP.statuses.has(st)?' sel':'')+'" onclick="obrToggleStatus(\''+st+'\')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+dot[st]+';margin-right:5px"></span>'+st+'</button>').join("")
-       +'</div><div class="hint">'+(RP.statuses.size===3?"All statuses":RP.statuses.size?"Only the selected statuses":"Pick at least one")+'</div></div>'
+       +'</div><div class="hint">'+(RP.statuses.size===OB_STATES.length?"All statuses":RP.statuses.size?"Only the selected statuses":"Pick at least one")+'</div></div>'
    +'</div></div></div>'
    +'<div class="rp-sec"><div class="rp-sh"><span class="n">2</span>Sheets in the Excel file<span class="act"><button class="btn link" onclick="rpAll(\'sheets\',true)">All</button><button class="btn link" onclick="rpAll(\'sheets\',false)">None</button></span></div><div class="rp-sb"><div class="rp-checks">'
      +OBR_SHEETS.map(([k,l,sub])=>ck(RP.sheets.has(k),l,sub,"rpToggle('sheets','"+k+"')")).join("")+'</div></div></div>'
@@ -2276,24 +2277,24 @@ function obDays(r){
   if(r.status==="Onboarded"){ const h=obHist(r).filter(e=>e.status==="Onboarded"); end=new Date((h.length?h[h.length-1].ts:null)||r.updated_at||r.created_at); }
   return Math.max(0,Math.round((end-start)/864e5*10)/10);
 }
-function obCountRow(items){ const c={}; items.forEach(x=>{ c[x.status]=(c[x.status]||0)+1; }); return [items.length, c["Pending"]||0, c["Email Sent/Text Message"]||0, c["Onboarded"]||0]; }
+function obCountRow(items){ const c={}; items.forEach(x=>{ c[x.status]=(c[x.status]||0)+1; }); return [items.length, c["Pending"]||0, c["Email Sent/Text Message"]||0, c["Work in Progress"]||0, c["Onboarded"]||0]; }
 function downloadObReport(){
   const X=window.XLSX; if(!X){ toast("Excel tool didn't load — check your internet and reopen the app","err"); return; }
   const sel=obrSelected().slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)||String(a.store_num).localeCompare(String(b.store_num),undefined,{numeric:true}));
   if(!sel.length){ toast("No onboarding records match these choices","err"); return; }
   const wb=X.utils.book_new(), fm=rpFrMatch();
   const frOf=r=>FR.find(x=>x.id===obrFid(r));
-  const cHead=["Total","Pending","Email Sent/Text Message","Onboarded"];
+  const cHead=["Total","Pending","Email Sent/Text Message","Work in Progress","Onboarded"];
   if(RP.sheets.has("summary")){
-    const [tot,pen,sent,done]=obCountRow(sel);
+    const [tot,pen,sent,wip,done]=obCountRow(sel);
     const dd=sel.filter(r=>r.status==="Onboarded").map(obDays).filter(v=>v!=="");
     const avg=dd.length?Math.round(dd.reduce((a,b)=>a+b,0)/dd.length*10)/10:"—";
     const rows=[["Onboarding Report — 3PD Helpdesk"],["Generated: "+rpDateText(new Date().toISOString())+" ("+rpTzName()+")"],[],
       ["Filters used",""],["Franchisee",fm.f?fm.f.name:"All franchisees"],["Store #",RP.store.trim()||"All stores"],["Date started",rpPeriodLabel()],
-      ["Platform",RP.plats.size===4?"All platforms":[...RP.plats].map(obPName).join(", ")],["Status",RP.statuses.size===3?"All statuses":[...RP.statuses].join(", ")],[],
+      ["Platform",RP.plats.size===4?"All platforms":[...RP.plats].map(obPName).join(", ")],["Status",RP.statuses.size===OB_STATES.length?"All statuses":[...RP.statuses].join(", ")],[],
       ["Totals",""],["Records (store + platform)",tot],["Stores",new Set(sel.map(r=>String(r.store_num||""))).size],["Franchisees",new Set(sel.map(obrFid)).size],
-      ["Pending",pen],["Email Sent/Text Message",sent],["Onboarded",done],["Onboarded rate",tot?Math.round(done/tot*1000)/10+"%":"—"],["Average days to onboard",avg],[],
-      ["By platform","Total / Pending / Email-Text / Onboarded"],
+      ["Pending",pen],["Email Sent/Text Message",sent],["Work in Progress",wip],["Onboarded",done],["Onboarded rate",tot?Math.round(done/tot*1000)/10+"%":"—"],["Average days to onboard",avg],[],
+      ["By platform","Total / Pending / Email-Text / Work in Progress / Onboarded"],
       ...OB_PLATS.filter(([k])=>RP.plats.has(k)).map(([k,n])=>{ const c=obCountRow(sel.filter(r=>r.platform===k)); return [n, c.join(" / ")]; })];
     const ws=rpSheet(rows,[30,44],{headerRow:-1,titleRows:2});
     ["A4","A11","A21"].forEach(a=>{ if(ws[a]) ws[a].s={font:{name:"Arial",sz:11,bold:true,color:{rgb:"0B8043"}}}; });
@@ -4127,10 +4128,11 @@ document.addEventListener("click",e=>{
 /* ===================== ONBOARDING (Issues → Onboarding) ===================== */
 const OB_PLATS=[["ue","Uber Eats"],["dd","DoorDash"],["gh","Grubhub"],["ez","ezCater"]];   // Foodja kept in data, not used
 const OB_CORE=["ue","dd","gh"];
-const OB_STATES=["Pending","Email Sent/Text Message","Onboarded"];
+const OB_STATES=["Pending","Email Sent/Text Message","Work in Progress","Onboarded"];
 let OB=[], obReady=true, isSub="concerns", obPlat=[], obTpd=[], obEz=[], obSort="new", obPage=1;
 const obPName=k=>(OB_PLATS.find(x=>x[0]===k)||[k,k])[1];
-function obCls(st){ return st==="Onboarded"?"ob-done":(st==="Email Sent/Text Message"?"ob-sent":"ob-pend"); }
+function obCls(st){ return st==="Onboarded"?"ob-done":(st==="Email Sent/Text Message"?"ob-sent":(st==="Work in Progress"?"ob-wip":"ob-pend")); }
+const OB_DOT={"Pending":"var(--warn)","Email Sent/Text Message":"#2f7fbf","Work in Progress":"#7a4fc2","Onboarded":"var(--ok)"};
 function obBadge(st){ return '<span class="badge '+obCls(st)+'">'+esc(st==="Email Sent/Text Message"?"Email / Text sent":st)+'</span>'; }
 function obIsOpen(r){ return r.status!=="Onboarded"; }
 function obHist(r){ try{ const h=Array.isArray(r.history)?r.history:JSON.parse(r.history||"[]"); return (Array.isArray(h)?h:[]).slice().sort((a,b)=>new Date(a.ts)-new Date(b.ts)); }catch(e){ return []; } }
@@ -4154,7 +4156,7 @@ function obFilterBar(){
   const opt=(on,html,onclick,ck)=>'<button class="fdd-opt'+(ck?' fdd-ck':'')+(on?' on':'')+'" onclick="'+onclick+'">'+(ck?'<span class="cbox'+(on?' on':'')+'">'+(on?'<i data-lucide="check"></i>':'')+'</span>':'')+html+(on&&!ck?'<i data-lucide="check" class="ck"></i>':'')+'</button>';
   const dd=(key,icon,label,value,active,menu)=>'<div class="fdd'+(fMenu===key?' open':'')+'"><button class="fdd-btn'+(active?' active':'')+'" onclick="event.stopPropagation();toggleFMenu(\''+key+'\')"><i data-lucide="'+icon+'"></i><span>'+label+'</span>'+(value?'<span class="fdd-val">'+esc(value)+'</span>':'')+'<i data-lucide="chevron-down" class="car"></i></button>'
     +(fMenu===key?'<div class="fdd-menu" onclick="event.stopPropagation()">'+menu+'</div>':'')+'</div>';
-  const short=s=>s==="Email Sent/Text Message"?"Email/Text":s;
+  const short=s=>s==="Email Sent/Text Message"?"Email/Text":(s==="Work in Progress"?"WIP":s);
   const stMenu=(arr,name)=>opt(!arr.length,'All statuses',"obSet('"+name+"','')")+'<div class="fdd-div"></div>'
     +OB_STATES.map(v=>opt(arr.includes(v),'<span class="sst-dot '+obCls(v)+'-dot"></span>'+esc(v==="Email Sent/Text Message"?"Email Sent / Text Message":v),"obSet('"+name+"','"+v+"')",true)).join("")+'<div class="fdd-note">Pick one or more</div>';
   const platMenu=opt(!obPlat.length,'All platforms',"obSet('plat','')")+'<div class="fdd-div"></div>'+OB_PLATS.map(([k,n])=>opt(obPlat.includes(k),esc(n),"obSet('plat','"+k+"')",true)).join("");
@@ -4357,7 +4359,7 @@ function obShowHistory(id){
   histCtx={kind:"ob", id};
   $("hist_title").textContent="Onboarding updates · Store "+r.store_num+" · "+obPName(r.platform);
   $("hist_sub").textContent=f?f.name:"";
-  const items=h.map((e,ix)=>{ const c=e.status==="Onboarded"?"var(--ok)":(e.status==="Email Sent/Text Message"?"#2f7fbf":"var(--warn)");
+  const items=h.map((e,ix)=>{ const c=OB_DOT[e.status]||"var(--warn)";
     const what=e.kind==="created"?'<span class="what">Onboarding started</span>'+obBadge(e.status):(e.prev&&e.prev!==e.status?'<span class="what">Status changed</span>'+obBadge(e.prev)+'<i data-lucide="arrow-right" class="arrow"></i>'+obBadge(e.status):'<span class="what">Update</span>'+obBadge(e.status));
     return '<div class="tl-item"><div class="tl-dot" style="background:'+c+'">'+(ix+1)+'</div><div class="tl-body"><div class="tl-head">'+what+'<span class="tl-time"><i data-lucide="clock"></i>'+esc(fmtTs(e.ts))+'</span></div>'
       +(e.kind==="created"?'':(e.action?'<div class="tl-act rt">'+richHtml(e.action)+'</div>':'<div class="tl-act none">No progress note</div>'))+'</div></div>'; }).join("");
