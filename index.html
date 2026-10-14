@@ -709,6 +709,71 @@
   .toast.ok{background:var(--green)}
   .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
 
+  /* ---------- Call logs ---------- */
+  .call-btn{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--lime);background:#fff;color:var(--green-dark);cursor:pointer;
+    transition:transform .18s cubic-bezier(.3,1.4,.6,1),box-shadow .18s ease,background .18s ease;will-change:transform}
+  .call-btn [data-lucide],.call-btn svg{width:14px;height:14px}
+  .call-btn.lg{width:34px;height:34px} .call-btn.lg svg{width:16px;height:16px}
+  .call-btn:hover,.call-btn:focus-visible{transform:scale(1.15);background:var(--lime-soft);box-shadow:0 4px 12px rgba(0,110,40,.18)}
+  .call-btn:hover svg,.call-btn:focus-visible svg{animation:clRing .65s ease-in-out}
+  .call-btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+  @keyframes clRing{0%{transform:rotate(0)}15%{transform:rotate(-16deg)}30%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}60%{transform:rotate(7deg)}75%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
+  @media (prefers-reduced-motion: reduce){ .call-btn{transition:none} .call-btn:hover,.call-btn:focus-visible{transform:none} .call-btn:hover svg,.call-btn:focus-visible svg{animation:none} }
+  .fr-item .call-btn{margin-left:2px}
+  .cl-fr-ro{display:flex;align-items:center;gap:12px;padding:11px 13px;margin-bottom:14px;border:1px solid var(--lime-soft);border-radius:11px;background:var(--lime-tint)}
+  .cl-fr-ro .lbl{font-size:11.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .cl-fr-ro .sf-av [data-lucide],.cl-fr-ro .sf-av svg{width:18px;height:18px}
+  .cl-lock{margin-left:auto;color:var(--ink-soft);display:grid;place-items:center;width:28px;height:28px;border-radius:50%}
+  .cl-lock svg{width:15px;height:15px}
+  .field textarea.cl-ta{min-height:96px;resize:vertical;line-height:1.45}
+  .fld-err{display:none;margin-top:5px;font-size:12.5px;color:var(--danger);font-weight:600}
+  .fld-err.show{display:block}
+  .field input.bad,.field textarea.bad,.field select.bad{border-color:var(--danger)!important;box-shadow:0 0 0 3px var(--danger-soft)}
+  .cl-err{display:none;align-items:flex-start;gap:8px;margin-top:12px;background:var(--danger-soft);color:var(--danger);border-radius:9px;padding:10px 12px;font-size:13px}
+  .cl-err.show{display:flex} .cl-err svg{width:17px;height:17px;flex:none}
+  .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+  .cl-kpis{margin-bottom:10px}
+  .cl-inswrap{display:flex;justify-content:flex-end;margin:-4px 0 8px}
+  .cl-insbtn{height:auto;padding:2px 0}
+  .cl-ins{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:14px}
+  @media(max-width:1000px){.cl-ins{grid-template-columns:1fr}}
+  .cl-in{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);min-width:0}
+  .cl-mini{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);margin-top:10px}
+  .cl-mini b{color:var(--ink);font-size:15px;margin-right:3px}
+  .cl-spark{display:flex;align-items:flex-end;gap:4px;height:84px;border-bottom:1px solid var(--line)}
+  .cl-spark .sb{flex:1;background:var(--green);border-radius:4px 4px 0 0;min-height:3px;transition:filter .15s}
+  .cl-spark .sb:hover{filter:brightness(.85)}
+  .cl-spark-x{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);margin-top:5px}
+  .cl-top{display:flex;flex-direction:column;gap:4px}
+  .cl-topr{display:flex;justify-content:space-between;gap:8px;border:none;background:none;padding:6px 8px;border-radius:8px;font-family:var(--font);font-size:13px;color:var(--ink);cursor:pointer;text-align:left}
+  .cl-topr:hover{background:var(--lime-soft)} .cl-topr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .cl-topr b{color:var(--green-dark)}
+  .cl-filters{gap:10px 14px}
+  .cl-fl{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);font-weight:600}
+  .cl-fl > span{display:inline-flex;align-items:center;gap:5px}
+  .cl-fl svg{width:14px;height:14px}
+  .cl-fl select,.cl-fl input{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 9px;font-family:var(--font);font-size:13px;color:var(--ink);background:#fff}
+  .cl-fl input[type=text]{width:180px}
+  .cl-table{width:100%;border-collapse:collapse;font-size:13px}
+  .cl-table th{text-align:left;font-size:12px;color:var(--ink-soft);padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .cl-table th.sortable{cursor:pointer;color:var(--green-dark)} .cl-table th svg{width:12px;height:12px;vertical-align:-1px;margin-left:4px}
+  .cl-table td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .cl-table tr.click{cursor:pointer} .cl-table tr.click:hover,.cl-table tr.click:focus-visible{background:var(--lime-tint);outline:none}
+  .cl-when{display:flex;flex-direction:column;white-space:nowrap} .cl-when b{font-size:13px} .cl-when span{font-size:12px;color:var(--ink-soft)}
+  .cl-when.sm{min-width:118px}
+  .cl-fr{min-width:150px;font-weight:600} .cl-fr small{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px}
+  .cl-st{white-space:nowrap}
+  .cl-txt{min-width:200px;max-width:340px}
+  .cl-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45}
+  .cl-res-top{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px} .cl-res-top:empty{display:none}
+  .badge svg{width:11px;height:11px;vertical-align:-1px;margin-right:3px}
+  .badge.cl-o-ans{background:var(--ok-soft);color:#146c3a} .badge.cl-o-done{background:#dff3e4;color:#0d5c2e}
+  .badge.cl-o-nva{background:#eceeed;color:#4b544f} .badge.cl-o-fu{background:var(--warn-soft);color:#8a5600} .badge.cl-o-info{background:#e3effa;color:#225f91}
+  .badge.cl-fu-open{background:#fff1cf;color:#7a5600;border:1px solid #f1d27a} .badge.cl-fu-done{background:#eef6e2;color:#4f7a18}
+  .clv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:14px}
+  @media(max-width:640px){.clv-grid{grid-template-columns:1fr}}
+  .clv-f{display:flex;flex-direction:column;gap:3px} .clv-f .k,.clv-block .k{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+  .clv-block{margin-top:12px} .clv-text{margin-top:5px;white-space:pre-wrap;line-height:1.5;font-size:14px;background:var(--lime-tint);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  #cnt-cl{background:var(--yellow)!important;color:var(--green-dark)!important}
   /* ---------- Issues sub-categories + Onboarding ---------- */
   .sb-subs{display:none;flex-direction:column;gap:2px;margin:2px 0 6px 22px;padding-left:10px;border-left:2px solid rgba(255,255,255,.18)}
   .sb-subs.show{display:flex}
@@ -896,6 +961,7 @@
       <button class="sb-sub" data-act="sub" data-arg="concerns" title="Concerns"><i data-lucide="message-square-warning"></i><span class="t-lb">Concerns</span><span class="sb-cnt" id="cnt-con">0</span></button>
       <button class="sb-sub" data-act="sub" data-arg="onboarding" title="Onboarding"><i data-lucide="rocket"></i><span class="t-lb">Onboarding</span><span class="sb-cnt" id="cnt-ob">0</span></button>
     </div>
+    <button class="tab" data-tab="calls" title="Call Logs"><span class="t-ic"><i data-lucide="phone-call"></i></span><span class="t-lb">Call Logs</span><span class="badge-num" id="cnt-cl" data-tip="Follow-ups still open"></span></button>
   </nav>
   <div class="sb-foot">
     <button class="sb-item" id="linksBtn" title="Links" aria-label="Links"><span class="t-ic"><i data-lucide="link"></i></span><span class="t-lb">Links</span></button>
@@ -1086,7 +1152,7 @@
   </div>
 </div>
 
-<div class="overlay top" id="confirmOverlay">
+<div class="overlay top" id="confirmOverlay" style="z-index:97" role="alertdialog" aria-modal="true">
   <div class="modal small">
     <div class="head"><i data-lucide="trash-2"></i><h2>Confirm delete</h2></div>
     <div class="body"><p class="hint" id="confirmText"></p></div>
@@ -1100,6 +1166,44 @@
     <div class="head"><i data-lucide="lock"></i><h2>Enter password</h2><button class="x" id="impPwX">&times;</button></div>
     <div class="body"><div class="field"><label id="imp_pw_lbl">Password</label><input id="imp_pw" type="password" placeholder="Password" autocomplete="off" spellcheck="false"></div></div>
     <footer><button class="btn ghost" id="impPwCancel">Cancel</button><button class="btn" id="impPwOk"><i data-lucide="unlock"></i>Unlock</button></footer>
+  </div>
+</div>
+
+<!-- Log / edit call -->
+<div class="overlay top" id="clOverlay" role="dialog" aria-modal="true" aria-labelledby="cl_title">
+  <div class="modal wide">
+    <div class="head"><i data-lucide="phone-call"></i><div><h2 id="cl_title">Log call</h2><div class="subt">Fields marked * are required</div></div><button class="x" id="clX" aria-label="Close">&times;</button></div>
+    <div class="body">
+      <div class="cl-fr-ro" id="cl_fr_ro"><span class="sf-av"><i data-lucide="user-round"></i></span><div><div class="lbl">Franchisee</div><b id="cl_fr_name">—</b><div class="muted" id="cl_fr_meta" style="font-size:12px"></div></div><span class="cl-lock" data-tip="Filled in from the franchisee you picked. To log a call for someone else, close this and use their phone button."><i data-lucide="lock"></i></span></div>
+      <div class="field" id="cl_fr_pick" style="margin-bottom:14px"><label for="cl_fr_in">Franchisee *</label>
+        <input id="cl_fr_in" list="cl_frlist2" placeholder="Type a franchisee name…" autocomplete="off" aria-describedby="cl_fr_in_err" onchange="clFrFromInput()">
+        <datalist id="cl_frlist2"></datalist><div class="fld-err" id="cl_fr_in_err" role="alert"></div></div>
+      <div class="fgrid" style="margin-bottom:14px">
+        <div class="field"><label for="cl_when">Date and time of call *</label><input id="cl_when" type="datetime-local" aria-describedby="cl_when_err cl_when_hint"><div class="help" id="cl_when_hint" style="margin-top:4px">Now by default — change it to log an earlier call</div><div class="fld-err" id="cl_when_err" role="alert"></div></div>
+        <div class="field"><label for="cl_store">Store number (optional)</label><select id="cl_store" aria-describedby="cl_store_hint"></select><div class="help" id="cl_store_hint" style="margin-top:4px"></div></div>
+      </div>
+      <div class="field" style="margin-bottom:14px"><label for="cl_reason">Reason for call *</label><textarea id="cl_reason" class="cl-ta" maxlength="4000" placeholder="Enter the reason for this call..." aria-describedby="cl_reason_err"></textarea><div class="fld-err" id="cl_reason_err" role="alert"></div></div>
+      <div class="field" style="margin-bottom:14px"><label for="cl_result">Result of call *</label><textarea id="cl_result" class="cl-ta" maxlength="4000" placeholder="Enter the call outcome, response, or next steps..." aria-describedby="cl_result_err cl_result_hint"></textarea>
+        <div class="help" id="cl_result_hint" style="margin-top:4px">e.g. Franchisee answered and confirmed the details · No answer, voicemail left · Follow-up required · Requested more information · Call completed</div><div class="fld-err" id="cl_result_err" role="alert"></div></div>
+      <div class="field" style="margin-bottom:10px"><label>Outcome (optional — helps the summary numbers)</label><div class="chips" id="cl_outcomes" role="group" aria-label="Outcome"></div></div>
+      <label class="ob-syncrow"><input type="checkbox" id="cl_follow"><span><b>Needs follow-up</b> — counts in “Follow-ups required” until it is marked done</span></label>
+      <div class="cl-err" id="cl_err" role="alert"><i data-lucide="circle-alert"></i><span></span></div>
+    </div>
+    <footer><button class="btn ghost" id="clCancel">Cancel</button><button class="btn" id="clSave"><i data-lucide="save"></i>Save Call</button></footer>
+  </div>
+</div>
+
+<!-- View call -->
+<div class="overlay top" id="clViewOverlay" role="dialog" aria-modal="true" aria-labelledby="clv_title">
+  <div class="modal wide">
+    <div class="head"><i data-lucide="phone"></i><div><h2 id="clv_title">Call details</h2><div class="subt" id="clv_sub"></div></div><button class="x" id="clvX" aria-label="Close">&times;</button></div>
+    <div class="body" id="clv_body"></div>
+    <footer>
+      <button class="btn link danger" id="clvDel" style="margin-right:auto"><i data-lucide="trash-2"></i>Delete</button>
+      <button class="btn ghost" id="clvStore"><i data-lucide="store"></i>Open store</button>
+      <button class="btn outline round" id="clvFU"></button>
+      <button class="btn" id="clvEdit"><i data-lucide="pencil"></i>Edit</button>
+    </footer>
   </div>
 </div>
 
@@ -1314,10 +1418,10 @@ const IMPORT_PW="Sup3rUs3r!";
 
 let db=null, tab="dashboard", selFr=null, terrFilter="", issuesOnly=false, closedOnly=false, pending=null;
 let frPage=1, stPage=1, frStorePage=1;
-const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50], is:[10,25,50,100], ob:[10,25,50,100]};
-const PAGE_DEF={fr:25, frst:12, st:50, is:25, ob:25};
+const PAGE_OPTS={fr:[10,25,50,100], frst:[5,12,25,50], st:[5,12,25,50], is:[10,25,50,100], ob:[10,25,50,100], cl:[10,25,50,100]};
+const PAGE_DEF={fr:25, frst:12, st:50, is:25, ob:25, cl:25};
 function loadPageSize(w){ let v=PAGE_DEF[w]; try{ const x=+localStorage.getItem("ft2_ps_"+w); if(PAGE_OPTS[w].includes(x)) v=x; }catch(e){} return v; }
-let PAGE_FR=loadPageSize("fr"), PAGE_ST=loadPageSize("st"), PAGE_FRST=loadPageSize("frst"), PAGE_IS=loadPageSize("is"), isPage=1, PAGE_OB=loadPageSize("ob");
+let PAGE_FR=loadPageSize("fr"), PAGE_ST=loadPageSize("st"), PAGE_FRST=loadPageSize("frst"), PAGE_IS=loadPageSize("is"), isPage=1, PAGE_OB=loadPageSize("ob"), PAGE_CL=loadPageSize("cl");
 let curStore=null, swEditing={}, platMenu=null, logStoreCtx=null, updIssueId=null, noteStoreCtx=null, impData=null;
 let isView="store"; try{ const v=localStorage.getItem("ft2_isview"); if(v==="issue"||v==="fr") isView=v; }catch(e){}
 let isStatus=[], isPeriod="all", isDate="", isSort="new", isDays=7, isYear=new Date().getFullYear(), isFrom="", isTo="";
@@ -1350,14 +1454,18 @@ function setStatus(state, header, popup){
 }
 function friendly(err){
   const m=(err&&err.message?err.message:"").toLowerCase(), code=(err&&err.code)?String(err.code):"";
+  if(m.includes("call_logs_store_mismatch")) return {t:"That store doesn't belong to this franchisee",b:"Pick one of their stores, or leave Store as General."};
+  if(m.includes("call_logs_not_future")) return {t:"The call time can't be in the future",b:"Check the date and time."};
+  if(m.includes("call_logs_reason_required")||m.includes("call_logs_result_required")) return {t:"Reason and result are required",b:"Fill in both fields."};
   if(code==="23505"||m.includes("duplicate key")){
     if(m.includes("stores_num_unique")) return {t:"That store number already exists",b:"Each store number can only be used once."};
+    if(m.includes("call_logs_store_mismatch")) return {t:"That store doesn't belong to this franchisee",b:"Pick one of their stores, or leave Store as General."};
     if(m.includes("onboarding_open_unique")) return {t:"That store already has an open onboarding for this platform",b:"Update the existing record instead."};
     if(m.includes("franchisees_name_unique")) return {t:"A franchisee with that name already exists",b:"Use the existing franchisee instead."};
     return {t:"That record already exists",b:"Refresh and try again."};
   }
   if(m.includes("datacloneerror")||m.includes("postmessage")) return {t:"Open the file in your browser",b:"This preview can't reach the internet. Download the file and double-click it (address starts with file://)."};
-  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run the latest migration files (migrate-onboarding.sql, migrate-store-status.sql, migrate-issue-number.sql, migrate-issue-history.sql, migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",a:"settings"};
+  if(m.includes("does not exist")||code==="42p01"||m.includes("could not find the table")||m.includes("column")) return {t:"Database needs the latest setup",b:"Run the latest migration files (migrate-call-logs.sql, migrate-onboarding.sql, migrate-store-status.sql, migrate-issue-number.sql, migrate-issue-history.sql, migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",a:"settings"};
   if(m.includes("row-level security")||m.includes("permission denied")||code==="42501") return {t:"Access blocked by security rules",b:"Add the team-access policy in Supabase, then Refresh.",a:"settings"};
   if(m.includes("invalid api key")||m.includes("apikey")||m.includes("jwt")) return {t:"That key isn't valid",b:"Recopy the publishable/anon key from Supabase into Settings.",a:"settings"};
   if(m.includes("failed to fetch")||m.includes("fetch")||m.includes("networkerror")) return {t:"Can't reach the database",b:"Check your internet and the Project URL in Settings.",a:"settings"};
@@ -1391,7 +1499,8 @@ async function backup(){
   try{
     const [fr,st,sf,is]=await Promise.all([fetchAll("franchisees"),fetchAll("stores"),fetchAll("staff"),fetchAll("issues")]);
     let ob=[]; try{ ob=await fetchAll("onboarding"); }catch(e){}
-    const payload={ exported_at:nowIso(), counts:{franchisees:fr.length,stores:st.length,staff:sf.length,issues:is.length,onboarding:ob.length}, franchisees:fr, stores:st, staff:sf, issues:is, onboarding:ob };
+    let cl=[]; try{ cl=await fetchAll("call_logs"); }catch(e){}
+    const payload={ exported_at:nowIso(), counts:{franchisees:fr.length,stores:st.length,staff:sf.length,issues:is.length,onboarding:ob.length,call_logs:cl.length}, franchisees:fr, stores:st, staff:sf, issues:is, onboarding:ob, call_logs:cl };
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob); const a=document.createElement("a");
     a.href=url; a.download="franchisee-tracker-backup-"+new Date().toISOString().slice(0,10)+".json";
@@ -1468,6 +1577,7 @@ async function loadAll(silent){
   catch(err){ setStatus("err","Connection issue",friendly(err).t); if(!silent) viewError(err); return; }
   [FR,ST,SF,IS]=data;
   try{ OB=await fetchAll("onboarding"); obReady=true; }catch(e){ OB=[]; obReady=false; }
+  try{ CL=await fetchAll("call_logs"); clReady=true; }catch(e){ CL=[]; clReady=false; }
   setStatus("ok","Connected");
   reindex(); buildTerrFilter(); updCounts(); render();
   lastRefreshAt=new Date(); showLastRefresh();
@@ -1484,7 +1594,7 @@ function setIdleMinutes(v){ v=Math.max(0,Math.min(120,Math.round(+v||0))); try{ 
   toast(v?"Auto-refresh after "+v+" min idle":"Auto-refresh turned off","ok"); }
 function showLastRefresh(){ const el=$("lastRefresh"); if(el&&lastRefreshAt) el.textContent="Last refreshed "+lastRefreshAt.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"."; }
 function busyEditing(){
-  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay","dlOverlay","obOverlay","obUpdOverlay"];
+  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay","dlOverlay","obOverlay","obUpdOverlay","clOverlay","clViewOverlay"];
   if(forms.some(id=>$(id)&&$(id).classList.contains("show"))) return true;
   if(lkEditing && $("linksOverlay").classList.contains("show")) return true;
   if(curStore && (Object.values(swEditing||{}).some(Boolean) || platMenu)) return true;
@@ -1503,6 +1613,7 @@ function updCounts(){
   $("cnt-sf").textContent=SF.length; $("cnt-is").textContent=IS.filter(isOpen).length+OB.filter(r=>r.platform!=="fj"&&obIsOpen(r)).length;
   if($("cnt-con")) $("cnt-con").textContent=IS.filter(isOpen).length;
   if($("cnt-ob")) $("cnt-ob").textContent=OB.filter(r=>r.platform!=="fj"&&obIsOpen(r)).length;
+  if($("cnt-cl")){ const n=CL.filter(clOpenFU).length; $("cnt-cl").textContent=n||""; $("cnt-cl").style.display=n?"":"none"; }
 }
 
 /* helpers */
@@ -1565,18 +1676,18 @@ function render(){
   if(!db){viewDisconnected();return;}
   document.querySelectorAll(".tab").forEach(t=>{ const on=t.dataset.tab===tab; t.classList.toggle("active",on); if(on) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current"); });
   const PTI=isSub==="onboarding"?["Issues · Onboarding","Track 3PD and ezCater onboarding for each store and platform"]:["Issues · Concerns","Log, track and report 3PD issues"];
-  const PT0={dashboard:["Dashboard","Stores, 3PD coverage and issues at a glance"],franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:PTI}; const PT=PT0[tab];
+  const PT0={dashboard:["Dashboard","Stores, 3PD coverage and issues at a glance"],franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:PTI,calls:["Call Logs","Every call made to franchisees — reasons, results and follow-ups"]}; const PT=PT0[tab];
   if(PT){ $("pageTitle").textContent=PT[0]; $("pageSub").textContent=PT[1]; document.title=PT[0]+" · Franchisee Tracker"; }
-  const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff");
+  const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff"||tab==="calls");
   $("searchWrap").style.display=showSearch?"flex":"none";
-  $("search").placeholder=(tab==="staff")?"Search name, email, or #store":(tab==="issues")?(isSub==="onboarding"?"Search onboarding: store #, platform, notes, city…":"Search issues, store #, phone, address, city, ZIP…"):"Search store #, name, phone, address, city, ZIP, territory, email…";
+  $("search").placeholder=(tab==="calls")?"Search calls: franchisee, store #, reason or result…":(tab==="staff")?"Search name, email, or #store":(tab==="issues")?(isSub==="onboarding"?"Search onboarding: store #, platform, notes, city…":"Search issues, store #, phone, address, city, ZIP…"):"Search store #, name, phone, address, city, ZIP, territory, email…";
   $("terrFilter").style.display=(tab==="franchisees"||tab==="stores")?"block":"none";
   $("storeFilters").style.display=(tab==="stores")?"inline-flex":"none";
   $("stIssueFilter").classList.toggle("on", issuesOnly);
   $("stClosedFilter").classList.toggle("on-alt", closedOnly);
   $("hintbar").style.display=(showSearch&&tab!=="staff")?"flex":"none";
   const obMode=(tab==="issues"&&isSub==="onboarding");
-  const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:obMode?"New onboarding":"Log issue"}[tab];
+  const lbl={franchisees:"",stores:"",staff:"Add FBC / OM",issues:obMode?"New onboarding":"Log issue",calls:"Log call"}[tab];
   $("subTabs").style.display=(tab==="issues")?"flex":"none";
   $("sbSubs").classList.toggle("show",tab==="issues");
   document.querySelectorAll("[data-act='sub']").forEach(b=>{ const on=tab==="issues"&&b.dataset.arg===isSub; b.classList.toggle("on",on); b.setAttribute("aria-selected",String(on)); });
@@ -1591,6 +1702,7 @@ function render(){
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
   else if(tab==="issues"){ if(isSub==="onboarding") renderOnboarding(); else renderIssues(); }
+  else if(tab==="calls") renderCalls();
 }
 
 /* Franchisees two-panel */
@@ -1634,7 +1746,8 @@ function renderFranchisees(){
       +'<div class="idot-col">'+openDot(frOpenIssues(f.id))+'</div>'
       +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
       +'<small>Terr '+esc(f.territory||"—")+'</small>'+(frHints[f.id]?'<small class="mhint"><i data-lucide="search"></i>'+esc(frHints[f.id])+'</small>':'')+'</div>'
-      +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span></div>';
+      +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span>'
+      +'<button class="call-btn" data-act="cl-log" data-arg="'+f.id+'" data-tip="Log Call" aria-label="Log a call to '+esc(f.name)+'"><i data-lucide="phone"></i></button></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="mouse-pointer-click"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
@@ -1680,7 +1793,8 @@ function detailHtml(id){
   const staffHtml=arr=>arr.length?arr.map(x=>'<span class="staff-badge" onclick="openStaff('+x.s.id+')" title="'+esc(emailOf(x.s)||"no email")+'"><i data-lucide="user-round"></i>'+esc(x.s.name)+' <span class="muted">· '+x.n+' store'+(x.n!==1?'s':'')+'</span></span>').join(""):'<span class="muted">Not assigned</span>';
   return '<div class="detail-head"><div style="flex:1"><h2 style="margin:2px 0">'+openDot(frOpenIssues(f.id))+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')+'</h2>'
     +'<div class="muted" style="font-size:13.5px">Territory '+esc(f.territory||"—")+' · '+stores.length+' store'+(stores.length!==1?'s':'')+'</div></div>'
-    +'<div class="hd-actions"><button class="btn outline round xs" onclick="openFr('+f.id+')" title="Edit franchisee"><i data-lucide="pencil"></i>Edit</button>'
+    +'<div class="hd-actions"><button class="call-btn lg" data-act="cl-log" data-arg="'+f.id+'" data-tip="Log Call" aria-label="Log a call to '+esc(f.name)+'"><i data-lucide="phone"></i></button>'
+    +'<button class="btn outline round xs" onclick="openFr('+f.id+')" title="Edit franchisee"><i data-lucide="pencil"></i>Edit</button>'
     +'<button class="iconbtn del" onclick="askDeleteFr('+f.id+')" title="Delete franchisee (password required)" aria-label="Delete franchisee"><i data-lucide="trash-2"></i></button></div></div>'
     +'<div class="grid2">'
       +'<div class="panel"><div class="ph"><i data-lucide="mail"></i>Contacts</div><div class="pb">'+contactHtml+'</div></div>'
@@ -1690,6 +1804,7 @@ function detailHtml(id){
         +'<div class="kv"><span class="k">Area</span><span class="muted">'+esc(f.territory||"—")+'</span></div></div></div>'
       +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="store"></i>Stores <span class="badge-num" style="background:var(--green-soft);color:var(--green-dark)">'+stores.length+'</span><span class="ph-act"><button class="iconbtn" title="Add store" onclick="openAddStore('+f.id+')"><i data-lucide="plus"></i></button></span></div><div class="pb">'+storeHtml+'</div></div>'
       +'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="triangle-alert"></i>Issues</div><div class="pb">'+issueHtml+'</div></div>'
+      +frCallsPanel(f.id)
       +(f.notes?'<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="sticky-note"></i>Notes</div><div class="pb" style="white-space:pre-wrap;font-size:13.5px">'+esc(f.notes)+'</div></div>':'')
     +'</div>';
 }
@@ -3011,6 +3126,8 @@ async function runImport(d){
     for(const c of chunk(d.st,300)){ const {error}=await db.from("stores").upsert(c,{onConflict:"id"}); if(error)throw error; }
     const issues=d.is.map(x=>{const {id,...r}=x;return r;});
     for(const c of chunk(issues,300)){ const {error}=await db.from("issues").insert(c); if(error)throw error; }
+    if(d.cl && d.cl.length){ const cl=d.cl.map(x=>{const {id,...r}=x;return r;});
+      for(const c of chunk(cl,300)){ const {error}=await db.from("call_logs").insert(c); if(error)throw error; } }
     if(d.ob && d.ob.length){ const ob=d.ob.map(x=>{const {id,...r}=x;return r;});
       for(const c of chunk(ob,300)){ const {error}=await db.from("onboarding").insert(c); if(error)throw error; } }
     $("confirmOverlay").classList.remove("show"); pending=null; btn.disabled=false; btn.textContent="Delete";
@@ -3020,11 +3137,13 @@ async function runImport(d){
 async function doDelete(){
   if(!pending)return; const p=pending;
   if(p.kind==="import"){ runImport(p.data); return; }
+  if(p.kind==="cl-discard"){ $("confirmOverlay").classList.remove("show"); pending=null; $("confirmOk").textContent="Delete"; clClose(true); return; }
   $("confirmOk").disabled=true; let error;
   if(p.kind==="issue"){ ({error}=await db.from("issues").delete().eq("id",p.id)); }
   else if(p.kind==="issues"){ ({error}=await db.from("issues").delete().in("id",p.ids)); }
   else if(p.kind==="franchisee"){ ({error}=await db.from("franchisees").delete().eq("id",p.id)); }
   else if(p.kind==="onb"){ ({error}=await db.from("onboarding").delete().eq("id",p.id)); }
+  else if(p.kind==="cl"){ ({error}=await db.from("call_logs").delete().eq("id",p.id)); }
   else if(p.kind==="store"){ const st=ST.find(x=>x.id===p.id);
     if(st){ const r=await db.from("issues").delete().eq("store_num",String(st.num)); error=r.error;
       if(!error && obReady){ const r2=await db.from("onboarding").delete().eq("store_num",String(st.num)); error=r2.error; }
@@ -3036,10 +3155,12 @@ async function doDelete(){
   if(p.kind==="issue"){ IS=IS.filter(i=>i.id!==p.id); updCounts(); if(curStore) renderStoreRight(); }
   if(p.kind==="issues"){ IS=IS.filter(i=>!p.ids.includes(i.id)); updCounts(); $("grpOverlay").classList.remove("show"); if(curStore) renderStoreRight(); }
   if(p.kind==="onb"){ OB=OB.filter(r=>r.id!==p.id); updCounts(); }
+  if(p.kind==="cl"){ CL=CL.filter(r=>r.id!==p.id); updCounts(); $("clViewOverlay").classList.remove("show"); if(tab==="franchisees"&&selFr&&$("frDetailPane")){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
   if(p.kind==="store"){ const st=ST.find(x=>x.id===p.id);
     if(st){ OB=OB.filter(r=>String(r.store_num)!==String(st.num)); IS=IS.filter(i=>String(i.store_num)!==String(st.num)); ST=ST.filter(x=>x.id!==p.id); }
     reindex(); buildTerrFilter(); updCounts(); }
   if(p.kind==="franchisee"){ const nums=new Set((storesByFr[p.id]||[]).map(x=>String(x.num)));
+    CL.forEach(r=>{ if(r.franchisee_id===p.id) r.franchisee_id=null; });
     FR=FR.filter(f=>f.id!==p.id); ST=ST.filter(x=>x.franchisee_id!==p.id);
     IS=IS.filter(i=>i.franchisee_id!==p.id && !nums.has(String(i.store_num)));
     if(selFr===p.id) selFr=null; reindex(); buildTerrFilter(); updCounts(); }
@@ -3049,7 +3170,7 @@ async function doDelete(){
 
 function toggleIssues(){ issuesOnly=!issuesOnly; frPage=1; stPage=1; render(); }
 function toggleClosed(){ closedOnly=!closedOnly; stPage=1; render(); }
-function pageSizeOf(w){ return w==="fr"?PAGE_FR:(w==="st"?PAGE_ST:(w==="is"?PAGE_IS:(w==="ob"?PAGE_OB:PAGE_FRST))); }
+function pageSizeOf(w){ return w==="fr"?PAGE_FR:(w==="st"?PAGE_ST:(w==="is"?PAGE_IS:(w==="ob"?PAGE_OB:(w==="cl"?PAGE_CL:PAGE_FRST)))); }
 function pagerHtml(which, page, total, count){
   const opts=PAGE_OPTS[which], size=pageSizeOf(which);
   if(count==null) count=total*size;
@@ -3071,6 +3192,7 @@ function setPageSize(which,val){
   else if(which==="st"){ PAGE_ST=v; stPage=1; render(); }
   else if(which==="is"){ PAGE_IS=v; isPage=1; render(); }
   else if(which==="ob"){ PAGE_OB=v; obPage=1; render(); }
+  else if(which==="cl"){ PAGE_CL=v; clPage=1; render(); }
   else { PAGE_FRST=v; frStorePage=1; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 function pageSet(which,val){
@@ -3079,6 +3201,7 @@ function pageSet(which,val){
   else if(which==='st'){ stPage=n; render(); }
   else if(which==='is'){ isPage=n; render(); }
   else if(which==='ob'){ obPage=n; render(); }
+  else if(which==='cl'){ clPage=n; render(); }
   else if(which==='frst'){ frStorePage=n; if(selFr){ $("frDetailPane").innerHTML=detailHtml(selFr); icons(); } }
 }
 
@@ -3730,11 +3853,11 @@ function askDeleteGroupSel(){
   $("confirmOverlay").classList.add("show");
 }
 
-function primaryAdd(){ if(tab==="issues"&&isSub==="onboarding") openNewOnboarding(); else if(tab==="issues") openLogIssue(null); else if(tab==="staff") openStaffEdit(null); }
+function primaryAdd(){ if(tab==="calls") openCallLog(null); else if(tab==="issues"&&isSub==="onboarding") openNewOnboarding(); else if(tab==="issues") openLogIssue(null); else if(tab==="staff") openStaffEdit(null); }
 
 /* events */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{ tab=t.dataset.tab; $("search").value=""; frPage=1; stPage=1; render(); });
-$("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; isPage=1; obPage=1; render(); };
+$("search").oninput=()=>{ frPage=1; stPage=1; frStorePage=1; isPage=1; obPage=1; clPage=1; render(); };
 $("terrFilter").onchange=e=>{ terrFilter=e.target.value; frPage=1; stPage=1; render(); };
 $("stIssueFilter").onclick=toggleIssues;
 $("stClosedFilter").onclick=toggleClosed;
@@ -3752,6 +3875,14 @@ $("obX").onclick=$("obCancel").onclick=()=>$("obOverlay").classList.remove("show
 $("obSave").onclick=saveNewOnboarding;
 $("obuX").onclick=$("obuCancel").onclick=()=>$("obUpdOverlay").classList.remove("show");
 $("obuSave").onclick=saveObUpdate;
+$("clX").onclick=$("clCancel").onclick=()=>clClose(false);
+$("clSave").onclick=saveCallLog;
+$("clvX").onclick=()=>$("clViewOverlay").classList.remove("show");
+$("clvEdit").onclick=()=>{ const id=clViewId; $("clViewOverlay").classList.remove("show"); openCallLog(null,id); };
+$("clvDel").onclick=()=>askDeleteCall(clViewId);
+$("clvFU").onclick=clToggleFU;
+$("clvStore").onclick=()=>{ const r=CL.find(x=>x.id===clViewId); const st=r&&storeByNum[String(r.store_num)]; if(st){ $("clViewOverlay").classList.remove("show"); openStore(st.id); } };
+$("clOverlay").addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveCallLog(); } });
 $("ob_store_in").oninput=obSuggest;
 $("ob_store_in").onblur=()=>setTimeout(()=>$("ob_sug").classList.remove("show"),120);
 $("ob_store_in").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); const v=$("ob_store_in").value.trim(); if(mIsName(v)){ const h=mFrHits(v); if(h.length) obPickFr(h[0].id); else toast("No franchisee found","err"); } else obAddStores(v); } };
@@ -3803,9 +3934,9 @@ $("importFile").onchange=async e=>{
   if(!file)return;
   if(!db){toast("Connect first","err");return;}
   let data; try{ data=JSON.parse(await file.text()); }catch(err){ toast("That file isn't valid JSON","err"); return; }
-  const fr=data.franchisees||[], st=data.stores||[], sf=data.staff||[], is=data.issues||[], ob=data.onboarding||[];
+  const fr=data.franchisees||[], st=data.stores||[], sf=data.staff||[], is=data.issues||[], ob=data.onboarding||[], cl=data.call_logs||[];
   if(!fr.length&&!st.length&&!sf.length&&!is.length){ toast("No data found in that file","err"); return; }
-  impData={fr,st,sf,is,ob};
+  impData={fr,st,sf,is,ob,cl};
   askPassword("Import password", ()=>{
     const d=impData; pending={kind:"import", data:d};
     $("confirmOk").textContent="Restore";
@@ -3843,7 +3974,9 @@ $("sfX").onclick=$("sfCancel").onclick=()=>$("sfOverlay").classList.remove("show
 
 $("confirmCancel").onclick=()=>{$("confirmOverlay").classList.remove("show");pending=null;$("confirmOk").textContent="Delete";}; $("confirmOk").onclick=doDelete;
 
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySelectorAll(".overlay.show").forEach(o=>{ if(o.id!=="storeOverlay") o.classList.remove("show"); }); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){
+  if($("clOverlay").classList.contains("show") && !$("confirmOverlay").classList.contains("show")){ clClose(false); return; }
+  document.querySelectorAll(".overlay.show").forEach(o=>{ if(o.id!=="storeOverlay"&&o.id!=="clOverlay") o.classList.remove("show"); }); } });
 
 /* startup */
 icons();
@@ -4384,6 +4517,287 @@ document.addEventListener("click",e=>{
   else if(a==="sub"){ tab="issues"; isSub=g; fMenu=null; $("search").value=""; render(); window.scrollTo(0,0); }
 });
 
+/* ===================== CALL LOGS ===================== */
+const CL_OUTCOMES=["Answered","No answer / voicemail","Follow-up required","Requested more info","Completed"];
+let CL=[], clReady=true, clF={range:"all",from:"",to:"",fr:"",store:"",outcome:""}, clSort="desc", clPage=1, clInsights=true;
+try{ clInsights=localStorage.getItem("ft2_cl_ins")!=="0"; }catch(e){}
+const clOpenFU=r=>!!r.follow_up && !r.follow_up_done_at;
+function clDay(d){ const t=new Date(d); t.setHours(0,0,0,0); return t; }
+function clWeekStart(){ const t=clDay(new Date()); t.setDate(t.getDate()-t.getDay()); return t; }
+function clFmt(ts){ const d=new Date(ts); if(isNaN(d)) return {d:"—",t:""};
+  return {d:d.toLocaleDateString([], {weekday:"short",month:"short",day:"numeric",year:"numeric"}), t:d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}; }
+function clOutcomeBadge(o){ if(!o) return ""; const c={"Answered":"cl-o-ans","No answer / voicemail":"cl-o-nva","Follow-up required":"cl-o-fu","Requested more info":"cl-o-info","Completed":"cl-o-done"}[o]||"";
+  return '<span class="badge '+c+'">'+esc(o)+'</span>'; }
+function clFUBadge(r){ if(!r.follow_up) return ""; return r.follow_up_done_at?'<span class="badge cl-fu-done" data-tip="Follow-up completed '+esc(fmtTs(r.follow_up_done_at))+'"><i data-lucide="check"></i>Follow-up done</span>':'<span class="badge cl-fu-open" data-tip="This call needs a follow-up"><i data-lucide="flag"></i>Follow-up</span>'; }
+function clFrName(r){ const f=r.franchisee_id?FR.find(x=>x.id===r.franchisee_id):null; return f?f.name:(r.franchisee_name||"—"); }
+
+/* ---------- filtering ---------- */
+function clRange(){
+  const now=new Date(), d0=clDay(now); let from=null,to=null;
+  if(clF.range==="today"){ from=d0; to=new Date(d0); to.setDate(to.getDate()+1); }
+  else if(clF.range==="week"){ from=clWeekStart(); to=new Date(from); to.setDate(to.getDate()+7); }
+  else if(clF.range==="month"){ from=new Date(now.getFullYear(),now.getMonth(),1); to=new Date(now.getFullYear(),now.getMonth()+1,1); }
+  else if(clF.range==="30"){ to=new Date(d0); to.setDate(to.getDate()+1); from=new Date(to); from.setDate(from.getDate()-30); }
+  else if(clF.range==="custom"){ if(clF.from) from=new Date(clF.from+"T00:00:00"); if(clF.to){ to=new Date(clF.to+"T00:00:00"); to.setDate(to.getDate()+1); } }
+  return [from,to];
+}
+function clFiltered(){
+  const sq=searchQ(), [from,to]=clRange();
+  const frQ=normName(clF.fr), stQ=String(clF.store||"").trim().replace(/^#/,"");
+  return CL.filter(r=>{
+    const d=new Date(r.call_at); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
+    if(frQ && !normName(clFrName(r)).includes(frQ) && !normName(r.franchisee_name).includes(frQ)) return false;
+    if(stQ && String(r.store_num||"")!==stQ) return false;
+    if(clF.outcome){
+      if(clF.outcome==="__fu_open"){ if(!clOpenFU(r)) return false; }
+      else if(clF.outcome==="__fu_done"){ if(!(r.follow_up&&r.follow_up_done_at)) return false; }
+      else if(clF.outcome==="__none"){ if(r.outcome) return false; }
+      else if(r.outcome!==clF.outcome) return false;
+    }
+    if(!sq.q) return true;
+    if(sq.mode==="store") return numRank(r.store_num,sq.q)<9;
+    if(sq.mode==="fr") return normName(clFrName(r)).includes(normName(sq.q))||normName(r.franchisee_name).includes(normName(sq.q));
+    return [clFrName(r),r.franchisee_name,r.store_num,r.reason,r.result,r.outcome].join(" ").toLowerCase().includes(sq.q) || (sq.phoneLike && dig(r.store_num).includes(sq.d));
+  });
+}
+function clAnyFilter(){ return clF.range!=="all"||clF.fr||clF.store||clF.outcome||$("search").value.trim(); }
+function clReset(){ clF={range:"all",from:"",to:"",fr:"",store:"",outcome:""}; $("search").value=""; clPage=1; render(); }
+function clSet(k,v){ clF[k]=v; clPage=1; if(k==="range"&&v==="custom"&&!clF.from&&!clF.to){ const t=new Date(); t.setDate(t.getDate()-6); clF.from=t.toISOString().slice(0,10); } render(); }
+
+/* ---------- Call Logs tab ---------- */
+function renderCalls(){
+  if(!clReady){ $("count").textContent=""; setView(emptyBox("database","Call Logs needs a quick database update","Run migrate-call-logs.sql in the Supabase SQL Editor, then click Refresh.")); return; }
+  const list=clFiltered(), t=r=>new Date(r.call_at).getTime()||0;
+  list.sort((a,b)=>clSort==="desc"?t(b)-t(a):t(a)-t(b));
+  const d0=clDay(new Date()), d1=new Date(d0); d1.setDate(d1.getDate()+1);
+  const w0=clWeekStart(), w1=new Date(w0); w1.setDate(w1.getDate()+7);
+  const today=list.filter(r=>{const d=new Date(r.call_at); return d>=d0&&d<d1;}).length;
+  const week=list.filter(r=>{const d=new Date(r.call_at); return d>=w0&&d<w1;}).length;
+  const fu=list.filter(clOpenFU).length;
+  $("count").textContent=fmtN(list.length)+" call"+(list.length!==1?"s":"");
+  const scopeNote=clAnyFilter()?" (matching your filters)":"";
+
+  const kpis='<div class="db-kpis cl-kpis">'
+    +dKpi("phone","Total calls",fmtN(list.length),clAnyFilter()?"matching filters":"all time","Number of call logs"+scopeNote+".","",null)
+    +dKpi("calendar-check","Calls today",fmtN(today),new Date().toLocaleDateString([], {month:"short",day:"numeric"}),"Calls made today"+scopeNote+" (your computer's time zone).","",null)
+    +dKpi("calendar-range","Calls this week",fmtN(week),"since "+w0.toLocaleDateString([], {month:"short",day:"numeric"}),"Calls made this week, Sunday to Saturday"+scopeNote+".","",null)
+    +dKpi("flag","Follow-ups required",fmtN(fu),fu?"click to see them":"all caught up","Calls marked “Needs follow-up” that are not done yet"+scopeNote+".",fu?"warn":"",fu?["cl-fu",""]:null)
+    +'</div>';
+
+  // insights (collapsible)
+  let ins='';
+  if(clInsights && list.length){
+    const oc={}; list.forEach(r=>{ const k=r.outcome||"Not set"; oc[k]=(oc[k]||0)+1; });
+    const ocColors={"Answered":DC.green,"Completed":DC.ok,"No answer / voicemail":DC.gray,"Follow-up required":DC.orange,"Requested more info":"#2f7fbf","Not set":"#e3e8de"};
+    const ocRow=[{label:"All calls",parts:[...CL_OUTCOMES,"Not set"].filter(k=>oc[k]).map(k=>({label:k,value:oc[k],color:ocColors[k]}))}];
+    const ans=(oc["Answered"]||0)+(oc["Completed"]||0)+(oc["Requested more info"]||0), un=oc["No answer / voicemail"]||0;
+    const days=[]; for(let i=13;i>=0;i--){ const a=new Date(d0); a.setDate(a.getDate()-i); const b=new Date(a); b.setDate(b.getDate()+1);
+      days.push({label:a.toLocaleDateString([], {month:"short",day:"numeric"}), n:list.filter(r=>{const d=new Date(r.call_at); return d>=a&&d<b;}).length}); }
+    const mx=Math.max(1,...days.map(x=>x.n));
+    const byFr={}; list.forEach(r=>{ const k=clFrName(r); byFr[k]=(byFr[k]||0)+1; });
+    const top=Object.entries(byFr).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const fuAll=list.filter(r=>r.follow_up), fuDone=fuAll.filter(r=>r.follow_up_done_at).length;
+    ins='<div class="cl-ins">'
+      +'<div class="cl-in"><div class="db-sub">Outcomes'+dInfo("Outcome picked when the call was logged. Answered = Answered, Requested more info or Completed. Unanswered = No answer / voicemail. Follow-up required and Not set are not counted as either.")+'</div>'+dHbars(ocRow,{full:true,valueFmt:(r,t)=>fmtN(t)})
+        +'<div class="db-key">'+[...CL_OUTCOMES,"Not set"].filter(k=>oc[k]).map(k=>'<span><i style="background:'+ocColors[k]+'"></i>'+esc(k)+' '+oc[k]+'</span>').join("")+'</div>'
+        +'<div class="cl-mini"><span data-tip="Outcome Answered, Requested more info or Completed"><b>'+fmtN(ans)+'</b> answered</span><span data-tip="No answer or voicemail"><b>'+fmtN(un)+'</b> unanswered</span><span data-tip="Follow-ups completed ÷ follow-ups requested"><b>'+(fuAll.length?pct(fuDone,fuAll.length)+'%':'—')+'</b> follow-ups done</span></div></div>'
+      +'<div class="cl-in"><div class="db-sub">Last 14 days'+dInfo("Calls per day for the last 14 days"+scopeNote+".")+'</div><div class="cl-spark">'
+        +days.map(x=>'<span class="sb" style="height:'+Math.max(3,x.n/mx*100)+'%" data-tip="'+esc(x.label)+': '+x.n+' call'+(x.n!==1?'s':'')+'"></span>').join("")+'</div>'
+        +'<div class="cl-spark-x"><span>'+esc(days[0].label)+'</span><span>Today</span></div></div>'
+      +'<div class="cl-in"><div class="db-sub">Most called franchisees'+dInfo("Franchisees with the most calls"+scopeNote+". Click to filter.")+'</div>'
+        +(top.length?'<div class="cl-top">'+top.map(([n,v])=>'<button class="cl-topr" data-act="cl-fr" data-arg="'+esc(n)+'" data-tip="Show only calls to '+esc(n)+'"><span>'+esc(n)+'</span><b>'+v+'</b></button>').join("")+'</div>':'<div class="db-empty">No calls</div>')+'</div>'
+      +'</div>';
+  }
+  const insToggle='<button class="btn link cl-insbtn" data-act="cl-ins" aria-expanded="'+clInsights+'"><i data-lucide="'+(clInsights?'chevron-up':'chevron-down')+'"></i>'+(clInsights?'Hide':'Show')+' insights</button>';
+
+  // filters
+  const frList='<datalist id="cl_frlist">'+FR.map(f=>'<option value="'+esc(f.name)+'">').join("")+'</datalist>';
+  const stList='<datalist id="cl_stlist">'+[...new Set(CL.map(r=>r.store_num).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).map(n=>'<option value="'+esc(n)+'">').join("")+'</datalist>';
+  const filters='<div class="ifbar cl-filters" role="search" aria-label="Call log filters">'+frList+stList
+    +'<label class="cl-fl"><span><i data-lucide="calendar"></i>Date</span><select onchange="clSet(\'range\',this.value)">'
+      +[["all","All time"],["today","Today"],["week","This week"],["month","This month"],["30","Last 30 days"],["custom","Date range…"]].map(([v,l])=>'<option value="'+v+'"'+(clF.range===v?' selected':'')+'>'+l+'</option>').join("")+'</select></label>'
+    +(clF.range==="custom"?'<label class="cl-fl"><span>From</span><input type="date" value="'+esc(clF.from)+'" onchange="clSet(\'from\',this.value)"></label><label class="cl-fl"><span>To</span><input type="date" value="'+esc(clF.to)+'" onchange="clSet(\'to\',this.value)"></label>':'')
+    +'<label class="cl-fl"><span><i data-lucide="user-round"></i>Franchisee</span><input type="text" list="cl_frlist" placeholder="Any franchisee" value="'+esc(clF.fr)+'" onchange="clSet(\'fr\',this.value.trim())"></label>'
+    +'<label class="cl-fl"><span><i data-lucide="store"></i>Store #</span><input type="text" list="cl_stlist" placeholder="Any" value="'+esc(clF.store)+'" onchange="clSet(\'store\',this.value.trim())" style="width:110px"></label>'
+    +'<label class="cl-fl"><span><i data-lucide="list-checks"></i>Outcome</span><select onchange="clSet(\'outcome\',this.value)">'
+      +[["","Any outcome"],...CL_OUTCOMES.map(o=>[o,o]),["__none","Outcome not set"],["__fu_open","Follow-up still open"],["__fu_done","Follow-up done"]].map(([v,l])=>'<option value="'+esc(v)+'"'+(clF.outcome===v?' selected':'')+'>'+esc(l)+'</option>').join("")+'</select></label>'
+    +(clAnyFilter()?'<button class="btn link" onclick="clReset()" style="margin-left:auto"><i data-lucide="rotate-ccw"></i>Reset filters</button>':'')
+    +'</div>';
+
+  if(!CL.length){ setView(kpis+emptyBox("phone","No call logs yet","Log a call from the Franchisee tab to get started — use the phone button next to any franchisee.")); return; }
+  if(!list.length){ setView(kpis+'<div class="cl-inswrap">'+insToggle+'</div>'+filters+emptyBox("search-x","No calls match","Try a different search, or reset the filters.")); return; }
+
+  const total=Math.max(1,Math.ceil(list.length/PAGE_CL)); if(clPage>total) clPage=total; if(clPage<1) clPage=1;
+  const rows=list.slice((clPage-1)*PAGE_CL, clPage*PAGE_CL).map(r=>{ const w=clFmt(r.call_at);
+    return '<tr class="click" data-act="cl-view" data-arg="'+r.id+'" tabindex="0" aria-label="View call to '+esc(clFrName(r))+' on '+esc(w.d)+'">'
+      +'<td><div class="cl-when"><b>'+esc(w.d)+'</b><span>'+esc(w.t)+'</span></div></td>'
+      +'<td class="cl-fr">'+esc(clFrName(r))+(r.franchisee_id&&clFrName(r)!==r.franchisee_name&&r.franchisee_name?'<small data-tip="Name when the call was logged">was “'+esc(r.franchisee_name)+'”</small>':'')+'</td>'
+      +'<td class="cl-st">'+(r.store_num?'<b>'+esc(r.store_num)+'</b>':'<span class="muted">General</span>')+'</td>'
+      +'<td class="cl-txt"><div class="cl-clamp">'+esc(r.reason)+'</div></td>'
+      +'<td class="cl-txt"><div class="cl-res-top">'+clOutcomeBadge(r.outcome)+clFUBadge(r)+'</div><div class="cl-clamp">'+esc(r.result)+'</div></td>'
+      +'<td class="c-act"><div class="row-acts">'
+        +'<button class="iconbtn mini" data-act="cl-view" data-arg="'+r.id+'" data-tip="View full details" aria-label="View call"><i data-lucide="eye"></i></button>'
+        +'<button class="iconbtn mini" data-act="cl-edit" data-arg="'+r.id+'" data-tip="Edit this call" aria-label="Edit call"><i data-lucide="pencil"></i></button>'
+        +'<button class="iconbtn mini del" data-act="cl-del" data-arg="'+r.id+'" data-tip="Delete this call" aria-label="Delete call"><i data-lucide="trash-2"></i></button>'
+      +'</div></td></tr>'; }).join("");
+  const sortTh='<th class="sortable on" data-act="cl-sort" data-tip="Click to sort '+(clSort==="desc"?"oldest":"newest")+' first" aria-sort="'+(clSort==="desc"?"descending":"ascending")+'">Date and Time<i data-lucide="'+(clSort==="desc"?"arrow-down":"arrow-up")+'"></i></th>';
+  setView(kpis+'<div class="cl-inswrap">'+insToggle+'</div>'+ins+filters
+    +'<div class="card" style="overflow-x:auto"><table class="cl-table"><thead><tr>'+sortTh+'<th>Franchisee Name</th><th>Store Number</th><th>Reason for Call</th><th>Result of Call</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +pagerHtml('cl',clPage,total,list.length)+'</div>');
+}
+
+/* ---------- log / edit modal ---------- */
+let clCtx=null, clSaving=false, clInit="";
+function clLocalInput(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); }
+function openCallLog(fid, editId){
+  if(!clReady){ toast("Run migrate-call-logs.sql first","err"); return; }
+  const r=editId?CL.find(x=>x.id===editId):null;
+  if(editId && !r){ toast("Call log not found","err"); return; }
+  const fixedFid=r?r.franchisee_id:fid;
+  clCtx={id:r?r.id:null, fid:fixedFid??null, fixed:!!(r||fid)};
+  $("cl_title").textContent=r?"Edit call":"Log call";
+  $("clSave").innerHTML='<i data-lucide="save"></i>'+(r?"Save changes":"Save Call");
+  const f=fixedFid?FR.find(x=>x.id===fixedFid):null;
+  $("cl_fr_ro").style.display=clCtx.fixed?"flex":"none"; $("cl_fr_pick").style.display=clCtx.fixed?"none":"block";
+  $("cl_fr_name").textContent=f?f.name:(r?r.franchisee_name:"—");
+  $("cl_fr_meta").textContent=f?("Territory "+(f.territory||"—")+" · "+(storesByFr[f.id]||[]).length+" store"+((storesByFr[f.id]||[]).length!==1?"s":"")):(r?"Franchisee record no longer exists — name kept from the call":"");
+  $("cl_fr_in").value=""; if(!clCtx.fixed) $("cl_frlist2").innerHTML=FR.map(x=>'<option value="'+esc(x.name)+'">').join("");
+  $("cl_when").value=clLocalInput(r?new Date(r.call_at):new Date());
+  $("cl_when").max=clLocalInput(new Date(Date.now()+10*60000));
+  $("cl_reason").value=r?r.reason:""; $("cl_result").value=r?r.result:"";
+  $("cl_follow").checked=!!(r&&r.follow_up);
+  clFillStores(fixedFid, r?r.store_num:"");
+  $("cl_outcomes").innerHTML=CL_OUTCOMES.map(o=>'<button type="button" class="mchip'+(r&&r.outcome===o?' sel':'')+'" data-v="'+esc(o)+'" aria-pressed="'+!!(r&&r.outcome===o)+'" onclick="clPickOutcome(this)">'+esc(o)+'</button>').join("");
+  clClearErrors(); $("cl_err").classList.remove("show");
+  clInit=clSnapshot(); clSaving=false; $("clSave").disabled=false;
+  $("clOverlay").classList.add("show"); icons();
+  setTimeout(()=>(clCtx.fixed?$("cl_reason"):$("cl_fr_in")).focus(),60);
+}
+function clFillStores(fid, cur){
+  const sts=fid?(storesByFr[fid]||[]).slice().sort(numCmp):[];
+  const opts=['<option value="">General — no specific store</option>'].concat(sts.map(s=>'<option value="'+s.id+'"'+(String(s.num)===String(cur||"")?' selected':'')+'>'+esc(s.num)+' · '+esc([s.address,s.city].filter(Boolean).join(", "))+'</option>'));
+  if(cur && !sts.some(s=>String(s.num)===String(cur))) opts.push('<option value="num:'+esc(cur)+'" selected>'+esc(cur)+' (no longer on this franchisee)</option>');
+  $("cl_store").innerHTML=opts.join(""); $("cl_store").disabled=!fid;
+  $("cl_store_hint").textContent=fid?(sts.length?sts.length+" store"+(sts.length!==1?"s":"")+" for this franchisee — optional":"This franchisee has no stores — the call is logged as general"):"Pick the franchisee first";
+}
+function clPickOutcome(b){ const on=!b.classList.contains("sel"); document.querySelectorAll("#cl_outcomes .mchip").forEach(x=>{ x.classList.remove("sel"); x.setAttribute("aria-pressed","false"); });
+  if(on){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); if(b.dataset.v==="Follow-up required") $("cl_follow").checked=true; } }
+function clFrFromInput(){
+  const v=$("cl_fr_in").value.trim(); const f=findDupFr(v,null);
+  clCtx.fid=f?f.id:null; clFillStores(clCtx.fid,"");
+  $("cl_fr_in").setAttribute("aria-invalid",String(!!v&&!f));
+  clErr("cl_fr_in", v&&!f?"No franchisee with that exact name — pick one from the list.":"");
+}
+function clSnapshot(){ return JSON.stringify([clCtx&&clCtx.fid,$("cl_when").value,$("cl_store").value,$("cl_reason").value,$("cl_result").value,(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"",$("cl_follow").checked,$("cl_fr_in").value]); }
+function clErr(id,msg){ const el=$(id+"_err"); if(el){ el.textContent=msg||""; el.classList.toggle("show",!!msg); } const inp=$(id); if(inp){ inp.classList.toggle("bad",!!msg); if(msg) inp.setAttribute("aria-invalid","true"); else inp.removeAttribute("aria-invalid"); } }
+function clClearErrors(){ ["cl_fr_in","cl_when","cl_reason","cl_result"].forEach(id=>clErr(id,"")); }
+function clClose(force){
+  if(!force && clSnapshot()!==clInit){ pending={kind:"cl-discard"}; $("confirmOk").textContent="Discard"; $("confirmText").textContent="Discard this call log? What you typed will not be saved."; $("confirmOverlay").classList.add("show"); return; }
+  $("clOverlay").classList.remove("show"); clCtx=null;
+}
+async function saveCallLog(){
+  if(clSaving) return;
+  clClearErrors(); $("cl_err").classList.remove("show");
+  const reason=$("cl_reason").value.trim(), result=$("cl_result").value.trim(), whenV=$("cl_when").value;
+  const when=whenV?new Date(whenV):null; let first=null;
+  if(!clCtx.fid && !clCtx.fixed){ clErr("cl_fr_in","Pick the franchisee you called."); first=first||"cl_fr_in"; }
+  if(clCtx.fixed && !clCtx.fid && !clCtx.id){ toast("Franchisee missing","err"); return; }
+  if(!when||isNaN(when)){ clErr("cl_when","Enter the date and time of the call."); first=first||"cl_when"; }
+  else if(when.getTime()>Date.now()+10*60000){ clErr("cl_when","The call time can't be in the future."); first=first||"cl_when"; }
+  if(!reason){ clErr("cl_reason","Enter the reason for this call."); first=first||"cl_reason"; } else if(reason.length>4000){ clErr("cl_reason","Please keep the reason under 4,000 characters."); first=first||"cl_reason"; }
+  if(!result){ clErr("cl_result","Enter the result of the call."); first=first||"cl_result"; } else if(result.length>4000){ clErr("cl_result","Please keep the result under 4,000 characters."); first=first||"cl_result"; }
+  if(first){ $(first).focus(); toast("Please fix the highlighted fields","err"); return; }
+  const sv=$("cl_store").value; let store_id=null, store_num=null;
+  if(sv.startsWith("num:")) store_num=sv.slice(4); else if(sv){ const st=ST.find(x=>x.id===+sv); if(!st||st.franchisee_id!==clCtx.fid){ toast("That store doesn't belong to this franchisee","err"); return; } store_id=st.id; store_num=String(st.num); }
+  const f=clCtx.fid?FR.find(x=>x.id===clCtx.fid):null;
+  const outcome=(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||null;
+  const follow=$("cl_follow").checked;
+  const rec={ franchisee_id:clCtx.fid, store_id, store_num, call_at:when.toISOString(), reason, result, outcome, follow_up:follow };
+  clSaving=true; const btn=$("clSave"); btn.disabled=true; const old=btn.innerHTML; btn.innerHTML='<span class="spin"></span>Saving…';
+  let res;
+  if(clCtx.id){
+    const cur=CL.find(x=>x.id===clCtx.id);
+    if(!follow) rec.follow_up_done_at=null;
+    if(f && cur && !cur.franchisee_name) rec.franchisee_name=f.name;
+    res=await guardedUpdate("call_logs",cur,rec);
+    if(res.row) Object.assign(cur,res.row);
+  } else {
+    rec.franchisee_name=f?f.name:"";
+    const {data,error}=await db.from("call_logs").insert(rec).select(); res={row:data&&data[0],error};
+    if(res.row) CL.push(res.row);
+  }
+  clSaving=false; btn.disabled=false; btn.innerHTML=old; icons();
+  if(res.error||res.conflict){
+    const msg=res.conflict?"Someone else changed this call log. Close and reopen it to get the latest version.":friendly(res.error).t+" — "+friendly(res.error).b;
+    $("cl_err").querySelector("span").textContent=msg+" Your entries are still here — fix the problem and try again."; $("cl_err").classList.add("show"); icons(); return;
+  }
+  $("clOverlay").classList.remove("show");
+  toast(clCtx.id?"Call log updated":"Call logged"+(f?" for "+f.name:""),"ok"); clCtx=null;
+  updCounts(); render();
+  if(tab==="franchisees" && selFr){ const dp=$("frDetailPane"); if(dp){ dp.innerHTML=detailHtml(selFr); icons(); } }
+}
+
+/* ---------- view ---------- */
+let clViewId=null;
+function openCallView(id){
+  const r=CL.find(x=>x.id===id); if(!r) return; clViewId=id; const w=clFmt(r.call_at);
+  const st=r.store_num?storeByNum[String(r.store_num)]:null;
+  $("clv_sub").textContent=w.d+" · "+w.t;
+  $("clv_body").innerHTML='<div class="clv-grid">'
+    +'<div class="clv-f"><span class="k">Franchisee</span><span class="v"><b>'+esc(clFrName(r))+'</b>'+(r.franchisee_id&&clFrName(r)!==r.franchisee_name?'<small class="muted"> (logged as “'+esc(r.franchisee_name)+'”)</small>':'')+'</span></div>'
+    +'<div class="clv-f"><span class="k">Store</span><span class="v">'+(r.store_num?'<b>'+esc(r.store_num)+'</b>'+(st?' · '+esc([st.address,st.city].filter(Boolean).join(", ")):''):'<span class="muted">General (no specific store)</span>')+'</span></div>'
+    +'<div class="clv-f"><span class="k">Outcome</span><span class="v">'+(clOutcomeBadge(r.outcome)||'<span class="muted">Not set</span>')+' '+clFUBadge(r)+'</span></div>'
+    +'<div class="clv-f"><span class="k">Logged</span><span class="v muted">'+esc(fmtTs(r.created_at))+(r.updated_at&&r.updated_at!==r.created_at?' · edited '+esc(fmtTs(r.updated_at)):'')+'</span></div>'
+    +'</div>'
+    +'<div class="clv-block"><span class="k">Reason for call</span><div class="clv-text">'+esc(r.reason)+'</div></div>'
+    +'<div class="clv-block"><span class="k">Result of call</span><div class="clv-text">'+esc(r.result)+'</div></div>';
+  $("clvFU").style.display=r.follow_up?"inline-flex":"none";
+  $("clvFU").innerHTML=r.follow_up_done_at?'<i data-lucide="rotate-ccw"></i>Reopen follow-up':'<i data-lucide="check"></i>Mark follow-up done';
+  $("clvStore").style.display=st?"inline-flex":"none";
+  $("clViewOverlay").classList.add("show"); icons();
+}
+async function clToggleFU(){
+  const r=CL.find(x=>x.id===clViewId); if(!r) return;
+  const res=await guardedUpdate("call_logs",r,{follow_up_done_at:r.follow_up_done_at?null:nowIso()});
+  if(res.error){ toast(friendly(res.error).t,"err"); return; } if(res.conflict){ showConflict("This call log"); return; }
+  Object.assign(r,res.row); toast(r.follow_up_done_at?"Follow-up marked done":"Follow-up reopened","ok"); updCounts(); openCallView(r.id); render();
+}
+function askDeleteCall(id){ const r=CL.find(x=>x.id===id); if(!r) return; const w=clFmt(r.call_at);
+  pending={kind:"cl",id}; $("confirmOk").textContent="Delete";
+  $("confirmText").textContent="Delete the call to "+clFrName(r)+" on "+w.d+" at "+w.t+"? This can't be undone."; $("confirmOverlay").classList.add("show"); }
+
+/* ---------- franchisee page: recent calls ---------- */
+function frCallsPanel(fid){
+  if(!clReady) return '';
+  const calls=CL.filter(r=>r.franchisee_id===fid).sort((a,b)=>new Date(b.call_at)-new Date(a.call_at));
+  const fu=calls.filter(clOpenFU).length;
+  return '<div class="panel" style="grid-column:1/-1"><div class="ph"><i data-lucide="phone"></i>Calls <span class="badge-num" style="background:var(--lime-soft);color:var(--lime-dark)">'+calls.length+'</span>'
+    +(fu?'<span class="badge cl-fu-open" style="margin-left:6px"><i data-lucide="flag"></i>'+fu+' follow-up'+(fu>1?'s':'')+'</span>':'')
+    +'<span class="ph-act" style="display:flex;gap:6px">'+(calls.length?'<button class="btn link" data-act="cl-fr-all" data-arg="'+esc((FR.find(x=>x.id===fid)||{}).name||"")+'">See all</button>':'')
+    +'<button class="call-btn" data-act="cl-log" data-arg="'+fid+'" data-tip="Log Call" aria-label="Log a call to this franchisee"><i data-lucide="phone"></i></button></span></div><div class="pb">'
+    +(calls.length?calls.slice(0,3).map(r=>{ const w=clFmt(r.call_at); return '<div class="issue-line" data-act="cl-view" data-arg="'+r.id+'"><span class="cl-when sm"><b>'+esc(w.d)+'</b><span>'+esc(w.t)+'</span></span>'
+        +'<span class="val">'+esc(oneLine(r.reason,80))+(r.store_num?' <span class="muted">(#'+esc(r.store_num)+')</span>':'')+'</span>'+clOutcomeBadge(r.outcome)+clFUBadge(r)+'</div>'; }).join("")
+      :'<p class="muted">No calls logged yet. Use the phone button to log one.</p>')
+    +'</div></div>';
+}
+
+/* ---------- clicks + keyboard ---------- */
+document.addEventListener("click",e=>{
+  const el=e.target.closest&&e.target.closest("[data-act]"); if(!el) return;
+  const a=el.dataset.act, g=el.dataset.arg;
+  if(a==="cl-log"){ e.stopPropagation(); openCallLog(+g); }
+  else if(a==="cl-view"){ openCallView(+g); }
+  else if(a==="cl-edit"){ e.stopPropagation(); openCallLog(null,+g); }
+  else if(a==="cl-del"){ e.stopPropagation(); askDeleteCall(+g); }
+  else if(a==="cl-sort"){ clSort=clSort==="desc"?"asc":"desc"; render(); }
+  else if(a==="cl-fu"){ clF.outcome="__fu_open"; clPage=1; render(); }
+  else if(a==="cl-fr"||a==="cl-fr-all"){ tab="calls"; clF.fr=g; clPage=1; $("search").value=""; render(); window.scrollTo(0,0); }
+  else if(a==="cl-ins"){ clInsights=!clInsights; try{ localStorage.setItem("ft2_cl_ins",clInsights?"1":"0"); }catch(e){} render(); }
+}, true);
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ") && e.target.matches && e.target.matches("tr[data-act='cl-view']")){ e.preventDefault(); openCallView(+e.target.dataset.arg); }
+});
+
 /* ===== Sidebar collapse ===== */
 function applySidebar(col){
   $("app").classList.toggle("collapsed",col);
@@ -4406,7 +4820,7 @@ function saveUiState(){
   try{
     const list=$("frList");
     const st={
-      tab, search:$("search").value, terrFilter, selFr, frPage, stPage, frStorePage, isPage, isSub, obPlat, obTpd, obEz, obSort, obPage,
+      tab, search:$("search").value, terrFilter, selFr, frPage, stPage, frStorePage, isPage, isSub, obPlat, obTpd, obEz, obSort, obPage, clF, clSort, clPage,
       issuesOnly, closedOnly, isStatus, isPeriod, isDate, isDays, isYear, isFrom, isTo, isSort,
       store: ($("storeOverlay").classList.contains("show") && curStore) ? curStore : null,
       stIss: $("stIssOverlay").classList.contains("show") ? {mode:stIssMode, num:stIssNum, fr:stIssFr} : null,
@@ -4420,7 +4834,9 @@ function saveUiState(){
 function loadUiState(){
   let st=null; try{ st=JSON.parse(sessionStorage.getItem(UI_KEY)||"null"); }catch(e){}
   if(!st) return;
-  if(["dashboard","franchisees","stores","staff","issues"].includes(st.tab)) tab=st.tab;
+  if(["dashboard","franchisees","stores","staff","issues","calls"].includes(st.tab)) tab=st.tab;
+  if(st.clF&&typeof st.clF==="object") clF=Object.assign({range:"all",from:"",to:"",fr:"",store:"",outcome:""},st.clF);
+  clSort=st.clSort==="asc"?"asc":"desc"; clPage=st.clPage||1;
   if(st.isSub==="onboarding"||st.isSub==="concerns") isSub=st.isSub;
   const okP=x=>Array.isArray(x)?x:[]; obPlat=okP(st.obPlat).filter(k=>OB_PLATS.some(p=>p[0]===k)); obTpd=okP(st.obTpd).filter(x=>OB_STATES.includes(x)); obEz=okP(st.obEz).filter(x=>OB_STATES.includes(x));
   obSort=st.obSort==="old"?"old":"new"; obPage=st.obPage||1;
