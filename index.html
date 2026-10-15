@@ -739,6 +739,10 @@
   .cl-con a:hover{color:var(--green-dark);text-decoration:underline} .cl-con svg{width:12px;height:12px;flex:none}
   .cl-nocon{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px;font-style:italic;margin-top:3px}
   .clv-con{display:flex;flex-wrap:wrap;gap:8px}
+  .cl-frcon{display:none;flex-wrap:wrap;align-items:center;gap:8px;margin:-6px 0 14px;padding:10px 12px;border:1px dashed var(--lime);border-radius:11px;background:#fff}
+  .cl-frcon.show{display:flex}
+  .cl-frcon .lbl{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-right:2px}
+  .cl-frcon .lbl svg{width:14px;height:14px;color:var(--green)}
   .clv-ci{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 11px;background:#fff;font-size:13px}
   .clv-ci svg{width:14px;height:14px;color:var(--green)} .clv-ci a{color:var(--ink);text-decoration:none} .clv-ci a:hover{text-decoration:underline}
   /* ---------- Call logs ---------- */
@@ -1209,8 +1213,9 @@
     <div class="body">
       <div class="cl-fr-ro" id="cl_fr_ro"><span class="sf-av"><i data-lucide="user-round"></i></span><div><div class="lbl">Franchisee</div><b id="cl_fr_name">—</b><div class="muted" id="cl_fr_meta" style="font-size:12px"></div></div><span class="cl-lock" data-tip="Filled in from the franchisee you picked. To log a call for someone else, close this and use their phone button."><i data-lucide="lock"></i></span></div>
       <div class="field" id="cl_fr_pick" style="margin-bottom:14px"><label for="cl_fr_in">Franchisee *</label>
-        <input id="cl_fr_in" list="cl_frlist2" placeholder="Type a franchisee name…" autocomplete="off" aria-describedby="cl_fr_in_err" onchange="clFrFromInput()">
+        <input id="cl_fr_in" list="cl_frlist2" placeholder="Type a franchisee name…" autocomplete="off" aria-describedby="cl_fr_in_err" onchange="clFrFromInput()" oninput="if(findDupFr(this.value,null))clFrFromInput()">
         <datalist id="cl_frlist2"></datalist><div class="fld-err" id="cl_fr_in_err" role="alert"></div></div>
+      <div class="cl-frcon" id="cl_fr_con" aria-live="polite"></div>
       <div class="fgrid" style="margin-bottom:14px">
         <div class="field"><label for="cl_when">Date and time of call *</label><input id="cl_when" type="datetime-local" aria-describedby="cl_when_err cl_when_hint"><div class="help" id="cl_when_hint" style="margin-top:4px">Now by default — change it to log an earlier call</div><div class="fld-err" id="cl_when_err" role="alert"></div></div>
         <div class="field"><label for="cl_store">Store number (optional)</label><select id="cl_store" aria-describedby="cl_store_hint"></select><div class="help" id="cl_store_hint" style="margin-top:4px"></div></div>
@@ -5102,6 +5107,17 @@ function renderCalls(){
 function clContactHtml(fid){ const c=frContactBits(fid); if(!c.phones.length&&!c.emails.length) return '<small class="cl-nocon">No contact saved</small>';
   return '<div class="cl-con">'+c.phones.slice(0,2).map(p=>'<a href="tel:'+esc(String(p).replace(/[^\d+]/g,""))+'" onclick="event.stopPropagation()" data-tip="Call '+esc(p)+'"><i data-lucide="phone"></i>'+esc(p)+'</a>').join("")
     +c.emails.slice(0,2).map(e=>'<a href="mailto:'+esc(e)+'" onclick="event.stopPropagation()" data-tip="Email '+esc(e)+'"><i data-lucide="mail"></i><span>'+esc(e)+'</span></a>').join("")+'</div>'; }
+function clShowContact(fid){
+  const box=$("cl_fr_con"); if(!box) return;
+  if(!fid){ box.innerHTML=""; box.classList.remove("show"); return; }
+  const c=frContactBits(fid), tel=p=>String(p).replace(/[^\d+]/g,"");
+  box.innerHTML='<span class="lbl"><i data-lucide="contact"></i>Contact</span>'
+    +(c.phones.length||c.emails.length
+      ? c.phones.map(p=>'<span class="clv-ci"><i data-lucide="phone"></i><a href="tel:'+esc(tel(p))+'" data-tip="Call '+esc(p)+'">'+esc(p)+'</a>'+copyBtn(p)+'</span>').join("")
+        +c.emails.map(e=>'<span class="clv-ci"><i data-lucide="mail"></i><a href="mailto:'+esc(e)+'" data-tip="Email '+esc(e)+'">'+esc(e)+'</a>'+copyBtn(e)+'</span>').join("")
+      : '<span class="muted" style="font-size:12.5px">No phone or email saved for this franchisee — add them with Edit on the franchisee page.</span>');
+  box.classList.add("show"); icons();
+}
 /* ---------- log / edit modal ---------- */
 let clCtx=null, clSaving=false, clInit="";
 function clLocalInput(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); }
@@ -5123,6 +5139,7 @@ function openCallLog(fid, editId){
   $("cl_reason").value=r?r.reason:""; $("cl_result").value=r?r.result:"";
   $("cl_follow").checked=!!(r&&r.follow_up);
   clFillStores(fixedFid, r?r.store_num:"");
+  clShowContact(fixedFid||null);
   $("cl_outcomes").innerHTML=CL_OUTCOMES.map(o=>'<button type="button" class="mchip'+(r&&r.outcome===o?' sel':'')+'" data-v="'+esc(o)+'" aria-pressed="'+!!(r&&r.outcome===o)+'" onclick="clPickOutcome(this)">'+esc(o)+'</button>').join("");
   clClearErrors(); $("cl_err").classList.remove("show");
   clInit=clSnapshot(); clSaving=false; $("clSave").disabled=false;
@@ -5140,7 +5157,7 @@ function clPickOutcome(b){ const on=!b.classList.contains("sel"); document.query
   if(on){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); if(b.dataset.v==="Follow-up required") $("cl_follow").checked=true; } }
 function clFrFromInput(){
   const v=$("cl_fr_in").value.trim(); const f=findDupFr(v,null);
-  clCtx.fid=f?f.id:null; clFillStores(clCtx.fid,"");
+  clCtx.fid=f?f.id:null; clFillStores(clCtx.fid,""); clShowContact(clCtx.fid);
   $("cl_fr_in").setAttribute("aria-invalid",String(!!v&&!f));
   clErr("cl_fr_in", v&&!f?"No franchisee with that exact name — pick one from the list.":"");
 }
