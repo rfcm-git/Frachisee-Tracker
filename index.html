@@ -1746,8 +1746,7 @@ function renderFranchisees(){
       +'<div class="idot-col">'+openDot(frOpenIssues(f.id))+'</div>'
       +'<div class="nm">'+esc(f.name)+(f.closed?' <span class="badge b-inactive">Closed</span>':'')
       +'<small>Terr '+esc(f.territory||"—")+'</small>'+(frHints[f.id]?'<small class="mhint"><i data-lucide="search"></i>'+esc(frHints[f.id])+'</small>':'')+'</div>'
-      +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span>'
-      +'<button class="call-btn" data-act="cl-log" data-arg="'+f.id+'" data-tip="Log Call" aria-label="Log a call to '+esc(f.name)+'"><i data-lucide="phone"></i></button></div>';
+      +'<span class="fr-stc" title="'+stc+' store'+(stc!==1?'s':'')+'"><i data-lucide="store"></i>'+stc+'</span></div>';
   }).join("")||'<div class="fr-detail-placeholder"><i data-lucide="search-x"></i><div>No matches</div></div>';
   const detail=selFr?detailHtml(selFr):'<div class="card"><div class="fr-detail-placeholder"><i data-lucide="mouse-pointer-click"></i><div>Select a franchisee to see details</div></div></div>';
   const head='<div class="list-head"><div class="lh-title"><i data-lucide="users"></i><span><b>'+FR.length+'</b> franchisees · <b>'+ST.length+'</b> stores</span></div>'
