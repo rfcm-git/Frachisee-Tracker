@@ -709,6 +709,38 @@
   .toast.ok{background:var(--green)}
   .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
 
+  /* ---------- Reports ---------- */
+  .rp-fmt{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:#fff;gap:3px}
+  .rp-fmt button{display:inline-flex;align-items:center;gap:6px;border:none;background:none;border-radius:8px;padding:7px 12px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .rp-fmt button svg{width:15px;height:15px}
+  .rp-fmt button.on{background:var(--green);color:#fff}
+  .rp-fmt button:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .rt-intro{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-left:4px solid var(--yellow);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink);margin-bottom:18px}
+  .rt-intro svg{width:18px;height:18px;color:var(--green);flex:none;margin-top:1px}
+  .rt-h{display:flex;align-items:center;gap:8px;font-size:15px;margin:4px 0 12px;color:var(--ink)} .rt-h svg{width:18px;height:18px;color:var(--green)}
+  .rt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-bottom:24px}
+  .rt-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s,box-shadow .15s,transform .15s}
+  .rt-card:hover{border-color:var(--lime);box-shadow:0 10px 24px rgba(0,80,30,.10);transform:translateY(-2px)}
+  @media (prefers-reduced-motion: reduce){ .rt-card:hover{transform:none} }
+  .rt-top{display:flex;gap:12px}
+  .rt-ic{width:42px;height:42px;border-radius:12px;background:var(--lime-soft);color:var(--green-dark);display:grid;place-items:center;flex:none} .rt-ic svg{width:21px;height:21px}
+  .rt-card h3{margin:2px 0 4px;font-size:15px} .rt-card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.45}
+  .rt-filt{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--ink-soft);background:var(--lime-tint);border-radius:9px;padding:8px 10px} .rt-filt svg{width:14px;height:14px;flex:none;margin-top:1px;color:var(--green)}
+  .rt-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+  .rt-fmt{display:flex;gap:5px} .rt-fmt span{font-size:11px;font-weight:700;color:var(--green-dark);background:var(--green-soft);border-radius:6px;padding:2px 7px}
+  .rt-quick{padding:4px 0}
+  .rt-q{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line)} .rt-q:last-child{border-bottom:none}
+  .rt-q:hover{background:var(--lime-tint)}
+  .rt-qic{width:32px;height:32px;border-radius:9px;background:var(--yellow-soft);color:var(--yellow-dark);display:grid;place-items:center;flex:none} .rt-qic svg{width:16px;height:16px}
+  .rt-qt{flex:1;font-size:13.5px;font-weight:600} .rt-qt small{display:block;font-weight:500;color:var(--ink-soft);font-size:11.5px}
+  .cl-con{display:flex;flex-direction:column;gap:2px;margin-top:4px;font-weight:400}
+  .cl-con a{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-soft);text-decoration:none;max-width:220px}
+  .cl-con a span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cl-con a:hover{color:var(--green-dark);text-decoration:underline} .cl-con svg{width:12px;height:12px;flex:none}
+  .cl-nocon{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px;font-style:italic;margin-top:3px}
+  .clv-con{display:flex;flex-wrap:wrap;gap:8px}
+  .clv-ci{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 11px;background:#fff;font-size:13px}
+  .clv-ci svg{width:14px;height:14px;color:var(--green)} .clv-ci a{color:var(--ink);text-decoration:none} .clv-ci a:hover{text-decoration:underline}
   /* ---------- Call logs ---------- */
   .call-btn{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--lime);background:#fff;color:var(--green-dark);cursor:pointer;
     transition:transform .18s cubic-bezier(.3,1.4,.6,1),box-shadow .18s ease,background .18s ease;will-change:transform}
@@ -962,6 +994,7 @@
       <button class="sb-sub" data-act="sub" data-arg="onboarding" title="Onboarding"><i data-lucide="rocket"></i><span class="t-lb">Onboarding</span><span class="sb-cnt" id="cnt-ob">0</span></button>
     </div>
     <button class="tab" data-tab="calls" title="Call Logs"><span class="t-ic"><i data-lucide="phone-call"></i></span><span class="t-lb">Call Logs</span><span class="badge-num" id="cnt-cl" data-tip="Follow-ups still open"></span></button>
+    <button class="tab" data-tab="reports" title="Reports"><span class="t-ic"><i data-lucide="file-bar-chart"></i></span><span class="t-lb">Reports</span></button>
   </nav>
   <div class="sb-foot">
     <button class="sb-item" id="linksBtn" title="Links" aria-label="Links"><span class="t-ic"><i data-lucide="link"></i></span><span class="t-lb">Links</span></button>
@@ -1676,7 +1709,7 @@ function render(){
   if(!db){viewDisconnected();return;}
   document.querySelectorAll(".tab").forEach(t=>{ const on=t.dataset.tab===tab; t.classList.toggle("active",on); if(on) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current"); });
   const PTI=isSub==="onboarding"?["Issues · Onboarding","Track 3PD and ezCater onboarding for each store and platform"]:["Issues · Concerns","Log, track and report 3PD issues"];
-  const PT0={dashboard:["Dashboard","Stores, 3PD coverage and issues at a glance"],franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:PTI,calls:["Call Logs","Every call made to franchisees — reasons, results and follow-ups"]}; const PT=PT0[tab];
+  const PT0={dashboard:["Dashboard","Stores, 3PD coverage and issues at a glance"],franchisees:["Franchisees","Owners, contacts and their stores"],stores:["All Stores","Every store with platforms and status"],staff:["FBC / OM","Field consultants and operations managers"],issues:PTI,calls:["Call Logs","Every call made to franchisees — reasons, results and follow-ups"],reports:["Reports","Build any report — Excel or PDF, by date, territory, franchisee, store and category"]}; const PT=PT0[tab];
   if(PT){ $("pageTitle").textContent=PT[0]; $("pageSub").textContent=PT[1]; document.title=PT[0]+" · Franchisee Tracker"; }
   const showSearch=(tab==="franchisees"||tab==="stores"||tab==="issues"||tab==="staff"||tab==="calls");
   $("searchWrap").style.display=showSearch?"flex":"none";
@@ -1694,15 +1727,16 @@ function render(){
   $("st-n-con").textContent=IS.filter(isOpen).length||""; $("st-n-ob").textContent=OB.filter(r=>r.platform!=="fj"&&obIsOpen(r)).length||"";
   $("primaryAdd").style.display=lbl?"inline-flex":"none"; $("primaryAddLabel").textContent=lbl||"";
   $("multiAdd").style.display=(tab==="issues"&&!obMode)?"inline-flex":"none";
-  $("reportBtn").style.display=(tab==="issues")?"inline-flex":"none";
+  $("reportBtn").style.display=(tab==="issues"||tab==="calls")?"inline-flex":"none";
   if($("stIssOverlay") && $("stIssOverlay").classList.contains("show")) renderStoreIssues();
-  $("toolbar").style.display=(tab==="dashboard")?"none":"flex";
+  $("toolbar").style.display=(tab==="dashboard"||tab==="reports")?"none":"flex";
   if(tab==="dashboard") renderDashboard();
   else if(tab==="franchisees") renderFranchisees();
   else if(tab==="stores") renderStores();
   else if(tab==="staff") renderStaff();
   else if(tab==="issues"){ if(isSub==="onboarding") renderOnboarding(); else renderIssues(); }
   else if(tab==="calls") renderCalls();
+  else if(tab==="reports") renderReportsTab();
 }
 
 /* Franchisees two-panel */
@@ -2050,13 +2084,13 @@ const RP_DEF_OFF=["addr","frcontact"];
 let RP=null;
 function rpDefaults(){
   let saved={}; try{ saved=JSON.parse(localStorage.getItem("ft2_report")||"{}"); }catch(e){}
-  return { fr:"", store:"", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"",
+  return { kind:"issues", fr:"", store:"", terr:"", fmt:saved.fmt||"xlsx", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"",
     statuses:new Set(ISSUE_STATES), tz:saved.tz||"local",
     sheets:new Set(saved.sheets||["summary","issues","updates","byfr","bystore","bystatus"]),
     cols:new Set(saved.cols||RP_COLS.map(c=>c[0]).filter(k=>!RP_DEF_OFF.includes(k))) };
 }
-function rpSave(){ try{ localStorage.setItem("ft2_report",JSON.stringify({tz:RP.tz,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
-function openReport(){ RP=(tab==="issues"&&isSub==="onboarding")?obrDefaults():rpDefaults(); renderReport(); $("rpOverlay").classList.add("show"); }
+function rpSave(){ try{ localStorage.setItem("ft2_report",JSON.stringify({tz:RP.tz,fmt:RP.fmt,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
+function openReport(){ openReportKind(tab==="calls"?"cl":(tab==="issues"&&isSub==="onboarding")?"ob":"issues"); }
 function rpUseTabFilters(){
   RP.period=isPeriod; RP.date=isDate; RP.days=isDays; RP.year=isYear; RP.from=isFrom; RP.to=isTo;
   RP.statuses=new Set(isStatus.length?isStatus:ISSUE_STATES);
@@ -2087,6 +2121,7 @@ function rpSelected(){
     if(fm.bad) return false;
     if(fm.f && (issueFid(i)||0)!==fm.f.id) return false;
     if(st && String(i.store_num||"")!==st) return false;
+    if(!rpTerrOk(i.store_num)) return false;
     if(!RP.statuses.has(normIssueStatus(i.status))) return false;
     const d=new Date(i.created_at); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
     return true;
@@ -2104,7 +2139,10 @@ function rpPeriodLabel(){
   return p;
 }
 function renderReport(){
-  if(RP&&RP.kind==="ob"){ renderObReport(); return; }
+  if(RP&&RP.kind==="ob") renderObReport(); else if(RP&&GEN[RP.kind]) renderGenReport(); else renderIssueReport();
+  rpAfterRender();
+}
+function renderIssueReport(){
   $("rp_title").textContent="Issue report";
   const fm=rpFrMatch();
   const frStores=fm.f?(storesByFr[fm.f.id]||[]).map(x=>x.num).sort():null;
@@ -2127,7 +2165,7 @@ function renderReport(){
      +'<div class="rp-f"><span class="l">Franchisee</span><input type="text" list="rp_frlist" placeholder="All franchisees — or type a name" value="'+esc(RP.fr)+'" onchange="RP.fr=this.value;renderReport()">'
        +(fm.bad?'<div class="hint bad">No franchisee with that exact name. Pick one from the list.</div>':(fm.f?'<div class="hint">'+(storesByFr[fm.f.id]||[]).length+' stores</div>':'<div class="hint">Leave empty for all franchisees</div>'))+'</div>'
      +'<div class="rp-f"><span class="l">Store #</span><input type="text" list="rp_stlist" placeholder="All stores — or type a store #" value="'+esc(RP.store)+'" onchange="RP.store=this.value;renderReport()">'
-       +(stBad?'<div class="hint bad">Store not found.</div>':(stWrongFr?'<div class="hint bad">This store belongs to a different franchisee.</div>':'<div class="hint">Leave empty for all stores'+(fm.f?' of this franchisee':'')+'</div>'))+'</div>'
+       +(stBad?'<div class="hint bad">Store not found.</div>':(stWrongFr?'<div class="hint bad">This store belongs to a different franchisee.</div>':'<div class="hint">Leave empty for all stores'+(fm.f?' of this franchisee':'')+'</div>'))+'</div>'+rpTerrField()
      +'<div class="rp-f"><span class="l">Date logged</span><select onchange="RP.period=this.value;if([\'day\',\'week\',\'month\'].includes(this.value)&&!RP.date){const t=new Date();RP.date=t.getFullYear()+\'-\'+String(t.getMonth()+1).padStart(2,\'0\')+\'-\'+String(t.getDate()).padStart(2,\'0\');}renderReport()">'
        +PERIODS.map(([v,l])=>'<option value="'+v+'"'+(p===v?' selected':'')+'>'+l+'</option>').join("")+'</select>'+extra+'</div>'
      +'<div class="rp-f"><span class="l">Status</span><div class="chips">'
@@ -2139,8 +2177,8 @@ function renderReport(){
    +'<div class="rp-sec"><div class="rp-sh"><span class="n">3</span>Columns in the Issues sheet<span class="act"><button class="btn link" onclick="rpAll(\'cols\',true)">All</button><button class="btn link" onclick="rpAll(\'cols\',false)">None</button></span></div><div class="rp-sb"'+(RP.sheets.has("issues")?'':' style="opacity:.5"')+'><div class="rp-checks">'
      +RP_COLS.map(([k,l])=>ck(RP.cols.has(k),l,"","rpToggle('cols','"+k+"')")).join("")+'</div>'
      +(RP.sheets.has("issues")?'':'<div class="hint" style="margin-top:8px">Turn on the Issues sheet to use these columns.</div>')+'</div></div>'
-   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb"><div class="rp-f" style="max-width:340px"><span class="l">Show dates and times in</span>'
-     +'<select onchange="RP.tz=this.value;rpSave()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div></div></div>';
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb rp-grid"><div class="rp-f"><span class="l">Show dates and times in</span>'
+     +'<select onchange="RP.tz=this.value;rpSave()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div>'+rpFormatField()+'</div></div>';
   const sel=rpSelected();
   const nSt=new Set(sel.map(i=>String(i.store_num||""))).size, nFr=new Set(sel.map(i=>issueFid(i)||0)).size;
   $("rp_count").innerHTML=sel.length?'<b>'+sel.length+'</b> issue'+(sel.length!==1?'s':'')+' · <b>'+nSt+'</b> store'+(nSt!==1?'s':'')+' · <b>'+nFr+'</b> franchisee'+(nFr!==1?'s':''):'No issues match these choices';
@@ -2148,8 +2186,10 @@ function renderReport(){
   icons();
 }
 function rpToggleStatus(st){ RP.statuses.has(st)?RP.statuses.delete(st):RP.statuses.add(st); renderReport(); }
-function rpToggle(kind,k){ const set=RP[kind]; set.has(k)?set.delete(k):set.add(k); RP.kind==="ob"?obrSave():rpSave(); renderReport(); }
-function rpAll(kind,on){ const ob=RP.kind==="ob"; RP[kind]=new Set(on?(kind==="sheets"?(ob?OBR_SHEETS:RP_SHEETS):(ob?OBR_COLS:RP_COLS)).map(x=>x[0]):[]); ob?obrSave():rpSave(); renderReport(); }
+function rpToggle(kind,k){ const set=RP[kind]; set.has(k)?set.delete(k):set.add(k); rpSaveAny(); renderReport(); }
+function rpAll(kind,on){ const ob=RP.kind==="ob", g=GEN[RP.kind];
+  const list=kind==="sheets"?(g?g.sheets:ob?OBR_SHEETS:RP_SHEETS):(g?g.cols:ob?OBR_COLS:RP_COLS);
+  RP[kind]=new Set(on?list.map(x=>x[0]):[]); rpSaveAny(); renderReport(); }
 
 function rpDate(ts){
   if(!ts) return null; const d=new Date(ts); if(isNaN(d)) return null;
@@ -2166,6 +2206,7 @@ function issueDays(i){
   return Math.max(0,Math.round((end-start)/864e5*10)/10);
 }
 function rpSheet(rows, widths, opts){
+  if(RP_CAPTURE) return {__cap:{rows,widths,opts}};
   const X=window.XLSX;
   const ws=X.utils.aoa_to_sheet(rows,{cellDates:true});
   ws["!cols"]=widths.map(w=>({wch:w}));
@@ -2187,7 +2228,11 @@ function countRow(items){ const c={}; items.forEach(x=>{ const k=normIssueStatus
 function lastActivity(items){ return items.map(x=>x.updated_at||x.created_at).sort().pop(); }
 
 function downloadReport(){
-  if(RP&&RP.kind==="ob"){ downloadObReport(); return; }
+  const run=()=>{ if(RP.kind==="ob") downloadObReport(); else if(GEN[RP.kind]) downloadGenReport(); else downloadIssueReport(); };
+  if(RP.fmt==="pdf") return downloadPdfReport(run);
+  run(); return Promise.resolve();
+}
+function downloadIssueReport(){
   const X=window.XLSX; if(!X){ toast("Excel tool didn't load — check your internet and reopen the app","err"); return; }
   const sel=rpSelected().slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   if(!sel.length){ toast("No issues match these choices","err"); return; }
@@ -2207,6 +2252,7 @@ function downloadReport(){
       ["Filters used",""],
       ["Franchisee", fm.f?fm.f.name:"All franchisees"],
       ["Store #", RP.store.trim()||"All stores"],
+      ["Territory", RP.terr?"Territory "+RP.terr:"All territories"],
       ["Date logged", rpPeriodLabel()],
       ["Status", RP.statuses.size===3?"All statuses":[...RP.statuses].join(", ")],
       [],
@@ -2310,12 +2356,12 @@ const OBR_COLS=[
 const OBR_DEF_OFF=["addr","frcontact","req"];
 function obrDefaults(){
   let saved={}; try{ saved=JSON.parse(localStorage.getItem("ft2_report_ob")||"{}"); }catch(e){}
-  return { kind:"ob", fr:"", store:"", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"",
+  return { kind:"ob", fr:"", store:"", terr:"", fmt:saved.fmt||"xlsx", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"",
     statuses:new Set(OB_STATES), plats:new Set(OB_PLATS.map(p=>p[0])), tz:saved.tz||"local",
     sheets:new Set(saved.sheets||["summary","records","updates","matrix","byplat","bystore"]),
     cols:new Set(saved.cols||OBR_COLS.map(c=>c[0]).filter(k=>!OBR_DEF_OFF.includes(k))) };
 }
-function obrSave(){ try{ localStorage.setItem("ft2_report_ob",JSON.stringify({tz:RP.tz,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
+function obrSave(){ try{ localStorage.setItem("ft2_report_ob",JSON.stringify({tz:RP.tz,fmt:RP.fmt,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
 function obrYears(){ const ys=new Set([new Date().getFullYear()]); OB.forEach(r=>{ const d=new Date(r.created_at); if(!isNaN(d)) ys.add(d.getFullYear()); }); return [...ys].sort((a,b)=>b-a); }
 function obrFid(r){ const st=storeByNum[String(r.store_num||"")]; return st?st.franchisee_id:(r.franchisee_id||0); }
 function obrSelected(){
@@ -2325,6 +2371,7 @@ function obrSelected(){
     if(fm.bad) return false;
     if(fm.f && obrFid(r)!==fm.f.id) return false;
     if(st && String(r.store_num||"")!==st) return false;
+    if(!rpTerrOk(r.store_num)) return false;
     if(!RP.statuses.has(r.status)) return false;
     if(!RP.plats.has(r.platform)) return false;
     const d=new Date(r.created_at); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
@@ -2360,7 +2407,7 @@ function renderObReport(){
      +'<div class="rp-f"><span class="l">Franchisee</span><input type="text" list="rp_frlist" placeholder="All franchisees — or type a name" value="'+esc(RP.fr)+'" onchange="RP.fr=this.value;renderReport()">'
        +(fm.bad?'<div class="hint bad">No franchisee with that exact name. Pick one from the list.</div>':(fm.f?'<div class="hint">'+(storesByFr[fm.f.id]||[]).length+' stores</div>':'<div class="hint">Leave empty for all franchisees</div>'))+'</div>'
      +'<div class="rp-f"><span class="l">Store #</span><input type="text" list="rp_stlist" placeholder="All stores — or type a store #" value="'+esc(RP.store)+'" onchange="RP.store=this.value;renderReport()">'
-       +(stBad?'<div class="hint bad">Store not found.</div>':(stWrongFr?'<div class="hint bad">This store belongs to a different franchisee.</div>':'<div class="hint">Leave empty for all stores'+(fm.f?' of this franchisee':'')+'</div>'))+'</div>'
+       +(stBad?'<div class="hint bad">Store not found.</div>':(stWrongFr?'<div class="hint bad">This store belongs to a different franchisee.</div>':'<div class="hint">Leave empty for all stores'+(fm.f?' of this franchisee':'')+'</div>'))+'</div>'+rpTerrField()
      +'<div class="rp-f"><span class="l">Date started</span><select onchange="RP.period=this.value;if([\'day\',\'week\',\'month\'].includes(this.value)&&!RP.date){const t=new Date();RP.date=t.getFullYear()+\'-\'+String(t.getMonth()+1).padStart(2,\'0\')+\'-\'+String(t.getDate()).padStart(2,\'0\');}renderReport()">'
        +PERIODS.map(([v,l])=>'<option value="'+v+'"'+(p===v?' selected':'')+'>'+l+'</option>').join("")+'</select>'+extra+'</div>'
      +'<div class="rp-f"><span class="l">Platform</span><div class="chips">'
@@ -2375,8 +2422,8 @@ function renderObReport(){
    +'<div class="rp-sec"><div class="rp-sh"><span class="n">3</span>Columns in the Records sheet<span class="act"><button class="btn link" onclick="rpAll(\'cols\',true)">All</button><button class="btn link" onclick="rpAll(\'cols\',false)">None</button></span></div><div class="rp-sb"'+(RP.sheets.has("records")?'':' style="opacity:.5"')+'><div class="rp-checks">'
      +OBR_COLS.map(([k,l])=>ck(RP.cols.has(k),l,"","rpToggle('cols','"+k+"')")).join("")+'</div>'
      +(RP.sheets.has("records")?'':'<div class="hint" style="margin-top:8px">Turn on the Records sheet to use these columns.</div>')+'</div></div>'
-   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb"><div class="rp-f" style="max-width:340px"><span class="l">Show dates and times in</span>'
-     +'<select onchange="RP.tz=this.value;obrSave()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div></div></div>';
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb rp-grid"><div class="rp-f"><span class="l">Show dates and times in</span>'
+     +'<select onchange="RP.tz=this.value;obrSave()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div>'+rpFormatField()+'</div></div>';
   const sel=obrSelected();
   const nSt=new Set(sel.map(r=>String(r.store_num||""))).size, nFr=new Set(sel.map(obrFid)).size;
   $("rp_count").innerHTML=sel.length?'<b>'+sel.length+'</b> record'+(sel.length!==1?'s':'')+' · <b>'+nSt+'</b> store'+(nSt!==1?'s':'')+' · <b>'+nFr+'</b> franchisee'+(nFr!==1?'s':''):'No onboarding records match these choices';
@@ -2404,7 +2451,7 @@ function downloadObReport(){
     const dd=sel.filter(r=>r.status==="Onboarded").map(obDays).filter(v=>v!=="");
     const avg=dd.length?Math.round(dd.reduce((a,b)=>a+b,0)/dd.length*10)/10:"—";
     const rows=[["Onboarding Report — 3PD Helpdesk"],["Generated: "+rpDateText(new Date().toISOString())+" ("+rpTzName()+")"],[],
-      ["Filters used",""],["Franchisee",fm.f?fm.f.name:"All franchisees"],["Store #",RP.store.trim()||"All stores"],["Date started",rpPeriodLabel()],
+      ["Filters used",""],["Franchisee",fm.f?fm.f.name:"All franchisees"],["Store #",RP.store.trim()||"All stores"],["Territory",RP.terr?"Territory "+RP.terr:"All territories"],["Date started",rpPeriodLabel()],
       ["Platform",RP.plats.size===4?"All platforms":[...RP.plats].map(obPName).join(", ")],["Status",RP.statuses.size===OB_STATES.length?"All statuses":[...RP.statuses].join(", ")],[],
       ["Totals",""],["Records (store + platform)",tot],["Stores",new Set(sel.map(r=>String(r.store_num||""))).size],["Franchisees",new Set(sel.map(obrFid)).size],
       ["Pending",pen],["Email Sent/Text Message",sent],["Work in Progress",wip],["Onboarded",done],["Onboarded rate",tot?Math.round(done/tot*1000)/10+"%":"—"],["Average days to onboard",avg],[],
@@ -2460,6 +2507,413 @@ function downloadObReport(){
   X.writeFile(wb, "onboarding-report"+tag+"_"+d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+".xlsx", {cellStyles:true});
   obrSave(); toast("Report downloaded","ok");
 }
+
+/* ===================== UNIVERSAL REPORTS ===================== */
+/* --- shared helpers --- */
+function rpTerrList(){ return [...new Set(ST.map(dTerrOf))].filter(t=>t!=="—").sort((a,b)=>(+a||0)-(+b||0)); }
+function rpTerrOk(storeNum){ if(!RP.terr) return true; const st=storeByNum[String(storeNum||"")]; return !!st && dTerrOf(st)===RP.terr; }
+function rpTerrField(){ return '<div class="rp-f"><span class="l">Territory</span><select onchange="RP.terr=this.value;renderReport()"><option value="">All territories</option>'
+  +rpTerrList().map(t=>'<option value="'+esc(t)+'"'+(RP.terr===t?' selected':'')+'>Territory '+esc(t)+'</option>').join("")+'</select><div class="hint">'+(RP.terr?'Only stores in territory '+esc(RP.terr):'Leave as All for every territory')+'</div></div>'; }
+function rpFormatField(){ const f=RP.fmt||"xlsx";
+  return '<div class="rp-f"><span class="l">File format</span><div class="rp-fmt" role="radiogroup" aria-label="File format">'
+    +'<button type="button" role="radio" aria-checked="'+(f==="xlsx")+'" class="'+(f==="xlsx"?'on':'')+'" onclick="RP.fmt=\'xlsx\';rpSaveAny();renderReport()"><i data-lucide="file-spreadsheet"></i>Excel (.xlsx)</button>'
+    +'<button type="button" role="radio" aria-checked="'+(f==="pdf")+'" class="'+(f==="pdf"?'on':'')+'" onclick="RP.fmt=\'pdf\';rpSaveAny();renderReport()"><i data-lucide="file-text"></i>PDF</button></div>'
+    +'<div class="hint">'+(f==="pdf"?'Printable, read-only. Every sheet becomes a section.'+(RP.cols&&RP.cols.size>12?' <b>Tip:</b> '+RP.cols.size+' columns are picked — choose 12 or fewer for an easier-to-read PDF.':''):'Editable, sortable and filterable in Excel.')+'</div></div>'; }
+function rpTzField(save){ return '<div class="rp-f"><span class="l">Show dates and times in</span><select onchange="RP.tz=this.value;rpSaveAny()"><option value="local"'+(RP.tz==="local"?' selected':'')+'>My computer\'s time zone</option><option value="America/Los_Angeles"'+(RP.tz==="America/Los_Angeles"?' selected':'')+'>Pacific Time (PST/PDT)</option><option value="Asia/Manila"'+(RP.tz==="Asia/Manila"?' selected':'')+'>Philippine Time (PHT)</option></select></div>'; }
+function rpSaveAny(){ if(!RP) return; if(RP.kind==="ob") obrSave(); else if(GEN[RP.kind]) genSave(); else rpSave(); }
+function rpAfterRender(){ const pdf=(RP&&RP.fmt)==="pdf"; const b=$("rpGo"); if(b){ b.innerHTML='<i data-lucide="'+(pdf?'file-text':'download')+'"></i>'+(pdf?'Download PDF':'Download Excel'); icons(); } }
+function frContactBits(fid){ const f=fid?FR.find(x=>x.id===fid):null; const cs=f?contactsOf(f).filter(c=>c.value):[];
+  return {phones:cs.filter(c=>c.type==="cell"||c.type==="phone").map(c=>c.value), emails:cs.filter(c=>c.type==="email").map(c=>c.value)}; }
+
+/* --- generic builder (Call logs, Activity, Stores, Franchisees, FBC/OM) --- */
+const GEN={};
+function genDefaults(kind){
+  const cfg=GEN[kind]; let saved={}; try{ saved=JSON.parse(localStorage.getItem("ft2_report_"+kind)||"{}"); }catch(e){}
+  const chips={}; (cfg.chips||[]).forEach(g=>chips[g.key]=new Set(g.def||g.options.map(o=>o[0])));
+  return { kind, fr:"", store:"", terr:"", period:"all", date:"", days:30, year:new Date().getFullYear(), from:"", to:"", chips,
+    tz:saved.tz||"local", fmt:saved.fmt||"xlsx",
+    sheets:new Set(saved.sheets||cfg.defSheets), cols:new Set(saved.cols||cfg.cols.map(c=>c[0]).filter(k=>!(cfg.defOff||[]).includes(k))) };
+}
+function genSave(){ try{ localStorage.setItem("ft2_report_"+RP.kind,JSON.stringify({tz:RP.tz,fmt:RP.fmt,sheets:[...RP.sheets],cols:[...RP.cols]})); }catch(e){} }
+function genSelected(){
+  const cfg=GEN[RP.kind], fm=rpFrMatch(), st=RP.store.trim().replace(/^#/,""), [from,to]=cfg.dateLabel?rpBounds():[null,null];
+  return cfg.items().filter(r=>{
+    if(fm.bad) return false;
+    if(fm.f && !cfg.frOk(r,fm.f.id)) return false;
+    if(st && !cfg.storeOk(r,st)) return false;
+    if(RP.terr && !cfg.terrOk(r,RP.terr)) return false;
+    if(cfg.dateLabel){ const d=new Date(cfg.dateOf(r)); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false; }
+    for(const g of (cfg.chips||[])){ const set=RP.chips[g.key]; if(set.size<g.options.length && !g.ok(r,set)) return false; }
+    return true;
+  });
+}
+function genToggleChip(key,v){ const s=RP.chips[key]; s.has(v)?s.delete(v):s.add(v); renderReport(); }
+function genFilterRows(){
+  const cfg=GEN[RP.kind], fm=rpFrMatch(), rows=[["Filters used",""],["Franchisee",fm.f?fm.f.name:"All franchisees"],["Store #",RP.store.trim()||"All stores"],["Territory",RP.terr?"Territory "+RP.terr:"All territories"]];
+  if(cfg.dateLabel) rows.push([cfg.dateLabel,rpPeriodLabel()]);
+  (cfg.chips||[]).forEach(g=>{ const s=RP.chips[g.key]; rows.push([g.label, s.size===g.options.length?"All":g.options.filter(o=>s.has(o[0])).map(o=>o[1]).join(", ")]); });
+  return rows;
+}
+function genSummarySheet(X,wb,title,totals){
+  const rows=[[title+" — 3PD Helpdesk"],["Generated: "+rpDateText(new Date().toISOString())+" ("+rpTzName()+")"],[],...genFilterRows(),[],["Totals",""],...totals];
+  const ws=rpSheet(rows,[34,46],{headerRow:-1,titleRows:2}); X.utils.book_append_sheet(wb,ws,"Summary");
+}
+function renderGenReport(){
+  const cfg=GEN[RP.kind], fm=rpFrMatch();
+  const frStores=fm.f?(storesByFr[fm.f.id]||[]).map(x=>x.num).sort():null;
+  const stVal=RP.store.trim().replace(/^#/,""), stBad=stVal&&!storeByNum[stVal];
+  const ck=(on,label,sub,onchange)=>'<label class="rp-ck'+(on?' on':'')+'"><input type="checkbox"'+(on?' checked':'')+' onchange="'+onchange+'"><span>'+label+(sub?'<small>'+sub+'</small>':'')+'</span></label>';
+  let dateHtml='';
+  if(cfg.dateLabel){ const p=RP.period; let extra='';
+    if(p==="day"||p==="week"||p==="month") extra='<div class="row"><span class="hint" style="margin:0">'+(p==="week"?"Any day in the week":p==="month"?"Any day in the month":"Day")+'</span><input type="date" value="'+esc(RP.date)+'" onchange="RP.date=this.value;renderReport()"></div>';
+    else if(p==="year"){ const ys=new Set([new Date().getFullYear()]); cfg.items().forEach(r=>{ const d=new Date(cfg.dateOf(r)); if(!isNaN(d)) ys.add(d.getFullYear()); });
+      extra='<div class="row"><select onchange="RP.year=+this.value;renderReport()" style="width:120px;height:34px">'+[...ys].sort((a,b)=>b-a).map(y=>'<option'+(+RP.year===y?' selected':'')+'>'+y+'</option>').join("")+'</select></div>'; }
+    else if(p==="lastdays") extra='<div class="row"><span class="hint" style="margin:0">Last</span><input type="number" min="1" max="3650" style="width:80px" value="'+esc(RP.days)+'" onchange="RP.days=Math.max(1,+this.value||1);renderReport()"><span class="hint" style="margin:0">days</span></div>';
+    else if(p==="range") extra='<div class="row"><span class="hint" style="margin:0">From</span><input type="date" value="'+esc(RP.from)+'" onchange="RP.from=this.value;renderReport()"><span class="hint" style="margin:0">To</span><input type="date" value="'+esc(RP.to)+'" onchange="RP.to=this.value;renderReport()"></div>';
+    dateHtml='<div class="rp-f"><span class="l">'+esc(cfg.dateLabel)+'</span><select onchange="RP.period=this.value;if([\'day\',\'week\',\'month\'].includes(this.value)&&!RP.date){const t=new Date();RP.date=t.getFullYear()+\'-\'+String(t.getMonth()+1).padStart(2,\'0\')+\'-\'+String(t.getDate()).padStart(2,\'0\');}renderReport()">'
+      +PERIODS.map(([v,l])=>'<option value="'+v+'"'+(p===v?' selected':'')+'>'+l+'</option>').join("")+'</select>'+extra+'</div>'; }
+  const chipHtml=(cfg.chips||[]).map(g=>{ const s=RP.chips[g.key];
+    return '<div class="rp-f"'+(g.wide?' style="grid-column:1/-1"':'')+'><span class="l">'+esc(g.label)+'</span><div class="chips">'+g.options.map(([v,l])=>'<button type="button" class="mchip'+(s.has(v)?' sel':'')+'" aria-pressed="'+s.has(v)+'" onclick="genToggleChip(\''+g.key+'\',\''+esc(v)+'\')">'+esc(l)+'</button>').join("")+'</div><div class="hint">'+(s.size===g.options.length?"All":s.size?"Only the selected":"Pick at least one")+'</div></div>'; }).join("");
+  $("rp_title").textContent=cfg.title;
+  $("rp_body").innerHTML=
+    '<datalist id="rp_frlist">'+FR.map(f=>'<option value="'+esc(f.name)+'">').join("")+'</datalist>'
+   +'<datalist id="rp_stlist">'+(frStores||ST.map(x=>x.num).sort()).map(n=>'<option value="'+esc(n)+'">').join("")+'</datalist>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">1</span>'+esc(cfg.whichLabel)+(cfg.useTab?'<span class="act"><button class="btn link" onclick="GEN[RP.kind].useTab();renderReport();toast(\'Copied the tab filters\',\'ok\')"><i data-lucide="copy"></i>Use '+esc(cfg.tabName)+' filters</button></span>':'')+'</div><div class="rp-sb"><div class="rp-grid">'
+     +'<div class="rp-f"><span class="l">Franchisee</span><input type="text" list="rp_frlist" placeholder="All franchisees — or type a name" value="'+esc(RP.fr)+'" onchange="RP.fr=this.value;renderReport()">'
+       +(fm.bad?'<div class="hint bad">No franchisee with that exact name. Pick one from the list.</div>':'<div class="hint">'+(fm.f?(storesByFr[fm.f.id]||[]).length+' stores':'Leave empty for all franchisees')+'</div>')+'</div>'
+     +'<div class="rp-f"><span class="l">Store #</span><input type="text" list="rp_stlist" placeholder="All stores — or type a store #" value="'+esc(RP.store)+'" onchange="RP.store=this.value;renderReport()">'
+       +(stBad?'<div class="hint bad">Store not found.</div>':'<div class="hint">Leave empty for all stores</div>')+'</div>'
+     +rpTerrField()+dateHtml+chipHtml
+   +'</div></div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">2</span>Sheets / sections<span class="act"><button class="btn link" onclick="rpAll(\'sheets\',true)">All</button><button class="btn link" onclick="rpAll(\'sheets\',false)">None</button></span></div><div class="rp-sb"><div class="rp-checks">'
+     +cfg.sheets.map(([k,l,sub])=>ck(RP.sheets.has(k),l,sub,"rpToggle('sheets','"+k+"')")).join("")+'</div></div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">3</span>Columns in the '+esc(cfg.mainSheetLabel)+' sheet<span class="act"><button class="btn link" onclick="rpAll(\'cols\',true)">All</button><button class="btn link" onclick="rpAll(\'cols\',false)">None</button></span></div><div class="rp-sb"'+(RP.sheets.has(cfg.mainSheet)?'':' style="opacity:.5"')+'><div class="rp-checks">'
+     +cfg.cols.map(([k,l])=>ck(RP.cols.has(k),l,"","rpToggle('cols','"+k+"')")).join("")+'</div></div></div>'
+   +'<div class="rp-sec"><div class="rp-sh"><span class="n">4</span>Options</div><div class="rp-sb"><div class="rp-grid">'+rpTzField()+rpFormatField()+'</div></div></div>';
+  const sel=genSelected();
+  $("rp_count").innerHTML=sel.length?'<b>'+fmtN(sel.length)+'</b> '+esc(sel.length!==1?cfg.nounPl:cfg.noun)+(cfg.countExtra?cfg.countExtra(sel):''):'Nothing matches these choices';
+  $("rpGo").disabled=!sel.length||!RP.sheets.size;
+  icons();
+}
+function downloadGenReport(){
+  const X=window.XLSX; if(!X){ toast("Excel tool didn't load — check your internet and reopen the app","err"); return; }
+  const cfg=GEN[RP.kind], sel=genSelected(); if(!sel.length){ toast("Nothing matches these choices","err"); return; }
+  const wb=X.utils.book_new(); cfg.build(sel,X,wb);
+  if(!wb.SheetNames.length){ toast("Pick at least one sheet","err"); return; }
+  const fm=rpFrMatch(), d=new Date(), p=n=>String(n).padStart(2,"0");
+  const tag=(fm.f?"_"+fm.f.name.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,""):"")+(RP.store.trim()?"_store-"+RP.store.trim().replace(/^#/,""):"")+(RP.terr?"_terr-"+RP.terr:"");
+  X.writeFile(wb, cfg.file+tag+"_"+d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+".xlsx",{cellStyles:true});
+  genSave(); toast("Report downloaded","ok");
+}
+function genGroupSheet(X,wb,sel,title,keyFn,headFn,headers,widths,countFn,sortFn){
+  const m=new Map(); sel.forEach(r=>{ const k=keyFn(r); if(!m.has(k)) m.set(k,[]); m.get(k).push(r); });
+  let groups=[...m.entries()]; groups.sort(sortFn||((a,b)=>b[1].length-a[1].length));
+  const rows=[headers]; groups.forEach(([k,items])=>rows.push([...headFn(k,items),...countFn(items)]));
+  X.utils.book_append_sheet(wb, rpSheet(rows,widths,{filter:true}), title);
+}
+const frNameOf=fid=>{ const f=fid?FR.find(x=>x.id===fid):null; return f?f.name:""; };
+const storeTerrOk=(num,t)=>{ const st=storeByNum[String(num||"")]; return !!st&&dTerrOf(st)===t; };
+
+/* --- Call logs --- */
+GEN.cl={ title:"Call log report", file:"call-log-report", noun:"call", nounPl:"calls", whichLabel:"Which calls", tabName:"Call Logs tab", dateLabel:"Call date",
+  mainSheet:"calls", mainSheetLabel:"Calls",
+  items:()=>CL, dateOf:r=>r.call_at, frOk:(r,id)=>r.franchisee_id===id, storeOk:(r,s)=>String(r.store_num||"")===s,
+  terrOk:(r,t)=>r.store_num?storeTerrOk(r.store_num,t):(r.franchisee_id?(storesByFr[r.franchisee_id]||[]).some(s=>dTerrOf(s)===t):false),
+  chips:[{key:"outcome",label:"Outcome",wide:true,options:[["Answered","Answered"],["No answer / voicemail","No answer / voicemail"],["Follow-up required","Follow-up required"],["Requested more info","Requested more info"],["Completed","Completed"],["__none","Not set"]],ok:(r,s)=>s.has(r.outcome||"__none")},
+         {key:"fu",label:"Follow-up",options:[["open","Open"],["done","Done"],["none","No follow-up"]],ok:(r,s)=>s.has(!r.follow_up?"none":(r.follow_up_done_at?"done":"open"))}],
+  sheets:[["summary","Summary","Filters, totals, answered vs unanswered, follow-ups"],["calls","Calls","One row per call"],["followups","Open follow-ups","Calls still waiting for a follow-up"],
+          ["byfr","By franchisee","Calls per franchisee"],["bystore","By store","Calls per store"],["byoutcome","By outcome","Calls per outcome"],["byday","By day","Calls per day"]],
+  defSheets:["summary","calls","followups","byfr"],
+  cols:[["date","Date"],["time","Time"],["fr","Franchisee"],["phone","Franchisee phone"],["email","Franchisee email"],["store","Store #"],["city","Store city"],["terr","Territory"],
+        ["reason","Reason for call"],["result","Result of call"],["outcome","Outcome"],["fu","Follow-up"],["fudone","Follow-up done"],["logged","Logged"],["edited","Last edited"],["fbc","FBC"],["om","OM"]],
+  defOff:["city","logged","edited","fbc","om"],
+  useTab:()=>{ RP.period=clF.range==="all"?"all":clF.range==="today"?"today":clF.range==="week"?"thisweek":clF.range==="month"?"thismonth":clF.range==="30"?"lastdays":"range"; if(clF.range==="30") RP.days=30; if(clF.range==="custom"){ RP.from=clF.from; RP.to=clF.to; }
+    RP.fr=clF.fr||""; RP.store=clF.store||""; },
+  countExtra:sel=>' · <b>'+new Set(sel.map(r=>r.franchisee_id||r.franchisee_name)).size+'</b> franchisees · <b>'+sel.filter(clOpenFU).length+'</b> open follow-ups',
+  build:(sel,X,wb)=>{
+    sel=sel.slice().sort((a,b)=>new Date(a.call_at)-new Date(b.call_at));
+    const ans=sel.filter(r=>["Answered","Completed","Requested more info"].includes(r.outcome)).length, un=sel.filter(r=>r.outcome==="No answer / voicemail").length;
+    const fuAll=sel.filter(r=>r.follow_up), fuDone=fuAll.filter(r=>r.follow_up_done_at).length;
+    if(RP.sheets.has("summary")) genSummarySheet(X,wb,"Call Log Report",[["Calls",sel.length],["Franchisees called",new Set(sel.map(r=>r.franchisee_id||r.franchisee_name)).size],["Stores mentioned",new Set(sel.map(r=>r.store_num).filter(Boolean)).size],
+      ["Answered (Answered, Requested more info, Completed)",ans],["Unanswered (No answer / voicemail)",un],["Outcome not set",sel.filter(r=>!r.outcome).length],
+      ["Follow-ups requested",fuAll.length],["Follow-ups done",fuDone],["Follow-ups still open",fuAll.length-fuDone],["Follow-up completion",fuAll.length?Math.round(fuDone/fuAll.length*1000)/10+"%":"—"]]);
+    const W={date:12,time:9,fr:28,phone:16,email:28,store:9,city:14,terr:9,reason:44,result:48,outcome:20,fu:12,fudone:17,logged:17,edited:17,fbc:16,om:16};
+    const rowOf=(r,cols)=>{ const cb=frContactBits(r.franchisee_id), st=storeByNum[String(r.store_num||"")], team=staffForStore(st), dt=rpDate(r.call_at);
+      const v={date:rpDateText(r.call_at).slice(0,10), time:rpDateText(r.call_at).slice(11), fr:clFrName(r), phone:cb.phones.join(", "), email:cb.emails.join(", "),
+        store:r.store_num||"General", city:st?st.city||"":"", terr:st?dTerrOf(st):"", reason:r.reason||"", result:r.result||"", outcome:r.outcome||"",
+        fu:!r.follow_up?"No":(r.follow_up_done_at?"Done":"Open"), fudone:r.follow_up_done_at?rpDate(r.follow_up_done_at):"", logged:rpDate(r.created_at), edited:rpDate(r.updated_at),
+        fbc:team.fbc.map(x=>x.name).join(", "), om:team.om.map(x=>x.name).join(", ")};
+      return cols.map(c=>v[c[0]]); };
+    if(RP.sheets.has("calls") && RP.cols.size){ const cols=GEN.cl.cols.filter(c=>RP.cols.has(c[0]));
+      const ws=rpSheet([cols.map(c=>c[1]),...sel.map(r=>rowOf(r,cols))], cols.map(c=>W[c[0]]||14), {filter:true});
+      X.utils.book_append_sheet(wb,ws,"Calls"); }
+    if(RP.sheets.has("followups")){ const cols=GEN.cl.cols.filter(c=>["date","time","fr","phone","email","store","reason","result"].includes(c[0]));
+      X.utils.book_append_sheet(wb, rpSheet([cols.map(c=>c[1]),...sel.filter(clOpenFU).map(r=>rowOf(r,cols))], cols.map(c=>W[c[0]]), {filter:true}), "Open follow-ups"); }
+    const cnt=items=>[items.length, items.filter(r=>["Answered","Completed","Requested more info"].includes(r.outcome)).length, items.filter(r=>r.outcome==="No answer / voicemail").length, items.filter(clOpenFU).length, rpDate(items.map(x=>x.call_at).sort().pop())];
+    const cH=["Calls","Answered","Unanswered","Open follow-ups","Last call"];
+    if(RP.sheets.has("byfr")) genGroupSheet(X,wb,sel,"By franchisee",r=>r.franchisee_id||("n:"+r.franchisee_name),(k,it)=>{ const cb=frContactBits(it[0].franchisee_id); return [clFrName(it[0]),cb.phones.join(", "),cb.emails.join(", ")]; },["Franchisee","Phone","Email",...cH],[28,16,28,8,10,11,14,17],cnt);
+    if(RP.sheets.has("bystore")) genGroupSheet(X,wb,sel.filter(r=>r.store_num),"By store",r=>String(r.store_num),(k,it)=>{ const st=storeByNum[k]; return [k,clFrName(it[0]),st?st.city||"":""]; },["Store #","Franchisee","City",...cH],[9,28,14,8,10,11,14,17],cnt);
+    if(RP.sheets.has("byoutcome")) genGroupSheet(X,wb,sel,"By outcome",r=>r.outcome||"Not set",k=>[k],["Outcome",...cH],[22,8,10,11,14,17],cnt);
+    if(RP.sheets.has("byday")) genGroupSheet(X,wb,sel,"By day",r=>rpDateText(r.call_at).slice(0,10),k=>[k],["Day",...cH],[12,8,10,11,14,17],cnt,(a,b)=>a[0].localeCompare(b[0]));
+  } };
+
+/* --- Activity (every category in one timeline) --- */
+function actEvents(){
+  const ev=[];
+  IS.forEach(i=>historyEntries(i).forEach(e=>ev.push({cat:"Concerns", at:e.ts||i.created_at, store:i.store_num, fid:issueFid(i),
+    what:e.kind==="created"?"Concern logged":(e.prev&&e.status&&normIssueStatus(e.prev)!==normIssueStatus(e.status)?"Status: "+normIssueStatus(e.prev)+" → "+normIssueStatus(e.status):"Concern updated"),
+    detail:e.kind==="created"?richToPlain(i.title||""):richToPlain(e.action||""), status:normIssueStatus(e.status||i.status), ref:issueNo(i)?"#"+issueNo(i):""})));
+  OB.filter(r=>r.platform!=="fj").forEach(r=>obHist(r).forEach(e=>ev.push({cat:"Onboarding", at:e.ts||r.created_at, store:r.store_num, fid:obrFid(r),
+    what:(e.kind==="created"?"Onboarding started":(e.prev&&e.prev!==e.status?"Status: "+e.prev+" → "+e.status:"Onboarding update"))+" · "+obPName(r.platform),
+    detail:e.kind==="created"?richToPlain(r.details||""):richToPlain(e.action||""), status:e.status||r.status, ref:obPName(r.platform)})));
+  CL.forEach(r=>ev.push({cat:"Calls", at:r.call_at, store:r.store_num, fid:r.franchisee_id, frName:r.franchisee_name, what:"Call"+(r.outcome?" · "+r.outcome:""),
+    detail:(r.reason||"")+(r.result?" — "+r.result:""), status:!r.follow_up?"":(r.follow_up_done_at?"Follow-up done":"Follow-up open"), ref:""}));
+  return ev;
+}
+let ACT_CACHE=null;
+GEN.act={ title:"Activity report (all categories)", file:"activity-report", noun:"event", nounPl:"events", whichLabel:"Which activity", dateLabel:"Activity date",
+  mainSheet:"timeline", mainSheetLabel:"Timeline",
+  items:()=>ACT_CACHE||(ACT_CACHE=actEvents()), dateOf:r=>r.at, frOk:(r,id)=>r.fid===id, storeOk:(r,s)=>String(r.store||"")===s,
+  terrOk:(r,t)=>r.store?storeTerrOk(r.store,t):(r.fid?(storesByFr[r.fid]||[]).some(s=>dTerrOf(s)===t):false),
+  chips:[{key:"cat",label:"Category",options:[["Concerns","Concerns"],["Onboarding","Onboarding"],["Calls","Calls"]],ok:(r,s)=>s.has(r.cat)}],
+  sheets:[["summary","Summary","Counts per category"],["timeline","Timeline","Every event in date order"],["byday","By day","Events per day per category"],["byfr","By franchisee","Events per franchisee"],["bystore","By store","Events per store"]],
+  defSheets:["summary","timeline","byday"],
+  cols:[["date","Date"],["time","Time"],["cat","Category"],["store","Store #"],["fr","Franchisee"],["terr","Territory"],["what","Event"],["detail","Details"],["status","Status"],["ref","Reference"]],
+  defOff:["ref"],
+  countExtra:sel=>' · '+["Concerns","Onboarding","Calls"].map(c=>'<b>'+sel.filter(e=>e.cat===c).length+'</b> '+c.toLowerCase()).join(" · "),
+  build:(sel,X,wb)=>{
+    sel=sel.slice().sort((a,b)=>new Date(a.at)-new Date(b.at));
+    const by=c=>sel.filter(e=>e.cat===c).length;
+    if(RP.sheets.has("summary")) genSummarySheet(X,wb,"Activity Report",[["Events",sel.length],["Concern events",by("Concerns")],["Onboarding events",by("Onboarding")],["Calls",by("Calls")],
+      ["Stores involved",new Set(sel.map(e=>e.store).filter(Boolean)).size],["Franchisees involved",new Set(sel.map(e=>e.fid).filter(Boolean)).size]]);
+    if(RP.sheets.has("timeline") && RP.cols.size){ const cols=GEN.act.cols.filter(c=>RP.cols.has(c[0])), W={date:12,time:9,cat:12,store:9,fr:28,terr:9,what:34,detail:60,status:18,ref:12};
+      const rows=[cols.map(c=>c[1]),...sel.map(e=>{ const st=storeByNum[String(e.store||"")], dt=rpDate(e.at);
+        const v={date:rpDateText(e.at).slice(0,10), time:rpDateText(e.at).slice(11), cat:e.cat, store:e.store||"", fr:frNameOf(e.fid)||e.frName||"", terr:st?dTerrOf(st):"", what:e.what, detail:e.detail, status:e.status||"", ref:e.ref||""};
+        return cols.map(c=>v[c[0]]); })];
+      X.utils.book_append_sheet(wb, rpSheet(rows, cols.map(c=>W[c[0]]||14), {filter:true}), "Timeline"); }
+    const cnt=it=>[it.length,it.filter(e=>e.cat==="Concerns").length,it.filter(e=>e.cat==="Onboarding").length,it.filter(e=>e.cat==="Calls").length];
+    const cH=["Events","Concerns","Onboarding","Calls"];
+    if(RP.sheets.has("byday")) genGroupSheet(X,wb,sel,"By day",e=>rpDateText(e.at).slice(0,10),k=>[k],["Day",...cH],[12,8,10,11,8],cnt,(a,b)=>a[0].localeCompare(b[0]));
+    if(RP.sheets.has("byfr")) genGroupSheet(X,wb,sel,"By franchisee",e=>e.fid||("n:"+(e.frName||"")),(k,it)=>[frNameOf(it[0].fid)||it[0].frName||"Unknown"],["Franchisee",...cH],[30,8,10,11,8],cnt);
+    if(RP.sheets.has("bystore")) genGroupSheet(X,wb,sel.filter(e=>e.store),"By store",e=>String(e.store),k=>{ const st=storeByNum[k]; return [k, st?frNameOf(st.franchisee_id):""]; },["Store #","Franchisee",...cH],[9,28,8,10,11,8],cnt);
+  } };
+
+/* --- Stores --- */
+GEN.stores={ title:"Store report", file:"store-report", noun:"store", nounPl:"stores", whichLabel:"Which stores", dateLabel:null, mainSheet:"stores", mainSheetLabel:"Stores",
+  items:()=>ST, frOk:(s,id)=>s.franchisee_id===id, storeOk:(s,n)=>String(s.num)===n, terrOk:(s,t)=>dTerrOf(s)===t,
+  chips:[{key:"status",label:"Store status",options:[["Open","Open"],["Temporarily closed","Temporarily closed"],["Closed","Closed"]],ok:(s,set)=>set.has(storeStatus(s))},
+         {key:"core",label:"Core 3PD active",options:[["3","All 3"],["2","2 of 3"],["1","1 of 3"],["0","None"]],ok:(s,set)=>set.has(String(coreActive(s)))},
+         {key:"gbp",label:"Google Business Profile",options:[["yes","Linked"],["no","Not linked"]],ok:(s,set)=>set.has(hasGbp(s)?"yes":"no")},
+         {key:"ez",label:"ezCater",options:[["Active","Active"],["Pending","Pending"],["Not enrolled","Not enrolled"]],ok:(s,set)=>set.has(platSt(s,"ez"))},
+         {key:"team",label:"Support team",options:[["both","FBC + OM"],["nofbc","No FBC"],["noom","No OM"]],ok:(s,set)=>{ const f=!!staffById(s.fbc_id), o=!!staffById(s.om_id); return (set.has("both")&&f&&o)||(set.has("nofbc")&&!f)||(set.has("noom")&&!o); }}],
+  sheets:[["summary","Summary","Totals and coverage"],["stores","Stores","One row per store"],["byterr","By territory","Coverage per territory"],["byfr","By franchisee","Coverage per franchisee"],["gaps","Coverage gaps","Stores missing a core app, GBP or ezCater"]],
+  defSheets:["summary","stores","byterr"],
+  cols:[["num","Store #"],["fr","Franchisee"],["status","Store status"],["addr","Address"],["city","City"],["state","State"],["zip","ZIP"],["terr","Territory"],["phone","Store phone"],
+        ["ue","Uber Eats"],["dd","DoorDash"],["gh","Grubhub"],["ez","ezCater"],["core","Core 3PD active (of 3)"],["gbp","GBP link"],["fbc","FBC"],["fbcmail","FBC email"],["om","OM"],["ommail","OM email"],
+        ["issues","Open concerns"],["onb","Open onboarding"],["calls","Calls"],["lastcall","Last call"],["frcontact","Franchisee email / phone"]],
+  defOff:["zip","fbcmail","ommail","frcontact","lastcall"],
+  build:(sel,X,wb)=>{
+    sel=sel.slice().sort(numCmp); const live=sel.filter(s=>storeStatus(s)==="Open");
+    if(RP.sheets.has("summary")) genSummarySheet(X,wb,"Store Report",[["Stores",sel.length],["Open",live.length],["Temporarily closed",sel.filter(s=>storeStatus(s)==="Temporarily closed").length],["Closed",sel.filter(s=>storeStatus(s)==="Closed").length],
+      ["Open stores on all 3 core apps",live.filter(s=>coreActive(s)===3).length+" ("+pct(live.filter(s=>coreActive(s)===3).length,live.length)+"%)"],
+      ["Open stores with no core app",live.filter(s=>coreActive(s)===0).length],["GBP linked (open stores)",live.filter(hasGbp).length+" ("+pct(live.filter(hasGbp).length,live.length)+"%)"],
+      ["ezCater active (open stores)",live.filter(s=>platSt(s,"ez")==="Active").length],["Stores without FBC",sel.filter(s=>!staffById(s.fbc_id)).length],["Stores without OM",sel.filter(s=>!staffById(s.om_id)).length]]);
+    const W={num:9,fr:28,status:16,addr:30,city:14,state:6,zip:8,terr:9,phone:15,ue:12,dd:12,gh:12,ez:12,core:10,gbp:30,fbc:14,fbcmail:26,om:14,ommail:26,issues:9,onb:9,calls:7,lastcall:17,frcontact:32};
+    if(RP.sheets.has("stores") && RP.cols.size){ const cols=GEN.stores.cols.filter(c=>RP.cols.has(c[0]));
+      const rows=[cols.map(c=>c[1]),...sel.map(s=>{ const f=FR.find(x=>x.id===s.franchisee_id), fb=staffById(s.fbc_id), om=staffById(s.om_id), cb=frContactBits(s.franchisee_id);
+        const calls=CL.filter(r=>String(r.store_num||"")===String(s.num)), last=calls.map(r=>r.call_at).sort().pop();
+        const v={num:s.num,fr:f?f.name:"",status:storeStatus(s),addr:s.address||"",city:s.city||"",state:s.state||"",zip:s.zip||"",terr:dTerrOf(s),phone:s.phone||"",
+          ue:platSt(s,"ue"),dd:platSt(s,"dd"),gh:platSt(s,"gh"),ez:platSt(s,"ez"),core:coreActive(s),gbp:s.gbp||"",fbc:fb?fb.name:"",fbcmail:fb?emailOf(fb):"",om:om?om.name:"",ommail:om?emailOf(om):"",
+          issues:storeOpenIssues(s.num),onb:OB.filter(r=>String(r.store_num)===String(s.num)&&r.platform!=="fj"&&obIsOpen(r)).length,calls:calls.length,lastcall:last?rpDate(last):"",frcontact:[...cb.emails,...cb.phones].join(", ")};
+        return cols.map(c=>v[c[0]]); })];
+      X.utils.book_append_sheet(wb, rpSheet(rows, cols.map(c=>W[c[0]]||12), {filter:true}), "Stores"); }
+    const cov=it=>{ const lv=it.filter(s=>storeStatus(s)==="Open"); return [it.length, lv.length, lv.length?Math.round(lv.reduce((a,s)=>a+coreActive(s),0)/lv.length*10)/10:0, pct(lv.filter(s=>coreActive(s)===3).length,lv.length)+"%", pct(lv.filter(hasGbp).length,lv.length)+"%", pct(lv.filter(s=>platSt(s,"ez")==="Active").length,lv.length)+"%", it.reduce((a,s)=>a+storeOpenIssues(s.num),0)]; };
+    const cH=["Stores","Open","Avg core 3PD","All 3 apps","GBP linked","ezCater active","Open concerns"];
+    if(RP.sheets.has("byterr")) genGroupSheet(X,wb,sel,"By territory",dTerrOf,k=>[k],["Territory",...cH],[10,8,8,11,10,10,12,12],cov,(a,b)=>(+a[0]||0)-(+b[0]||0));
+    if(RP.sheets.has("byfr")) genGroupSheet(X,wb,sel,"By franchisee",s=>s.franchisee_id,k=>[frNameOf(k)],["Franchisee",...cH],[30,8,8,11,10,10,12,12],cov);
+    if(RP.sheets.has("gaps")){ const rows=[["Store #","Franchisee","Territory","Status","Missing"]];
+      live.forEach(s=>{ const miss=[...CORE3.filter(([k])=>platSt(s,k)!=="Active").map(([k,n])=>n), hasGbp(s)?null:"GBP link", platSt(s,"ez")==="Active"?null:"ezCater", staffById(s.fbc_id)?null:"FBC", staffById(s.om_id)?null:"OM"].filter(Boolean);
+        if(miss.length) rows.push([s.num,frNameOf(s.franchisee_id),dTerrOf(s),storeStatus(s),miss.join(", ")]); });
+      X.utils.book_append_sheet(wb, rpSheet(rows,[9,28,9,14,60],{filter:true}), "Coverage gaps"); }
+  } };
+
+/* --- Franchisees --- */
+GEN.frs={ title:"Franchisee report", file:"franchisee-report", noun:"franchisee", nounPl:"franchisees", whichLabel:"Which franchisees", dateLabel:null, mainSheet:"frs", mainSheetLabel:"Franchisees",
+  items:()=>FR, frOk:(f,id)=>f.id===id, storeOk:(f,n)=>(storesByFr[f.id]||[]).some(s=>String(s.num)===n), terrOk:(f,t)=>(storesByFr[f.id]||[]).some(s=>dTerrOf(s)===t),
+  chips:[{key:"act",label:"Activity",options:[["issues","Has open concerns"],["onb","Has open onboarding"],["fu","Has open call follow-ups"],["none","None of these"]],
+    ok:(f,set)=>{ const a=frOpenIssues(f.id)>0, b=OB.some(r=>obrFid(r)===f.id&&r.platform!=="fj"&&obIsOpen(r)), c=CL.some(r=>r.franchisee_id===f.id&&clOpenFU(r));
+      return (set.has("issues")&&a)||(set.has("onb")&&b)||(set.has("fu")&&c)||(set.has("none")&&!a&&!b&&!c); }}],
+  sheets:[["summary","Summary","Totals"],["frs","Franchisees","One row per franchisee"],["stores","Their stores","One row per store, grouped by franchisee"]],
+  defSheets:["summary","frs"],
+  cols:[["name","Franchisee"],["terr","Territories"],["stores","Stores"],["open","Open stores"],["email","Email"],["phone","Phone"],["core","Avg core 3PD"],["gbp","GBP linked"],["ez","ezCater active"],
+        ["issues","Open concerns"],["onb","Open onboarding"],["calls","Calls"],["lastcall","Last call"],["fu","Open follow-ups"],["fbc","FBC(s)"],["om","OM(s)"]],
+  defOff:["fbc","om"],
+  build:(sel,X,wb)=>{
+    if(RP.sheets.has("summary")) genSummarySheet(X,wb,"Franchisee Report",[["Franchisees",sel.length],["Stores",sel.reduce((a,f)=>a+(storesByFr[f.id]||[]).length,0)],
+      ["With open concerns",sel.filter(f=>frOpenIssues(f.id)>0).length],["With open onboarding",sel.filter(f=>OB.some(r=>obrFid(r)===f.id&&r.platform!=="fj"&&obIsOpen(r))).length],
+      ["Called at least once",sel.filter(f=>CL.some(r=>r.franchisee_id===f.id)).length]]);
+    const W={name:30,terr:12,stores:8,open:8,email:30,phone:16,core:10,gbp:10,ez:10,issues:10,onb:10,calls:7,lastcall:17,fu:10,fbc:20,om:20};
+    if(RP.sheets.has("frs") && RP.cols.size){ const cols=GEN.frs.cols.filter(c=>RP.cols.has(c[0]));
+      const rows=[cols.map(c=>c[1]),...sel.map(f=>{ const sts=storesByFr[f.id]||[], lv=sts.filter(s=>storeStatus(s)==="Open"), cb=frContactBits(f.id), calls=CL.filter(r=>r.franchisee_id===f.id), team=staffForStores(sts);
+        const v={name:f.name,terr:[...new Set(sts.map(dTerrOf))].join(", ")||f.territory||"",stores:sts.length,open:lv.length,email:cb.emails.join(", "),phone:cb.phones.join(", "),
+          core:lv.length?Math.round(lv.reduce((a,s)=>a+coreActive(s),0)/lv.length*10)/10:"",gbp:lv.length?pct(lv.filter(hasGbp).length,lv.length)+"%":"",ez:lv.length?pct(lv.filter(s=>platSt(s,"ez")==="Active").length,lv.length)+"%":"",
+          issues:frOpenIssues(f.id),onb:OB.filter(r=>obrFid(r)===f.id&&r.platform!=="fj"&&obIsOpen(r)).length,calls:calls.length,lastcall:calls.length?rpDate(calls.map(r=>r.call_at).sort().pop()):"",fu:calls.filter(clOpenFU).length,
+          fbc:team.fbc.map(x=>x.s.name).join(", "),om:team.om.map(x=>x.s.name).join(", ")};
+        return cols.map(c=>v[c[0]]); })];
+      X.utils.book_append_sheet(wb, rpSheet(rows, cols.map(c=>W[c[0]]||12), {filter:true}), "Franchisees"); }
+    if(RP.sheets.has("stores")){ const rows=[["Franchisee","Store #","Status","City","Territory","Uber Eats","DoorDash","Grubhub","ezCater","GBP linked"]];
+      sel.forEach(f=>(storesByFr[f.id]||[]).slice().sort(numCmp).forEach(s=>rows.push([f.name,s.num,storeStatus(s),s.city||"",dTerrOf(s),platSt(s,"ue"),platSt(s,"dd"),platSt(s,"gh"),platSt(s,"ez"),hasGbp(s)?"Yes":"No"])));
+      X.utils.book_append_sheet(wb, rpSheet(rows,[28,9,16,14,9,12,12,12,12,10],{filter:true}), "Their stores"); }
+  } };
+
+/* --- FBC / OM --- */
+GEN.staff={ title:"FBC / OM report", file:"fbc-om-report", noun:"person", nounPl:"people", whichLabel:"Which FBCs / OMs", dateLabel:null, mainSheet:"people", mainSheetLabel:"People",
+  items:()=>SF, frOk:(p,id)=>(storesByFr[id]||[]).some(s=>s.fbc_id===p.id||s.om_id===p.id), storeOk:(p,n)=>{ const s=storeByNum[n]; return !!s&&(s.fbc_id===p.id||s.om_id===p.id); },
+  terrOk:(p,t)=>storesHandled(p).some(s=>dTerrOf(s)===t),
+  chips:[{key:"role",label:"Role",options:[["FBC","FBC"],["OM","OM"]],ok:(p,set)=>[...set].some(r=>hasRole(p,r))}],
+  sheets:[["summary","Summary","Totals"],["people","People","One row per FBC / OM"],["assign","Store assignments","Every store each person handles"],["gaps","Unassigned stores","Stores with no FBC or no OM"]],
+  defSheets:["summary","people","assign"],
+  cols:[["name","Name"],["email","Email"],["role","Role"],["asfbc","Stores as FBC"],["asom","Stores as OM"],["frs","Franchisees"],["terrs","Territories"],["issues","Open concerns"],["onb","Open onboarding"],["calls","Calls to their stores"]],
+  defOff:[],
+  build:(sel,X,wb)=>{
+    const inT=s=>!RP.terr||dTerrOf(s)===RP.terr;
+    if(RP.sheets.has("summary")) genSummarySheet(X,wb,"FBC / OM Report",[["People",sel.length],["FBCs",sel.filter(p=>hasRole(p,"FBC")).length],["OMs",sel.filter(p=>hasRole(p,"OM")).length],
+      ["Stores without FBC",ST.filter(s=>inT(s)&&!staffById(s.fbc_id)).length],["Stores without OM",ST.filter(s=>inT(s)&&!staffById(s.om_id)).length]]);
+    if(RP.sheets.has("people") && RP.cols.size){ const cols=GEN.staff.cols.filter(c=>RP.cols.has(c[0])), W={name:18,email:30,role:12,asfbc:11,asom:11,frs:11,terrs:20,issues:11,onb:12,calls:12};
+      const rows=[cols.map(c=>c[1]),...sel.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(p=>{ const all=storesHandled(p).filter(inT), nums=new Set(all.map(s=>String(s.num)));
+        const v={name:p.name,email:emailOf(p),role:p.role||"",asfbc:all.filter(s=>s.fbc_id===p.id).length,asom:all.filter(s=>s.om_id===p.id).length,frs:new Set(all.map(s=>s.franchisee_id)).size,
+          terrs:[...new Set(all.map(dTerrOf))].sort().join(", "),issues:all.reduce((a,s)=>a+storeOpenIssues(s.num),0),onb:OB.filter(r=>nums.has(String(r.store_num))&&r.platform!=="fj"&&obIsOpen(r)).length,calls:CL.filter(r=>nums.has(String(r.store_num||""))).length};
+        return cols.map(c=>v[c[0]]); })];
+      X.utils.book_append_sheet(wb, rpSheet(rows, cols.map(c=>W[c[0]]||12), {filter:true}), "People"); }
+    if(RP.sheets.has("assign")){ const rows=[["Person","Role on store","Store #","Franchisee","City","Territory","Store status"]];
+      sel.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(p=>storesHandled(p).filter(inT).sort(numCmp).forEach(s=>rows.push([p.name,[s.fbc_id===p.id?"FBC":null,s.om_id===p.id?"OM":null].filter(Boolean).join(" & "),s.num,frNameOf(s.franchisee_id),s.city||"",dTerrOf(s),storeStatus(s)])));
+      X.utils.book_append_sheet(wb, rpSheet(rows,[18,12,9,28,14,9,16],{filter:true}), "Store assignments"); }
+    if(RP.sheets.has("gaps")){ const rows=[["Store #","Franchisee","Territory","Missing"]];
+      ST.filter(inT).sort(numCmp).forEach(s=>{ const m=[staffById(s.fbc_id)?null:"FBC",staffById(s.om_id)?null:"OM"].filter(Boolean); if(m.length) rows.push([s.num,frNameOf(s.franchisee_id),dTerrOf(s),m.join(", ")]); });
+      X.utils.book_append_sheet(wb, rpSheet(rows,[9,28,9,14],{filter:true}), "Unassigned stores"); }
+  } };
+
+/* --- open any report --- */
+function openReportKind(kind, preset){
+  ACT_CACHE=null;
+  if(kind==="issues") RP=rpDefaults(); else if(kind==="ob") RP=obrDefaults(); else RP=genDefaults(kind);
+  if(preset) Object.keys(preset).forEach(k=>{ if(k==="chips") Object.keys(preset.chips).forEach(g=>RP.chips[g]=new Set(preset.chips[g])); else RP[k]=preset[k]; });
+  renderReport(); $("rpOverlay").classList.add("show");
+}
+
+/* --- PDF: runs the same report logic, then prints it --- */
+let RP_CAPTURE=null;
+function rpLoadScript(src){ return new Promise((ok,bad)=>{ if(document.querySelector('script[src="'+src+'"]')){ const t=setInterval(()=>{ if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API.autoTable){ clearInterval(t); ok(); } },50); setTimeout(()=>{ clearInterval(t); ok(); },8000); return; }
+  const s=document.createElement("script"); s.src=src; s.onload=ok; s.onerror=()=>bad(new Error("Could not load "+src)); document.head.appendChild(s); }); }
+async function rpEnsurePdf(){
+  if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API.autoTable) return;
+  await rpLoadScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+  await rpLoadScript("https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js");
+}
+function rpCapture(run){
+  const real=window.XLSX, sheets=[], realToast=toast; let fname="report.xlsx"; toast=()=>{};
+  window.XLSX={ utils:{ book_new:()=>({SheetNames:[]}), book_append_sheet:(wb,ws,name)=>{ wb.SheetNames.push(name); sheets.push(Object.assign({name},ws.__cap)); } },
+    writeFile:(wb,n)=>{ fname=n; } };
+  RP_CAPTURE=true;
+  try{ run(); } finally { window.XLSX=real; RP_CAPTURE=null; toast=realToast; }
+  return {sheets, fname};
+}
+function pdfText(v){
+  if(v==null) return "";
+  if(v instanceof Date){ if(isNaN(v)) return ""; const p=n=>String(n).padStart(2,"0"); const t=v.getHours()||v.getMinutes()?" "+p(v.getHours())+":"+p(v.getMinutes()):""; return v.getFullYear()+"-"+p(v.getMonth()+1)+"-"+p(v.getDate())+t; }
+  return String(v).replace(/→/g,"->").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u2013\u2014\u2022\u2026\u20AC]/g,"");
+}
+async function downloadPdfReport(run){
+  const btn=$("rpGo"); btn.disabled=true; const old=btn.innerHTML; btn.innerHTML='<span class="spin"></span>Making PDF…';
+  try{
+    await rpEnsurePdf();
+    const cap=rpCapture(run); if(!cap.sheets.length){ throw new Error("Nothing to put in the PDF"); }
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+    const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=36, title=$("rp_title").textContent;
+    const green=[0,137,56], lime=[246,250,239];
+    // header
+    doc.setFillColor(...green); doc.rect(0,0,W,54,"F"); doc.setFillColor(255,198,0); doc.rect(0,54,W,4,"F");
+    doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(17); doc.text(pdfText(title),M,34);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.text(pdfText("Franchisee Tracker · 3PD Helpdesk · Generated "+rpDateText(new Date().toISOString())+" ("+rpTzName()+")"),W-M,34,{align:"right"});
+    let y=78;
+    cap.sheets.forEach((sh,ix)=>{
+      const rows=(sh.rows||[]).map(r=>(r||[]).map(pdfText));
+      if(ix>0 && y>H-120){ doc.addPage(); y=M; }
+      doc.setTextColor(0,107,44); doc.setFont("helvetica","bold"); doc.setFontSize(12.5); doc.text(pdfText(sh.name),M,y); y+=8;
+      const opts=sh.opts||{};
+      if(opts.headerRow===-1){ // key / value sheet (Summary)
+        const body=rows.slice(opts.titleRows||0).filter(r=>r.length&&r.some(c=>c!==""));
+        doc.autoTable({startY:y,body,theme:"plain",margin:{left:M,right:M},tableWidth:Math.min(520,W-2*M),
+          styles:{fontSize:9,cellPadding:{top:3,bottom:3,left:6,right:6},textColor:[29,42,32]},
+          columnStyles:{0:{fontStyle:"bold",cellWidth:230,textColor:[60,75,64]}},
+          didParseCell:d=>{ const v=d.row.raw||[]; if(v.length&&(v[1]===""||v[1]==null)&&d.column.index===0){ d.cell.styles.textColor=green; d.cell.styles.fontSize=10; d.cell.styles.fillColor=lime; } },
+          alternateRowStyles:{fillColor:[255,255,255]}});
+      } else {
+        const head=rows[0]||[], body=rows.slice(1); const ws=(sh.widths||[]).slice(0,head.length); const tot=ws.reduce((a,b)=>a+(b||12),0)||1;
+        const fs=head.length>14?6.5:head.length>10?7.2:8, avail=W-2*M, colStyles={}, cw=fs*0.56;
+        // short columns (dates, numbers, codes) get just enough room; long text columns share the rest
+        const maxLen=head.map((h,i)=>Math.max(...[h,...body.slice(0,300).map(r=>r[i])].map(v=>String(v==null?"":v).split("\n").reduce((a,l)=>Math.max(a,l.length),0))));
+        const shortIdx=head.map((h,i)=>maxLen[i]<=16?i:-1).filter(i=>i>=0), shortW={}; let used=0;
+        shortIdx.forEach(i=>{ shortW[i]=Math.max(30,Math.min(110,maxLen[i]*cw+12, Math.max(String(head[i]).length*cw+12, maxLen[i]*cw+12))); used+=shortW[i]; });
+        const longIdx=head.map((h,i)=>i).filter(i=>!(i in shortW)), longTot=longIdx.reduce((a,i)=>a+(ws[i]||12),0)||1, left=Math.max(avail-used, longIdx.length*60);
+        head.forEach((h,i)=>colStyles[i]={cellWidth:(i in shortW)?shortW[i]:Math.max(60,(ws[i]||12)/longTot*left)});
+        const sumW=Object.values(colStyles).reduce((a,c)=>a+c.cellWidth,0);
+        if(sumW>avail){ const k=avail/sumW; Object.values(colStyles).forEach(c=>c.cellWidth=c.cellWidth*k); }   // always fit the page width
+        doc.autoTable({startY:y,head:[head],body:body.length?body:[["No rows"]],margin:{left:M,right:M,top:M,bottom:40},
+          styles:{fontSize:fs,cellPadding:3,overflow:"linebreak",valign:"top",textColor:[29,42,32],lineColor:[223,232,214],lineWidth:.4},
+          headStyles:{fillColor:green,textColor:255,fontStyle:"bold",fontSize:fs},alternateRowStyles:{fillColor:lime},columnStyles:colStyles});
+      }
+      y=doc.lastAutoTable.finalY+26;
+    });
+    const n=doc.getNumberOfPages();
+    for(let i=1;i<=n;i++){ doc.setPage(i); doc.setFontSize(8); doc.setTextColor(120,130,124); doc.setFont("helvetica","normal");
+      doc.text(pdfText(title),M,H-18); doc.text("Page "+i+" of "+n,W-M,H-18,{align:"right"}); }
+    doc.save(cap.fname.replace(/\.xlsx$/i,".pdf"));
+    toast("PDF downloaded","ok");
+  }catch(err){ toast("Couldn't make the PDF — "+(err&&err.message||"check your internet"),"err"); }
+  btn.disabled=false; btn.innerHTML=old; icons();
+}
+
+/* --- Reports tab --- */
+const RP_TYPES=[
+  ["issues","Concerns","message-square-warning","Issues logged for stores: status, platforms, updates and actions taken.","Date logged · status · franchisee · store · territory"],
+  ["ob","Onboarding","rocket","Onboarding per store and platform: status, progress and days to onboard.","Date started · status · platform · franchisee · store · territory"],
+  ["cl","Call logs","phone-call","Every call: reason, result, outcome, follow-ups and franchisee contact.","Call date · outcome · follow-up · franchisee · store · territory"],
+  ["act","Activity (all categories)","activity","Concerns, onboarding and calls together in one timeline.","Activity date · category · franchisee · store · territory"],
+  ["stores","Stores","store","Store directory with 3PD, GBP and ezCater coverage, support team and gaps.","Store status · coverage · GBP · ezCater · team · territory"],
+  ["frs","Franchisees","users","Owners with contacts, store counts, coverage and activity.","Activity · franchisee · store · territory"],
+  ["staff","FBC / OM","badge-check","Each FBC and OM with their stores, franchisees and open items.","Role · franchisee · store · territory"]
+];
+const RP_QUICK=[
+  ["issues","Open concerns","circle-alert",{statuses:new Set(["Pending","Work in Progress"])}],
+  ["issues","Concerns logged this week","calendar-range",{period:"thisweek"}],
+  ["ob","Onboarding still in progress","loader",{statuses:new Set(["Pending","Email Sent/Text Message","Work in Progress"])}],
+  ["ob","Onboarding started this month","calendar",{period:"thismonth"}],
+  ["cl","Calls this week","phone",{period:"thisweek"}],
+  ["cl","Open call follow-ups","flag",{chips:{fu:["open"]}}],
+  ["stores","Open stores missing GBP","map-pinned",{chips:{status:["Open"],gbp:["no"]}}],
+  ["stores","Open stores with no core 3PD","circle-off",{chips:{status:["Open"],core:["0"]}}],
+  ["act","All activity — last 7 days","activity",{period:"lastdays",days:7}]
+];
+function renderReportsTab(){
+  $("count").textContent="";
+  const card=([k,t,ic,desc,filt])=>'<div class="rt-card"><div class="rt-top"><span class="rt-ic"><i data-lucide="'+ic+'"></i></span><div><h3>'+esc(t)+'</h3><p>'+esc(desc)+'</p></div></div>'
+    +'<div class="rt-filt"><i data-lucide="sliders-horizontal"></i>'+esc(filt)+'</div>'
+    +'<div class="rt-foot"><span class="rt-fmt"><span>Excel</span><span>PDF</span></span><button class="btn sm round" data-act="rp-open" data-arg="'+k+'"><i data-lucide="settings-2"></i>Build report</button></div></div>';
+  const quick=RP_QUICK.map((q,i)=>'<div class="rt-q"><span class="rt-qic"><i data-lucide="'+q[2]+'"></i></span><span class="rt-qt">'+esc(q[1])+'<small>'+esc((RP_TYPES.find(t=>t[0]===q[0])||[])[1]||"")+'</small></span>'
+    +'<button class="iconbtn" data-act="rp-quick" data-arg="'+i+'|xlsx" data-tip="Download as Excel" aria-label="'+esc(q[1])+' as Excel"><i data-lucide="file-spreadsheet"></i></button>'
+    +'<button class="iconbtn" data-act="rp-quick" data-arg="'+i+'|pdf" data-tip="Download as PDF" aria-label="'+esc(q[1])+' as PDF"><i data-lucide="file-text"></i></button>'
+    +'<button class="btn link" data-act="rp-quick" data-arg="'+i+'|edit" data-tip="Open the builder with these choices">Customize</button></div>').join("");
+  setView('<div class="rt-intro"><i data-lucide="info"></i><span>Pick a report, choose the <b>date</b>, <b>territory</b>, <b>franchisee</b>, <b>store</b> and category filters, the <b>sheets and columns</b> you want, then download as <b>Excel</b> or <b>PDF</b>. Your choices are remembered for next time.</span></div>'
+    +'<h3 class="rt-h"><i data-lucide="layout-grid"></i>Build a report</h3><div class="rt-grid">'+RP_TYPES.map(card).join("")+'</div>'
+    +'<h3 class="rt-h"><i data-lucide="zap"></i>Quick reports<span class="muted" style="font-weight:500;font-size:12.5px;margin-left:6px">one click, all territories</span></h3><div class="rt-quick card">'+quick+'</div>');
+}
+document.addEventListener("click",e=>{
+  const el=e.target.closest&&e.target.closest("[data-act]"); if(!el) return; const a=el.dataset.act, g=el.dataset.arg;
+  if(a==="rp-open") openReportKind(g);
+  else if(a==="rp-quick"){ const [i,mode]=g.split("|"), q=RP_QUICK[+i]; openReportKind(q[0],q[3]);
+    if(mode!=="edit"){ RP.fmt=mode; renderReport(); setTimeout(()=>{ Promise.resolve(downloadReport()).then(()=>$("rpOverlay").classList.remove("show")); },30); } }
+});
 
 /* ===== Store issues popup ===== */
 let stIssNum=null, stIssMode="store", stIssFr=null;
@@ -4556,7 +5010,7 @@ function clFiltered(){
     if(!sq.q) return true;
     if(sq.mode==="store") return numRank(r.store_num,sq.q)<9;
     if(sq.mode==="fr") return normName(clFrName(r)).includes(normName(sq.q))||normName(r.franchisee_name).includes(normName(sq.q));
-    return [clFrName(r),r.franchisee_name,r.store_num,r.reason,r.result,r.outcome].join(" ").toLowerCase().includes(sq.q) || (sq.phoneLike && dig(r.store_num).includes(sq.d));
+    return [clFrName(r),r.franchisee_name,r.store_num,r.reason,r.result,r.outcome].join(" ").toLowerCase().includes(sq.q) || (sq.phoneLike && dig(r.store_num).includes(sq.d)) || frContactMatch(r.franchisee_id,sq);
   });
 }
 function clAnyFilter(){ return clF.range!=="all"||clF.fr||clF.store||clF.outcome||$("search").value.trim(); }
@@ -4630,7 +5084,7 @@ function renderCalls(){
   const rows=list.slice((clPage-1)*PAGE_CL, clPage*PAGE_CL).map(r=>{ const w=clFmt(r.call_at);
     return '<tr class="click" data-act="cl-view" data-arg="'+r.id+'" tabindex="0" aria-label="View call to '+esc(clFrName(r))+' on '+esc(w.d)+'">'
       +'<td><div class="cl-when"><b>'+esc(w.d)+'</b><span>'+esc(w.t)+'</span></div></td>'
-      +'<td class="cl-fr">'+esc(clFrName(r))+(r.franchisee_id&&clFrName(r)!==r.franchisee_name&&r.franchisee_name?'<small data-tip="Name when the call was logged">was “'+esc(r.franchisee_name)+'”</small>':'')+'</td>'
+      +'<td class="cl-fr">'+esc(clFrName(r))+clContactHtml(r.franchisee_id)+(r.franchisee_id&&clFrName(r)!==r.franchisee_name&&r.franchisee_name?'<small data-tip="Name when the call was logged">was “'+esc(r.franchisee_name)+'”</small>':'')+'</td>'
       +'<td class="cl-st">'+(r.store_num?'<b>'+esc(r.store_num)+'</b>':'<span class="muted">General</span>')+'</td>'
       +'<td class="cl-txt"><div class="cl-clamp">'+esc(r.reason)+'</div></td>'
       +'<td class="cl-txt"><div class="cl-res-top">'+clOutcomeBadge(r.outcome)+clFUBadge(r)+'</div><div class="cl-clamp">'+esc(r.result)+'</div></td>'
@@ -4645,6 +5099,9 @@ function renderCalls(){
     +pagerHtml('cl',clPage,total,list.length)+'</div>');
 }
 
+function clContactHtml(fid){ const c=frContactBits(fid); if(!c.phones.length&&!c.emails.length) return '<small class="cl-nocon">No contact saved</small>';
+  return '<div class="cl-con">'+c.phones.slice(0,2).map(p=>'<a href="tel:'+esc(String(p).replace(/[^\d+]/g,""))+'" onclick="event.stopPropagation()" data-tip="Call '+esc(p)+'"><i data-lucide="phone"></i>'+esc(p)+'</a>').join("")
+    +c.emails.slice(0,2).map(e=>'<a href="mailto:'+esc(e)+'" onclick="event.stopPropagation()" data-tip="Email '+esc(e)+'"><i data-lucide="mail"></i><span>'+esc(e)+'</span></a>').join("")+'</div>'; }
 /* ---------- log / edit modal ---------- */
 let clCtx=null, clSaving=false, clInit="";
 function clLocalInput(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); }
@@ -4744,6 +5201,9 @@ function openCallView(id){
   $("clv_sub").textContent=w.d+" · "+w.t;
   $("clv_body").innerHTML='<div class="clv-grid">'
     +'<div class="clv-f"><span class="k">Franchisee</span><span class="v"><b>'+esc(clFrName(r))+'</b>'+(r.franchisee_id&&clFrName(r)!==r.franchisee_name?'<small class="muted"> (logged as “'+esc(r.franchisee_name)+'”)</small>':'')+'</span></div>'
+    +(()=>{ const c=frContactBits(r.franchisee_id); return '<div class="clv-f" style="grid-column:1/-1"><span class="k">Franchisee contact</span><span class="v clv-con">'
+        +(c.phones.length||c.emails.length?c.phones.map(p=>'<span class="clv-ci"><i data-lucide="phone"></i><a href="tel:'+esc(String(p).replace(/[^\d+]/g,""))+'">'+esc(p)+'</a>'+copyBtn(p)+'</span>').join("")
+          +c.emails.map(e=>'<span class="clv-ci"><i data-lucide="mail"></i><a href="mailto:'+esc(e)+'">'+esc(e)+'</a>'+copyBtn(e)+'</span>').join(""):'<span class="muted">No phone or email saved for this franchisee</span>')+'</span></div>'; })()
     +'<div class="clv-f"><span class="k">Store</span><span class="v">'+(r.store_num?'<b>'+esc(r.store_num)+'</b>'+(st?' · '+esc([st.address,st.city].filter(Boolean).join(", ")):''):'<span class="muted">General (no specific store)</span>')+'</span></div>'
     +'<div class="clv-f"><span class="k">Outcome</span><span class="v">'+(clOutcomeBadge(r.outcome)||'<span class="muted">Not set</span>')+' '+clFUBadge(r)+'</span></div>'
     +'<div class="clv-f"><span class="k">Logged</span><span class="v muted">'+esc(fmtTs(r.created_at))+(r.updated_at&&r.updated_at!==r.created_at?' · edited '+esc(fmtTs(r.updated_at)):'')+'</span></div>'
@@ -4833,7 +5293,7 @@ function saveUiState(){
 function loadUiState(){
   let st=null; try{ st=JSON.parse(sessionStorage.getItem(UI_KEY)||"null"); }catch(e){}
   if(!st) return;
-  if(["dashboard","franchisees","stores","staff","issues","calls"].includes(st.tab)) tab=st.tab;
+  if(["dashboard","franchisees","stores","staff","issues","calls","reports"].includes(st.tab)) tab=st.tab;
   if(st.clF&&typeof st.clF==="object") clF=Object.assign({range:"all",from:"",to:"",fr:"",store:"",outcome:""},st.clF);
   clSort=st.clSort==="asc"?"asc":"desc"; clPage=st.clPage||1;
   if(st.isSub==="onboarding"||st.isSub==="concerns") isSub=st.isSub;
