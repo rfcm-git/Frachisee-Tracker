@@ -883,6 +883,15 @@
   .ob-upd{display:flex;align-items:flex-start;gap:8px}
   .ob-last{font-size:12.5px;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .ob-det{font-size:13px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .ob-hcnt{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle;flex-wrap:wrap}
+  .ob-hc{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid transparent;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0}
+  .ob-hc b{font-weight:800}
+  .ob-hc.p-ue{background:#e7f6ec;color:#06603a} .ob-hc.p-dd{background:#fde9e5;color:#b3261e}
+  .ob-hc.p-gh{background:#fff1e0;color:#a35200} .ob-hc.p-ez{background:#e9f2ea;color:#2b6b3a}
+  .ob-hc.zero{opacity:.45}
+  .ob-hc:hover{border-color:currentColor}
+  .ob-hc.on{border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,.06)}
+  .ob-hc:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
   .ob-prog{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
   @media(max-width:1100px){.ob-prog{grid-template-columns:1fr}}
   .ob-ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--lime-tint);font-size:13.5px}
@@ -4906,6 +4915,13 @@ function obChart(){
   return '<div class="ob-chart card"><div class="ob-ph"><i data-lucide="bar-chart-3"></i><b>Progress chart</b><span class="db-i" data-tip="Share of each status per platform, from all onboarding records. Click a colored part to filter the table."><i data-lucide="info"></i></span></div>'
     +'<div class="ob-cbody">'+ring+'<div class="ob-bars">'+bars+key+'</div></div></div>';
 }
+/* Count per platform in the CURRENT filtered list (changes with search and filters) */
+const OB_ABBR={ue:"UE",dd:"DD",gh:"GH",ez:"Ez"};
+function obPlatCounts(list){
+  return '<span class="ob-hcnt" aria-label="Records per platform in the current list">'+OB_PLATS.map(([k,n])=>{ const c=list.filter(r=>r.platform===k).length, on=obPlat.length===1&&obPlat[0]===k;
+    return '<button type="button" class="ob-hc p-'+k+(c?'':' zero')+(on?' on':'')+'" data-act="ob-hplat" data-arg="'+k+'" data-tip="'+esc(n+': '+c+' record'+(c!==1?'s':'')+' in the current list'+(on?' — click to show all platforms':' — click to show only '+n))+'">'
+      +'<b>'+OB_ABBR[k]+'</b>'+c+'</button>'; }).join("")+'</span>';
+}
 function obProgress(){ return '<div class="ob-prog">'+obMatrix()+obChart()+'</div>'; }
 function renderOnboarding(){
   if(!obReady){ setView(emptyBox("database","Onboarding needs a quick database update","Run migrate-onboarding.sql in the Supabase SQL Editor, then click Refresh. Your Concerns are not affected.")); $("count").textContent=""; return; }
@@ -4937,7 +4953,7 @@ function renderOnboarding(){
       +'</div></td></tr>';
   }).join("");
   setView(bar+obProgress()
-    +'<div class="card" style="overflow-x:auto"><table class="is-table ob-table"><thead><tr><th class="c-status">Status</th><th class="ob-updcol">Updates</th><th class="c-issue">Issue</th><th class="c-store">Store Number</th><th class="hide-sm c-logged">Logged</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="card" style="overflow-x:auto"><table class="is-table ob-table"><thead><tr><th class="c-status">Status</th><th class="ob-updcol">Updates</th><th class="c-issue">Issue '+obPlatCounts(list)+'</th><th class="c-store">Store Number</th><th class="hide-sm c-logged">Logged</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +pagerHtml('ob',obPage,total,list.length)+'</div>');
 }
 
@@ -5102,6 +5118,7 @@ document.addEventListener("click",e=>{
   if(a==="ob-upd") openObUpdate(+g);
   else if(a==="ob-hist") obShowHistory(+g);
   else if(a==="ob-del") askDeleteOb(+g);
+  else if(a==="ob-hplat"){ obPlat=(obPlat.length===1&&obPlat[0]===g)?[]:[g]; obPage=1; render(); }
   else if(a==="ob-store"){ const st=storeByNum[g]; if(st) openStore(st.id); else toast("Store "+g+" is not in the store list","err"); }
   else if(a==="ob-cell"){ const [k,s]=g.split("|");
     if(obCellOn(k,s)){ obPlat=[]; obTpd=[]; obEz=[]; } else { obPlat=[k]; if(k==="ez"){ obEz=[s]; obTpd=[]; } else { obTpd=[s]; obEz=[]; } }
