@@ -709,6 +709,46 @@
   .toast.ok{background:var(--green)}
   .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
 
+  /* ---------- Issue preview + details ---------- */
+  .dpv{position:relative;cursor:pointer;border-radius:8px;margin:2px -6px;padding:3px 6px;outline:none;transition:background .15s}
+  .dpv-txt{max-height:3em;overflow:hidden;line-height:1.5;font-size:13px;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
+  .dpv-txt ul,.dpv-txt ol{margin:0;padding-left:18px}
+  .dpv-hint{position:absolute;right:6px;bottom:2px;display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;opacity:0;transform:translateY(3px);transition:opacity .15s,transform .15s;pointer-events:none;box-shadow:0 4px 10px rgba(0,80,30,.2)}
+  .dpv-hint svg{width:12px;height:12px}
+  .dpv:hover,.dpv:focus-visible{background:var(--lime-soft)}
+  .dpv:hover .dpv-hint,.dpv:focus-visible .dpv-hint{opacity:1;transform:none}
+  .dpv:focus-visible{box-shadow:0 0 0 3px var(--yellow)}
+  @media (prefers-reduced-motion: reduce){ .dpv-hint{transition:none} }
+  .id-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px}
+  .id-stores{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+  .id-st{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-size:13px} .id-st span{flex:1;color:var(--ink-soft)}
+  /* ---------- Call follow-ups ---------- */
+  .req{color:var(--danger)}
+  .db-kpi .sb .due-n{color:var(--danger);font-weight:700}
+  .cl-upd{display:none;margin-top:10px;padding:12px;border:1px solid var(--lime-soft);background:var(--lime-tint);border-radius:11px}
+  .cl-upd.show{display:block}
+  .cl-nextrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .cl-nextrow input{height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-size:14px;min-width:220px}
+  .cfu-ctx{display:flex;flex-direction:column;gap:6px;background:var(--lime-tint);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:14px;font-size:13px}
+  .cfu-ctx .k{display:inline-block;min-width:140px;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em}
+  .cfu-state{display:flex;gap:8px;align-items:flex-start;border-radius:9px;padding:9px 12px;margin-bottom:12px;font-size:13px;background:var(--idle-soft);color:var(--ink-soft)}
+  .cfu-state svg{width:17px;height:17px;flex:none;margin-top:1px}
+  .cfu-state.open{background:var(--warn-soft);color:#7a5600} .cfu-state.closed{background:var(--ok-soft);color:#146c3a}
+  .badge.cl-fu-due{background:var(--danger-soft);color:var(--danger);border:1px solid #f0b8b0}
+  .clv-next{display:flex;align-items:center;gap:8px;margin-top:12px;padding:9px 12px;border-radius:10px;background:var(--warn-soft);color:#7a5600;font-size:13px}
+  .clv-next.due{background:var(--danger-soft);color:var(--danger)} .clv-next svg{width:16px;height:16px}
+  .cl-updlbl{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;color:var(--green-dark);font-weight:700;margin-top:2px} .cl-updlbl svg{width:10px;height:10px}
+  .cl-latest{display:flex;gap:5px;align-items:flex-start;margin-top:5px;font-size:12px;color:var(--ink-soft)} .cl-latest svg{width:12px;height:12px;flex:none;margin-top:2px;color:var(--green)}
+  .cl-latest span{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  #remStack{position:fixed;right:18px;bottom:18px;z-index:300;display:flex;flex-direction:column;gap:10px;max-width:340px}
+  .rem-card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--yellow);border-radius:12px;box-shadow:0 14px 34px rgba(0,60,25,.22);padding:12px 12px 12px 14px;animation:remIn .25s ease}
+  @keyframes remIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){ .rem-card{animation:none} }
+  .rem-top{display:flex;gap:10px;align-items:flex-start} .rem-top div{flex:1;display:flex;flex-direction:column} .rem-top b{font-size:14px} .rem-top span{font-size:12.5px;color:var(--ink-soft)}
+  .rem-top .x{width:26px;height:26px;border:none;background:none;font-size:18px;cursor:pointer;color:var(--ink-soft);border-radius:6px}
+  .rem-ic{width:32px;height:32px;border-radius:9px;background:var(--yellow-soft);color:var(--yellow-dark);display:grid;place-items:center;flex:none} .rem-ic svg{width:17px;height:17px}
+  .rem-body{font-size:13px;margin:8px 0 10px} .rem-body small{display:block;color:var(--danger);font-weight:600;margin-top:3px}
+  .rem-act{display:flex;gap:6px}
   /* ---------- Reports ---------- */
   .rp-fmt{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:#fff;gap:3px}
   .rp-fmt button{display:inline-flex;align-items:center;gap:6px;border:none;background:none;border-radius:8px;padding:7px 12px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer}
@@ -1075,6 +1115,7 @@
       <div id="connStatus" class="conn-status"><i class="d"></i><span>Not connected</span></div>
       <div class="field" style="margin-bottom:13px"><label>Project URL</label><input id="c_url" placeholder="https://xxxx.supabase.co" spellcheck="false"></div>
       <div class="field"><label>Database key (publishable or anon)</label><input id="c_key" placeholder="sb_publishable_…" spellcheck="false"></div>
+      <div class="field" style="margin-top:14px"><label>Follow-up reminders</label><div id="notifState"></div><div class="help">Reminders pop up in the app when a follow-up is due, while the app is open. Desktop notifications also show when this tab is in the background.</div></div>
       <div class="help">Saved on this computer so you stay connected. Share the file with your team and it connects automatically.</div>
       <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:15px">
         <label style="display:block;font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:7px">Auto-refresh when idle</label>
@@ -1228,6 +1269,36 @@
   </div>
 </div>
 
+<!-- Issue / onboarding details -->
+<div class="overlay top" id="idOverlay" role="dialog" aria-modal="true" aria-labelledby="id_title">
+  <div class="modal wide">
+    <div class="head"><i data-lucide="file-text"></i><div><h2 id="id_title">Issue details</h2><div class="subt" id="id_sub"></div></div><button class="x" id="idX" aria-label="Close">&times;</button></div>
+    <div class="body" id="id_body"></div>
+    <footer>
+      <button class="btn ghost" id="idStore" style="margin-right:auto"><i data-lucide="store"></i>Open store</button>
+      <button class="btn ghost" id="idClose">Close</button>
+      <button class="btn outline round" id="idHist"><i data-lucide="history"></i>View all updates</button>
+      <button class="btn" id="idUpd"><i data-lucide="refresh-cw"></i>Update status</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Follow-up update -->
+<div class="overlay top" id="cfuOverlay" role="dialog" aria-modal="true" aria-labelledby="cfu_title">
+  <div class="modal wide">
+    <div class="head"><i data-lucide="repeat"></i><div><h2 id="cfu_title">Follow-up update</h2><div class="subt" id="cfu_sub"></div></div><button class="x" id="cfuX" aria-label="Close">&times;</button></div>
+    <div class="body">
+      <div class="cfu-ctx" id="cfu_ctx"></div>
+      <div class="field" style="margin-bottom:12px"><label>Outcome now *</label><div class="chips" id="cfu_outcomes" role="group" aria-label="Outcome"></div><div class="fld-err" id="cfu_out_err" role="alert"></div></div>
+      <div class="cfu-state" id="cfu_state"></div>
+      <div class="field" style="margin-bottom:12px"><label for="cfu_note">Update <span id="cfu_note_req" class="req">*</span></label>
+        <textarea id="cfu_note" class="cl-ta" maxlength="4000" placeholder="What happened on this follow-up? e.g. Reached owner, will send menu photos tomorrow."></textarea><div class="fld-err" id="cfu_note_err" role="alert"></div></div>
+      <div class="field" id="cfu_next_wrap"><label for="cfu_next">Next follow-up — date and time *</label><div id="cfu_next_holder"></div></div>
+    </div>
+    <footer><button class="btn ghost" id="cfuCancel">Cancel</button><button class="btn" id="cfuSave"><i data-lucide="save"></i>Save update</button></footer>
+  </div>
+</div>
+
 <!-- Log / edit call -->
 <div class="overlay top" id="clOverlay" role="dialog" aria-modal="true" aria-labelledby="cl_title">
   <div class="modal wide">
@@ -1245,8 +1316,16 @@
       <div class="field" style="margin-bottom:14px"><label for="cl_reason">Reason for call *</label><textarea id="cl_reason" class="cl-ta" maxlength="4000" placeholder="Enter the reason for this call..." aria-describedby="cl_reason_err"></textarea><div class="fld-err" id="cl_reason_err" role="alert"></div></div>
       <div class="field" style="margin-bottom:14px"><label for="cl_result">Result of call *</label><textarea id="cl_result" class="cl-ta" maxlength="4000" placeholder="Enter the call outcome, response, or next steps..." aria-describedby="cl_result_err cl_result_hint"></textarea>
         <div class="help" id="cl_result_hint" style="margin-top:4px">e.g. Franchisee answered and confirmed the details · No answer, voicemail left · Follow-up required · Requested more information · Call completed</div><div class="fld-err" id="cl_result_err" role="alert"></div></div>
-      <div class="field" style="margin-bottom:10px"><label>Outcome (optional — helps the summary numbers)</label><div class="chips" id="cl_outcomes" role="group" aria-label="Outcome"></div></div>
-      <label class="ob-syncrow"><input type="checkbox" id="cl_follow"><span><b>Needs follow-up</b> — counts in “Follow-ups required” until it is marked done</span></label>
+      <div class="field" style="margin-bottom:10px"><label>Outcome</label><div class="chips" id="cl_outcomes" role="group" aria-label="Outcome"></div>
+        <div class="help" style="margin-top:4px">Every outcome except <b>Completed</b> needs an update.</div></div>
+      <label class="ob-syncrow"><input type="checkbox" id="cl_follow" onchange="clSyncUpd()"><span><b>Needs follow-up</b> — stays open until the call is Completed</span></label>
+      <div class="help" id="cl_fu_note" style="margin:2px 0 0 25px"></div>
+      <div class="cl-upd" id="cl_upd_wrap">
+        <div class="field" style="margin-bottom:12px"><label for="cl_upd">Update <span id="cl_upd_req" class="req">*</span></label>
+          <textarea id="cl_upd" class="cl-ta" maxlength="4000" placeholder="What happened, and what is the next step? e.g. Left voicemail — will call back Thursday." aria-describedby="cl_upd_hint cl_upd_err" oninput="clSyncUpd()"></textarea>
+          <div class="help" id="cl_upd_hint" style="margin-top:4px"></div><div class="fld-err" id="cl_upd_err" role="alert"></div></div>
+        <div class="field" id="cl_next_wrap"><label for="cl_next">Next follow-up — date and time *</label><div id="cl_next_holder"></div></div>
+      </div>
       <div class="cl-err" id="cl_err" role="alert"><i data-lucide="circle-alert"></i><span></span></div>
     </div>
     <footer><button class="btn ghost" id="clCancel">Cancel</button><button class="btn" id="clSave"><i data-lucide="save"></i>Save Call</button></footer>
@@ -1536,7 +1615,7 @@ function friendly(err){
 function saveCreds(u,k){try{localStorage.setItem("ft2_url",u);localStorage.setItem("ft2_key",k);}catch(e){}}
 function clearCreds(){try{localStorage.removeItem("ft2_url");localStorage.removeItem("ft2_key");}catch(e){}}
 function getCreds(){let u="",k="";try{u=localStorage.getItem("ft2_url")||"";k=localStorage.getItem("ft2_key")||"";}catch(e){}return{url:u||DEFAULT_URL,key:k||DEFAULT_KEY};}
-function openSettings(){const c=getCreds(); if(!$("c_url").value)$("c_url").value=c.url; if(!$("c_key").value)$("c_key").value=c.key; $("settingsOverlay").classList.add("show");}
+function openSettings(){ setTimeout(showNotifState,0);const c=getCreds(); if(!$("c_url").value)$("c_url").value=c.url; if(!$("c_key").value)$("c_key").value=c.key; $("settingsOverlay").classList.add("show");}
 function closeSettings(){$("settingsOverlay").classList.remove("show");}
 
 async function connect(url,key,silent){
@@ -1638,6 +1717,7 @@ async function loadAll(silent){
   [FR,ST,SF,IS]=data;
   try{ OB=await fetchAll("onboarding"); obReady=true; }catch(e){ OB=[]; obReady=false; }
   try{ CL=await fetchAll("call_logs"); clReady=true; }catch(e){ CL=[]; clReady=false; }
+  setTimeout(remCheck,800);
   setStatus("ok","Connected");
   reindex(); buildTerrFilter(); updCounts(); render();
   lastRefreshAt=new Date(); showLastRefresh();
@@ -1654,7 +1734,7 @@ function setIdleMinutes(v){ v=Math.max(0,Math.min(120,Math.round(+v||0))); try{ 
   toast(v?"Auto-refresh after "+v+" min idle":"Auto-refresh turned off","ok"); }
 function showLastRefresh(){ const el=$("lastRefresh"); if(el&&lastRefreshAt) el.textContent="Last refreshed "+lastRefreshAt.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+"."; }
 function busyEditing(){
-  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay","dlOverlay","obOverlay","obUpdOverlay","clOverlay","clViewOverlay"];
+  const forms=["frOverlay","logOverlay","updOverlay","noteOverlay","grpOverlay","multiOverlay","addStOverlay","bulkOverlay","sfOverlay","settingsOverlay","confirmOverlay","impPwOverlay","conflictOverlay","histOverlay","sdOverlay","frInfoOverlay","stIssOverlay","rpOverlay","dlOverlay","obOverlay","obUpdOverlay","clOverlay","clViewOverlay","idOverlay","cfuOverlay"];
   if(forms.some(id=>$(id)&&$(id).classList.contains("show"))) return true;
   if(lkEditing && $("linksOverlay").classList.contains("show")) return true;
   if(curStore && (Object.values(swEditing||{}).some(Boolean) || platMenu)) return true;
@@ -2652,8 +2732,8 @@ GEN.cl={ title:"Call log report", file:"call-log-report", noun:"call", nounPl:"c
           ["byfr","By franchisee","Calls per franchisee"],["bystore","By store","Calls per store"],["byoutcome","By outcome","Calls per outcome"],["byday","By day","Calls per day"]],
   defSheets:["summary","calls","followups","byfr"],
   cols:[["date","Date"],["time","Time"],["fr","Franchisee"],["phone","Franchisee phone"],["email","Franchisee email"],["store","Store #"],["city","Store city"],["terr","Territory"],
-        ["reason","Reason for call"],["result","Result of call"],["outcome","Outcome"],["fu","Follow-up"],["fudone","Follow-up done"],["logged","Logged"],["edited","Last edited"],["fbc","FBC"],["om","OM"]],
-  defOff:["city","logged","edited","fbc","om"],
+        ["reason","Reason for call"],["result","Result of call"],["outcome","Outcome"],["fu","Follow-up"],["fudone","Follow-up done"],["next","Next follow-up"],["latest","Latest update"],["lastat","Latest update time"],["nupd","Updates"],["allupd","All updates (with dates)"],["logged","Logged"],["edited","Last edited"],["fbc","FBC"],["om","OM"]],
+  defOff:["city","logged","edited","fbc","om","lastat","allupd"],
   useTab:()=>{ RP.period=clF.range==="all"?"all":clF.range==="today"?"today":clF.range==="week"?"thisweek":clF.range==="month"?"thismonth":clF.range==="30"?"lastdays":"range"; if(clF.range==="30") RP.days=30; if(clF.range==="custom"){ RP.from=clF.from; RP.to=clF.to; }
     RP.fr=clF.fr||""; RP.store=clF.store||""; },
   countExtra:sel=>' · <b>'+new Set(sel.map(r=>r.franchisee_id||r.franchisee_name)).size+'</b> franchisees · <b>'+sel.filter(clOpenFU).length+'</b> open follow-ups',
@@ -2668,6 +2748,8 @@ GEN.cl={ title:"Call log report", file:"call-log-report", noun:"call", nounPl:"c
     const rowOf=(r,cols)=>{ const cb=frContactBits(r.franchisee_id), st=storeByNum[String(r.store_num||"")], team=staffForStore(st), dt=rpDate(r.call_at);
       const v={date:rpDateText(r.call_at).slice(0,10), time:rpDateText(r.call_at).slice(11), fr:clFrName(r), phone:cb.phones.join(", "), email:cb.emails.join(", "),
         store:r.store_num||"General", city:st?st.city||"":"", terr:st?dTerrOf(st):"", reason:r.reason||"", result:r.result||"", outcome:r.outcome||"",
+        next:r.next_follow_up_at&&clOpenFU(r)?rpDate(r.next_follow_up_at):"", latest:(clLatestNote(r)||{}).note||"", lastat:rpDate(clLast(r)), nupd:clHist(r).length,
+        allupd:clHist(r).map(e=>rpDateText(e.ts)+" — "+(e.kind==="logged"?"Logged":e.kind==="follow-up"?(e.closed?"Follow-up closed":"Follow-up"):e.kind==="edited"?"Edited":"Update")+(e.outcome?" ["+e.outcome+"]":"")+(e.note?": "+e.note:"")+(e.next?" (next "+rpDateText(e.next)+")":"")).join("\n"),
         fu:!r.follow_up?"No":(r.follow_up_done_at?"Done":"Open"), fudone:r.follow_up_done_at?rpDate(r.follow_up_done_at):"", logged:rpDate(r.created_at), edited:rpDate(r.updated_at),
         fbc:team.fbc.map(x=>x.name).join(", "), om:team.om.map(x=>x.name).join(", ")};
       return cols.map(c=>v[c[0]]); };
@@ -2693,6 +2775,8 @@ function actEvents(){
   OB.filter(r=>r.platform!=="fj").forEach(r=>obHist(r).forEach(e=>ev.push({cat:"Onboarding", at:e.ts||r.created_at, store:r.store_num, fid:obrFid(r),
     what:(e.kind==="created"?"Onboarding started":(e.prev&&e.prev!==e.status?"Status: "+e.prev+" → "+e.status:"Onboarding update"))+" · "+obPName(r.platform),
     detail:e.kind==="created"?richToPlain(r.details||""):richToPlain(e.action||""), status:e.status||r.status, ref:obPName(r.platform)})));
+  CL.forEach(r=>clHist(r).filter(e=>e.kind!=="logged").forEach(e=>ev.push({cat:"Calls", at:e.ts, store:r.store_num, fid:r.franchisee_id, frName:r.franchisee_name,
+    what:(e.kind==="follow-up"?(e.closed?"Follow-up closed":"Follow-up update"):"Call edited")+(e.outcome?" · "+e.outcome:""), detail:e.note||"", status:e.closed?"Follow-up done":(e.next?"Next "+rpDateText(e.next):""), ref:""})));
   CL.forEach(r=>ev.push({cat:"Calls", at:r.call_at, store:r.store_num, fid:r.franchisee_id, frName:r.franchisee_name, what:"Call"+(r.outcome?" · "+r.outcome:""),
     detail:(r.reason||"")+(r.result?" — "+r.result:""), status:!r.follow_up?"":(r.follow_up_done_at?"Follow-up done":"Follow-up open"), ref:""}));
   return ev;
@@ -2963,7 +3047,7 @@ function renderFrIssues(){
     return '<tr>'
       +'<td class="c-status">'+statusBadge(i.status)+'</td>'
       +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
-      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div><div class="rt">'+richHtml(i.title)+'</div>'
+      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div>'+descPreview(richHtml(i.title),"iss-view",i.id)
         +(pls.length?'<div class="muted" style="font-size:11.5px;margin-top:3px">'+esc(pls.join(", "))+'</div>':'')
         +(i.action_taken?'<div class="muted" style="font-size:11.5px;margin-top:3px">Last action: '+esc(oneLine(i.action_taken,120))+'</div>':'')+'</td>'
       +'<td class="c-store"><button class="btn link" style="padding:0;font-weight:700" title="Show only this store\'s issues" onclick="openStoreIssues(\''+esc(String(i.store_num||""))+'\')">'+esc(i.store_num||"—")+'</button></td>'
@@ -2996,7 +3080,7 @@ function renderStoreIssues(){
     return '<tr>'
       +'<td class="c-status">'+statusBadge(i.status)+'</td>'
       +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
-      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div><div class="rt">'+richHtml(i.title)+'</div>'
+      +'<td class="c-issue"><div class="ic-top">'+noTag(i)+(gsize>1?'<span class="mtag" title="Logged to '+gsize+' stores"><i data-lucide="layers"></i>'+gsize+' stores</span>':'')+'</div>'+descPreview(richHtml(i.title),"iss-view",i.id)
         +(pls.length?'<div class="muted" style="font-size:11.5px;margin-top:3px">'+esc(pls.join(", "))+'</div>':'')
         +(i.action_taken?'<div class="muted" style="font-size:11.5px;margin-top:3px">Last action: '+esc(oneLine(i.action_taken,120))+'</div>':'')+'</td>'
       +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
@@ -3119,7 +3203,7 @@ function renderIssuesByIssue(bar, pass, frName, issueRank){
       return '<tr class="click" onclick="openStoreIssues(\''+esc(String(i.store_num||""))+'\')" title="Open this store\'s issues">'
         +'<td class="c-status">'+statusBadge(i.status)+'</td>'
         +'<td class="c-upd">'+updPill('openHistory('+i.id+')', historyEntries(i).length)+'</td>'
-        +'<td class="c-issue">'+noTag(i)+' '+esc(oneLine(i.title))+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+        +'<td class="c-issue">'+noTag(i)+descPreview(richHtml(i.title),"iss-view",i.id)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
         +'<td class="hide-sm store c-store">'+(i.store_num?esc(i.store_num):'—')+'</td>'
         +'<td class="hide-sm">'+esc(frName[i.franchisee_id]||"")+'</td>'
         +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(i.created_at)+(i.updated_at&&i.updated_at!==i.created_at?'<br>upd. '+fmtTs(i.updated_at):'')+'</td>'
@@ -3132,7 +3216,7 @@ function renderIssuesByIssue(bar, pass, frName, issueRank){
     return '<tr class="click" onclick="openGroupUpdate(\''+e.gid+'\')" title="Update this multi-store issue">'
       +'<td class="c-status">'+groupStatusBadge(m)+'</td>'
       +'<td class="c-upd">'+updPill('openHistoryGroup(\''+e.gid+'\')', Math.max(...m.map(x=>historyEntries(x).length)))+'</td>'
-      +'<td class="c-issue"><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+noTag(f,m.length>1?' +'+(m.length-1):'')+' '+esc(oneLine(f.title))+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
+      +'<td class="c-issue"><span class="mtag"><i data-lucide="layers"></i>'+m.length+' stores</span> '+noTag(f,m.length>1?' +'+(m.length-1):'')+descPreview(richHtml(f.title),"iss-view",f.id)+(pls.length?'<br><span class="muted" style="font-size:11.5px">'+esc(pls.join(", "))+'</span>':'')+'</td>'
       +'<td class="hide-sm store c-store" style="font-size:12.5px">'+esc(shown)+'</td>'
       +'<td class="hide-sm">'+esc(owners.length>1?owners.length+' franchisees':(owners[0]||""))+'</td>'
       +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(f.created_at)+(lastUpd&&lastUpd!==f.created_at?'<br>upd. '+fmtTs(lastUpd):'')+'</td>'
@@ -4357,10 +4441,15 @@ $("obuX").onclick=$("obuCancel").onclick=()=>$("obUpdOverlay").classList.remove(
 $("obuSave").onclick=saveObUpdate;
 $("clX").onclick=$("clCancel").onclick=()=>clClose(false);
 $("clSave").onclick=saveCallLog;
+$("cl_next_holder").innerHTML=clNextField("cl_next"); $("cfu_next_holder").innerHTML=clNextField("cfu_next");
+$("idX").onclick=$("idClose").onclick=()=>$("idOverlay").classList.remove("show");
+$("idHist").onclick=()=>idAction("hist"); $("idUpd").onclick=()=>idAction("upd"); $("idStore").onclick=()=>idAction("store");
+$("cfuX").onclick=$("cfuCancel").onclick=()=>$("cfuOverlay").classList.remove("show");
+$("cfuSave").onclick=saveFollowUp;
 $("clvX").onclick=()=>$("clViewOverlay").classList.remove("show");
 $("clvEdit").onclick=()=>{ const id=clViewId; $("clViewOverlay").classList.remove("show"); openCallLog(null,id); };
 $("clvDel").onclick=()=>askDeleteCall(clViewId);
-$("clvFU").onclick=clToggleFU;
+$("clvFU").onclick=()=>openFollowUp(clViewId);
 $("clvStore").onclick=()=>{ const r=CL.find(x=>x.id===clViewId); const st=r&&storeByNum[String(r.store_num)]; if(st){ $("clViewOverlay").classList.remove("show"); openStore(st.id); } };
 $("clOverlay").addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); saveCallLog(); } });
 $("ob_store_in").oninput=obSuggest;
@@ -4838,7 +4927,7 @@ function renderOnboarding(){
       +'<td class="ob-updcol"><div class="ob-upd"><button class="upd-pill" data-act="ob-hist" data-arg="'+r.id+'" data-tip="View all updates ('+h.length+' step'+(h.length!==1?'s':'')+')"><i data-lucide="history"></i>'+h.length+'</button>'
         +'<span class="ob-last">'+(r.last_update?esc(oneLine(r.last_update,90)):'<span class="muted">No updates yet</span>')+'</span></div></td>'
       +'<td class="c-issue"><div class="ic-top">'+obPlatTag(r.platform)+(gsize>1?'<span class="mtag" data-tip="Created in one request with '+(gsize-1)+' other store/platform item'+(gsize>2?'s':'')+'"><i data-lucide="layers"></i>Request · '+gsize+'</span>':'')+'</div>'
-        +(r.details?'<div class="rt ob-det">'+richHtml(r.details)+'</div>':'<span class="muted">Onboarding request</span>')+'</td>'
+        +(r.details?descPreview(richHtml(r.details),"ob-view",r.id):descPreview('<span class="muted">Onboarding request</span>',"ob-view",r.id))+'</td>'
       +'<td class="c-store"><button class="ob-snum" data-act="ob-store" data-arg="'+esc(r.store_num)+'" data-tip="Open store information">'+esc(r.store_num)+'</button>'
         +'<div class="muted" style="font-size:11.5px">'+esc(f?f.name:"—")+'</div>'+(st&&storeStatusIfNotOpen(st)?storeStatusIfNotOpen(st):'')+'</td>'
       +'<td class="hide-sm muted c-logged" style="font-size:12px">'+fmtTs(r.created_at)+(r.updated_at&&r.updated_at!==r.created_at?'<br>upd. '+fmtTs(r.updated_at):'')+'</td>'
@@ -5031,7 +5120,8 @@ function clFmt(ts){ const d=new Date(ts); if(isNaN(d)) return {d:"—",t:""};
   return {d:d.toLocaleDateString([], {weekday:"short",month:"short",day:"numeric",year:"numeric"}), t:d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}; }
 function clOutcomeBadge(o){ if(!o) return ""; const c={"Answered":"cl-o-ans","No answer / voicemail":"cl-o-nva","Follow-up required":"cl-o-fu","Requested more info":"cl-o-info","Completed":"cl-o-done"}[o]||"";
   return '<span class="badge '+c+'">'+esc(o)+'</span>'; }
-function clFUBadge(r){ if(!r.follow_up) return ""; return r.follow_up_done_at?'<span class="badge cl-fu-done" data-tip="Follow-up completed '+esc(fmtTs(r.follow_up_done_at))+'"><i data-lucide="check"></i>Follow-up done</span>':'<span class="badge cl-fu-open" data-tip="This call needs a follow-up"><i data-lucide="flag"></i>Follow-up</span>'; }
+function clFUBadge(r){ if(!r.follow_up) return "";
+  if(clOpenFU(r) && r.next_follow_up_at){ const due=clDue(r); return '<span class="badge '+(due?'cl-fu-due':'cl-fu-open')+'" data-tip="'+(due?'Follow-up was due ':'Next follow-up ')+esc(fmtTs(r.next_follow_up_at))+'"><i data-lucide="'+(due?'bell-ring':'flag')+'"></i>'+(due?'Follow-up due':'Follow-up · '+esc(new Date(r.next_follow_up_at).toLocaleDateString([], {month:"short",day:"numeric"})))+'</span>'; } return r.follow_up_done_at?'<span class="badge cl-fu-done" data-tip="Follow-up completed '+esc(fmtTs(r.follow_up_done_at))+'"><i data-lucide="check"></i>Follow-up done</span>':'<span class="badge cl-fu-open" data-tip="This call needs a follow-up"><i data-lucide="flag"></i>Follow-up</span>'; }
 function clFrName(r){ const f=r.franchisee_id?FR.find(x=>x.id===r.franchisee_id):null; return f?f.name:(r.franchisee_name||"—"); }
 
 /* ---------- filtering ---------- */
@@ -5048,7 +5138,7 @@ function clFiltered(){
   const sq=searchQ(), [from,to]=clRange();
   const frQ=normName(clF.fr), stQ=String(clF.store||"").trim().replace(/^#/,"");
   return CL.filter(r=>{
-    const d=new Date(r.call_at); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
+    const d=new Date(clLast(r)); if(from&&!(d>=from)) return false; if(to&&!(d<to)) return false;
     if(frQ && !normName(clFrName(r)).includes(frQ) && !normName(r.franchisee_name).includes(frQ)) return false;
     if(stQ && String(r.store_num||"")!==stQ) return false;
     if(clF.outcome){
@@ -5070,7 +5160,8 @@ function clSet(k,v){ clF[k]=v; clPage=1; if(k==="range"&&v==="custom"&&!clF.from
 /* ---------- Call Logs tab ---------- */
 function renderCalls(){
   if(!clReady){ $("count").textContent=""; setView(emptyBox("database","Call Logs needs a quick database update","Run migrate-call-logs.sql in the Supabase SQL Editor, then click Refresh.")); return; }
-  const list=clFiltered(), t=r=>new Date(r.call_at).getTime()||0;
+  const list=clFiltered(), t=r=>new Date(clLast(r)).getTime()||0;
+  const dueN=list.filter(clDue).length;
   list.sort((a,b)=>clSort==="desc"?t(b)-t(a):t(a)-t(b));
   const d0=clDay(new Date()), d1=new Date(d0); d1.setDate(d1.getDate()+1);
   const w0=clWeekStart(), w1=new Date(w0); w1.setDate(w1.getDate()+7);
@@ -5084,7 +5175,7 @@ function renderCalls(){
     +dKpi("phone","Total calls",fmtN(list.length),clAnyFilter()?"matching filters":"all time","Number of call logs"+scopeNote+".","",null)
     +dKpi("calendar-check","Calls today",fmtN(today),new Date().toLocaleDateString([], {month:"short",day:"numeric"}),"Calls made today"+scopeNote+" (your computer's time zone).","",null)
     +dKpi("calendar-range","Calls this week",fmtN(week),"since "+w0.toLocaleDateString([], {month:"short",day:"numeric"}),"Calls made this week, Sunday to Saturday"+scopeNote+".","",null)
-    +dKpi("flag","Follow-ups required",fmtN(fu),fu?"click to see them":"all caught up","Calls marked “Needs follow-up” that are not done yet"+scopeNote+".",fu?"warn":"",fu?["cl-fu",""]:null)
+    +dKpi("flag","Follow-ups required",fmtN(fu),fu?(dueN?'<span class="due-n">'+dueN+' due now</span> · click to see':"click to see them"):"all caught up","Calls marked “Needs follow-up” that are not done yet"+scopeNote+".",fu?"warn":"",fu?["cl-fu",""]:null)
     +'</div>';
 
   // insights (collapsible)
@@ -5131,19 +5222,19 @@ function renderCalls(){
   if(!list.length){ setView(kpis+'<div class="cl-inswrap">'+insToggle+'</div>'+filters+emptyBox("search-x","No calls match","Try a different search, or reset the filters.")); return; }
 
   const total=Math.max(1,Math.ceil(list.length/PAGE_CL)); if(clPage>total) clPage=total; if(clPage<1) clPage=1;
-  const rows=list.slice((clPage-1)*PAGE_CL, clPage*PAGE_CL).map(r=>{ const w=clFmt(r.call_at);
+  const rows=list.slice((clPage-1)*PAGE_CL, clPage*PAGE_CL).map(r=>{ const last=clLast(r), w=clFmt(last), upd=new Date(last).getTime()!==new Date(r.call_at).getTime(), ln=clLatestNote(r);
     return '<tr class="click" data-act="cl-view" data-arg="'+r.id+'" tabindex="0" aria-label="View call to '+esc(clFrName(r))+' on '+esc(w.d)+'">'
-      +'<td><div class="cl-when"><b>'+esc(w.d)+'</b><span>'+esc(w.t)+'</span></div></td>'
+      +'<td><div class="cl-when" data-tip="'+esc(upd?'Latest update '+fmtTs(last)+' · call made '+fmtTs(r.call_at):'Call made '+fmtTs(r.call_at))+'"><b>'+esc(w.d)+'</b><span>'+esc(w.t)+'</span>'+(upd?'<small class="cl-updlbl"><i data-lucide="refresh-cw"></i>Updated</small>':'')+'</div></td>'
       +'<td class="cl-fr">'+esc(clFrName(r))+clContactHtml(r.franchisee_id)+(r.franchisee_id&&clFrName(r)!==r.franchisee_name&&r.franchisee_name?'<small data-tip="Name when the call was logged">was “'+esc(r.franchisee_name)+'”</small>':'')+'</td>'
       +'<td class="cl-st">'+(r.store_num?'<b>'+esc(r.store_num)+'</b>':'<span class="muted">General</span>')+'</td>'
       +'<td class="cl-txt"><div class="cl-clamp">'+esc(r.reason)+'</div></td>'
-      +'<td class="cl-txt"><div class="cl-res-top">'+clOutcomeBadge(r.outcome)+clFUBadge(r)+'</div><div class="cl-clamp">'+esc(r.result)+'</div></td>'
+      +'<td class="cl-txt"><div class="cl-res-top">'+clOutcomeBadge(r.outcome)+clFUBadge(r)+'</div><div class="cl-clamp">'+esc(r.result)+'</div>'+(ln&&ln.note?'<div class="cl-latest"><i data-lucide="message-square"></i><span>'+esc(oneLine(ln.note,120))+'</span></div>':'')+'</td>'
       +'<td class="c-act"><div class="row-acts">'
         +'<button class="iconbtn mini" data-act="cl-view" data-arg="'+r.id+'" data-tip="View full details" aria-label="View call"><i data-lucide="eye"></i></button>'
         +'<button class="iconbtn mini" data-act="cl-edit" data-arg="'+r.id+'" data-tip="Edit this call" aria-label="Edit call"><i data-lucide="pencil"></i></button>'
         +'<button class="iconbtn mini del" data-act="cl-del" data-arg="'+r.id+'" data-tip="Delete this call" aria-label="Delete call"><i data-lucide="trash-2"></i></button>'
       +'</div></td></tr>'; }).join("");
-  const sortTh='<th class="sortable on" data-act="cl-sort" data-tip="Click to sort '+(clSort==="desc"?"oldest":"newest")+' first" aria-sort="'+(clSort==="desc"?"descending":"ascending")+'">Date and Time<i data-lucide="'+(clSort==="desc"?"arrow-down":"arrow-up")+'"></i></th>';
+  const sortTh='<th class="sortable on" data-act="cl-sort" data-tip="Date and time of the latest update. Click to sort '+(clSort==="desc"?"oldest":"newest")+' first" aria-sort="'+(clSort==="desc"?"descending":"ascending")+'">Date and Time<i data-lucide="'+(clSort==="desc"?"arrow-down":"arrow-up")+'"></i></th>';
   setView(kpis+'<div class="cl-inswrap">'+insToggle+'</div>'+ins+filters
     +'<div class="card" style="overflow-x:auto"><table class="cl-table"><thead><tr>'+sortTh+'<th>Franchisee Name</th><th>Store Number</th><th>Reason for Call</th><th>Result of Call</th><th class="c-act">Actions</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +pagerHtml('cl',clPage,total,list.length)+'</div>');
@@ -5182,11 +5273,13 @@ function openCallLog(fid, editId){
   $("cl_when").value=clLocalInput(r?new Date(r.call_at):new Date());
   $("cl_when").max=clLocalInput(new Date(Date.now()+10*60000));
   $("cl_reason").value=r?r.reason:""; $("cl_result").value=r?r.result:"";
-  $("cl_follow").checked=!!(r&&r.follow_up);
+  $("cl_follow").checked=!!(r&&clOpenFU(r));
+  clCtx.prevOutcome=r?(r.outcome||""):""; clCtx.prevFollow=!!(r&&clOpenFU(r));
+  $("cl_upd").value=""; $("cl_next").value=(r&&r.next_follow_up_at)?clLocalInput(new Date(r.next_follow_up_at)):"";
   clFillStores(fixedFid, r?r.store_num:"");
   clShowContact(fixedFid||null);
   $("cl_outcomes").innerHTML=CL_OUTCOMES.map(o=>'<button type="button" class="mchip'+(r&&r.outcome===o?' sel':'')+'" data-v="'+esc(o)+'" aria-pressed="'+!!(r&&r.outcome===o)+'" onclick="clPickOutcome(this)">'+esc(o)+'</button>').join("");
-  clClearErrors(); $("cl_err").classList.remove("show");
+  clClearErrors(); $("cl_err").classList.remove("show"); clSyncUpd();
   clInit=clSnapshot(); clSaving=false; $("clSave").disabled=false;
   $("clOverlay").classList.add("show"); icons();
   setTimeout(()=>(clCtx.fixed?$("cl_reason"):$("cl_fr_in")).focus(),60);
@@ -5199,16 +5292,16 @@ function clFillStores(fid, cur){
   $("cl_store_hint").textContent=fid?(sts.length?sts.length+" store"+(sts.length!==1?"s":"")+" for this franchisee — optional":"This franchisee has no stores — the call is logged as general"):"Pick the franchisee first";
 }
 function clPickOutcome(b){ const on=!b.classList.contains("sel"); document.querySelectorAll("#cl_outcomes .mchip").forEach(x=>{ x.classList.remove("sel"); x.setAttribute("aria-pressed","false"); });
-  if(on){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); if(b.dataset.v==="Follow-up required") $("cl_follow").checked=true; } }
+  if(on){ b.classList.add("sel"); b.setAttribute("aria-pressed","true"); if(b.dataset.v==="Follow-up required") $("cl_follow").checked=true; } clSyncUpd(); }
 function clFrFromInput(){
   const v=$("cl_fr_in").value.trim(); const f=findDupFr(v,null);
   clCtx.fid=f?f.id:null; clFillStores(clCtx.fid,""); clShowContact(clCtx.fid);
   $("cl_fr_in").setAttribute("aria-invalid",String(!!v&&!f));
   clErr("cl_fr_in", v&&!f?"No franchisee with that exact name — pick one from the list.":"");
 }
-function clSnapshot(){ return JSON.stringify([clCtx&&clCtx.fid,$("cl_when").value,$("cl_store").value,$("cl_reason").value,$("cl_result").value,(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"",$("cl_follow").checked,$("cl_fr_in").value]); }
+function clSnapshot(){ return JSON.stringify([clCtx&&clCtx.fid,$("cl_when").value,$("cl_store").value,$("cl_reason").value,$("cl_result").value,(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"",$("cl_follow").checked,$("cl_fr_in").value,$("cl_upd").value,$("cl_next").value]); }
 function clErr(id,msg){ const el=$(id+"_err"); if(el){ el.textContent=msg||""; el.classList.toggle("show",!!msg); } const inp=$(id); if(inp){ inp.classList.toggle("bad",!!msg); if(msg) inp.setAttribute("aria-invalid","true"); else inp.removeAttribute("aria-invalid"); } }
-function clClearErrors(){ ["cl_fr_in","cl_when","cl_reason","cl_result"].forEach(id=>clErr(id,"")); }
+function clClearErrors(){ ["cl_fr_in","cl_when","cl_reason","cl_result","cl_upd","cl_next"].forEach(id=>clErr(id,"")); }
 function clClose(force){
   if(!force && clSnapshot()!==clInit){ pending={kind:"cl-discard"}; $("confirmOk").textContent="Discard"; $("confirmText").textContent="Discard this call log? What you typed will not be saved."; $("confirmOverlay").classList.add("show"); return; }
   $("clOverlay").classList.remove("show"); clCtx=null;
@@ -5224,23 +5317,39 @@ async function saveCallLog(){
   else if(when.getTime()>Date.now()+10*60000){ clErr("cl_when","The call time can't be in the future."); first=first||"cl_when"; }
   if(!reason){ clErr("cl_reason","Enter the reason for this call."); first=first||"cl_reason"; } else if(reason.length>4000){ clErr("cl_reason","Please keep the reason under 4,000 characters."); first=first||"cl_reason"; }
   if(!result){ clErr("cl_result","Enter the result of the call."); first=first||"cl_result"; } else if(result.length>4000){ clErr("cl_result","Please keep the result under 4,000 characters."); first=first||"cl_result"; }
+  clSyncUpd();
+  const updNote=$("cl_upd").value.trim(), followC=$("cl_follow").checked;
+  if(clCtx.needUpd && !updNote){ clErr("cl_upd",followC?"Write an update for this follow-up.":"Write an update — it's required for every outcome except Completed."); first=first||"cl_upd"; }
+  else if(updNote.length>4000){ clErr("cl_upd","Please keep the update under 4,000 characters."); first=first||"cl_upd"; }
+  let nextD=null;
+  if(followC){ const curR=clCtx.id?CL.find(x=>x.id===clCtx.id):null, unchanged=curR&&curR.next_follow_up_at&&$("cl_next").value===clLocalInput(new Date(curR.next_follow_up_at));
+    if(unchanged) nextD=new Date(curR.next_follow_up_at); else { const c=clCheckNext("cl_next"); if(c.err){ clErr("cl_next",c.err); first=first||"cl_next"; } else nextD=c.d; } }
   if(first){ $(first).focus(); toast("Please fix the highlighted fields","err"); return; }
   const sv=$("cl_store").value; let store_id=null, store_num=null;
   if(sv.startsWith("num:")) store_num=sv.slice(4); else if(sv){ const st=ST.find(x=>x.id===+sv); if(!st||st.franchisee_id!==clCtx.fid){ toast("That store doesn't belong to this franchisee","err"); return; } store_id=st.id; store_num=String(st.num); }
   const f=clCtx.fid?FR.find(x=>x.id===clCtx.fid):null;
   const outcome=(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||null;
   const follow=$("cl_follow").checked;
-  const rec={ franchisee_id:clCtx.fid, store_id, store_num, call_at:when.toISOString(), reason, result, outcome, follow_up:follow };
+  const nowTs=nowIso();
+  const rec={ franchisee_id:clCtx.fid, store_id, store_num, call_at:when.toISOString(), reason, result, outcome, follow_up:follow,
+    next_follow_up_at:follow&&nextD?nextD.toISOString():null };
   clSaving=true; const btn=$("clSave"); btn.disabled=true; const old=btn.innerHTML; btn.innerHTML='<span class="spin"></span>Saving…';
   let res;
   if(clCtx.id){
     const cur=CL.find(x=>x.id===clCtx.id);
-    if(!follow) rec.follow_up_done_at=null;
+    const wasOpen=clOpenFU(cur);
+    if(follow) rec.follow_up_done_at=null;
+    else if(wasOpen && outcome==="Completed"){ rec.follow_up=true; rec.follow_up_done_at=nowTs; }   // Completed closes the open follow-up
+    else if(!follow){ rec.follow_up=!!cur.follow_up && !!cur.follow_up_done_at; if(!rec.follow_up) rec.follow_up_done_at=null; }
+    const changes=[]; const lab={call_at:"call time",reason:"reason",result:"result",outcome:"outcome",store_num:"store",follow_up:"follow-up",next_follow_up_at:"next follow-up"};
+    Object.keys(lab).forEach(k=>{ const a=k==="call_at"||k==="next_follow_up_at"?(cur[k]?new Date(cur[k]).getTime():null):(cur[k]??null), b=k==="call_at"||k==="next_follow_up_at"?(rec[k]?new Date(rec[k]).getTime():null):(rec[k]??null); if(String(a)!==String(b)) changes.push(lab[k]); });
+    rec.history=[...clHist(cur), {ts:nowTs, kind:"edited", prev:cur.outcome||null, outcome, note:updNote, changes, follow_up:rec.follow_up&&!rec.follow_up_done_at, next:rec.next_follow_up_at, closed:!!(wasOpen&&rec.follow_up_done_at)}];
     if(f && cur && !cur.franchisee_name) rec.franchisee_name=f.name;
     res=await guardedUpdate("call_logs",cur,rec);
     if(res.row) Object.assign(cur,res.row);
   } else {
     rec.franchisee_name=f?f.name:"";
+    rec.history=[{ts:nowTs, kind:"logged", call_at:rec.call_at, outcome, note:updNote, follow_up:follow, next:rec.next_follow_up_at}];
     const {data,error}=await db.from("call_logs").insert(rec).select(); res={row:data&&data[0],error};
     if(res.row) CL.push(res.row);
   }
@@ -5250,7 +5359,9 @@ async function saveCallLog(){
     $("cl_err").querySelector("span").textContent=msg+" Your entries are still here — fix the problem and try again."; $("cl_err").classList.add("show"); icons(); return;
   }
   $("clOverlay").classList.remove("show");
-  toast(clCtx.id?"Call log updated":"Call logged"+(f?" for "+f.name:""),"ok"); clCtx=null;
+  toast(clCtx.id?"Call log updated":"Call logged"+(f?" for "+f.name:"")+(follow&&nextD?" · follow-up "+fmtTs(nextD.toISOString()):""),"ok");
+  if(follow&&nextD){ clAskNotify(); if(clCtx.id) remClear(clCtx.id); }
+  clCtx=null;
   updCounts(); render();
   if(tab==="franchisees" && selFr){ const dp=$("frDetailPane"); if(dp){ dp.innerHTML=detailHtml(selFr); icons(); } }
 }
@@ -5271,9 +5382,21 @@ function openCallView(id){
     +'<div class="clv-f"><span class="k">Logged</span><span class="v muted">'+esc(fmtTs(r.created_at))+(r.updated_at&&r.updated_at!==r.created_at?' · edited '+esc(fmtTs(r.updated_at)):'')+'</span></div>'
     +'</div>'
     +'<div class="clv-block"><span class="k">Reason for call</span><div class="clv-text">'+esc(r.reason)+'</div></div>'
-    +'<div class="clv-block"><span class="k">Result of call</span><div class="clv-text">'+esc(r.result)+'</div></div>';
+    +'<div class="clv-block"><span class="k">Result of call</span><div class="clv-text">'+esc(r.result)+'</div></div>'
+    +(clOpenFU(r)&&r.next_follow_up_at?'<div class="clv-next'+(clDue(r)?' due':'')+'"><i data-lucide="'+(clDue(r)?'bell-ring':'calendar-clock')+'"></i><span><b>'+(clDue(r)?'Follow-up due':'Next follow-up')+'</b> '+esc(fmtTs(r.next_follow_up_at))+'</span></div>':'')
+    +'<div class="clv-block"><span class="k">Updates — every change with date and time</span><div class="tl" style="margin-top:8px">'
+    +(()=>{ const h=clHist(r); if(!h.length) return '<p class="muted">No updates recorded.</p>';
+        return h.map((e,ix)=>{ const lab=e.kind==="logged"?"Call logged":e.kind==="follow-up"?(e.closed?"Follow-up closed":"Follow-up update"):e.kind==="edited"?"Call edited":"Update";
+          const col=e.closed||e.outcome==="Completed"?"var(--ok)":e.kind==="follow-up"?"var(--warn)":e.kind==="edited"?"#2f7fbf":"var(--green)";
+          return '<div class="tl-item"><div class="tl-dot" style="background:'+col+'">'+(ix+1)+'</div><div class="tl-body"><div class="tl-head"><span class="what">'+lab+'</span>'
+            +(e.prev&&e.outcome&&e.prev!==e.outcome?clOutcomeBadge(e.prev)+'<i data-lucide="arrow-right" class="arrow"></i>':'')+clOutcomeBadge(e.outcome)
+            +'<span class="tl-time"><i data-lucide="clock"></i>'+esc(fmtTs(e.ts))+'</span></div>'
+            +(e.note?'<div class="tl-act">'+esc(e.note)+'</div>':'')
+            +(e.changes&&e.changes.length?'<div class="tl-legacy">Changed: '+esc(e.changes.join(", "))+'</div>':'')
+            +(e.next?'<div class="tl-legacy">Next follow-up set for '+esc(fmtTs(e.next))+'</div>':'')+'</div></div>'; }).join(""); })()
+    +'</div></div>';
   $("clvFU").style.display=r.follow_up?"inline-flex":"none";
-  $("clvFU").innerHTML=r.follow_up_done_at?'<i data-lucide="rotate-ccw"></i>Reopen follow-up':'<i data-lucide="check"></i>Mark follow-up done';
+  $("clvFU").innerHTML=r.follow_up_done_at?'<i data-lucide="rotate-ccw"></i>Reopen follow-up':'<i data-lucide="repeat"></i>Follow-up update';
   $("clvStore").style.display=st?"inline-flex":"none";
   $("clViewOverlay").classList.add("show"); icons();
 }
@@ -5319,6 +5442,199 @@ document.addEventListener("keydown",e=>{
   if((e.key==="Enter"||e.key===" ") && e.target.matches && e.target.matches("tr[data-act='cl-view']")){ e.preventDefault(); openCallView(+e.target.dataset.arg); }
   if((e.key==="Enter"||e.key===" ") && e.target.matches && e.target.matches("[data-act='ob-cell']")){ e.preventDefault(); e.target.click(); }
 });
+
+/* ===================== ISSUE PREVIEW + DETAILS WINDOW ===================== */
+function descPreview(inner, act, arg){
+  return '<div class="dpv" data-act="'+act+'" data-arg="'+arg+'" role="button" tabindex="0" aria-label="Show the full issue details">'
+    +'<div class="dpv-txt rt">'+inner+'</div><span class="dpv-hint" aria-hidden="true"><i data-lucide="maximize-2"></i>Click to view all</span></div>';
+}
+let idCtx=null;
+function openIssueDetails(id){
+  const i=IS.find(x=>x.id===id); if(!i){ toast("Issue not found","err"); return; }
+  const members=i.group_id?IS.filter(x=>x.group_id===i.group_id).sort((a,b)=>numCmp({num:a.store_num},{num:b.store_num})):[i];
+  const multi=members.length>1, st=storeByNum[String(i.store_num||"")], fn=frNameById(issueFid(i)), pls=issuePlatforms(i);
+  idCtx={kind:"issue", id, gid:multi?i.group_id:null, store:st?st.id:null};
+  $("id_title").textContent=(issueNo(i)?"Issue #"+issueNo(i):"Concern details")+(multi?" · multi-store":"");
+  $("id_sub").textContent=multi?members.length+" stores":("Store "+(i.store_num||"—")+(fn?" · "+fn:""));
+  const lastUpd=historyEntries(i).slice(-1)[0];
+  $("id_body").innerHTML='<div class="id-badges">'+(multi?groupStatusBadge(members):statusBadge(i.status))+(multi?'<span class="mtag"><i data-lucide="layers"></i>'+members.length+' stores</span>':'')+pls.map(x=>'<span class="tag">'+esc(x)+'</span>').join("")+'</div>'
+    +'<div class="clv-grid">'
+      +(multi?'':'<div class="clv-f"><span class="k">Store</span><span class="v"><b>'+esc(i.store_num||"—")+'</b>'+(st?' · '+esc([st.address,st.city].filter(Boolean).join(", ")):'')+'</span></div>'
+        +'<div class="clv-f"><span class="k">Franchisee</span><span class="v">'+esc(fn||"—")+'</span></div>')
+      +'<div class="clv-f"><span class="k">Logged</span><span class="v">'+esc(fmtTs(i.created_at))+'</span></div>'
+      +'<div class="clv-f"><span class="k">Last updated</span><span class="v">'+esc(fmtTs(i.updated_at||i.created_at))+' · '+historyEntries(i).length+' step'+(historyEntries(i).length!==1?'s':'')+'</span></div>'
+    +'</div>'
+    +'<div class="clv-block"><span class="k">Issue description</span><div class="clv-text rt">'+richHtml(i.title)+'</div></div>'
+    +(i.action_taken?'<div class="clv-block"><span class="k">Last action taken</span><div class="clv-text rt">'+richHtml(i.action_taken)+'</div></div>':'')
+    +(multi?'<div class="clv-block"><span class="k">Stores in this issue</span><div class="id-stores">'+members.map(m=>'<div class="id-st"><b>'+esc(m.store_num)+'</b><span>'+esc(frNameById(issueFid(m))||"—")+'</span>'+statusBadge(m.status)+noTag(m)+'</div>').join("")+'</div></div>':'');
+  $("idHist").style.display="inline-flex"; $("idUpd").style.display="inline-flex"; $("idStore").style.display=(!multi&&st)?"inline-flex":"none";
+  $("idOverlay").classList.add("show"); icons();
+}
+function openObDetails(id){
+  const r=OB.find(x=>x.id===id); if(!r) return;
+  const st=storeByNum[String(r.store_num||"")], fn=frNameById(obrFid(r)), h=obHist(r), gsize=r.group_id?OB.filter(x=>x.group_id===r.group_id).length:1;
+  idCtx={kind:"ob", id, store:st?st.id:null};
+  $("id_title").textContent="Onboarding · "+obPName(r.platform);
+  $("id_sub").textContent="Store "+(r.store_num||"—")+(fn?" · "+fn:"");
+  $("id_body").innerHTML='<div class="id-badges">'+obPlatTag(r.platform)+obBadge(r.status)+(gsize>1?'<span class="mtag"><i data-lucide="layers"></i>Request · '+gsize+'</span>':'')+'</div>'
+    +'<div class="clv-grid">'
+      +'<div class="clv-f"><span class="k">Store</span><span class="v"><b>'+esc(r.store_num||"—")+'</b>'+(st?' · '+esc([st.address,st.city].filter(Boolean).join(", ")):'')+'</span></div>'
+      +'<div class="clv-f"><span class="k">Franchisee</span><span class="v">'+esc(fn||"—")+'</span></div>'
+      +'<div class="clv-f"><span class="k">Started</span><span class="v">'+esc(fmtTs(r.created_at))+'</span></div>'
+      +'<div class="clv-f"><span class="k">Last updated</span><span class="v">'+esc(fmtTs(r.updated_at||r.created_at))+' · '+h.length+' step'+(h.length!==1?'s':'')+'</span></div>'
+    +'</div>'
+    +'<div class="clv-block"><span class="k">Onboarding details</span><div class="clv-text rt">'+(r.details?richHtml(r.details):'<span class="muted">No details written</span>')+'</div></div>'
+    +(r.last_update?'<div class="clv-block"><span class="k">Latest update</span><div class="clv-text rt">'+richHtml(r.last_update)+'</div></div>':'');
+  $("idHist").style.display="inline-flex"; $("idUpd").style.display="inline-flex"; $("idStore").style.display=st?"inline-flex":"none";
+  $("idOverlay").classList.add("show"); icons();
+}
+function idAction(which){
+  const c=idCtx; if(!c) return; $("idOverlay").classList.remove("show");
+  if(which==="hist"){ if(c.kind==="ob") obShowHistory(c.id); else openHistory(c.id); }
+  else if(which==="upd"){ if(c.kind==="ob") openObUpdate(c.id); else if(c.gid) openGroupUpdate(c.gid,c.id); else openUpdateIssue(c.id); }
+  else if(which==="store" && c.store){ openStore(c.store); }
+}
+document.addEventListener("click",e=>{
+  const el=e.target.closest&&e.target.closest(".dpv[data-act]"); if(!el) return;
+  e.stopPropagation(); e.preventDefault();
+  if(el.dataset.act==="iss-view") openIssueDetails(+el.dataset.arg); else if(el.dataset.act==="ob-view") openObDetails(+el.dataset.arg);
+}, true);
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ") && e.target.classList && e.target.classList.contains("dpv")){ e.preventDefault(); e.stopPropagation(); e.target.click(); }
+}, true);
+
+/* ===================== CALL UPDATES, FOLLOW-UPS, REMINDERS ===================== */
+function clHist(r){ try{ const h=Array.isArray(r.history)?r.history:JSON.parse(r.history||"[]"); return (Array.isArray(h)?h:[]).slice().sort((a,b)=>new Date(a.ts)-new Date(b.ts)); }catch(e){ return []; } }
+function clLast(r){ const h=clHist(r).filter(e=>e.kind!=="logged"); /* logging the call itself is not an update */ const ts=[r.call_at,...h.map(e=>e.ts)].map(x=>new Date(x).getTime()).filter(x=>!isNaN(x)); return new Date(Math.max(...ts)).toISOString(); }
+function clLatestNote(r){ const h=clHist(r).filter(e=>e.note); return h.length?h[h.length-1]:null; }
+function clDue(r){ return clOpenFU(r) && r.next_follow_up_at && new Date(r.next_follow_up_at).getTime()<=Date.now(); }
+function clTomorrow9(){ const d=new Date(); d.setDate(d.getDate()+1); d.setHours(9,0,0,0); return d; }
+function clQuick(inputId, kind){ let d=new Date();
+  if(kind==="1h") d=new Date(Date.now()+3600e3); else if(kind==="tom") d=clTomorrow9(); else if(kind==="3d"){ d.setDate(d.getDate()+3); d.setHours(9,0,0,0); }
+  $(inputId).value=clLocalInput(d); $(inputId).dispatchEvent(new Event("input")); }
+function clNextField(id){ return '<div class="cl-nextrow"><input type="datetime-local" id="'+id+'" aria-describedby="'+id+'_err">'
+  +'<button type="button" class="mchip" onclick="clQuick(\''+id+'\',\'1h\')">In 1 hour</button><button type="button" class="mchip" onclick="clQuick(\''+id+'\',\'tom\')">Tomorrow 9 AM</button><button type="button" class="mchip" onclick="clQuick(\''+id+'\',\'3d\')">In 3 days</button></div>'
+  +'<div class="help">You\'ll get a reminder at this time while the app is open in your browser.</div><div class="fld-err" id="'+id+'_err" role="alert"></div>'; }
+function clCheckNext(id){ const v=$(id).value; const d=v?new Date(v):null;
+  if(!d||isNaN(d)) return {err:"Pick the date and time for the next follow-up."};
+  if(d.getTime()<Date.now()-60000) return {err:"Pick a time in the future for the reminder."};
+  return {d}; }
+
+/* --- Log/Edit form: Update box + next follow-up --- */
+function clSyncUpd(){
+  if(!clCtx) return;
+  const outcome=(document.querySelector("#cl_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"";
+  const fu=$("cl_follow");
+  if(outcome==="Completed"){ if(fu.checked){ fu.checked=false; } fu.disabled=true; $("cl_fu_note").textContent="Completed calls don't need a follow-up."; }
+  else { fu.disabled=false; $("cl_fu_note").textContent=""; }
+  const follow=fu.checked;
+  const changed=!clCtx.id || outcome!==(clCtx.prevOutcome||"") || (follow && !clCtx.prevFollow);
+  const need=(outcome && outcome!=="Completed") || follow;
+  const req=need && changed;
+  $("cl_upd_wrap").classList.toggle("show", need || !!clCtx.id && !!$("cl_upd").value);
+  $("cl_upd_req").style.display=req?"inline":"none";
+  $("cl_upd_hint").textContent=req?(follow?"Required — what happened and what's the next step for this follow-up?":"Required for every outcome except Completed."):"Optional — add a note about this change.";
+  $("cl_next_wrap").style.display=follow?"block":"none";
+  if(follow && !$("cl_next").value) $("cl_next").value=clLocalInput(clTomorrow9());
+  clCtx.needUpd=req;
+}
+
+/* --- follow-up update dialog --- */
+let cfuId=null;
+function openFollowUp(id){
+  const r=CL.find(x=>x.id===id); if(!r) return; cfuId=id;
+  $("clViewOverlay").classList.remove("show");
+  const last=clLatestNote(r), w=clFmt(r.call_at), reopen=!!r.follow_up_done_at;
+  $("cfu_title").textContent=reopen?"Reopen follow-up":"Follow-up update";
+  $("cfu_sub").textContent=clFrName(r)+(r.store_num?" · Store "+r.store_num:"");
+  $("cfu_ctx").innerHTML='<div><span class="k">Call</span>'+esc(w.d)+' · '+esc(w.t)+' — '+esc(oneLine(r.reason,110))+'</div>'
+    +'<div><span class="k">Outcome now</span>'+(clOutcomeBadge(r.outcome)||'<span class="muted">Not set</span>')+' '+clFUBadge(r)+'</div>'
+    +(last?'<div><span class="k">Latest update</span>'+esc(oneLine(last.note,160))+' <span class="muted">('+esc(fmtTs(last.ts))+')</span></div>':'')
+    +(r.next_follow_up_at&&clOpenFU(r)?'<div><span class="k">Follow-up was due</span>'+esc(fmtTs(r.next_follow_up_at))+'</div>':'');
+  $("cfu_outcomes").innerHTML=CL_OUTCOMES.map(o=>'<button type="button" class="mchip" data-v="'+esc(o)+'" aria-pressed="false" onclick="cfuPick(this)">'+esc(o)+'</button>').join("");
+  $("cfu_note").value=""; $("cfu_next").value=clLocalInput(clTomorrow9());
+  ["cfu_out_err","cfu_note_err","cfu_next_err"].forEach(x=>{ $(x).textContent=""; $(x).classList.remove("show"); });
+  cfuSync(); $("cfuOverlay").classList.add("show"); icons(); setTimeout(()=>$("cfu_note").focus(),60);
+}
+function cfuPick(b){ document.querySelectorAll("#cfu_outcomes .mchip").forEach(x=>{ x.classList.remove("sel"); x.setAttribute("aria-pressed","false"); }); b.classList.add("sel"); b.setAttribute("aria-pressed","true"); cfuSync(); }
+function cfuSync(){
+  const o=(document.querySelector("#cfu_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"";
+  const done=o==="Completed";
+  $("cfu_next_wrap").style.display=done?"none":"block";
+  $("cfu_note_req").style.display=done?"none":"inline";
+  $("cfu_state").className="cfu-state "+(o?(done?"closed":"open"):"");
+  $("cfu_state").innerHTML=!o?'<i data-lucide="info"></i><span>Pick the outcome of this follow-up.</span>'
+    :done?'<i data-lucide="circle-check"></i><span><b>The follow-up will be closed.</b> The call is Completed.</span>'
+    :'<i data-lucide="repeat"></i><span><b>The follow-up stays open</b> because the call is not Completed yet. Set when to follow up next — you\'ll get a reminder.</span>';
+  $("cfuSave").innerHTML=done?'<i data-lucide="circle-check"></i>Save and close follow-up':'<i data-lucide="save"></i>Save update';
+  icons();
+}
+let cfuSaving=false;
+async function saveFollowUp(){
+  if(cfuSaving) return;
+  const r=CL.find(x=>x.id===cfuId); if(!r) return;
+  const o=(document.querySelector("#cfu_outcomes .mchip.sel")||{dataset:{}}).dataset.v||"", note=$("cfu_note").value.trim();
+  const errs=[]; const se=(id,m)=>{ $(id).textContent=m; $(id).classList.toggle("show",!!m); if(m) errs.push(id); };
+  se("cfu_out_err", o?"":"Pick the outcome.");
+  se("cfu_note_err", (o!=="Completed"&&!note)?"Write an update — it's required for every outcome except Completed.":(note.length>4000?"Please keep it under 4,000 characters.":""));
+  let next=null; if(o && o!=="Completed"){ const c=clCheckNext("cfu_next"); se("cfu_next_err",c.err||""); next=c.d||null; } else se("cfu_next_err","");
+  if(errs.length){ toast("Please fix the highlighted fields","err"); return; }
+  const ts=nowIso(), done=o==="Completed";
+  const entry={ts, kind:"follow-up", prev:r.outcome||null, outcome:o, note, closed:done, next:done?null:next.toISOString(), follow_up:true};
+  const rec={ outcome:o, follow_up:true, follow_up_done_at:done?ts:null, next_follow_up_at:done?null:next.toISOString(), history:[...clHist(r), entry] };
+  cfuSaving=true; $("cfuSave").disabled=true;
+  const res=await guardedUpdate("call_logs",r,rec);
+  cfuSaving=false; $("cfuSave").disabled=false;
+  if(res.error){ toast(friendly(res.error).t,"err"); return; } if(res.conflict){ showConflict("This call log"); return; }
+  Object.assign(r,res.row); remClear(r.id);
+  $("cfuOverlay").classList.remove("show"); updCounts(); render();
+  toast(done?"Follow-up closed — call Completed":"Update saved — next follow-up "+fmtTs(entry.next),"ok");
+  if(!done) clAskNotify();
+}
+
+/* --- reminders: in-app card + desktop notification --- */
+const REM_KEY="ft2_cl_reminded", SNOOZE_KEY="ft2_cl_snooze";
+function remGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"{}"); }catch(e){ return {}; } }
+function remSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function remClear(id){ const s=remGet(SNOOZE_KEY); delete s[id]; remSet(SNOOZE_KEY,s); const c=document.getElementById("rem_"+id); if(c) c.remove(); }
+function clAskNotify(){ try{ if("Notification" in window && Notification.permission==="default") Notification.requestPermission().then(()=>{ if($("notifState")) showNotifState(); }); }catch(e){} }
+function showNotifState(){ const el=$("notifState"); if(!el) return;
+  const p=("Notification" in window)?Notification.permission:"unsupported";
+  el.innerHTML=p==="granted"?'<span class="badge cl-o-ans">Desktop notifications on</span>':p==="denied"?'<span class="badge cl-o-nva">Blocked by the browser</span> <span class="muted">— allow notifications for this page in the browser\'s site settings</span>':p==="unsupported"?'<span class="badge cl-o-nva">Not supported here</span> <span class="muted">— in-app reminders still work</span>':'<button class="btn sm outline round" onclick="clAskNotify()"><i data-lucide="bell"></i>Allow desktop notifications</button>';
+  icons(); }
+function remCheck(){
+  if(!clReady || !CL.length) return;
+  const reminded=remGet(REM_KEY), snooze=remGet(SNOOZE_KEY), now=Date.now();
+  CL.filter(clDue).forEach(r=>{
+    const key=r.id+"|"+r.next_follow_up_at;
+    if(snooze[r.id] && snooze[r.id]>now) return;
+    if(reminded[key] && !(snooze[r.id] && snooze[r.id]<=now)) { if(!document.getElementById("rem_"+r.id) && !reminded[key+"|x"]) remCard(r); return; }
+    reminded[key]=now; remCard(r);
+    try{ if("Notification" in window && Notification.permission==="granted"){
+      const n=new Notification("Follow-up due · "+clFrName(r), {body:oneLine(r.reason,120)+(r.store_num?" (Store "+r.store_num+")":""), tag:"cl-"+r.id});
+      n.onclick=()=>{ window.focus(); openCallView(r.id); n.close(); }; } }catch(e){}
+  });
+  remSet(REM_KEY,reminded);
+  const sn=remGet(SNOOZE_KEY); let ch=false; Object.keys(sn).forEach(k=>{ if(sn[k]<=now){ delete sn[k]; ch=true; } }); if(ch) remSet(SNOOZE_KEY,sn);
+}
+function remCard(r){
+  let stack=$("remStack"); if(!stack){ stack=document.createElement("div"); stack.id="remStack"; stack.setAttribute("aria-live","assertive"); document.body.appendChild(stack); }
+  if(document.getElementById("rem_"+r.id)) return;
+  const c=document.createElement("div"); c.className="rem-card"; c.id="rem_"+r.id; c.setAttribute("role","alert");
+  c.innerHTML='<div class="rem-top"><span class="rem-ic"><i data-lucide="bell-ring"></i></span><div><b>Follow-up due</b><span>'+esc(clFrName(r))+(r.store_num?' · Store '+esc(r.store_num):'')+'</span></div>'
+    +'<button class="x" aria-label="Dismiss" data-rem="dismiss" data-id="'+r.id+'">&times;</button></div>'
+    +'<div class="rem-body">'+esc(oneLine(r.reason,120))+'<small>Due '+esc(fmtTs(r.next_follow_up_at))+'</small></div>'
+    +'<div class="rem-act"><button class="btn sm round" data-rem="open" data-id="'+r.id+'"><i data-lucide="phone"></i>Open call</button><button class="btn sm ghost round" data-rem="snooze" data-id="'+r.id+'"><i data-lucide="alarm-clock"></i>Snooze 15 min</button></div>';
+  stack.appendChild(c); icons();
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-rem]"); if(!b) return;
+  const id=+b.dataset.id, r=CL.find(x=>x.id===id), card=document.getElementById("rem_"+id);
+  if(b.dataset.rem==="open"){ if(card) card.remove(); const rm=remGet(REM_KEY); if(r) rm[id+"|"+r.next_follow_up_at+"|x"]=1; remSet(REM_KEY,rm); openCallView(id); }
+  else if(b.dataset.rem==="snooze"){ const s=remGet(SNOOZE_KEY); s[id]=Date.now()+15*60000; remSet(SNOOZE_KEY,s); if(card) card.remove(); toast("Reminder snoozed for 15 minutes","ok"); }
+  else if(b.dataset.rem==="dismiss"){ if(card) card.remove(); const rm=remGet(REM_KEY); if(r) rm[id+"|"+r.next_follow_up_at+"|x"]=1; remSet(REM_KEY,rm); }
+});
+setInterval(remCheck, 30000);
 
 /* ===== Sidebar collapse ===== */
 function applySidebar(col){
