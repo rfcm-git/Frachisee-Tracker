@@ -1326,8 +1326,8 @@
       <div class="field" style="margin-bottom:14px"><label for="cl_result">Result of call *</label><textarea id="cl_result" class="cl-ta" maxlength="4000" placeholder="Enter the call outcome, response, or next steps..." aria-describedby="cl_result_err cl_result_hint"></textarea>
         <div class="help" id="cl_result_hint" style="margin-top:4px">e.g. Franchisee answered and confirmed the details · No answer, voicemail left · Follow-up required · Requested more information · Call completed</div><div class="fld-err" id="cl_result_err" role="alert"></div></div>
       <div class="field" style="margin-bottom:10px"><label>Outcome</label><div class="chips" id="cl_outcomes" role="group" aria-label="Outcome"></div>
-        <div class="help" style="margin-top:4px">Every outcome except <b>Completed</b> needs an update.</div></div>
-      <label class="ob-syncrow"><input type="checkbox" id="cl_follow" onchange="clSyncUpd()"><span><b>Needs follow-up</b> — stays open until the call is Completed</span></label>
+        <div class="help" style="margin-top:4px">Tick <b>Needs follow-up</b> below to add an update and set a reminder.</div></div>
+      <label class="ob-syncrow"><input type="checkbox" id="cl_follow" onchange="clSyncUpd();if(this.checked){const w=$('cl_upd_wrap');w.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});setTimeout(()=>$('cl_upd').focus({preventScroll:true}),250);}"><span><b>Needs follow-up</b> — stays open until the call is Completed</span></label>
       <div class="help" id="cl_fu_note" style="margin:2px 0 0 25px"></div>
       <div class="cl-upd" id="cl_upd_wrap">
         <div class="field" style="margin-bottom:12px"><label for="cl_upd">Update <span id="cl_upd_req" class="req">*</span></label>
@@ -5336,7 +5336,7 @@ async function saveCallLog(){
   if(!result){ clErr("cl_result","Enter the result of the call."); first=first||"cl_result"; } else if(result.length>4000){ clErr("cl_result","Please keep the result under 4,000 characters."); first=first||"cl_result"; }
   clSyncUpd();
   const updNote=$("cl_upd").value.trim(), followC=$("cl_follow").checked;
-  if(clCtx.needUpd && !updNote){ clErr("cl_upd",followC?"Write an update for this follow-up.":"Write an update — it's required for every outcome except Completed."); first=first||"cl_upd"; }
+  if(clCtx.needUpd && !updNote){ clErr("cl_upd","Write an update for this follow-up."); first=first||"cl_upd"; }
   else if(updNote.length>4000){ clErr("cl_upd","Please keep the update under 4,000 characters."); first=first||"cl_upd"; }
   let nextD=null;
   if(followC){ const curR=clCtx.id?CL.find(x=>x.id===clCtx.id):null, unchanged=curR&&curR.next_follow_up_at&&$("cl_next").value===clLocalInput(new Date(curR.next_follow_up_at));
@@ -5545,12 +5545,11 @@ function clSyncUpd(){
   if(outcome==="Completed"){ if(fu.checked){ fu.checked=false; } fu.disabled=true; $("cl_fu_note").textContent="Completed calls don't need a follow-up."; }
   else { fu.disabled=false; $("cl_fu_note").textContent=""; }
   const follow=fu.checked;
-  const changed=!clCtx.id || outcome!==(clCtx.prevOutcome||"") || (follow && !clCtx.prevFollow);
-  const need=(outcome && outcome!=="Completed") || follow;
-  const req=need && changed;
-  $("cl_upd_wrap").classList.toggle("show", need || !!clCtx.id && !!$("cl_upd").value);
+  // The Update box only appears when "Needs follow-up" is ticked (not when an outcome is picked)
+  const req=follow && (!clCtx.id || !clCtx.prevFollow);
+  $("cl_upd_wrap").classList.toggle("show", follow);
   $("cl_upd_req").style.display=req?"inline":"none";
-  $("cl_upd_hint").textContent=req?(follow?"Required — what happened and what's the next step for this follow-up?":"Required for every outcome except Completed."):"Optional — add a note about this change.";
+  $("cl_upd_hint").textContent=req?"Required — what happened, and what's the next step for this follow-up?":"Optional — add a note about this change.";
   $("cl_next_wrap").style.display=follow?"block":"none";
   if(follow && !$("cl_next").value) $("cl_next").value=clLocalInput(clTomorrow9());
   clCtx.needUpd=req;
