@@ -3,8 +3,8 @@
  * To use a new icon, import it here and add it to ICONS.
  */
 import {
-  Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellRing,
-  Bike, Bold, Bookmark, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
+  Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellOff, BellRing,
+  Bike, Bold, Bookmark, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
   CircleAlert, CircleCheck, CircleOff, CircleX, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
   FileBarChart, FileSpreadsheet, FileText, Filter, Flag, Folder, FolderPlus, Globe, Hash, History, Hourglass, IdCard, IndentDecrease,
   IndentIncrease, Info, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, Map as MapIcon, MapPin, MapPinned,
@@ -26,6 +26,7 @@ export const ICONS = {
   "badge-check": BadgeCheck,
   "bar-chart-3": BarChart3,
   bell: Bell,
+  "bell-off": BellOff,
   "bell-ring": BellRing,
   bike: Bike,
   bold: Bold,
@@ -35,6 +36,7 @@ export const ICONS = {
   "calendar-clock": CalendarClock,
   "calendar-range": CalendarRange,
   check: Check,
+  "check-check": CheckCheck,
   "chevron-down": ChevronDown,
   "chevron-left": ChevronLeft,
   "chevron-right": ChevronRight,
