@@ -1,0 +1,37 @@
+/* ---------- Reports ---------- */
+  .rp-fmt{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:#fff;gap:3px}
+  .rp-fmt button{display:inline-flex;align-items:center;gap:6px;border:none;background:none;border-radius:8px;padding:7px 12px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .rp-fmt button svg{width:15px;height:15px}
+  .rp-fmt button.on{background:var(--green);color:#fff}
+  .rp-fmt button:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .rt-intro{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-left:4px solid var(--yellow);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink);margin-bottom:18px}
+  .rt-intro svg{width:18px;height:18px;color:var(--green);flex:none;margin-top:1px}
+  .rt-h{display:flex;align-items:center;gap:8px;font-size:15px;margin:4px 0 12px;color:var(--ink)} .rt-h svg{width:18px;height:18px;color:var(--green)}
+  .rt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-bottom:24px}
+  .rt-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s,box-shadow .15s,transform .15s}
+  .rt-card:hover{border-color:var(--lime);box-shadow:0 10px 24px rgba(0,80,30,.10);transform:translateY(-2px)}
+  @media (prefers-reduced-motion: reduce){ .rt-card:hover{transform:none} }
+  .rt-top{display:flex;gap:12px}
+  .rt-ic{width:42px;height:42px;border-radius:12px;background:var(--lime-soft);color:var(--green-dark);display:grid;place-items:center;flex:none} .rt-ic svg{width:21px;height:21px}
+  .rt-card h3{margin:2px 0 4px;font-size:15px} .rt-card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.45}
+  .rt-filt{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--ink-soft);background:var(--lime-tint);border-radius:9px;padding:8px 10px} .rt-filt svg{width:14px;height:14px;flex:none;margin-top:1px;color:var(--green)}
+  .rt-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+  .rt-fmt{display:flex;gap:5px} .rt-fmt span{font-size:11px;font-weight:700;color:var(--green-dark);background:var(--green-soft);border-radius:6px;padding:2px 7px}
+  .rt-quick{padding:4px 0}
+  .rt-q{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line)} .rt-q:last-child{border-bottom:none}
+  .rt-q:hover{background:var(--lime-tint)}
+  .rt-qic{width:32px;height:32px;border-radius:9px;background:var(--yellow-soft);color:var(--yellow-dark);display:grid;place-items:center;flex:none} .rt-qic svg{width:16px;height:16px}
+  .rt-qt{flex:1;font-size:13.5px;font-weight:600} .rt-qt small{display:block;font-weight:500;color:var(--ink-soft);font-size:11.5px}
+  .cl-con{display:flex;flex-direction:column;gap:2px;margin-top:4px;font-weight:400}
+  .cl-con a{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-soft);text-decoration:none;max-width:220px}
+  .cl-con a span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cl-con a:hover{color:var(--green-dark);text-decoration:underline} .cl-con svg{width:12px;height:12px;flex:none}
+  .cl-nocon{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px;font-style:italic;margin-top:3px}
+  .clv-con{display:flex;flex-wrap:wrap;gap:8px}
+  .cl-frcon{display:none;flex-wrap:wrap;align-items:center;gap:8px;margin:-6px 0 14px;padding:10px 12px;border:1px dashed var(--lime);border-radius:11px;background:#fff}
+  .cl-frcon.show{display:flex}
+  .cl-frcon .lbl{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-right:2px}
+  .cl-frcon .lbl svg{width:14px;height:14px;color:var(--green)}
+  .clv-ci{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 11px;background:#fff;font-size:13px}
+  .clv-ci svg{width:14px;height:14px;color:var(--green)} .clv-ci a{color:var(--ink);text-decoration:none} .clv-ci a:hover{text-decoration:underline}
+  
