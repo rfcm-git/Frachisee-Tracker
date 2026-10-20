@@ -1,35 +1,53 @@
 /* App-wide actions: connecting, loading data, backups. */
-import { EMPTY_DATA } from "../domain/context.js";
 import { errorTitle, friendlyError } from "../lib/errors.js";
 import { downloadBlob } from "../lib/browser.js";
 import { localDateInput, nowIso } from "../lib/format.js";
-import { TABLES, fetchAll, hasDb, loadAllTables, ping, upsertRows } from "../services/api.js";
-import { clearCredentials, clearDb, createDb, getDb, getSavedCredentials, saveCredentials } from "../services/supabase.js";
+import { TABLES, fetchAll, hasDb, loadAllTables, upsertRows } from "../services/api.js";
+import { clearDb, createDb, getDb, getSavedCredentials, saveCredentials } from "../services/supabase.js";
 import { setAllData, setConnection, useDataStore } from "./dataStore.js";
 import { DIALOG, closeDialogs } from "./dialogs.js";
 import { toast } from "./toastStore.js";
 
 const setPhase = (phase, extra = {}) => useDataStore.setState({ phase, ...extra });
+let activeLoad = null;
+let lastDatabaseNotice = "";
+
+function notifyDatabaseProblem(error) {
+  const message = errorTitle(error);
+  if (lastDatabaseNotice === message) return;
+  lastDatabaseNotice = message;
+  toast(`Database problem: ${message}`, "err");
+}
 
 /** Reloads every table. silent = background refresh (keeps the screen as it is). */
-export async function loadAll({ silent = false } = {}) {
+export function loadAll({ silent = false } = {}) {
+  if (activeLoad) return activeLoad;
   if (!hasDb()) {
-    if (!silent) setPhase("disconnected");
-    return false;
-  }
-  if (!silent) setPhase("loading", { loadingText: "Loading data…" });
-  let data;
-  try {
-    data = await loadAllTables();
-  } catch (error) {
+    const error = new Error("Database client is unavailable");
     setConnection("err", "Connection issue", errorTitle(error));
     if (!silent) setPhase("error", { error });
-    return false;
+    notifyDatabaseProblem(error);
+    return Promise.resolve(false);
   }
-  setAllData(data);
-  setConnection("ok", "Connected", useDataStore.getState().connection.popup || "Connected");
-  setPhase("ready", { error: null, lastRefreshAt: new Date() });
-  return true;
+  if (!silent) setPhase("loading", { loadingText: "Loading data…" });
+  activeLoad = (async () => {
+    try {
+      const data = await loadAllTables();
+      setAllData(data);
+      lastDatabaseNotice = "";
+      setConnection("ok", "Connected", "Connected");
+      setPhase("ready", { error: null, lastRefreshAt: new Date() });
+      return true;
+    } catch (error) {
+      setConnection("err", "Connection issue", errorTitle(error));
+      if (!silent) setPhase("error", { error });
+      notifyDatabaseProblem(error);
+      return false;
+    } finally {
+      activeLoad = null;
+    }
+  })();
+  return activeLoad;
 }
 
 /** Connects with the given credentials, then loads the data. */
@@ -45,23 +63,16 @@ export async function connect(url, key, { silent = false } = {}) {
     clearDb();
     setConnection("err", "Not connected", errorTitle(error));
     setPhase("error", { error });
-    if (!silent) toast(errorTitle(error), "err");
-    return false;
-  }
-  const error = await ping().catch((err) => err);
-  if (error) {
-    clearDb();
-    setConnection("err", "Not connected", errorTitle(error));
-    setPhase("error", { error });
-    if (!silent) toast(errorTitle(error), "err");
+    notifyDatabaseProblem(error);
     return false;
   }
   saveCredentials(projectUrl, projectKey);
-  let host = projectUrl;
-  try { host = new URL(projectUrl).host; } catch { /* keep the raw URL */ }
-  setConnection("ok", "Connected", `Connected to ${host}`);
-  if (!silent) { toast("Connected", "ok"); closeDialogs(DIALOG.settings); }
-  return loadAll();
+  const loaded = await loadAll();
+  if (loaded && !silent) {
+    toast("Connected", "ok");
+    closeDialogs(DIALOG.settings);
+  }
+  return loaded;
 }
 
 /** Connects with the saved (or default) credentials when the app starts. */
@@ -69,16 +80,8 @@ export function connectSaved() {
   const { url, key } = getSavedCredentials();
   if (url && key) return connect(url, key, { silent: true });
   setPhase("disconnected");
+  notifyDatabaseProblem(new Error("Database credentials are unavailable"));
   return Promise.resolve(false);
-}
-
-export function disconnect() {
-  clearCredentials();
-  clearDb();
-  setAllData(EMPTY_DATA);
-  setConnection("", "Not connected");
-  setPhase("disconnected");
-  toast("Disconnected");
 }
 
 /** Downloads every table as one JSON file. */

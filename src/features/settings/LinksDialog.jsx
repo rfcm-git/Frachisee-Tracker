@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
-import { EmptyState } from "../../components/ui/common.jsx";
+import { CopyButton, EmptyState } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { toast } from "../../state/toastStore.js";
 import { defaultLinks, hostOf, loadLinks, normalizeUrl, saveLinks } from "./linksService.js";
@@ -32,8 +32,13 @@ function LinkSections({ links }) {
     <div className="lk-grid">{section.links.map((link, linkIndex) => {
       const url = normalizeUrl(link.url);
       const host = hostOf(link.url);
-      return <a className="lk" key={`${url}-${linkIndex}`} href={url} target="_blank" rel="noopener noreferrer" title={`${link.name ? `${link.name}\n` : ""}${url}`}>
-        <Favicon host={host} /><span className="t"><b>{link.name || host}</b><small>{host}</small></span><Icon name="external-link" className="ext" /></a>;
+      return <div className="lk" key={`${url}-${linkIndex}`}>
+        <button type="button" className="lk-open" onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
+          title={`${link.name ? `${link.name}\n` : ""}${url}`}>
+          <Favicon host={host} /><span className="t"><b>{link.name || host}</b><small>{host}</small></span>
+        </button>
+        <CopyButton value={url} title={`Copy ${link.name || host} link`} />
+      </div>;
     })}</div>
   </div>);
 }

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
@@ -97,13 +97,42 @@ const OB_ABBR = { ue: "UE", dd: "DD", gh: "GH", ez: "Ez" };
 
 /** Records per platform in the current (searched and filtered) list; click to show only that platform. */
 function PlatformCounts({ records, platforms }) {
-  return <span className="ob-hcnt" aria-label="Records per platform in the current list">{OB_PLATFORMS.map(([key, name]) => {
-    const count = records.filter((record) => record.platform === key).length;
-    const on = platforms.length === 1 && platforms[0] === key;
-    const tip = `${name}: ${count} record${count !== 1 ? "s" : ""} in the current list${on ? " — click to show all platforms" : ` — click to show only ${name}`}`;
-    return <button type="button" key={key} className={`ob-hc p-${key}${count ? "" : " zero"}${on ? " on" : ""}`} data-tip={tip} aria-pressed={on}
-      onClick={() => toggleObOnlyPlatform(key)}><b>{OB_ABBR[key]}</b>{count}</button>;
-  })}</span>;
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const selectedPlatform = platforms.length === 1 ? OB_ABBR[platforms[0]] : null;
+
+  const closeIfInactive = (event) => {
+    if (!event.currentTarget.matches(":hover") && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+  };
+
+  return <div className={`ob-hcnt${open ? " open" : ""}`} ref={rootRef} role="group" aria-label="Filter by platform"
+    onMouseEnter={() => setOpen(true)}
+    onMouseLeave={() => {
+      if (!rootRef.current?.contains(document.activeElement)) setOpen(false);
+    }}
+    onFocus={() => setOpen(true)}
+    onBlur={closeIfInactive}
+    onKeyDown={(event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setOpen(false);
+      }
+    }}>
+    <button type="button" className={`ob-hc ob-hc-trigger${selectedPlatform ? " on" : ""}`}
+      aria-expanded={open} aria-controls="ob-platform-counts"
+      onClick={(event) => setOpen(event.currentTarget.matches(":hover") ? true : !open)}>
+      {selectedPlatform || "Platforms"}<Icon name="chevron-down" />
+    </button>
+    {open && <div className="ob-hc-menu" id="ob-platform-counts" aria-label="Platform record counts">
+      {OB_PLATFORMS.map(([key, name]) => {
+        const count = records.filter((record) => record.platform === key).length;
+        const on = platforms.length === 1 && platforms[0] === key;
+        const tip = `${name}: ${count} record${count !== 1 ? "s" : ""} in the current list${on ? " — click to show all platforms" : ` — click to show only ${name}`}`;
+        return <button type="button" key={key} className={`ob-hc p-${key}${count ? "" : " zero"}${on ? " on" : ""}`} data-tip={tip} aria-pressed={on}
+          onClick={() => toggleObOnlyPlatform(key)}><b>{OB_ABBR[key]}</b>{count}</button>;
+      })}
+    </div>}
+  </div>;
 }
 
 function RecordTable({ ctx, records, platforms }) {
