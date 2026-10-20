@@ -82,6 +82,8 @@ export const STORAGE_KEYS = {
   callInsights: "ft2_cl_ins",
   callReminded: "ft2_cl_reminded",
   callSnooze: "ft2_cl_snooze",
+  notifications: "ft2_notifications",
+  notifyPosition: "ft2_notify_pos",
   links: "ft2_links",
   linksSeeded: "ft2_links_seeded",
   report: (kind) => (kind === "issues" ? "ft2_report" : kind === "ob" ? "ft2_report_ob" : `ft2_report_${kind}`),

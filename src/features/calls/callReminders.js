@@ -40,12 +40,6 @@ export function clearCallSnooze(callId) {
   write(STORAGE_KEYS.callSnooze, snoozes);
 }
 
-export function dismissCallReminder(call) {
-  const reminded = read(STORAGE_KEYS.callReminded);
-  if (call?.next_follow_up_at) reminded[`${call.id}|${call.next_follow_up_at}|x`] = 1;
-  write(STORAGE_KEYS.callReminded, reminded);
-}
-
 export function snoozeCallReminder(callId, until) {
   const snoozes = read(STORAGE_KEYS.callSnooze);
   snoozes[callId] = until;

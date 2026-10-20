@@ -3,6 +3,7 @@ import DialogHost from "./components/dialogs/DialogHost.jsx";
 import ToastHost from "./components/ui/ToastHost.jsx";
 import TooltipHost from "./components/ui/TooltipHost.jsx";
 import CallReminderHost from "./features/calls/CallReminderHost.jsx";
+import NotificationHost from "./features/notifications/NotificationHost.jsx";
 import { useIdleRefresh } from "./hooks/useIdleRefresh.js";
 import { useSessionRestore } from "./hooks/useSessionRestore.js";
 
@@ -17,6 +18,7 @@ export default function App() {
       <ToastHost />
       <TooltipHost />
       <CallReminderHost />
+      <NotificationHost />
     </>
   );
 }
