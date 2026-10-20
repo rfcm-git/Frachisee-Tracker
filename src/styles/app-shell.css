@@ -338,15 +338,16 @@
   .lk-sec h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
   .lk-sec h4 [data-lucide]{width:15px;height:15px;color:var(--green)}
   .lk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
-  .lk{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--surface)}
+  .lk{display:flex;align-items:center;gap:8px;min-width:0;padding:5px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:var(--surface)}
+  .lk-open{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:5px 6px;border:0;border-radius:7px;text-align:left;font:inherit;color:inherit;background:transparent;cursor:pointer}
   .lk:hover{border-color:var(--green);background:var(--green-soft)}
+  .lk-open:hover{background:transparent}
   .lk .fav{width:28px;height:28px;border-radius:7px;background:var(--idle-soft);display:grid;place-items:center;flex:none;overflow:hidden}
   .lk .fav img{width:18px;height:18px}
   .lk .fav [data-lucide]{width:15px;height:15px;color:var(--ink-soft)}
   .lk .t{flex:1;min-width:0}
   .lk .t b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lk .t small{display:block;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .lk .ext{width:14px;height:14px;color:var(--ink-soft);flex:none}
   .lke-sec{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:12px;background:var(--lime-tint)}
   .lke-sec .sh{display:flex;gap:8px;align-items:center;margin-bottom:9px}
   .lke-sec .sh input{flex:1;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-family:var(--font);font-weight:700;font-size:13px}

@@ -1,6 +1,6 @@
 /*
  * Turns database and network errors into plain messages.
- * Returns { title, body, action } where action is "settings" or "retry" (optional).
+ * Returns { title, body, action } where action is "retry" (optional).
  */
 export function friendlyError(error) {
   const message = String(error?.message || "").toLowerCase();
@@ -19,18 +19,18 @@ export function friendlyError(error) {
   if (message.includes("does not exist") || code === "42p01" || code === "42P01" || message.includes("could not find the table") || message.includes("column")) {
     return {
       title: "Database needs the latest setup",
-      body: "Run the latest migration files (migrate-call-logs.sql, migrate-onboarding.sql, migrate-store-status.sql, migrate-issue-number.sql, migrate-issue-history.sql, migrate-safety.sql, migrate-multi-issue.sql) in Supabase SQL Editor, then Refresh.",
-      action: "settings",
+      body: "The database schema is missing a required table or column. Ask your database administrator to apply the latest migrations, then try again.",
+      action: "retry",
     };
   }
   if (message.includes("row-level security") || message.includes("permission denied") || code === "42501") {
-    return { title: "Access blocked by security rules", body: "Add the team-access policy in Supabase, then Refresh.", action: "settings" };
+    return { title: "Database access is blocked", body: "Ask your database administrator to check the database access policies, then try again.", action: "retry" };
   }
   if (message.includes("invalid api key") || message.includes("apikey") || message.includes("jwt")) {
-    return { title: "That key isn't valid", body: "Recopy the publishable/anon key from Supabase into Settings.", action: "settings" };
+    return { title: "Database authentication failed", body: "Ask your database administrator to check the app's database configuration.", action: "retry" };
   }
   if (message.includes("failed to fetch") || message.includes("fetch") || message.includes("networkerror")) {
-    return { title: "Can't reach the database", body: "Check your internet and the Project URL in Settings.", action: "settings" };
+    return { title: "Can't reach the database", body: "Check your internet connection and try again.", action: "retry" };
   }
   return { title: "Something went wrong", body: error?.message || "Please try again.", action: "retry" };
 }

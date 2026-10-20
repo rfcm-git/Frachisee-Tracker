@@ -33,23 +33,34 @@ export async function fetchAll(table) {
   return all;
 }
 
-/** Checks that the database answers with these credentials. */
-export async function ping() {
-  const { error } = await db().from(TABLES.franchisees).select("id").limit(1);
-  return error || null;
+function isMissingTable(error) {
+  const code = String(error?.code || "").toUpperCase();
+  const message = String(error?.message || "").toLowerCase();
+  return code === "42P01" || code === "PGRST205"
+    || message.includes("could not find the table")
+    || /(?:relation|table).+does not exist/.test(message);
 }
 
 /** Loads every table. Onboarding and call logs are optional (older databases may not have them). */
 export async function loadAllTables() {
-  const [franchisees, stores, staff, issues] = await Promise.all([
-    fetchAll(TABLES.franchisees), fetchAll(TABLES.stores), fetchAll(TABLES.staff), fetchAll(TABLES.issues),
+  const fetchOptional = async (table) => {
+    try {
+      return { rows: await fetchAll(table), ready: true };
+    } catch (error) {
+      if (isMissingTable(error)) return { rows: [], ready: false };
+      throw error;
+    }
+  };
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult] = await Promise.all([
+    fetchAll(TABLES.franchisees),
+    fetchAll(TABLES.stores),
+    fetchAll(TABLES.staff),
+    fetchAll(TABLES.issues),
+    fetchOptional(TABLES.onboarding),
+    fetchOptional(TABLES.callLogs),
   ]);
-  let onboarding = [];
-  let onboardingReady = true;
-  try { onboarding = await fetchAll(TABLES.onboarding); } catch { onboardingReady = false; }
-  let callLogs = [];
-  let callLogsReady = true;
-  try { callLogs = await fetchAll(TABLES.callLogs); } catch { callLogsReady = false; }
+  const { rows: onboarding, ready: onboardingReady } = onboardingResult;
+  const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   return { franchisees, stores, staff, issues, onboarding, callLogs, onboardingReady, callLogsReady };
 }
 

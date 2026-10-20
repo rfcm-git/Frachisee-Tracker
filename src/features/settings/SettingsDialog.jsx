@@ -4,9 +4,8 @@ import Modal from "../../components/ui/Modal.jsx";
 import { BusyButton } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
-import { getSavedCredentials } from "../../services/supabase.js";
 import { hasDb } from "../../services/api.js";
-import { connect, disconnect, downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
+import { downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
 import { askPassword, confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
@@ -44,16 +43,12 @@ function startRestore(backup, closeSettings) {
 
 export default function SettingsDialog() {
   const { close } = useDialog();
-  const connection = useDataStore((state) => state.connection);
   const lastRefreshAt = useDataStore((state) => state.lastRefreshAt);
   const idleMinutes = useUiStore((state) => state.idleMinutes);
-  const [credentials, setCredentials] = useState(getSavedCredentials);
   const [idleDraft, setIdleDraft] = useState(String(idleMinutes));
   const [backingUp, setBackingUp] = useState(false);
-  const [connecting, setConnecting] = useState(false);
   const [notification, setNotification] = useState(notificationPermission);
   const fileRef = useRef(null);
-  const connected = connection.state === "ok";
 
   useEffect(() => {
     function refreshPermission() { setNotification(notificationPermission()); }
@@ -80,30 +75,12 @@ export default function SettingsDialog() {
   }
 
   async function chooseBackup(file) {
-    if (!hasDb()) { toast("Connect first", "err"); return; }
+    if (!hasDb()) { toast("Database is not available", "err"); return; }
     const backup = await readBackupFile(file);
     if (backup) startRestore(backup, close);
   }
 
-  async function runConnect() {
-    setConnecting(true);
-    await connect(credentials.url, credentials.key);
-    setConnecting(false);
-  }
-
-  return <Modal size="small" icon="settings" title="Settings"
-    footer={<>
-      {connected && <button type="button" className="btn link danger" style={{ marginRight: "auto" }} onClick={disconnect}>Disconnect</button>}
-      <button type="button" className="btn ghost" onClick={close}>Close</button>
-      <BusyButton busy={connecting} busyLabel="Connecting…" onClick={runConnect}>{connected ? "Reconnect" : "Connect"}</BusyButton>
-    </>}>
-    <div className={`conn-status ${connection.state}`}><i className="d" /><span>{connection.popup}</span></div>
-    <div className="field" style={{ marginBottom: 13 }}><label htmlFor="c_url">Project URL</label>
-      <input id="c_url" placeholder="https://xxxx.supabase.co" spellCheck="false" value={credentials.url} onChange={(event) => setCredentials({ ...credentials, url: event.target.value })} /></div>
-    <div className="field"><label htmlFor="c_key">Database key (publishable or anon)</label>
-      <input id="c_key" placeholder="sb_publishable_…" spellCheck="false" value={credentials.key} onChange={(event) => setCredentials({ ...credentials, key: event.target.value })} /></div>
-    <div className="help">Saved on this computer so you stay connected. Share the file with your team and it connects automatically.</div>
-
+  return <Modal size="small" icon="settings" title="Settings" footer={<button type="button" className="btn ghost" onClick={close}>Close</button>}>
     <div style={sectionStyle}>
       <label style={labelStyle} htmlFor="idleMin">Auto-refresh when idle</label>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
