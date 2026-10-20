@@ -1,0 +1,39 @@
+/* ---------- Subway theme: sidebar + header ---------- */
+  .sidebar{background:linear-gradient(180deg,var(--green) 0%,#007a31 100%);border-right:none;box-shadow:2px 0 12px rgba(0,80,30,.12)}
+  .sb-brand{border-bottom:1px solid rgba(255,255,255,.16)}
+  .sb-name b{color:#fff}
+  .sb-name span{color:#d7efbf}
+  .sb-label{color:#c5e6a3}
+  .tab,.sb-item{color:#e9f6de}
+  .tab:hover,.sb-item:hover{background:rgba(140,198,63,.28);color:#fff}
+  .tab.active{background:rgba(140,198,63,.34);color:#fff}
+  .tab.active::before{background:var(--yellow);width:5px}
+  .tab .badge-num{background:rgba(255,255,255,.2);color:#fff}
+  .tab.active .badge-num{background:var(--yellow);color:var(--green-dark)}
+  .tab[data-tab="issues"] .badge-num{background:#ffe1dc;color:#b3261e}
+  .sb-foot{border-top:1px solid rgba(255,255,255,.16)}
+  .sb-collapse{color:#d7efbf}
+  .mainbar{border-bottom:3px solid var(--yellow);background:rgba(255,255,255,.95)}
+  .mb-title h1{color:var(--green-dark)}
+  .clock{border-color:var(--lime-soft);background:var(--lime-tint)}
+  .clock b{color:var(--green)}
+  .panel .ph [data-lucide],.lc .lch [data-lucide],.rpanel .rph [data-lucide]{color:var(--green)}
+  .panel .ph,.lc .lch,.rpanel .rph{border-bottom-color:var(--line)}
+  .lc .lch,.rpanel .rph,.panel .ph{background:var(--lime-tint)}
+  .fr-item:hover,tbody tr.click:hover,.store-line:hover,.issue-line:hover{background:var(--lime-soft)}
+  .fr-item.active{background:var(--lime-soft);box-shadow:inset 4px 0 0 var(--yellow)}
+  .fr-stc{background:var(--yellow-soft);color:var(--yellow-dark)}
+  .fr-item.active .fr-stc{background:var(--yellow);color:var(--green-dark)}
+  .btn{background:var(--green)}
+  .btn:hover{background:var(--green-dark)}
+  .btn.outline{border-color:var(--green);color:var(--green-dark);background:#fff}
+  .btn.outline:hover{background:var(--lime-soft)}
+  .mchip.sel,.fchip.on{border-color:var(--green)}
+  .vtog button.on{background:var(--green)}
+  .fdd-btn.active{background:var(--lime-soft);border-color:var(--lime-dark);color:var(--green-dark)}
+  .modal .head{border-bottom:3px solid var(--yellow)}
+  .modal .head [data-lucide]{color:var(--green)}
+  .toast.ok{background:var(--green)}
+  .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
+
+  

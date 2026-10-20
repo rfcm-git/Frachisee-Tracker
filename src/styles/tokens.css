@@ -1,0 +1,22 @@
+  :root{
+    /* Subway palette: Green + Yellow + Fresh Lime */
+    --bg:#f3f7ec; --surface:#ffffff; --ink:#1d2a20; --ink-soft:#5b6b5f;
+    --line:#dfe8d6;
+    --green:#008938; --green-dark:#006b2c; --green-soft:#e3f2e7;
+    --yellow:#ffc600; --yellow-dark:#8a6a00; --yellow-soft:#fff4cc;
+    --lime:#8cc63f; --lime-dark:#4f7a18; --lime-soft:#eef6e2; --lime-tint:#f6faef;
+    --danger:#c0392b; --danger-soft:#fdecea;
+    --ok:#1a9850; --ok-soft:#e6f4ea;
+    --warn:#e08a00; --warn-soft:#fbf0da;
+    --idle:#59685e; --idle-soft:#ecefec;
+    --radius:10px; --shadow:0 1px 2px rgba(19,32,26,.06), 0 6px 20px rgba(19,32,26,.05);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--font); background:var(--bg); color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;}
+  .wrap{width:100%;max-width:1440px;margin:0 auto;padding:22px 28px 60px}
+  @media(max-width:900px){ .wrap{padding:16px 16px 48px} }
+  [data-lucide]{width:18px;height:18px;stroke-width:2}
+
+  
