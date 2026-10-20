@@ -5,12 +5,14 @@ React + Vite front end for the 3PD Helpdesk Franchisee Tracker. Data lives in Su
 ## Run locally
 
 ```powershell
-npm install
-npm run dev      # development server
-npm run lint     # ESLint (includes the React Hooks rules)
-npm run build    # production bundle in dist/
-npm run preview  # serve the production bundle
+npm.cmd install
+npm.cmd run dev      # development server
+npm.cmd run lint     # ESLint (includes the React Hooks rules)
+npm.cmd run build    # production bundle in dist/
+npm.cmd run preview  # serve the production bundle
 ```
+
+Using `npm.cmd` in PowerShell avoids the `npm.ps1` execution-policy error without changing your system's script policy.
 
 All libraries (Supabase, Lucide icons, Excel and PDF export) come from npm. Only the Inter font loads from Google Fonts. The Excel and PDF libraries download on first use.
 
