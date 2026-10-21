@@ -24,17 +24,17 @@ export const territorySet = (value) => new Set(String(value || "").split(",").ma
 /** First territory of a store, or an em dash. */
 export const primaryTerritory = (store) => String(store?.territory || "").split(",")[0].trim() || "—";
 
-export const normalizePlatformStatus = (value) => (value === "Active" || value === "Pending" ? value : "Not enrolled");
+export const normalizePlatformStatus = (value) => (["Active", "Pending", "Not enrolled", "Exempted"].includes(value) ? value : "Not enrolled");
 
 export const platformStatus = (store, key) => normalizePlatformStatus(platformsOf(store)[key] || "Not enrolled");
 
 export const platformColor = (status) => {
   const value = normalizePlatformStatus(status);
-  return value === "Active" ? "var(--ok)" : value === "Pending" ? "var(--warn)" : "var(--danger)";
+  return value === "Active" ? "var(--ok)" : value === "Pending" ? "var(--warn)" : value === "Exempted" ? "var(--idle)" : "var(--danger)";
 };
 
-/** Chip class: on / pend / off. */
-export const platformChipClass = (status) => (status === "Active" ? "on" : status === "Pending" ? "pend" : "off");
+/** Chip class: on / pend / off / exempt. */
+export const platformChipClass = (status) => (status === "Active" ? "on" : status === "Pending" ? "pend" : status === "Exempted" ? "exempt" : "off");
 
 /** A full platforms object with every platform set to Not enrolled. */
 export const emptyPlatforms = () => Object.fromEntries(PLATFORMS.map(([key]) => [key, "Not enrolled"]));

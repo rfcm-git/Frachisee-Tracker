@@ -130,7 +130,7 @@ export default function StoreWindowLeft({ store }) {
     </div></div>
 
     <div className="lc"><div className="lch"><Icon name="bike" />Delivery Platforms</div><div className="lcb">
-      <div className="legend"><span><span className="d" style={{ background: "var(--ok)" }} />Active</span><span><span className="d" style={{ background: "var(--warn)" }} />Pending</span><span><span className="d" style={{ background: "var(--danger)" }} />Not enrolled</span></div>
+      <div className="legend"><span><span className="d" style={{ background: "var(--ok)" }} />Active</span><span><span className="d" style={{ background: "var(--warn)" }} />Pending</span><span><span className="d" style={{ background: "var(--danger)" }} />Not enrolled</span><span><span className="d" style={{ background: "var(--idle)" }} />Exempted</span></div>
       <div className="pbtns">{PLATFORMS_UI.map(([key, name]) => {
         const status = platformStatus(store, key);
         return <button type="button" className="pbtn" title={`${name}: ${status}`} aria-expanded={platformMenu === key} key={key}

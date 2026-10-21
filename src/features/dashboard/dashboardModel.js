@@ -31,7 +31,7 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
   live.forEach((store) => { coreDist[coreActive(store)] += 1; });
   const avgCore = live.length ? live.reduce((sum, store) => sum + coreActive(store), 0) / live.length : 0;
   const gbpYes = live.filter(hasGbp).length;
-  const ez = { Active: 0, Pending: 0, "Not enrolled": 0 };
+  const ez = { Active: 0, Pending: 0, "Not enrolled": 0, Exempted: 0 };
   live.forEach((store) => { ez[platformStatus(store, "ez")] += 1; });
   const openIssues = issues.filter(isIssueOpen);
   const resolvedIssues = issues.filter((issue) => !isIssueOpen(issue));
@@ -57,19 +57,20 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
     tip: `${count === 0 ? "Open stores with no core delivery app active" : count === 3 ? "Open stores active on Uber Eats, DoorDash and Grubhub" : `Open stores active on ${count} of the 3 core apps`}: ${formatNumber(coreDist[count])} (${percent(coreDist[count], live.length)}%) — click to see them`,
   }));
   const platformRows = PLATFORMS_UI.map(([key, name]) => {
-    const counts = { Active: 0, Pending: 0, "Not enrolled": 0 };
+    const counts = { Active: 0, Pending: 0, "Not enrolled": 0, Exempted: 0 };
     live.forEach((store) => { counts[platformStatus(store, key)] += 1; });
     return { label: name, parts: [
       { label: "Active", value: counts.Active, color: DC.green, act: `plat:${key}:Active` },
       { label: "Pending", value: counts.Pending, color: DC.yellow, act: `plat:${key}:Pending` },
       { label: "Not enrolled", value: counts["Not enrolled"], color: DC.redSoft, act: `plat:${key}:Not enrolled` },
+      { label: "Exempted", value: counts.Exempted, color: DC.gray, act: `plat:${key}:Exempted` },
     ] };
   });
   const donuts = [
     { title: "Google Business Profile", icon: "map-pinned", tip: "An open store counts as synced when its Google Business Profile link is saved in the store window.", center: `${percent(gbpYes, live.length)}%`, sub: "synced",
       segments: [{ label: "Synced (link saved)", value: gbpYes, color: DC.green, act: "gbp:yes", tip: "Click to see these stores" }, { label: "Not synced", value: live.length - gbpYes, color: DC.gray, act: "gbp:no", tip: "No GBP link saved; click to see these stores" }] },
     { title: "ezCater", icon: "utensils", tip: "ezCater status of open stores (set in Delivery Platforms in the store window).", center: `${percent(ez.Active, live.length)}%`, sub: "active",
-      segments: [{ label: "Active", value: ez.Active, color: DC.green, act: "plat:ez:Active" }, { label: "Pending", value: ez.Pending, color: DC.yellow, act: "plat:ez:Pending" }, { label: "Not enrolled", value: ez["Not enrolled"], color: DC.gray, act: "plat:ez:Not enrolled" }] },
+      segments: [{ label: "Active", value: ez.Active, color: DC.green, act: "plat:ez:Active" }, { label: "Pending", value: ez.Pending, color: DC.yellow, act: "plat:ez:Pending" }, { label: "Not enrolled", value: ez["Not enrolled"], color: DC.redSoft, act: "plat:ez:Not enrolled" }, { label: "Exempted", value: ez.Exempted, color: DC.gray, act: "plat:ez:Exempted" }] },
   ];
 
   const territoryRows = (territory ? [territory] : territories).map((value) => {

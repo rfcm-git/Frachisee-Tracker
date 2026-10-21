@@ -43,7 +43,7 @@ export function DashboardCoverage({ coverage, donuts }) {
             <HorizontalBars rows={coverage.coreRows} liveCount={coverage.liveCount} valueMode="coverage" onSelect={openDashboardList} /></div>
           <div><div className="db-sub">Status by platform</div>
             <HorizontalBars rows={coverage.platformRows} full valueMode="platform" onSelect={openDashboardList} />
-            <ChartKey items={[["var(--green)", "Active"], ["var(--warn)", "Pending"], ["#e9968c", "Not enrolled"]]} /></div>
+            <ChartKey items={[["var(--green)", "Active"], ["var(--warn)", "Pending"], ["#e9968c", "Not enrolled"], ["#c9d3c4", "Exempted"]]} /></div>
         </div>
       </DashboardCard>
     </div>
