@@ -30,7 +30,7 @@ export const storesReport = {
     { key: "status", label: "Store status", options: [["Open", "Open"], ["Temporarily closed", "Temporarily closed"], ["Closed", "Closed"]], ok: (ctx, store, selected) => selected.includes(storeStatus(store)) },
     { key: "core", label: "Core 3PD active", options: [["3", "All 3"], ["2", "2 of 3"], ["1", "1 of 3"], ["0", "None"]], ok: (ctx, store, selected) => selected.includes(String(coreActive(store))) },
     { key: "gbp", label: "Google Business Profile", options: [["yes", "Linked"], ["no", "Not linked"]], ok: (ctx, store, selected) => selected.includes(hasGbp(store) ? "yes" : "no") },
-    { key: "ez", label: "ezCater", options: [["Active", "Active"], ["Pending", "Pending"], ["Not enrolled", "Not enrolled"]], ok: (ctx, store, selected) => selected.includes(platformStatus(store, "ez")) },
+    { key: "ez", label: "ezCater", options: [["Active", "Active"], ["Pending", "Pending"], ["Not enrolled", "Not enrolled"], ["Exempted", "Exempted"]], ok: (ctx, store, selected) => selected.includes(platformStatus(store, "ez")) },
     { key: "team", label: "Support team", options: [["both", "FBC + OM"], ["nofbc", "No FBC"], ["noom", "No OM"]],
       ok: (ctx, store, selected) => {
         const fbc = !!staffMember(ctx, store.fbc_id);

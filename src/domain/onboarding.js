@@ -3,7 +3,7 @@ import { OB_PLATFORMS } from "../config/constants.js";
 
 export const obPlatformName = (key) => (OB_PLATFORMS.find(([value]) => value === key) || [key, key])[1];
 
-export const obStatusClass = (status) => (status === "Onboarded" ? "ob-done" : status === "Email Sent/Text Message" ? "ob-sent" : status === "Work in Progress" ? "ob-wip" : "ob-pend");
+export const obStatusClass = (status) => (status === "Onboarded" ? "ob-done" : status === "Exempted" ? "ob-exempt" : status === "Email Sent/Text Message" ? "ob-sent" : status === "Work in Progress" ? "ob-wip" : "ob-pend");
 
 /** Label used on badges. */
 export const obStatusLabel = (status) => (status === "Email Sent/Text Message" ? "Email / Text sent" : status);
@@ -11,7 +11,7 @@ export const obStatusLabel = (status) => (status === "Email Sent/Text Message" ?
 /** Shorter label used in filters and the progress table. */
 export const obShortLabel = (status) => (status === "Email Sent/Text Message" ? "Email/Text" : status === "Work in Progress" ? "WIP" : status);
 
-export const obIsOpen = (record) => record.status !== "Onboarded";
+export const obIsOpen = (record) => record.status !== "Onboarded" && record.status !== "Exempted";
 
 /** Foodja records are kept but not shown. */
 export const obVisible = (record) => record.platform !== "fj";
@@ -46,4 +46,6 @@ export function obDays(record) {
 /** Text for the "keep Delivery Platforms in step" checkbox. */
 export const obSyncLabel = (platform, status) => (status === "Onboarded"
   ? `Also set ${obPlatformName(platform)} to Active in this store's Delivery Platforms`
-  : `Also set ${obPlatformName(platform)} to Pending in this store's Delivery Platforms (only if Not enrolled)`);
+  : status === "Exempted"
+    ? `Also set ${obPlatformName(platform)} to Exempted in this store's Delivery Platforms`
+    : `Also set ${obPlatformName(platform)} to Pending in this store's Delivery Platforms (only if Not enrolled)`);

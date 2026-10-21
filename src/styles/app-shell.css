@@ -467,6 +467,7 @@
   .chip.on{background:var(--ok-soft);color:var(--ok);border-color:transparent}
   .chip.pend{background:var(--warn-soft);color:var(--warn);border-color:transparent}
   .chip.off{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+  .chip.exempt{background:var(--idle-soft);color:var(--idle);border-color:transparent}
   .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--lime-soft);color:var(--lime-dark);font-weight:600}
 
   .state{padding:52px 24px;text-align:center;color:var(--ink-soft)}

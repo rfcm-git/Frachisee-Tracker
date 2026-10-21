@@ -53,7 +53,7 @@ export async function addStoreNote(store, text) {
 
 /**
  * Keeps stores' Delivery Platforms in step with onboarding:
- * Onboarded -> Active; otherwise Not enrolled -> Pending.
+ * Onboarded -> Active; otherwise Not enrolled -> Pending. Exempted statuses remain unchanged.
  * items = [{ num, platform, status }]
  */
 export async function syncStorePlatforms(items) {
@@ -66,6 +66,8 @@ export async function syncStorePlatforms(items) {
       const platforms = platformsOf(fresh);
       byStore[num].forEach((item) => {
         const current = normalizePlatformStatus(platforms[item.platform] || "Not enrolled");
+        if (item.status === "Exempted") { platforms[item.platform] = "Exempted"; return; }
+        if (current === "Exempted") return;
         if (item.status === "Onboarded") platforms[item.platform] = "Active";
         else if (current === "Not enrolled") platforms[item.platform] = "Pending";
       });
@@ -111,4 +113,3 @@ async function removeStore(store) {
   }));
   toast("Deleted", "ok");
 }
-

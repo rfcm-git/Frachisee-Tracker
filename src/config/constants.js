@@ -10,7 +10,7 @@ export const ADMIN_PASSWORD = "Sup3rUs3r!";
 export const PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["fj", "Foodja"]];
 export const PLATFORMS_UI = PLATFORMS.filter(([key]) => key !== "fj");
 export const PLATFORM_SHORT = { ue: "UE", dd: "DD", gh: "GH", ez: "EZ", fj: "FJ" };
-export const PLATFORM_STATES = ["Active", "Pending", "Not enrolled"];
+export const PLATFORM_STATES = ["Active", "Pending", "Not enrolled", "Exempted"];
 /** The three core delivery apps used for coverage numbers. */
 export const CORE3 = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"]];
 
@@ -22,8 +22,8 @@ export const ISSUE_STATUS_COLOR = { Pending: "var(--danger)", "Work in Progress"
 
 export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"]];
 export const OB_CORE = ["ue", "dd", "gh"];
-export const OB_STATES = ["Pending", "Email Sent/Text Message", "Work in Progress", "Onboarded"];
-export const OB_STATUS_COLOR = { Pending: "var(--warn)", "Email Sent/Text Message": "#2f7fbf", "Work in Progress": "#7a4fc2", Onboarded: "var(--ok)" };
+export const OB_STATES = ["Pending", "Email Sent/Text Message", "Work in Progress", "Onboarded", "Exempted"];
+export const OB_STATUS_COLOR = { Pending: "var(--warn)", "Email Sent/Text Message": "#2f7fbf", "Work in Progress": "#7a4fc2", Onboarded: "var(--ok)", Exempted: "var(--idle)" };
 
 export const CALL_OUTCOMES = ["Answered", "No answer / voicemail", "Follow-up required", "Requested more info", "Completed"];
 export const CALL_OUTCOME_CLASS = {
