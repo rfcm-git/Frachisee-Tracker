@@ -89,8 +89,8 @@ export const openReport = (kind, preset = null, download = null) => openDialog(D
  * Asks for confirmation. onConfirm may be async; the dialog shows progress and closes when it resolves
  * (return false to keep it open).
  */
-export const confirmAction = ({ text, okLabel = "Delete", title = "Confirm delete", onConfirm, busyLabel }) =>
-  openDialog(DIALOG.confirm, { text, okLabel, title, onConfirm, busyLabel });
+export const confirmAction = ({ text, okLabel = "Delete", title = "Confirm delete", onConfirm, busyLabel, icon, okClass }) =>
+  openDialog(DIALOG.confirm, { text, okLabel, title, onConfirm, busyLabel, icon, okClass });
 
 /** Asks for the admin password, then runs onUnlock. */
 export const askPassword = (label, onUnlock, onCancel) => openDialog(DIALOG.password, { label, onUnlock, onCancel });

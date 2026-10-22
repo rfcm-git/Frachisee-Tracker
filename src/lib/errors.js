@@ -10,6 +10,10 @@ export function friendlyError(error) {
   if (message.includes("call_logs_not_future")) return { title: "The call time can't be in the future", body: "Check the date and time." };
   if (message.includes("call_logs_reason_required") || message.includes("call_logs_result_required")) return { title: "Reason and result are required", body: "Fill in both fields." };
 
+  if (code === "23514" || message.includes("violates check constraint")) {
+    if (message.includes("onboarding")) return { title: "The database doesn't accept that onboarding status yet", body: "Ask your database administrator to apply the latest migrations (Exempted status), then try again.", action: "retry" };
+    return { title: "The database rejected that value", body: "Ask your database administrator to apply the latest migrations, then try again.", action: "retry" };
+  }
   if (code === "23505" || message.includes("duplicate key")) {
     if (message.includes("stores_num_unique")) return { title: "That store number already exists", body: "Each store number can only be used once." };
     if (message.includes("onboarding_open_unique")) return { title: "That store already has an open onboarding for this platform", body: "Update the existing record instead." };

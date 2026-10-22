@@ -10,20 +10,27 @@ import { syncStorePlatforms } from "../stores/storeActions.js";
 
 const newGroupId = () => `O${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-/** Creates one record per store + platform. Returns true when saved. */
+/**
+ * Creates one record per store + platform. Returns true when saved.
+ * Items flagged exempt (store is Exempted on that platform) are recorded as Exempted instead of the starting status.
+ */
 export async function createOnboarding({ items, status, details, syncStores, skipped }) {
   const ctx = getContext();
   const ts = nowIso();
   const groupId = newGroupId();
-  const records = items.map(({ num, platform }) => ({
-    group_id: groupId, store_num: num, franchisee_id: ctx.storeByNum.get(num)?.franchisee_id ?? null, platform, status, details, last_update: "",
-    history: [{ ts, kind: "created", status, action: "" }], created_at: ts, updated_at: ts,
-  }));
+  const records = items.map(({ num, platform, exempt }) => {
+    const itemStatus = exempt ? "Exempted" : status;
+    return {
+      group_id: groupId, store_num: num, franchisee_id: ctx.storeByNum.get(num)?.franchisee_id ?? null, platform, status: itemStatus, details, last_update: "",
+      history: [{ ts, kind: "created", status: itemStatus, action: exempt ? "Store is Exempted on this platform" : "" }], created_at: ts, updated_at: ts,
+    };
+  });
   const result = await insertRows(TABLES.onboarding, records);
   if (result.error) { toastError(result.error); return false; }
   addRows("onboarding", result.rows);
-  if (syncStores) await syncStorePlatforms(records.map((record) => ({ num: record.store_num, platform: record.platform, status })));
-  toast(`${records.length} onboarding record${records.length > 1 ? "s" : ""} created${skipped ? ` · ${skipped} skipped` : ""}`, "ok");
+  if (syncStores) await syncStorePlatforms(records.map((record) => ({ num: record.store_num, platform: record.platform, status: record.status })));
+  const exempted = records.filter((record) => record.status === "Exempted" && status !== "Exempted").length;
+  toast(`${records.length} onboarding record${records.length > 1 ? "s" : ""} created${skipped ? ` · ${skipped} skipped` : ""}${exempted ? ` · ${exempted} recorded as Exempted` : ""}`, "ok");
   return true;
 }
 

@@ -8,8 +8,8 @@ import { loadAll } from "../../state/appActions.js";
 import { DIALOG, closeDialogs } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 
-/** Yes/no confirmation. onConfirm may be async; returning false keeps the dialog open. */
-export function ConfirmDialog({ text, okLabel = "Delete", title = "Confirm delete", busyLabel, onConfirm }) {
+/** Yes/no confirmation. onConfirm may be async; returning false keeps the dialog open. text may be a string or JSX. */
+export function ConfirmDialog({ text, okLabel = "Delete", title = "Confirm delete", busyLabel, onConfirm, icon = "trash-2", okClass = "btn danger" }) {
   const { close } = useDialog();
   const [busy, setBusy] = useState(false);
 
@@ -20,10 +20,10 @@ export function ConfirmDialog({ text, okLabel = "Delete", title = "Confirm delet
     if (result !== false) close();
   }
 
-  return <Modal size="small" icon="trash-2" title={title} showClose={false} role="alertdialog" onEscape={busy ? false : close}
+  return <Modal size="small" icon={icon} title={title} showClose={false} role="alertdialog" onEscape={busy ? false : close}
     footer={<><button type="button" className="btn ghost" disabled={busy} onClick={close}>Cancel</button>
-      <BusyButton className="btn danger" busy={busy} busyLabel={busyLabel || `${okLabel}…`} onClick={confirm} autoFocus>{okLabel}</BusyButton></>}>
-    <p className="hint">{text}</p>
+      <BusyButton className={okClass} busy={busy} busyLabel={busyLabel || `${okLabel}…`} onClick={confirm} autoFocus>{okLabel}</BusyButton></>}>
+    {typeof text === "string" ? <p className="hint">{text}</p> : <div className="hint">{text}</div>}
   </Modal>;
 }
 
