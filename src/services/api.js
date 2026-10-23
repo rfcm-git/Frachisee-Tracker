@@ -81,12 +81,15 @@ export async function guardedUpdate(table, row, patch) {
  * Loads the latest store, applies mutate(freshRow) -> patch, and saves.
  * Retries when someone saved in between. Returns { row } | { gone } | { conflict } | { error }.
  */
-export async function mergeStoreSave(storeId, mutate) {
+export const mergeStoreSave = (storeId, mutate) => mergeRowSave(TABLES.stores, storeId, mutate);
+
+/** Same as mergeStoreSave, for any table with an id column. */
+export async function mergeRowSave(table, id, mutate) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const { data: fresh, error } = await db().from(TABLES.stores).select("*").eq("id", storeId).maybeSingle();
+    const { data: fresh, error } = await db().from(table).select("*").eq("id", id).maybeSingle();
     if (error) return { error };
     if (!fresh) return { gone: true };
-    const result = await guardedUpdate(TABLES.stores, fresh, mutate(fresh));
+    const result = await guardedUpdate(table, fresh, mutate(fresh));
     if (result.error || result.row) return result;
   }
   return { conflict: true };

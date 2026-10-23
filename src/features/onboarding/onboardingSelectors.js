@@ -1,6 +1,7 @@
 /* Onboarding tab: filtering and the progress table. */
 import { OB_CORE, OB_PLATFORMS, OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
 import { obIsOpen, obPlatformName, obVisible } from "../../domain/onboarding.js";
+import { platformStatus } from "../../domain/records.js";
 import { franchiseeContactMatch, numRank, storeMatches } from "../../domain/search.js";
 import { timeOf } from "../../lib/format.js";
 import { richToPlain } from "../../lib/richText.js";
@@ -48,13 +49,38 @@ export function progressModel(ctx, filter) {
   return { platforms, totals, total: rows.length, done, percent: rows.length ? Math.round((done / rows.length) * 100) : 0 };
 }
 
-/** Store + platform items to create, and the ones skipped because an open record exists. */
+/** Most recent onboarding record of a store + platform, or null. */
+const latestOnboarding = (ctx, num, platform) => ctx.onboarding
+  .filter((record) => String(record.store_num) === num && record.platform === platform)
+  .sort((a, b) => timeOf(b.created_at) - timeOf(a.created_at))[0] || null;
+
+/** Status of a store on each supported platform: its Delivery Platforms status and its latest onboarding status ("" when none). */
+export function storePlatformStatuses(ctx, num) {
+  const store = ctx.storeByNum.get(String(num));
+  return OB_PLATFORMS.map(([key]) => ({
+    key,
+    delivery: store ? platformStatus(store, key) : "Not enrolled",
+    onboarding: latestOnboarding(ctx, String(num), key)?.status || "",
+  }));
+}
+
+/** True when a store + platform already has a status, so adding it should be confirmed. */
+export const hasPlatformStatus = (entry) => entry.delivery !== "Not enrolled" || Boolean(entry.onboarding);
+
+/**
+ * Store + platform items to create and the ones skipped because an open record exists.
+ * Items on a platform where the store is Exempted are still created, flagged exempt, so they can be reported.
+ * flagged = items to create that already have a status; stores = picked stores with their statuses.
+ */
 export function planOnboarding(ctx, storeNums, platformKeys) {
   const make = [];
   const skip = [];
-  storeNums.forEach((num) => platformKeys.forEach((platform) => {
+  const stores = storeNums.map((num) => ({ num, platforms: storePlatformStatuses(ctx, num) }));
+  stores.forEach(({ num, platforms }) => platformKeys.forEach((platform) => {
     const duplicate = ctx.onboarding.find((record) => String(record.store_num) === num && record.platform === platform && obIsOpen(record));
-    (duplicate ? skip : make).push({ num, platform });
+    const current = platforms.find((entry) => entry.key === platform);
+    if (duplicate) skip.push({ num, platform });
+    else make.push({ num, platform, exempt: current.delivery === "Exempted", current });
   }));
-  return { make, skip };
+  return { make, skip, exempt: make.filter((item) => item.exempt), flagged: make.filter((item) => hasPlatformStatus(item.current)), stores };
 }

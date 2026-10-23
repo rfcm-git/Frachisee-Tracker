@@ -294,6 +294,19 @@
   .bk-ok{color:var(--ok);font-weight:600;display:inline-flex;align-items:center;gap:4px}
   .bk-skip{color:var(--danger);font-weight:600;display:inline-flex;align-items:center;gap:4px}
   .bk-ok [data-lucide],.bk-skip [data-lucide]{width:14px;height:14px}
+  .bu-btns{display:flex;flex-wrap:wrap;gap:6px}
+  .bu-error{background:var(--danger-soft);color:var(--danger)}
+  .bu-error ul{margin:4px 0;padding-left:18px}
+  .bu-mode{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0 0 10px;font-size:13px;color:var(--ink-soft)}
+  .bu-mode label{display:inline-flex;align-items:center;gap:6px;color:var(--ink);cursor:pointer}
+  .bu-mode input{accent-color:var(--green)}
+  .bu-h{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:12px 0 6px}
+  .bu-table{max-height:240px}
+  .bu-change{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:1px 0}
+  .bu-change [data-lucide]{width:12px;height:12px;color:var(--ink-soft)}
+  .bu-old{color:var(--ink-soft);text-decoration:line-through}
+  .bu-new{color:var(--green-dark);font-weight:600}
+  .bk-ok.bu-transfer{color:#2f7fbf}
   .hbtn{position:relative}
   .hbtn .cnt{position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;border-radius:999px;background:var(--green);color:#fff;font-size:9.5px;font-weight:700;display:grid;place-items:center;padding:0 3px;border:1.5px solid #fff}
   .h-issue{border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:var(--lime-tint);margin-bottom:16px}

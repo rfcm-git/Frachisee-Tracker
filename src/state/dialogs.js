@@ -22,6 +22,7 @@ export const DIALOG = {
   franchiseeInfo: "franchiseeInfo",
   addStore: "addStore",
   bulkImport: "bulkImport",
+  bulkUpdate: "bulkUpdate",
   staffDetail: "staffDetail",
   staffForm: "staffForm",
   callLog: "callLog",
@@ -67,6 +68,7 @@ export const openFranchiseeForm = (franchiseeId = null) => openDialog(DIALOG.fra
 export const openFranchiseeInfo = (franchiseeId, groupId = "") => openDialog(DIALOG.franchiseeInfo, { franchiseeId, groupId });
 export const openAddStore = (franchiseeId) => openDialog(DIALOG.addStore, { franchiseeId });
 export const openBulkImport = () => openDialog(DIALOG.bulkImport);
+export const openBulkUpdate = () => openDialog(DIALOG.bulkUpdate);
 
 export const openStaffDetail = (staffId) => openDialog(DIALOG.staffDetail, { staffId });
 export const openStaffForm = (staffId = null) => openDialog(DIALOG.staffForm, { staffId });
@@ -89,8 +91,8 @@ export const openReport = (kind, preset = null, download = null) => openDialog(D
  * Asks for confirmation. onConfirm may be async; the dialog shows progress and closes when it resolves
  * (return false to keep it open).
  */
-export const confirmAction = ({ text, okLabel = "Delete", title = "Confirm delete", onConfirm, busyLabel }) =>
-  openDialog(DIALOG.confirm, { text, okLabel, title, onConfirm, busyLabel });
+export const confirmAction = ({ text, okLabel = "Delete", title = "Confirm delete", onConfirm, busyLabel, icon, okClass }) =>
+  openDialog(DIALOG.confirm, { text, okLabel, title, onConfirm, busyLabel, icon, okClass });
 
 /** Asks for the admin password, then runs onUnlock. */
 export const askPassword = (label, onUnlock, onCancel) => openDialog(DIALOG.password, { label, onUnlock, onCancel });

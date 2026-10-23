@@ -4,7 +4,7 @@
  */
 import { create } from "zustand";
 import { ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS } from "../config/constants.js";
-import { DEFAULT_CALL_FILTERS } from "../domain/calls.js";
+import { CALL_VIEWS, DEFAULT_CALL_FILTERS } from "../domain/calls.js";
 import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
@@ -44,6 +44,7 @@ function baseState() {
     obFilter: defaultObFilter(),
     callFilters: { ...DEFAULT_CALL_FILTERS },
     callSort: "desc",
+    callView: "calls",
     callInsights: local.get(STORAGE_KEYS.callInsights) !== "0",
     staffRole: "all",
     dashTerritory: "",
@@ -94,6 +95,7 @@ function restoredState() {
   }
   if (saved.callFilters && typeof saved.callFilters === "object") state.callFilters = { ...DEFAULT_CALL_FILTERS, ...saved.callFilters };
   state.callSort = saved.callSort === "asc" ? "asc" : "desc";
+  if (CALL_VIEWS.includes(saved.callView)) state.callView = saved.callView;
   return { state, pending: saved };
 }
 
@@ -162,7 +164,12 @@ export function showOpenConcerns() {
 }
 
 export function showFranchiseeCalls(name) {
-  set({ tab: "calls", search: "", callFilters: { ...get().callFilters, fr: name }, ...resetPages("cl") });
+  set({ tab: "calls", callView: "calls", search: "", callFilters: { ...get().callFilters, fr: name }, ...resetPages("cl") });
+  window.scrollTo(0, 0);
+}
+
+export function showStoreCalls(storeNum) {
+  set({ tab: "calls", callView: "calls", search: "", callFilters: { ...get().callFilters, store: String(storeNum) }, ...resetPages("cl") });
   window.scrollTo(0, 0);
 }
 
@@ -248,6 +255,8 @@ export function setCallFilter(key, value) {
 
 export const resetCallFilters = () => set({ callFilters: { ...DEFAULT_CALL_FILTERS }, search: "", ...resetPages("cl") });
 
+export const setCallView = (callView) => set({ callView, ...resetPages("cl") });
+
 export const toggleCallSort = () => set({ callSort: get().callSort === "desc" ? "asc" : "desc" });
 
 export function toggleCallInsights() {
@@ -298,7 +307,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, issueSub: state.issueSub, search: state.search, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, callFilters: state.callFilters, callSort: state.callSort,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });

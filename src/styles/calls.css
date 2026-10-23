@@ -36,6 +36,24 @@
   .cl-top{display:flex;flex-direction:column;gap:4px}
   .cl-topr{display:flex;justify-content:space-between;gap:8px;border:none;background:none;padding:6px 8px;border-radius:8px;font-family:var(--font);font-size:13px;color:var(--ink);cursor:pointer;text-align:left}
   .cl-topr:hover{background:var(--lime-soft)} .cl-topr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .cl-topr b{color:var(--green-dark)}
+  .cl-count-mode{display:flex;gap:5px;margin:8px 0}
+  .cl-count-mode button{border:1px solid var(--line);border-radius:7px;background:#fff;padding:4px 9px;font:600 12px var(--font);color:var(--ink-soft);cursor:pointer}
+  .cl-count-mode button[aria-pressed=true]{border-color:var(--green);background:var(--lime-tint);color:var(--green-dark)}
+  .cl-count-mode button:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+  .cl-count-list{max-height:220px;overflow-y:auto}
+  .cl-viewbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin:0 0 10px}
+  .cl-view{margin:0}
+  .cl-view button{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;font-size:12.5px}
+  .cl-view button svg{width:14px;height:14px}
+  .cl-totals{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--ink-soft)}
+  .cl-totals b{color:var(--ink)}
+  .cl-counts th.num,.cl-counts td.num{text-align:right;white-space:nowrap}
+  .cl-cnt{position:relative;min-width:110px}
+  .cl-cnt-bar{position:absolute;right:12px;top:50%;height:6px;margin-top:9px;max-width:calc(100% - 24px);background:var(--lime-soft);border-radius:3px}
+  .cl-cnt b{position:relative;color:var(--green-dark)}
+  .cl-fu-n{color:#8a5600}
+  .cl-counts tfoot td{padding:11px 12px;font-weight:700;background:var(--lime-tint);border-top:2px solid var(--line)}
+  .cl-count-static{cursor:default;color:var(--ink-soft)}
   .cl-filters{gap:10px 14px}
   .cl-fl{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);font-weight:600}
   .cl-fl > span{display:inline-flex;align-items:center;gap:5px}
