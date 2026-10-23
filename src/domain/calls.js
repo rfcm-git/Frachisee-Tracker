@@ -1,10 +1,14 @@
 /* Call logs: filters, names and contact details. */
+import { CALL_ANSWERED } from "../config/constants.js";
 import { addDays, parseLocalDate, startOfDay, startOfWeek } from "../lib/format.js";
 import { digitsOnly, normalizeName } from "../lib/text.js";
 import { contactsOf } from "./records.js";
 import { franchiseeContactMatch, numRank } from "./search.js";
 
 export const DEFAULT_CALL_FILTERS = Object.freeze({ range: "all", from: "", to: "", fr: "", store: "", outcome: "" });
+
+/** Call Logs views: "calls" (the list), "franchisee" or "store" (call counts). */
+export const CALL_VIEWS = ["calls", "franchisee", "store"];
 
 export const hasOpenFollowUp = (call) => !!call.follow_up && !call.follow_up_done_at;
 
@@ -80,7 +84,34 @@ export function callRange(filters, now = new Date()) {
   }
 }
 
-export const anyCallFilter = (filters, search) => !!(filters.range !== "all" || filters.fr || filters.store || filters.outcome || String(search || "").trim());
+/**
+ * Calls grouped by franchisee or by store, most calls first.
+ * by: "franchisee" | "store". Rows: { key, name, storeNum, franchisee, stores, calls, answered, followUps, lastCall }.
+ * Calls without a store are grouped under storeNum null ("General").
+ */
+export function callCounts(ctx, calls, by) {
+  const groups = new Map();
+  calls.forEach((call) => {
+    const name = callFranchiseeName(ctx, call);
+    const storeNum = call.store_num ? String(call.store_num) : null;
+    const key = by === "store" ? storeNum ?? "" : call.franchisee_id ? `id:${call.franchisee_id}` : `name:${name}`;
+    let row = groups.get(key);
+    if (!row) { row = { key, name, storeNum, franchisees: new Set(), storeSet: new Set(), calls: 0, answered: 0, followUps: 0, lastCall: 0 }; groups.set(key, row); }
+    row.franchisees.add(name);
+    if (storeNum) row.storeSet.add(storeNum);
+    row.calls += 1;
+    if (CALL_ANSWERED.includes(call.outcome)) row.answered += 1;
+    if (hasOpenFollowUp(call)) row.followUps += 1;
+    row.lastCall = Math.max(row.lastCall, new Date(call.call_at).getTime() || 0);
+  });
+  return [...groups.values()]
+    .map(({ franchisees, storeSet, ...row }) => ({ ...row, franchisee: [...franchisees].join(", "), stores: storeSet.size }))
+    .sort((a, b) => b.calls - a.calls || (by === "store"
+      ? (a.storeNum === null) - (b.storeNum === null) || String(a.storeNum).localeCompare(String(b.storeNum), undefined, { numeric: true })
+      : a.name.localeCompare(b.name)));
+}
+
+export const anyCallFilter =(filters, search) => !!(filters.range !== "all" || filters.fr || filters.store || filters.outcome || String(search || "").trim());
 
 /** Calls matching the Call Logs filters and the toolbar search. */
 export function filterCalls(ctx, filters, sq) {

@@ -3,7 +3,7 @@
  * To use a new icon, import it here and add it to ICONS.
  */
 import {
-  Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellOff, BellRing,
+  Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowRightLeft, ShieldCheck, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellOff, BellRing,
   Bike, Bold, Bookmark, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
   CircleAlert, CircleCheck, CircleOff, CircleX, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
   FileBarChart, FileSpreadsheet, FileText, Filter, Flag, Folder, FolderPlus, Globe, Hash, History, Hourglass, IdCard, IndentDecrease,
@@ -21,6 +21,7 @@ export const ICONS = {
   "arrow-down-up": ArrowDownUp,
   "arrow-down-wide-narrow": ArrowDownWideNarrow,
   "arrow-right": ArrowRight,
+  "arrow-right-left": ArrowRightLeft,
   "arrow-up": ArrowUp,
   "arrow-up-narrow-wide": ArrowUpNarrowWide,
   "badge-check": BadgeCheck,
@@ -104,6 +105,7 @@ export const ICONS = {
   "search-x": SearchX,
   settings: Settings,
   "settings-2": Settings2,
+  "shield-check": ShieldCheck,
   "sliders-horizontal": SlidersHorizontal,
   "sticky-note": StickyNote,
   store: Store,

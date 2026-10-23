@@ -22,6 +22,7 @@ export const DIALOG = {
   franchiseeInfo: "franchiseeInfo",
   addStore: "addStore",
   bulkImport: "bulkImport",
+  bulkUpdate: "bulkUpdate",
   staffDetail: "staffDetail",
   staffForm: "staffForm",
   callLog: "callLog",
@@ -67,6 +68,7 @@ export const openFranchiseeForm = (franchiseeId = null) => openDialog(DIALOG.fra
 export const openFranchiseeInfo = (franchiseeId, groupId = "") => openDialog(DIALOG.franchiseeInfo, { franchiseeId, groupId });
 export const openAddStore = (franchiseeId) => openDialog(DIALOG.addStore, { franchiseeId });
 export const openBulkImport = () => openDialog(DIALOG.bulkImport);
+export const openBulkUpdate = () => openDialog(DIALOG.bulkUpdate);
 
 export const openStaffDetail = (staffId) => openDialog(DIALOG.staffDetail, { staffId });
 export const openStaffForm = (staffId = null) => openDialog(DIALOG.staffForm, { staffId });

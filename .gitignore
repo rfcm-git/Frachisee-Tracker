@@ -3,3 +3,5 @@ dist/
 .vercel/
 *.log
 /Old Versions/README.md
+.env
+.env.*

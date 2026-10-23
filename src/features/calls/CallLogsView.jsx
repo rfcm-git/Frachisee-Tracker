@@ -7,16 +7,17 @@ import { clickableProps } from "../../components/ui/clickable.js";
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { CALL_OUTCOMES } from "../../config/constants.js";
-import { anyCallFilter, callFollowUpDue, callFranchiseeName, callLastActivity, callPreviousName, filterCalls, hasOpenFollowUp, latestCallUpdate } from "../../domain/calls.js";
+import { anyCallFilter, callCounts, callFollowUpDue, callFranchiseeName, callLastActivity, callPreviousName, filterCalls, hasOpenFollowUp, latestCallUpdate } from "../../domain/calls.js";
 import { searchQuery } from "../../domain/search.js";
 import { addDays, formatCallTime, formatNumber, formatTimestamp, shortDate, startOfDay, startOfWeek } from "../../lib/format.js";
 import { oneLine } from "../../lib/richText.js";
 import { compareNumbers } from "../../lib/text.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openCallDetails, openCallFollowUp, openCallLog } from "../../state/dialogs.js";
-import { resetCallFilters, setCallFilter, toggleCallInsights, toggleCallSort, useUiStore } from "../../state/uiStore.js";
+import { resetCallFilters, setCallFilter, setCallView, toggleCallInsights, toggleCallSort, useUiStore } from "../../state/uiStore.js";
 import { askDeleteCall } from "./callActions.js";
 import CallContacts from "./CallContacts.jsx";
+import CallCountsTable from "./CallCountsTable.jsx";
 import CallInsights from "./CallInsights.jsx";
 
 /** Text filter that applies on blur or Enter. Give it key={value} so it resets when the filter changes. */
@@ -51,6 +52,23 @@ function CallFilters({ ctx, filters, anyFilter }) {
         <option value="__none">Outcome not set</option><option value="__fu_open">Follow-up still open</option><option value="__fu_done">Follow-up done</option>
       </select></label>
     {anyFilter && <button type="button" className="btn link" onClick={resetCallFilters} style={{ marginLeft: "auto" }}><Icon name="rotate-ccw" />Reset filters</button>}
+  </div>;
+}
+
+const VIEW_OPTIONS = [["calls", "phone", "Calls"], ["franchisee", "user-round", "By franchisee"], ["store", "store", "By store"]];
+
+/** View switch (calls list or call counts) and how many calls, franchisees and stores are shown out of all. */
+function CallViewBar({ view, calls, allCount, franchisees, stores }) {
+  const plural = (count, word) => `${formatNumber(count)} ${word}${count !== 1 ? "s" : ""}`;
+  return <div className="cl-viewbar">
+    <div className="cl-count-mode cl-view" role="group" aria-label="Call log view">
+      {VIEW_OPTIONS.map(([key, icon, label]) => <button type="button" key={key} aria-pressed={view === key} onClick={() => setCallView(key)}><Icon name={icon} />{label}</button>)}
+    </div>
+    <div className="cl-totals" aria-live="polite">
+      <span><b>{formatNumber(calls.length)}</b>{calls.length !== allCount ? <> of {formatNumber(allCount)}</> : ""} call{allCount !== 1 ? "s" : ""}</span>
+      <span>to <b>{plural(franchisees, "franchisee")}</b></span>
+      <span>about <b>{plural(stores, "store")}</b></span>
+    </div>
   </div>;
 }
 
@@ -97,10 +115,16 @@ export default function CallLogsView() {
   const sort = useUiStore((state) => state.callSort);
   const insights = useUiStore((state) => state.callInsights);
   const search = useUiStore((state) => state.search);
+  const view = useUiStore((state) => state.callView);
 
   const calls = useMemo(() => filterCalls(ctx, filters, searchQuery(search))
     .sort((a, b) => (sort === "desc" ? callLastActivity(b) - callLastActivity(a) : callLastActivity(a) - callLastActivity(b))), [ctx, filters, search, sort]);
-  useToolbarCount(ctx.callLogsReady ? `${formatNumber(calls.length)} call${calls.length !== 1 ? "s" : ""}` : "");
+  const byFranchisee = useMemo(() => callCounts(ctx, calls, "franchisee"), [ctx, calls]);
+  const byStore = useMemo(() => callCounts(ctx, calls, "store"), [ctx, calls]);
+  const storeCount = byStore.filter((row) => row.storeNum).length;
+  const countText = view === "franchisee" ? `${formatNumber(byFranchisee.length)} franchisee${byFranchisee.length !== 1 ? "s" : ""}`
+    : view === "store" ? `${formatNumber(storeCount)} store${storeCount !== 1 ? "s" : ""}` : "";
+  useToolbarCount(ctx.callLogsReady ? `${formatNumber(calls.length)} call${calls.length !== 1 ? "s" : ""}${countText ? ` · ${countText}` : ""}` : "");
 
   if (!ctx.callLogsReady) return <EmptyState icon="database" title="Call Logs needs a quick database update">Run migrate-call-logs.sql in the Supabase SQL Editor, then click Refresh.</EmptyState>;
 
@@ -129,10 +153,13 @@ export default function CallLogsView() {
       </div>
       {insights && calls.length > 0 && <CallInsights ctx={ctx} calls={calls} scopeNote={scopeNote} />}
       <CallFilters ctx={ctx} filters={filters} anyFilter={anyFilter} />
+      <CallViewBar view={view} calls={calls} allCount={ctx.callLogs.length} franchisees={byFranchisee.length} stores={storeCount} />
     </>}
 
     {!ctx.callLogs.length ? <EmptyState icon="phone" title="No call logs yet">Log a call from the Franchisee tab to get started — use the phone button next to any franchisee.</EmptyState>
       : !calls.length ? <EmptyState icon="search-x" title="No calls match">Try a different search, or reset the filters.</EmptyState>
-        : <CallTable ctx={ctx} calls={calls} sort={sort} />}
+        : view === "franchisee" ? <CallCountsTable rows={byFranchisee} calls={calls} by="franchisee" />
+          : view === "store" ? <CallCountsTable rows={byStore} calls={calls} by="store" />
+            : <CallTable ctx={ctx} calls={calls} sort={sort} />}
   </>;
 }

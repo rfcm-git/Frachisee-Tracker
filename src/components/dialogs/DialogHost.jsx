@@ -8,6 +8,7 @@ import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
 import CallFollowUpDialog from "../../features/calls/CallFollowUpDialog.jsx";
 import DashboardListDialog from "../../features/dashboard/DashboardListDialog.jsx";
 import BulkImportDialog from "../../features/franchisees/BulkImportDialog.jsx";
+import BulkUpdateDialog from "../../features/franchisees/BulkUpdateDialog.jsx";
 import FranchiseeFormDialog from "../../features/franchisees/FranchiseeFormDialog.jsx";
 import FranchiseeInfoDialog from "../../features/franchisees/FranchiseeInfoDialog.jsx";
 import GroupUpdateDialog from "../../features/issues/GroupUpdateDialog.jsx";
@@ -45,6 +46,7 @@ const COMPONENTS = {
   [DIALOG.franchiseeInfo]: FranchiseeInfoDialog,
   [DIALOG.addStore]: AddStoreDialog,
   [DIALOG.bulkImport]: BulkImportDialog,
+  [DIALOG.bulkUpdate]: BulkUpdateDialog,
   [DIALOG.staffDetail]: StaffDetailDialog,
   [DIALOG.staffForm]: StaffFormDialog,
   [DIALOG.callLog]: CallLogDialog,

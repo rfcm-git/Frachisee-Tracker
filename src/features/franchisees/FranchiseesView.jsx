@@ -8,7 +8,7 @@ import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { franchiseeOpenIssues, storesOf } from "../../domain/context.js";
 import { searchQuery } from "../../domain/search.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openBulkImport, openFranchiseeForm } from "../../state/dialogs.js";
+import { openFranchiseeForm } from "../../state/dialogs.js";
 import { selectFranchisee, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 import { filterFranchisees } from "./franchiseeSelectors.js";
 import FranchiseeDetail from "./FranchiseeDetail.jsx";
@@ -32,7 +32,6 @@ export default function FranchiseesView() {
       <div className="card fr-panel">
         <div className="list-head">
           <div className="lh-title"><Icon name="users" /><span><b>{ctx.franchisees.length}</b> franchisees {"·"} <b>{ctx.stores.length}</b> stores</span></div>
-          <button type="button" className="iconbtn" title="Bulk add from spreadsheet" aria-label="Bulk add from spreadsheet" onClick={openBulkImport}><Icon name="file-spreadsheet" /></button>
           <button type="button" className="iconbtn" title="Add franchisee" aria-label="Add franchisee" onClick={() => openFranchiseeForm(null)}><Icon name="user-plus" /></button>
           <button type="button" className={`iconbtn${issuesOnly ? " on" : ""}`} title="Only franchisees with an issue" aria-pressed={issuesOnly} onClick={toggleIssuesOnly}><Icon name="triangle-alert" /></button>
         </div>
