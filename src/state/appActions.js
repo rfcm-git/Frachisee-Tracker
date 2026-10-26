@@ -4,7 +4,7 @@ import { downloadBlob } from "../lib/browser.js";
 import { localDateInput, nowIso } from "../lib/format.js";
 import { TABLES, fetchAll, hasDb, loadAllTables, upsertRows } from "../services/api.js";
 import { clearDb, createDb, getDb, getSavedCredentials, saveCredentials } from "../services/supabase.js";
-import { setAllData, setConnection, useDataStore } from "./dataStore.js";
+import { getContext, setAllData, setConnection, useDataStore } from "./dataStore.js";
 import { DIALOG, closeDialogs } from "./dialogs.js";
 import { toast } from "./toastStore.js";
 
@@ -121,17 +121,72 @@ const chunks = (list, size) => {
   return out;
 };
 
-const withoutId = (rows) => rows.map(({ id: _id, ...rest }) => rest);
+/** Text compared as plain text: no HTML tags, &nbsp; as a space, single spaces, trimmed, lower case. */
+const plainKey = (value) => String(value ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " ").replace(/\s+/g, " ").trim().toLowerCase();
 
-/** Restores a backup into the shared database (matching records are overwritten). Throws on failure. */
+/** Times compared to the minute. */
+const minuteKey = (value) => {
+  const time = new Date(value);
+  return Number.isNaN(time.getTime()) ? "" : time.toISOString().slice(0, 16);
+};
+
+/** Content that makes two history records the same record, whatever their ids. */
+const HISTORY_KEYS = {
+  [TABLES.issues]: (row) => [plainKey(row.store_num), plainKey(row.title), minuteKey(row.created_at)].join("|"),
+  [TABLES.onboarding]: (row) => [plainKey(row.store_num), plainKey(row.platform), plainKey(row.details), minuteKey(row.created_at)].join("|"),
+  [TABLES.callLogs]: (row) => [plainKey(row.store_num), plainKey(row.franchisee_name), plainKey(row.reason), plainKey(row.result), minuteKey(row.call_at)].join("|"),
+};
+
+export const historyKey = (table, row) => HISTORY_KEYS[table](row);
+
+/**
+ * Splits backup rows of a history table: rows whose id is saved are updated in place;
+ * rows with a new id are added without it, unless the same record is already saved or earlier in the backup.
+ */
+export function planHistoryRestore(existing, rows, keyOf) {
+  const savedIds = new Set(existing.map((row) => String(row.id)));
+  const seen = new Set(existing.map(keyOf));
+  const update = [];
+  const add = [];
+  let skipped = 0;
+  rows.forEach((row) => {
+    if (row.id != null && savedIds.has(String(row.id))) {
+      update.push(row);
+      seen.add(keyOf(row));
+      return;
+    }
+    const key = keyOf(row);
+    if (seen.has(key)) { skipped += 1; return; }
+    seen.add(key);
+    const { id: _id, ...rest } = row;
+    add.push(rest);
+  });
+  return { update, add, skipped };
+}
+
+/** Restores one history table without making copies. Returns { updated, added, skipped }. Throws on failure. */
+async function restoreHistory(table, rows, chunk = 300) {
+  if (!rows.length) return { updated: 0, added: 0, skipped: 0 };
+  const { update, add, skipped } = planHistoryRestore(await fetchAll(table), rows, (row) => historyKey(table, row));
+  for (const part of chunks(update, chunk)) { const error = await upsertRows(table, part); if (error) throw error; }
+  for (const part of chunks(add, chunk)) { const { error } = await getDb().from(table).insert(part); if (error) throw error; }
+  return { updated: update.length, added: add.length, skipped };
+}
+
+/**
+ * Restores a backup into the shared database (matching records are overwritten). Throws on failure.
+ * Returns the history counts { updated, added, skipped } for concerns, call logs and onboarding.
+ */
 export async function restoreBackup(backup) {
-  const db = getDb();
   for (const part of chunks(backup.staff, 400)) { const error = await upsertRows(TABLES.staff, part); if (error) throw error; }
   for (const part of chunks(backup.franchisees, 400)) { const error = await upsertRows(TABLES.franchisees, part); if (error) throw error; }
   for (const part of chunks(backup.stores, 300)) { const error = await upsertRows(TABLES.stores, part); if (error) throw error; }
-  for (const part of chunks(withoutId(backup.issues), 300)) { const { error } = await db.from(TABLES.issues).insert(part); if (error) throw error; }
-  for (const part of chunks(withoutId(backup.callLogs), 300)) { const { error } = await db.from(TABLES.callLogs).insert(part); if (error) throw error; }
-  for (const part of chunks(withoutId(backup.onboarding), 300)) { const { error } = await db.from(TABLES.onboarding).insert(part); if (error) throw error; }
+  const results = [
+    await restoreHistory(TABLES.issues, backup.issues),
+    await restoreHistory(TABLES.callLogs, backup.callLogs),
+    getContext().onboardingReady ? await restoreHistory(TABLES.onboarding, backup.onboarding) : null,
+  ].filter(Boolean);
+  return results.reduce((total, result) => ({ updated: total.updated + result.updated, added: total.added + result.added, skipped: total.skipped + result.skipped }), { updated: 0, added: 0, skipped: 0 });
 }
 
 export { friendlyError };
