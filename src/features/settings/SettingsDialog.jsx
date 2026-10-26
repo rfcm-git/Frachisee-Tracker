@@ -27,13 +27,14 @@ function startRestore(backup, closeSettings) {
     busyLabel: "Restoring…",
     text: `Restore ${backup.franchisees.length} franchisees, ${backup.stores.length} stores, ${backup.staff.length} FBC/OM and ${backup.issues.length} issues into the shared database. Matching records are overwritten. Continue?`,
     onConfirm: async () => {
+      let history;
       try {
-        await restoreBackup(backup);
+        history = await restoreBackup(backup);
       } catch (error) {
         toast(errorTitle(error), "err");
         return false;
       }
-      toast("Backup restored", "ok");
+      toast(`Backup restored · ${history.added} history record${history.added !== 1 ? "s" : ""} added, ${history.updated} updated${history.skipped ? `, ${history.skipped} duplicate${history.skipped !== 1 ? "s" : ""} skipped` : ""}`, "ok");
       closeSettings();
       loadAll();
       return true;
