@@ -25,11 +25,13 @@
   .cap-table td{vertical-align:middle}
   .cap-table th.cap-sort button{display:inline-flex;align-items:center;gap:4px;padding:0;border:none;background:none;font:inherit;color:inherit;cursor:pointer;white-space:nowrap}
   .cap-table th.cap-sort [data-lucide]{width:12px;height:12px;opacity:.35}
-  .cap-table th.cap-sort:hover button,.cap-table th.cap-sort.on button{color:var(--green-dark)}
-  .cap-table th.cap-sort.on [data-lucide]{opacity:1}
+  .cap-table th.cap-sort button:hover,.cap-table th.cap-sort button.on{color:var(--green-dark)}
+  .cap-table th.cap-sort button.on [data-lucide]{opacity:1}
+  .cap-table th.cap-sort2{line-height:1.25} .cap-table th.cap-sort2 button{display:flex;margin:1px 0}
+  .cap-upd{font-size:11.5px;margin-top:2px}
   .cap-table th.cap-sort button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}
-  .cap-statuscol{width:150px;white-space:nowrap}
-  .cap-phone{white-space:nowrap}
+  .cap-statuscol{width:140px;white-space:nowrap}
+  .cap-phone{min-width:120px}
   .cap-email{overflow-wrap:anywhere;min-width:170px}
   .cap-date{white-space:nowrap;font-size:12px}
   .cap-notes{min-width:140px;max-width:210px}
@@ -56,6 +58,40 @@
   .cap-overwrite input{margin-top:2px;accent-color:var(--green)}
   .cap-hold{color:#8a5600;font-weight:600;display:inline-flex;align-items:center;gap:4px}
   .cap-hold [data-lucide]{width:14px;height:14px}
+
+  /* Submission due date */
+  .cap-cnt.cap-alert [data-lucide]{width:14px;height:14px}
+  .cap-cnt.cap-alert.hot{background:var(--danger-soft);border-color:#efb7af;color:#a12f23} .cap-cnt.cap-alert.hot b{color:#a12f23}
+  .cap-cnt.cap-alert.warm{background:var(--warn-soft);border-color:#f0d29a;color:#8a5600} .cap-cnt.cap-alert.warm b{color:#8a5600}
+  .cap-cnt.cap-alert.on{box-shadow:inset 0 0 0 2px var(--green);border-color:var(--green)}
+  .cap-duecol{white-space:nowrap}
+  .cap-due-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;font-size:12.5px}
+  .cap-due{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;white-space:nowrap}
+  .cap-due [data-lucide]{width:12px;height:12px}
+  .cap-due.overdue{background:var(--danger-soft);color:#a12f23}
+  .cap-due.today{background:var(--warn-soft);color:#8a5600}
+  .cap-due.soon{background:var(--yellow-soft);color:var(--yellow-dark)}
+  .cap-due.later{background:var(--lime-tint);color:var(--ink-soft)}
+  .cap-due.done{background:var(--ok-soft);color:#146c3a}
+  .cap-setdue{padding:0;height:auto;font-size:12px}
+  .cap-due-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .field .cap-due-row input[type=date]{width:180px}
+  .cap-migrate{margin:0 0 10px}
+  .cap-migrate code{font-size:12px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px}
+
+  /* Import checks */
+  .bk-sum .s.warn b{color:var(--warn)}
+  .cap-check{margin:0 0 10px}
+  .cap-check.bad{background:var(--danger-soft);color:#a12f23}
+  .cap-imp-contact{min-width:200px} .cap-imp-contact b{display:block;font-weight:600} .cap-imp-contact span{font-size:11.5px}
+  .cap-nums{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .cap-nums span{font-size:11.5px;font-weight:700;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.08);border-radius:6px;padding:1px 6px}
+  .cap-nums em{font-size:11.5px;font-style:normal;align-self:center}
+  .cap-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;white-space:nowrap}
+  .cap-tag [data-lucide]{width:12px;height:12px}
+  .cap-tag.ok{background:var(--ok-soft);color:#146c3a}
+  .cap-tag.warn{background:var(--warn-soft);color:#8a5600}
+  .cap-tag.bad{background:var(--danger-soft);color:#a12f23}
 
   /* Dashboard */
   .db-caps .db-sech{margin-bottom:10px}

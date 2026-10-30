@@ -19,7 +19,7 @@ export default function DashboardView() {
   return <>
     <DashboardHeader territory={territory} territories={model.territories} refreshed={shortTime(lastRefreshAt || new Date())} />
     <DashboardKpis items={model.kpis} />
-    {ctx.capsReady && <DashboardCaps summary={caps} territory={territory} />}
+    {ctx.capsReady && <DashboardCaps summary={caps} territory={territory} showDue={ctx.capsDueReady} />}
     <DashboardCoverage coverage={model.coverage} donuts={model.donuts} />
     <DashboardGaps items={model.gaps} />
     <DashboardTerritoryTable rows={model.territoryRows} sort={sort} />

@@ -1,7 +1,7 @@
 import Icon from "../ui/Icon.jsx";
 import { hasOpenFollowUp } from "../../domain/calls.js";
 import { isIssueOpen } from "../../domain/issues.js";
-import { openCapsCount } from "../../features/caps/capsSelectors.js";
+import { capsProgress, openCapsCount } from "../../features/caps/capsSelectors.js";
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openLinks, openSettings } from "../../state/dialogs.js";
@@ -23,6 +23,7 @@ export default function Sidebar() {
   const openOnboarding = openOnboardingCount(ctx);
   const openFollowUps = ctx.callLogs.filter(hasOpenFollowUp).length;
   const openCaps = openCapsCount(ctx);
+  const overdueCaps = ctx.capsDueReady ? capsProgress(ctx).overdue : 0;
   const onIssues = tab === "issues";
   const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
 
@@ -46,7 +47,7 @@ export default function Sidebar() {
               <Icon name={icon} /><span className="t-lb">{label}</span><span className="sb-cnt">{count}</span></button>;
           })}
         </div>
-        <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAPs Monitoring" count={openCaps || ""} countId="cnt-cap" countTip="Stores whose CAP is not completed yet" />
+        <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAPs Monitoring" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
         <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>

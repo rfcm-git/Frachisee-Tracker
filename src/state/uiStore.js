@@ -29,9 +29,10 @@ const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "ne
 const defaultObFilter = () => ({ platforms: [], threePd: [], ezCater: [], sort: "new" });
 
 /** CAPs sort keys: store number, status, date added, last updated. */
-export const CAP_SORT_KEYS = ["num", "status", "added", "updated"];
+export const CAP_SORT_KEYS = ["num", "status", "added", "updated", "due"];
 const CAP_EMAIL_FILTERS = ["", "has", "none"];
-const defaultCapsFilter = () => ({ statuses: [], email: "", sort: { key: "added", dir: -1 } });
+const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
+const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key: "added", dir: -1 } });
 
 function baseState() {
   return {
@@ -104,6 +105,7 @@ function restoredState() {
     state.capsFilter = {
       statuses: onlyValid(saved.capsFilter.statuses, CAP_STATES),
       email: CAP_EMAIL_FILTERS.includes(saved.capsFilter.email) ? saved.capsFilter.email : "",
+      due: CAP_DUE_FILTERS.includes(saved.capsFilter.due) ? saved.capsFilter.due : "",
       sort: CAP_SORT_KEYS.includes(sort.key) ? { key: sort.key, dir: sort.dir === 1 ? 1 : -1 } : defaultCapsFilter().sort,
     };
   }
@@ -273,7 +275,12 @@ export function toggleCapOnlyStatus(status) {
 
 export const setCapEmailFilter = (email) => patchCapsFilter({ email: CAP_EMAIL_FILTERS.includes(email) ? email : "" });
 
-/** Sorts by a column; the same column again flips the direction. Dates start newest first, the rest ascending. */
+export const setCapDueFilter = (due) => patchCapsFilter({ due: CAP_DUE_FILTERS.includes(due) ? due : "" });
+
+/** Progress-strip chips: the same due filter again shows all. */
+export const toggleCapDueFilter = (due) => setCapDueFilter(get().capsFilter.due === due ? "" : due);
+
+/** Sorts by a column; the same column again flips the direction. Added / updated start newest first, the rest ascending (due date: soonest first). */
 export function sortCaps(key, dir) {
   if (!CAP_SORT_KEYS.includes(key)) return;
   const { sort } = get().capsFilter;
@@ -283,9 +290,9 @@ export function sortCaps(key, dir) {
 
 export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter(), sort: get().capsFilter.sort }, search: "", ...resetPages("cap") });
 
-/** Opens CAPs Monitoring, optionally on one status (used by the dashboard). */
-export function showCaps(status = "") {
-  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "" }, ...resetPages("cap") });
+/** Opens CAPs Monitoring, optionally on one status or due date filter (dashboard and reminders). */
+export function showCaps(status = "", due = "") {
+  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
   window.scrollTo(0, 0);
 }
 

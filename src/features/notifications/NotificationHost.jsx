@@ -5,7 +5,8 @@ import {
   clearNotifications, deliverIncoming, markAllRead, markRead, markUnread, removeNotification,
   setNotifyPanelOpen, setNotifyPosition, useNotificationStore,
 } from "../../state/notificationStore.js";
-import { openCallDetails } from "../../state/dialogs.js";
+import { openCallDetails, openCapForm } from "../../state/dialogs.js";
+import { showCaps } from "../../state/uiStore.js";
 import { toast } from "../../state/toastStore.js";
 import { snoozeCallReminder } from "../calls/callReminders.js";
 
@@ -55,6 +56,8 @@ function dayGroup(ts, now) {
 function openTarget(item) {
   markRead(item.id);
   if (item.target?.type === "call") openCallDetails(item.target.id);
+  else if (item.target?.type === "cap") { showCaps(); openCapForm(item.target.id); }
+  else if (item.target?.type === "caps") showCaps("", item.target.due);
 }
 
 function snoozeCall(item) {
@@ -65,6 +68,7 @@ function snoozeCall(item) {
 
 function NotificationItem({ item, now }) {
   const isCall = item.target?.type === "call";
+  const isCap = item.target?.type === "cap" || item.target?.type === "caps";
   return <li className={`nt-item${item.read ? "" : " unread"}${item.tone ? ` ${item.tone}` : ""}`}>
     <span className="nt-ic"><Icon name={item.icon || "bell"} /></span>
     <div className="nt-main">
@@ -79,6 +83,7 @@ function NotificationItem({ item, now }) {
           <button type="button" className="nt-link" onClick={() => openTarget(item)}><Icon name="phone" />Open call</button>
           <button type="button" className="nt-link" onClick={() => snoozeCall(item)}><Icon name="alarm-clock" />Snooze 15 min</button>
         </> : null}
+        {isCap ? <button type="button" className="nt-link" onClick={() => openTarget(item)}><Icon name="list-checks" />{item.target.type === "cap" ? "Open CAP" : "Open CAPs"}</button> : null}
       </div>
     </div>
     <div className="nt-tools">

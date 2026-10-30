@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { CapStatusBadge } from "../../components/ui/common.jsx";
+import { formatDueDate } from "../../domain/caps.js";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
@@ -12,6 +13,14 @@ import { CAP_COLUMNS, downloadCapsList, downloadCapsTemplate, planCapsImport, re
 
 const xlsxFailed = () => toast("Spreadsheet tool didn't load — check internet", "err");
 const plural = (count, word) => `${count} ${word}${count !== 1 ? "s" : ""}`;
+
+/** Result of the store check for one row: new, already in CAPs, not in the database, or another problem. */
+function CheckTag({ row }) {
+  if (row.reason === "notFound") return <span className="cap-tag bad"><Icon name="circle-x" />Not in database</span>;
+  if (!row.ok) return <span className="cap-tag bad"><Icon name="circle-alert" />Problem</span>;
+  if (row.kind === "update") return <span className="cap-tag warn"><Icon name="copy" />Already added</span>;
+  return <span className="cap-tag ok"><Icon name="circle-check" />New</span>;
+}
 
 /** Add many stores to CAPs Monitoring from a spreadsheet, with a preview first. Existing stores are only updated when allowed. */
 export default function CapsImportDialog() {
@@ -37,6 +46,9 @@ export default function CapsImportDialog() {
       if (result.error) { setError(result.error); return; }
       setParsed(result);
       setBusy(true);
+      const checked = planCapsImport(getContext(), result);
+      const notes = [checked.existing.length && `${plural(checked.existing.length, "store")} already in CAPs`, checked.notFound.length && `${plural(checked.notFound.length, "store")} not in the database`].filter(Boolean);
+      if (notes.length) toast(`Checked: ${notes.join(" · ")} — see the preview`, checked.notFound.length ? "err" : "ok");
     } catch {
       xlsxFailed();
     }
@@ -83,7 +95,7 @@ export default function CapsImportDialog() {
         <span>{saving ? `Importing… ${progress.done}/${progress.total}` : count ? `Import ${plural(count, "store")}` : "Import"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the template</h4>
-        <p>Only Store Number is needed. Franchisee, email and phone are filled in from the store records. Status is optional — blank means No Action Yet.</p>
+        <p>Only Store Number is needed. Franchisee, email and phone are filled in from the store records. Status (blank = No Action Yet) and Due Date are optional.</p>
         <div className="bk-cols">{CAP_COLUMNS.map((column) => <span key={column} className={column === "Store Number" ? "req" : ""}>{column}</span>)}</div>
         <div className="bu-btns">
           <button type="button" className="btn sm round" onClick={() => downloadCapsTemplate().catch(xlsxFailed)}><Icon name="file-spreadsheet" />Download template</button>
@@ -109,31 +121,42 @@ export default function CapsImportDialog() {
 
     {plan && <>
       <div className="bk-sum">
-        <div className={`s${plan.adds.length ? " ok" : ""}`}><b>{plan.adds.length}</b>New stores</div>
-        <div className={`s${plan.updates.length ? " ok" : ""}`}><b>{plan.updates.length}</b>Already in CAPs, with changes</div>
-        <div className="s"><b>{plan.unchanged.length}</b>Already in CAPs, no changes</div>
-        <div className={`s${plan.skipped.length ? " bad" : ""}`}><b>{plan.skipped.length}</b>Rows skipped</div>
+        <div className={`s${plan.adds.length ? " ok" : ""}`}><b>{plan.adds.length}</b>New stores to add</div>
+        <div className={`s${plan.existing.length ? " warn" : ""}`}><b>{plan.existing.length}</b>Already in CAPs</div>
+        <div className={`s${plan.notFound.length ? " bad" : ""}`}><b>{plan.notFound.length}</b>Not in database</div>
+        <div className={`s${plan.problems.length ? " bad" : ""}`}><b>{plan.problems.length}</b>Other problems</div>
       </div>
-      {plan.updates.length > 0 && <div className="warnbox show"><Icon name="triangle-alert" /><div>
-        <b>{plural(plan.updates.length, "store")} already in CAPs Monitoring</b> {plan.updates.length === 1 ? "has" : "have"} a different status in the file. They are <b>not changed</b> unless you allow it.
-        <label className="cap-overwrite"><input type="checkbox" checked={overwrite} disabled={saving} onChange={(event) => setOverwrite(event.target.checked)} />
-          Update the status of stores already in CAPs (a blank Status keeps the saved one)</label>
-        {overwrite && <div className="bk-table bu-table" style={{ marginTop: 8, maxHeight: 180 }}><table><thead><tr><th>Store</th><th>Change</th></tr></thead><tbody>
-          {plan.updates.map((row) => <tr key={row.row}><td className="store">{row.num}</td><td>
-            {row.changes.map((change) => <div key={change.label} className="bu-change"><b>{change.label}:</b> <span className="bu-old">{change.before}</span>
-              <Icon name="arrow-right" /> <span className="bu-new">{change.after}</span></div>)}
-          </td></tr>)}
-        </tbody></table></div>}
+
+      {plan.notFound.length > 0 && <div className="warnbox show cap-check bad"><Icon name="circle-x" /><div>
+        <b>{plural(plan.notFound.length, "store")} {plan.notFound.length === 1 ? "is" : "are"} not in the database</b> and will be skipped. Check the store number, or add the store in All Stores first.
+        <div className="cap-nums">{plan.notFound.slice(0, 40).map((row) => <span key={row.row}>{row.num}</span>)}{plan.notFound.length > 40 && <em>+{plan.notFound.length - 40} more</em>}</div>
+      </div></div>}
+
+      {plan.existing.length > 0 && <div className="warnbox show cap-check"><Icon name="triangle-alert" /><div>
+        <b>{plural(plan.existing.length, "store")} {plan.existing.length === 1 ? "is" : "are"} already in CAPs Monitoring</b> and won't be added again.
+        <div className="cap-nums">{plan.existing.slice(0, 40).map((row) => <span key={row.row}>{row.num}</span>)}{plan.existing.length > 40 && <em>+{plan.existing.length - 40} more</em>}</div>
+        {plan.updates.length > 0 && <>
+          <div style={{ marginTop: 8 }}>{plural(plan.updates.length, "of them")} {plan.updates.length === 1 ? "has" : "have"} a different status or due date in the file. They are <b>not changed</b> unless you allow it.</div>
+          <label className="cap-overwrite"><input type="checkbox" checked={overwrite} disabled={saving} onChange={(event) => setOverwrite(event.target.checked)} />
+            Update stores already in CAPs (blank Status or Due Date keeps the saved one)</label>
+          {overwrite && <div className="bk-table bu-table" style={{ marginTop: 8, maxHeight: 180 }}><table><thead><tr><th>Store</th><th>Change</th></tr></thead><tbody>
+            {plan.updates.map((row) => <tr key={row.row}><td className="store">{row.num}</td><td>
+              {row.changes.map((change) => <div key={change.label} className="bu-change"><b>{change.label}:</b> <span className="bu-old">{change.before}</span>
+                <Icon name="arrow-right" /> <span className="bu-new">{change.after}</span></div>)}
+            </td></tr>)}
+          </tbody></table></div>}
+        </>}
       </div></div>}
 
       <div className="bu-h">Rows in the file</div>
-      {plan.rows.length ? <div className="bk-table bu-table"><table><thead><tr><th>Row</th><th>Store #</th><th>Franchisee</th><th>Email</th><th>Phone</th><th>Status</th><th>Result</th></tr></thead><tbody>
+      {plan.rows.length ? <div className="bk-table bu-table"><table><thead><tr><th>Row</th><th>Store #</th><th>Check</th><th>From store records</th><th>Status</th>{ctx.capsDueReady && <th>Due Date</th>}<th>Result</th></tr></thead><tbody>
         {ordered.map((row) => <tr key={row.row}>
           <td className="muted">{row.row}</td><td className="store">{row.num || "—"}</td>
-          <td>{row.shown?.name || <span className="muted">—</span>}</td>
-          <td>{row.shown?.email || <span className="muted">—</span>}</td>
-          <td style={{ whiteSpace: "nowrap" }}>{row.shown?.phone || <span className="muted">—</span>}</td>
+          <td><CheckTag row={row} /></td>
+          <td className="cap-imp-contact">{row.shown ? <><b>{row.shown.name || "—"}</b>
+            <span className="muted">{[row.shown.email, row.shown.phone].filter(Boolean).join(" · ") || "No email or phone saved"}</span></> : <span className="muted">—</span>}</td>
           <td>{row.shown ? <CapStatusBadge status={row.shown.status} /> : <span className="muted">—</span>}</td>
+          {ctx.capsDueReady && <td style={{ whiteSpace: "nowrap" }}>{row.shown?.due ? formatDueDate(row.shown.due) : <span className="muted">—</span>}</td>}
           <td>{resultOf(row)}</td>
         </tr>)}
       </tbody></table></div> : <p className="muted">No data rows found in the file.</p>}

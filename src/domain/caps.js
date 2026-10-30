@@ -3,10 +3,13 @@
  * store_name, email and phone are saved only when they differ from the store records;
  * blank means "use the store records" (owner name, owner email, store phone).
  */
-import { CAP_STATES } from "../config/constants.js";
+import { CAP_DUE_SOON_DAYS, CAP_STATES } from "../config/constants.js";
 import { franchiseeName } from "./context.js";
 import { emailOf } from "./records.js";
+import { parseLocalDate, startOfDay } from "../lib/format.js";
 import { cleanStoreNumber } from "../lib/text.js";
+
+const DAY = 864e5;
 
 export const capStatusClass = (status) => (status === "Completed" ? "cap-done" : status === "In Progress" ? "cap-wip" : status === "Email Sent" ? "cap-sent" : "cap-none");
 
@@ -44,11 +47,55 @@ const sameText = (a, b) => String(a || "").trim().toLowerCase() === String(b || 
 /** Value to save for a contact field: "" when it matches the store records, so the record keeps following them. */
 export const contactToSave = (value, storeValue) => (sameText(value, storeValue) ? "" : String(value || "").trim());
 
-/** Counts per status and the completion percentage. */
-export function capsSummary(records) {
+/* ---------- submission due date ---------- */
+
+/** Saved due date as "yyyy-mm-dd", or "". */
+export const capDueDate = (record) => (record?.due_date ? String(record.due_date).slice(0, 10) : "");
+
+/** Days from today to the due date: 0 = today, negative = overdue. null when there is no due date. */
+export function capDueDays(record, now = new Date()) {
+  const due = parseLocalDate(capDueDate(record));
+  if (!due || Number.isNaN(due.getTime())) return null;
+  return Math.round((due - startOfDay(now)) / DAY);
+}
+
+/** "none" (no date) | "done" (Completed) | "overdue" | "today" | "soon" (within CAP_DUE_SOON_DAYS) | "later" */
+export function capDueState(record, now = new Date()) {
+  const days = capDueDays(record, now);
+  if (days === null) return "none";
+  if (!capIsOpen(record)) return "done";
+  if (days < 0) return "overdue";
+  if (days === 0) return "today";
+  return days <= CAP_DUE_SOON_DAYS ? "soon" : "later";
+}
+
+/** "Overdue by 3 days", "Due today", "Due tomorrow", "Due in 5 days" ("" without a date). */
+export function capDueText(record, now = new Date()) {
+  const days = capDueDays(record, now);
+  if (days === null) return "";
+  if (days < 0) return `Overdue by ${-days} day${days === -1 ? "" : "s"}`;
+  if (days === 0) return "Due today";
+  return days === 1 ? "Due tomorrow" : `Due in ${days} days`;
+}
+
+/** "Nov 15, 2026" */
+export const formatDueDate = (value) => {
+  const date = parseLocalDate(String(value || "").slice(0, 10));
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" }) : "";
+};
+
+/** Counts per status, the completion percentage and how many open CAPs are overdue or due soon (today included). */
+export function capsSummary(records, now = new Date()) {
   const counts = Object.fromEntries(CAP_STATES.map((status) => [status, 0]));
-  records.forEach((record) => { counts[normalizeCapStatus(record.status)] += 1; });
+  let overdue = 0;
+  let dueSoon = 0;
+  records.forEach((record) => {
+    counts[normalizeCapStatus(record.status)] += 1;
+    const state = capDueState(record, now);
+    if (state === "overdue") overdue += 1;
+    else if (state === "today" || state === "soon") dueSoon += 1;
+  });
   const total = records.length;
   const completed = counts.Completed;
-  return { total, counts, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
+  return { total, counts, completed, overdue, dueSoon, percent: total ? Math.round((completed / total) * 100) : 0 };
 }

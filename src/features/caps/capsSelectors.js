@@ -1,6 +1,6 @@
 /* CAPs Monitoring: search, filters, sorting and the progress numbers. */
 import { CAP_STATES } from "../../config/constants.js";
-import { capContact, capsSummary, normalizeCapStatus } from "../../domain/caps.js";
+import { capContact, capDueDays, capDueState, capsSummary, normalizeCapStatus } from "../../domain/caps.js";
 import { primaryTerritory } from "../../domain/records.js";
 import { numRank } from "../../domain/search.js";
 import { timeOf } from "../../lib/format.js";
@@ -20,11 +20,21 @@ function matchesSearch(row, sq) {
   return sq.phoneLike && digitsOnly(contact.phone).includes(sq.d);
 }
 
-function passesFilters(row, filter) {
+/** Due date filter: "overdue", "today", "week" (due today through the next 7 days), "none" (no due date). Completed CAPs only match "none". */
+function passesDue(record, due, now) {
+  if (!due) return true;
+  if (due === "none") return capDueDays(record, now) === null;
+  const state = capDueState(record, now);
+  if (due === "overdue") return state === "overdue";
+  if (due === "today") return state === "today";
+  return (state === "today" || state === "soon" || state === "later") && capDueDays(record, now) <= 7;
+}
+
+function passesFilters(row, filter, now) {
   if (filter.statuses.length && !filter.statuses.includes(normalizeCapStatus(row.record.status))) return false;
   if (filter.email === "has" && !row.contact.email) return false;
   if (filter.email === "none" && row.contact.email) return false;
-  return true;
+  return passesDue(row.record, filter.due, now);
 }
 
 const SORTERS = {
@@ -32,14 +42,19 @@ const SORTERS = {
   status: (a, b) => CAP_STATES.indexOf(normalizeCapStatus(a.record.status)) - CAP_STATES.indexOf(normalizeCapStatus(b.record.status)),
   added: (a, b) => timeOf(a.record.created_at) - timeOf(b.record.created_at),
   updated: (a, b) => timeOf(a.record.updated_at || a.record.created_at) - timeOf(b.record.updated_at || b.record.created_at),
+  due: (a, b) => String(a.record.due_date || "").localeCompare(String(b.record.due_date || "")),
 };
 
+/** Records without a due date go last whichever way the due date is sorted. */
+const missingDueLast = (a, b) => (!a.record.due_date) - (!b.record.due_date);
+
 /** Rows that pass the search and filters, in the chosen order (ties by store number). */
-export function filterCaps(ctx, filter, sq) {
+export function filterCaps(ctx, filter, sq, now = new Date()) {
   const sorter = SORTERS[filter.sort.key] || SORTERS.added;
+  const byDue = filter.sort.key === "due";
   return capRows(ctx)
-    .filter((row) => passesFilters(row, filter) && matchesSearch(row, sq))
-    .sort((a, b) => sorter(a, b) * filter.sort.dir || SORTERS.num(a, b));
+    .filter((row) => passesFilters(row, filter, now) && matchesSearch(row, sq))
+    .sort((a, b) => (byDue && missingDueLast(a, b)) || sorter(a, b) * filter.sort.dir || SORTERS.num(a, b));
 }
 
 /** Records still open (not Completed), for the menu count. */
