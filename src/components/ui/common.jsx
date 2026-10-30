@@ -3,7 +3,7 @@ import Icon from "./Icon.jsx";
 import { copyText } from "../../state/toastStore.js";
 import { CALL_OUTCOME_CLASS, ISSUE_STATES, PLATFORMS_UI, PLATFORM_SHORT } from "../../config/constants.js";
 import { callFollowUpDue } from "../../domain/calls.js";
-import { capStatusClass, normalizeCapStatus } from "../../domain/caps.js";
+import { capDueState, capDueText, capStatusClass, formatDueDate, normalizeCapStatus } from "../../domain/caps.js";
 import { issueStatusClass, shortStatus, statusCounts } from "../../domain/issues.js";
 import { obPlatformName, obStatusClass, obStatusLabel } from "../../domain/onboarding.js";
 import { platformChipClass, platformStatus, storeStatusClass } from "../../domain/records.js";
@@ -82,6 +82,16 @@ export function ObStatusBadge({ status }) {
 export function CapStatusBadge({ status }) {
   const value = normalizeCapStatus(status);
   return <span className={`badge ${capStatusClass(value)}`}>{value}</span>;
+}
+
+const CAP_DUE_ICONS = { overdue: "triangle-alert", today: "alarm-clock", soon: "calendar-clock", later: "calendar", done: "calendar-check" };
+
+/** Due date state of a CAP: "Overdue by 3 days", "Due today", "Due in 2 days"… Completed CAPs show the date only. */
+export function CapDueBadge({ record }) {
+  const state = capDueState(record);
+  if (state === "none") return null;
+  const text = state === "done" ? formatDueDate(record.due_date) : capDueText(record);
+  return <span className={`cap-due ${state}`} data-tip={`Submission due ${formatDueDate(record.due_date)}`}><Icon name={CAP_DUE_ICONS[state]} />{text}</span>;
 }
 
 export function ObPlatformTag({ platform }) {

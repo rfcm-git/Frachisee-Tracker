@@ -1,17 +1,17 @@
 /*
  * CAPs spreadsheet: template, export of the current list, reading and checking rows.
- * Only Store Number (and an optional Status) is read: franchisee, email and phone always come from the store records.
+ * Only Store Number (and an optional Status and Due Date) is read: franchisee, email and phone always come from the store records.
  * Nothing is saved here — the import dialog shows the plan first, then capsActions.runCapsImport saves it.
  */
 import { CAP_STATES } from "../../config/constants.js";
-import { capContact, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
-import { localDateInput } from "../../lib/format.js";
+import { capContact, capDueDate, formatDueDate, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
+import { localDateInput, pad2 } from "../../lib/format.js";
 import { cleanStoreNumber, compareNumbers } from "../../lib/text.js";
 import { loadXlsx } from "../../lib/xlsx.js";
 
 /** Columns read on import. */
-export const CAP_COLUMNS = ["Store Number", "Status"];
-const COLUMN_WIDTHS = [14, 16];
+export const CAP_COLUMNS = ["Store Number", "Status", "Due Date"];
+const COLUMN_WIDTHS = [14, 16, 14];
 /** The "Current list" export adds these for reading only — they are ignored on import. */
 const EXPORT_COLUMNS = [...CAP_COLUMNS, "Franchisee", "Email Address", "Phone Number", "Notes"];
 const EXPORT_WIDTHS = [...COLUMN_WIDTHS, 30, 32, 18, 50];
@@ -21,6 +21,7 @@ const SHEET_NAME = "CAPs";
 const HEADERS = {
   num: ["store number", "store #", "store", "store no", "store num"],
   status: ["status", "cap status"],
+  due: ["due date", "submission due date", "due", "deadline"],
 };
 
 const headerKey = (value) => String(value || "").replace(/\*/g, "").toLowerCase().replace(/\s*\/\s*/g, " / ").replace(/\s+/g, " ").trim();
@@ -34,6 +35,34 @@ function readStatus(value) {
   return aliases[key] || null;
 }
 
+/**
+ * Due date typed in the file: 11/15/2026, 11/15/26, 2026-11-15, "Nov 15, 2026" or an Excel date number.
+ * Returns "yyyy-mm-dd", "" when blank, or null when it is not a real date.
+ */
+export function readDueDate(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  let year;
+  let month;
+  let day;
+  let match;
+  if ((match = text.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/))) [, year, month, day] = match.map(Number);
+  else if ((match = text.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2}|\d{4})$/))) {
+    [, month, day, year] = match.map(Number);
+    if (year < 100) year += 2000;
+  } else if (/^\d{5}(\.\d+)?$/.test(text)) {
+    const date = new Date(Date.UTC(1899, 11, 30) + Math.floor(Number(text)) * 864e5);
+    [year, month, day] = [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()];
+  } else {
+    const date = new Date(text);
+    if (Number.isNaN(date.getTime()) || !/[a-z]/i.test(text)) return null;
+    [year, month, day] = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+  }
+  const check = new Date(year, month - 1, day);
+  if (year < 2000 || year > 2100 || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+  return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
 /* ---------- template and export ---------- */
 
 function instructionsSheet(XLSX) {
@@ -43,15 +72,16 @@ function instructionsSheet(XLSX) {
     ["• Franchisee, Email Address and Phone Number are filled in automatically from the store records — don't add them."],
     ["• The store must already be in the store list (All Stores). Rows for unknown stores are skipped."],
     [`• Status is optional: ${CAP_STATES.join(", ")}. Leave it blank for new stores — they start at No Action Yet.`],
-    ["• Stores already in CAPs Monitoring are listed separately in the preview. Their status only changes if you tick \"Update the status of stores already in CAPs\"."],
+    ["• Due Date is optional: the CAP submission due date, e.g. 11/15/2026 (month/day/year) or 2026-11-15. Reminders are sent as it gets close."],
+    ["• Stores already in CAPs Monitoring are listed separately in the preview. Their status and due date only change if you tick \"Update stores already in CAPs\"."],
     ["• Notes are added in the app, not in the file. Other columns are ignored."],
     ["• Nothing is saved until you check the preview and click Import in the app."], [""],
     ["Example rows (do not paste these into the CAPs sheet):"],
     CAP_COLUMNS,
-    ["99901", ""],
-    ["99902", "Email Sent"],
+    ["99901", "", ""],
+    ["99902", "Email Sent", "11/15/2026"],
     [""],
-    ["Row 1: adds store 99901 with status No Action Yet. Row 2: adds store 99902 with status Email Sent."],
+    ["Row 1: adds store 99901 with status No Action Yet and no due date. Row 2: adds store 99902 with status Email Sent, due Nov 15, 2026."],
   ]);
   sheet["!cols"] = COLUMN_WIDTHS.map((wch) => ({ wch }));
   return sheet;
@@ -80,7 +110,7 @@ export async function downloadCapsTemplate() {
 export async function downloadCapsList(ctx) {
   const rows = ctx.caps.slice().sort((a, b) => compareNumbers(a.store_num, b.store_num)).map((record) => {
     const contact = capContact(ctx, record);
-    return [record.store_num, normalizeCapStatus(record.status), contact.name, contact.email, contact.phone, record.notes || ""];
+    return [record.store_num, normalizeCapStatus(record.status), capDueDate(record), contact.name, contact.email, contact.phone, record.notes || ""];
   });
   writeWorkbook(await loadXlsx(), EXPORT_COLUMNS, EXPORT_WIDTHS, rows, `caps-monitoring-${localDateInput()}.xlsx`);
 }
@@ -115,51 +145,65 @@ export async function readCapsFile(file) {
 
 /**
  * Checks every row against the store list and the saved records, without saving.
- * Each row: { row, num, ok, kind: "add" | "update", msg, shown, save (new record), patch + changes (existing record), existingId }.
+ * Each row: { row, num, ok, kind: "add" | "update", reason, msg, shown, save (new record), patch + changes (existing record), existingId }.
+ * reason (skipped rows): "missing" | "repeat" | "notFound" (not in the store database) | "badStatus" | "badDate".
  * New records save no franchisee, email or phone, so they always show the store records.
+ * withDue: the database has the due_date column.
  */
-export function planCapsImport(ctx, parsed) {
+export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady) {
   const seen = {};
   const rows = parsed.rows.map(({ row, values }) => {
-    const out = { row, num: cleanStoreNumber(values.num), ok: false, kind: "add", msg: "", changes: [] };
-    if (!out.num) { out.msg = "Store Number is missing"; return out; }
-    if (seen[out.num]) { out.msg = `Store ${out.num} is repeated (row ${seen[out.num]})`; return out; }
+    const out = { row, num: cleanStoreNumber(values.num), ok: false, kind: "add", reason: "", msg: "", changes: [] };
+    const skip = (reason, msg) => Object.assign(out, { reason, msg });
+    if (!out.num) return skip("missing", "Store Number is missing");
+    if (seen[out.num]) return skip("repeat", `Store ${out.num} is repeated (row ${seen[out.num]})`);
     seen[out.num] = row;
     const defaults = storeContactDefaults(ctx, out.num);
-    if (!defaults.found) { out.msg = `Store ${out.num} is not in the store list`; return out; }
+    if (!defaults.found) return skip("notFound", `Store ${out.num} is not in the database`);
     const status = readStatus(values.status);
-    if (status === null) { out.msg = `Status "${values.status}" is not one of: ${CAP_STATES.join(", ")}`; return out; }
+    if (status === null) return skip("badStatus", `Status "${values.status}" is not one of: ${CAP_STATES.join(", ")}`);
+    const due = withDue ? readDueDate(values.due) : "";
+    if (due === null) return skip("badDate", `Due Date "${values.due}" is not a date — use month/day/year, e.g. 11/15/2026`);
 
     const existing = ctx.caps.find((record) => String(record.store_num) === out.num);
     out.ok = true;
     if (!existing) {
-      out.save = { store_num: out.num, store_name: "", email: "", phone: "", status: status || CAP_STATES[0], notes: "" };
-      out.msg = `New · ${out.save.status}`;
-      out.shown = { name: defaults.name, email: defaults.email, phone: defaults.phone, status: out.save.status };
+      out.save = { store_num: out.num, store_name: "", email: "", phone: "", status: status || CAP_STATES[0], notes: "", ...(withDue ? { due_date: due || null } : {}) };
+      out.msg = `New · ${out.save.status}${due ? ` · due ${formatDueDate(due)}` : ""}`;
+      out.shown = { name: defaults.name, email: defaults.email, phone: defaults.phone, status: out.save.status, due };
       return out;
     }
 
-    // Already in CAPs: only the status can change, and only when the file fills it in.
+    // Already in CAPs: only the status and due date can change, and only when the file fills them in.
     out.kind = "update";
     out.existingId = existing.id;
     const current = capContact(ctx, existing);
     const before = normalizeCapStatus(existing.status);
+    const beforeDue = capDueDate(existing);
     out.patch = {};
     if (status && status !== before) {
       out.patch.status = status;
       out.changes.push({ label: "Status", before, after: status });
     }
-    out.msg = out.changes.length ? `Already in CAPs · status ${before} → ${status}` : "Already in CAPs · no changes";
-    out.shown = { name: current.name, email: current.email, phone: current.phone, status: status || before };
+    if (due && due !== beforeDue) {
+      out.patch.due_date = due;
+      out.changes.push({ label: "Due Date", before: beforeDue ? formatDueDate(beforeDue) : "—", after: formatDueDate(due) });
+    }
+    out.msg = out.changes.length ? `Already in CAPs · changes ${out.changes.map((change) => change.label).join(", ")}` : "Already in CAPs · no changes";
+    out.shown = { name: current.name, email: current.email, phone: current.phone, status: status || before, due: due || beforeDue };
     return out;
   });
 
   const ok = rows.filter((row) => row.ok);
+  const skipped = rows.filter((row) => !row.ok);
   return {
     rows,
     adds: ok.filter((row) => row.kind === "add"),
+    existing: ok.filter((row) => row.kind === "update"),
     updates: ok.filter((row) => row.kind === "update" && row.changes.length),
     unchanged: ok.filter((row) => row.kind === "update" && !row.changes.length),
-    skipped: rows.filter((row) => !row.ok),
+    notFound: skipped.filter((row) => row.reason === "notFound"),
+    problems: skipped.filter((row) => row.reason !== "notFound"),
+    skipped,
   };
 }

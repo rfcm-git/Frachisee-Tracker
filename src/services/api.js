@@ -64,7 +64,17 @@ export async function loadAllTables() {
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: caps, ready: capsReady } = capsResult;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady };
+  const capsDueReady = capsReady && await hasColumn(TABLES.caps, "due_date");
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady };
+}
+
+/** True when the table has the column (false when a newer migration has not been run yet). */
+async function hasColumn(table, column) {
+  const { error } = await db().from(table).select(column).limit(1);
+  if (!error) return true;
+  const code = String(error.code || "").toUpperCase();
+  if (code === "42703" || code === "PGRST204" || String(error.message || "").toLowerCase().includes(column)) return false;
+  throw error;
 }
 
 /**

@@ -2,11 +2,11 @@ import { useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { StatusButtons } from "../../components/ui/Choices.jsx";
-import { CapStatusBadge } from "../../components/ui/common.jsx";
+import { CapDueBadge, CapStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
-import { CAP_STATES } from "../../config/constants.js";
-import { capContact, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
-import { formatPhone, formatTimestamp, phone10 } from "../../lib/format.js";
+import { CAP_DUE_SOON_DAYS, CAP_STATES } from "../../config/constants.js";
+import { capContact, capDueDate, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
+import { addDays, formatPhone, formatTimestamp, localDateInput, phone10 } from "../../lib/format.js";
 import { cleanStoreNumber, isEmail } from "../../lib/text.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openCapForm } from "../../state/dialogs.js";
@@ -14,6 +14,7 @@ import { toast } from "../../state/toastStore.js";
 import { createCap, findCap, updateCap } from "./capsActions.js";
 
 const FIELDS = ["name", "email", "phone"];
+const DUE_SHORTCUTS = [7, 14, 30];
 
 /** Add a store to CAPs Monitoring (capId null) or edit one. Name, email and phone come from the store records until changed. */
 export default function CapFormDialog({ capId = null }) {
@@ -29,6 +30,7 @@ export default function CapFormDialog({ capId = null }) {
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState(() => (record ? normalizeCapStatus(record.status) : CAP_STATES[0]));
   const [notes, setNotes] = useState(() => record?.notes || "");
+  const [dueDate, setDueDate] = useState(() => capDueDate(record));
   const [saving, setSaving] = useState(false);
   if (capId != null && !record) return null;
 
@@ -66,7 +68,7 @@ export default function CapFormDialog({ capId = null }) {
     if (phoneBad) { toast("Phone number must be 10 digits", "err"); return; }
     const contact = { name: values.name.trim(), email: values.email.trim(), phone: values.phone.trim() ? phone10(values.phone) : "" };
     setSaving(true);
-    const ok = editing ? await updateCap(record, { ...contact, status, notes }) : await createCap({ num: storeNum, ...contact, notes });
+    const ok = editing ? await updateCap(record, { ...contact, status, notes, dueDate }) : await createCap({ num: storeNum, ...contact, notes, dueDate });
     setSaving(false);
     if (ok) close();
   }
@@ -106,6 +108,15 @@ export default function CapFormDialog({ capId = null }) {
       {editing ? <StatusButtons options={CAP_STATES} value={status} onChange={(value) => { setStatus(value); setBusy(true); }} label="Status" />
         : <div className="cap-newstatus"><CapStatusBadge status={CAP_STATES[0]} /><span className="muted">New stores always start at {CAP_STATES[0]}. Change it from the list once you act on it.</span></div>}
     </div>
+    {ctx.capsDueReady && <div className="field" style={{ marginBottom: 12 }}><label htmlFor="cap_due">Submission Due Date <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+      <div className="cap-due-row">
+        <input id="cap_due" type="date" value={dueDate} onChange={(event) => { setDueDate(event.target.value); setBusy(true); }} />
+        {DUE_SHORTCUTS.map((days) => <button type="button" key={days} className="btn sm outline round" data-tip={`Set the due date ${days} days from today`}
+          onClick={() => { setDueDate(localDateInput(addDays(new Date(), days))); setBusy(true); }}>+{days} days</button>)}
+        {dueDate && <button type="button" className="btn link" onClick={() => { setDueDate(""); setBusy(true); }}><Icon name="x" />Clear</button>}
+      </div>
+      {dueDate && <div className="help" style={{ marginTop: 6 }}><CapDueBadge record={{ due_date: dueDate, status }} /> You'll get a reminder {CAP_DUE_SOON_DAYS} days before, on the day, and if it is overdue.</div>}
+    </div>}
     <div className="field"><label htmlFor="cap_notes">Notes</label>
       <textarea id="cap_notes" className="cl-ta" value={notes} placeholder="Updates, follow-ups or remarks" onChange={(event) => { setNotes(event.target.value); setBusy(true); }} /></div>
   </Modal>;

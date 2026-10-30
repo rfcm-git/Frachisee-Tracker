@@ -20,13 +20,16 @@ function contactFields(ctx, num, { name, email, phone }) {
   return { store_name: contactToSave(name, defaults.name), email: contactToSave(email, defaults.email), phone: contactToSave(phone, defaults.phone) };
 }
 
+/** due_date to save ("yyyy-mm-dd" or null), only when the database has the column. */
+const dueField = (ctx, dueDate) => (ctx.capsDueReady ? { due_date: dueDate || null } : {});
+
 /** Adds one store. New stores always start at "No Action Yet". Returns true when saved. */
-export async function createCap({ num, name, email, phone, notes }) {
+export async function createCap({ num, name, email, phone, notes, dueDate }) {
   const ctx = getContext();
   const storeNum = cleanStoreNumber(num);
   if (findCap(ctx, storeNum)) { toast(`Store ${storeNum} is already in CAPs Monitoring`, "err"); return false; }
   const ts = nowIso();
-  const record = { store_num: storeNum, ...contactFields(ctx, storeNum, { name, email, phone }), status: CAP_STATES[0], notes: String(notes || "").trim(), created_at: ts, updated_at: ts };
+  const record = { store_num: storeNum, ...contactFields(ctx, storeNum, { name, email, phone }), status: CAP_STATES[0], notes: String(notes || "").trim(), ...dueField(ctx, dueDate), created_at: ts, updated_at: ts };
   const result = await insertRows(TABLES.caps, [record]);
   if (result.error) {
     if (isDuplicateError(result.error)) toast(`Store ${storeNum} was just added by a teammate — click Refresh`, "err");
@@ -38,13 +41,14 @@ export async function createCap({ num, name, email, phone, notes }) {
   return true;
 }
 
-/** Saves changed fields of a record (status, contacts, notes). Returns true when saved. */
-export async function updateCap(record, { name, email, phone, status, notes }, { quiet = false } = {}) {
+/** Saves changed fields of a record (status, contacts, notes, due date). Returns true when saved. */
+export async function updateCap(record, { name, email, phone, status, notes, dueDate }, { quiet = false } = {}) {
   const ctx = getContext();
   const patch = { updated_at: nowIso() };
   if (name !== undefined || email !== undefined || phone !== undefined) Object.assign(patch, contactFields(ctx, record.store_num, { name, email, phone }));
   if (status !== undefined) patch.status = status;
   if (notes !== undefined) patch.notes = String(notes || "").trim();
+  if (dueDate !== undefined) Object.assign(patch, dueField(ctx, dueDate));
   const result = await guardedUpdate(TABLES.caps, record, patch);
   if (!saveSucceeded(result, `CAPs record for store ${record.store_num}`)) return false;
   replaceRow("caps", result.row);

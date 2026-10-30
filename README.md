@@ -21,6 +21,7 @@ All libraries (Supabase, Lucide icons, Excel and PDF export) come from npm. Only
 Some tabs need a table that older databases don't have yet. Run the matching script once in Supabase (SQL Editor → New query → paste → Run). Each script can safely be run again.
 
 - `migrate-caps.sql` — CAPs Monitoring (Corrective Action Plans). Until it is run, the CAPs tab shows a reminder and other tabs work as before.
+- `migrate-caps-due-date.sql` — CAPs submission due dates and due-date reminders. Until it is run, CAPs Monitoring works without due dates.
 
 ## Deploy to Vercel
 
