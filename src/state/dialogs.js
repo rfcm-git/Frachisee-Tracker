@@ -30,6 +30,8 @@ export const DIALOG = {
   callFollowUp: "callFollowUp",
   newOnboarding: "newOnboarding",
   updateOnboarding: "updateOnboarding",
+  capForm: "capForm",
+  capsImport: "capsImport",
   dashList: "dashList",
   report: "report",
   confirm: "confirm",
@@ -80,6 +82,10 @@ export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { ca
 
 export const openNewOnboarding = () => openDialog(DIALOG.newOnboarding);
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
+
+/** Add a store to CAPs Monitoring (capId null) or edit one. */
+export const openCapForm = (capId = null) => openDialog(DIALOG.capForm, { capId });
+export const openCapsImport = () => openDialog(DIALOG.capsImport);
 
 /** key: "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed", … */
 export const openDashboardList = (key) => openDialog(DIALOG.dashList, { storeKey: key });

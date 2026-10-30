@@ -6,13 +6,14 @@ import { openOnboardingCount } from "../../features/onboarding/onboardingSelecto
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { setIssueSub, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
-const SEARCH_TABS = ["franchisees", "stores", "issues", "staff", "calls"];
+const SEARCH_TABS = ["franchisees", "stores", "issues", "staff", "caps", "calls"];
 
 function searchPlaceholder(tab, issueSub) {
+  if (tab === "caps") return "Search CAPs: store #, franchisee, email, phone or notes…";
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
   if (tab === "issues") return issueSub === "onboarding" ? "Search onboarding: store #, platform, notes, city…" : "Search issues, store #, phone, address, city, ZIP…";
@@ -22,6 +23,10 @@ function searchPlaceholder(tab, issueSub) {
 /** "Log issue", "New onboarding", "Add FBC / OM" or "Log call", depending on the tab. */
 function primaryAction(tab, issueSub) {
   if (tab === "staff") return ["Add FBC / OM", () => openStaffForm(null)];
+  if (tab === "caps") return ["Add store", () => {
+    if (!getContext().capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
+    openCapForm();
+  }];
   if (tab === "calls") return ["Log call", () => {
     if (!getContext().callLogsReady) { toast("Run migrate-call-logs.sql first", "err"); return; }
     openCallLog(null);
@@ -84,6 +89,10 @@ export default function Toolbar() {
         </span>}
         <span className="count">{countText}</span>
         {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name="plus" /><span>{primary[0]}</span></button>}
+        {tab === "caps" && <button type="button" className="btn outline round" title="Add many stores from an Excel spreadsheet" onClick={() => {
+          if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
+          openCapsImport();
+        }}><Icon name="upload" />Import spreadsheet</button>}
         {concerns && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
         {(tab === "issues" || tab === "calls") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
@@ -91,7 +100,7 @@ export default function Toolbar() {
       {showSearch && tab !== "staff" && <div className="hintbar">
         <span><kbd>#</kbd> store number only {"—"} e.g. #123</span>
         <span><kbd>@</kbd> franchisee name only {"—"} e.g. @Aggarwal</span>
-        <span className="muted">Or type anything: store #, name, phone, address, city, ZIP, territory or email</span>
+        <span className="muted">{tab === "caps" ? "Or type anything: store #, franchisee, email, phone or notes" : "Or type anything: store #, name, phone, address, city, ZIP, territory or email"}</span>
       </div>}
     </>
   );

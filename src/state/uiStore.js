@@ -3,13 +3,13 @@
  * Preferences are kept in localStorage; the current screen survives a browser refresh (sessionStorage).
  */
 import { create } from "zustand";
-import { ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS } from "../config/constants.js";
+import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS } from "../config/constants.js";
 import { CALL_VIEWS, DEFAULT_CALL_FILTERS } from "../domain/calls.js";
 import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
 
-const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, cl: 1 };
+const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, cl: 1, cap: 1 };
 
 function savedPageSizes() {
   const sizes = {};
@@ -28,6 +28,11 @@ function savedIssueView() {
 const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "new" });
 const defaultObFilter = () => ({ platforms: [], threePd: [], ezCater: [], sort: "new" });
 
+/** CAPs sort keys: store number, status, date added, last updated. */
+export const CAP_SORT_KEYS = ["num", "status", "added", "updated"];
+const CAP_EMAIL_FILTERS = ["", "has", "none"];
+const defaultCapsFilter = () => ({ statuses: [], email: "", sort: { key: "added", dir: -1 } });
+
 function baseState() {
   return {
     tab: "dashboard",
@@ -42,6 +47,7 @@ function baseState() {
     issueView: savedIssueView(),
     issueFilter: defaultIssueFilter(),
     obFilter: defaultObFilter(),
+    capsFilter: defaultCapsFilter(),
     callFilters: { ...DEFAULT_CALL_FILTERS },
     callSort: "desc",
     callView: "calls",
@@ -93,6 +99,14 @@ function restoredState() {
       sort: saved.obFilter.sort === "old" ? "old" : "new",
     };
   }
+  if (saved.capsFilter && typeof saved.capsFilter === "object") {
+    const sort = saved.capsFilter.sort || {};
+    state.capsFilter = {
+      statuses: onlyValid(saved.capsFilter.statuses, CAP_STATES),
+      email: CAP_EMAIL_FILTERS.includes(saved.capsFilter.email) ? saved.capsFilter.email : "",
+      sort: CAP_SORT_KEYS.includes(sort.key) ? { key: sort.key, dir: sort.dir === 1 ? 1 : -1 } : defaultCapsFilter().sort,
+    };
+  }
   if (saved.callFilters && typeof saved.callFilters === "object") state.callFilters = { ...DEFAULT_CALL_FILTERS, ...saved.callFilters };
   state.callSort = saved.callSort === "asc" ? "asc" : "desc";
   if (CALL_VIEWS.includes(saved.callView)) state.callView = saved.callView;
@@ -127,7 +141,7 @@ export function setIssueSub(issueSub) {
 }
 
 export function setSearch(search) {
-  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl") });
+  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap") });
 }
 
 export function setTerrFilter(terrFilter) {
@@ -241,6 +255,40 @@ export function toggleObCell(platform, status) {
   set({ obFilter: next, ...resetPages("ob") });
 }
 
+/* ---------- CAPs monitoring ---------- */
+
+const patchCapsFilter = (patch) => set({ capsFilter: { ...get().capsFilter, ...patch }, ...resetPages("cap") });
+
+/** Adds or removes a status; "" shows all statuses. */
+export function toggleCapStatus(status) {
+  const { statuses } = get().capsFilter;
+  patchCapsFilter({ statuses: !status ? [] : statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status] });
+}
+
+/** Shows only one status, or all again when it was the only one shown. */
+export function toggleCapOnlyStatus(status) {
+  const { statuses } = get().capsFilter;
+  patchCapsFilter({ statuses: !status || (statuses.length === 1 && statuses[0] === status) ? [] : [status] });
+}
+
+export const setCapEmailFilter = (email) => patchCapsFilter({ email: CAP_EMAIL_FILTERS.includes(email) ? email : "" });
+
+/** Sorts by a column; the same column again flips the direction. Dates start newest first, the rest ascending. */
+export function sortCaps(key, dir) {
+  if (!CAP_SORT_KEYS.includes(key)) return;
+  const { sort } = get().capsFilter;
+  const next = dir === 1 || dir === -1 ? dir : sort.key === key ? -sort.dir : key === "added" || key === "updated" ? -1 : 1;
+  patchCapsFilter({ sort: { key, dir: next } });
+}
+
+export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter(), sort: get().capsFilter.sort }, search: "", ...resetPages("cap") });
+
+/** Opens CAPs Monitoring, optionally on one status (used by the dashboard). */
+export function showCaps(status = "") {
+  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "" }, ...resetPages("cap") });
+  window.scrollTo(0, 0);
+}
+
 /* ---------- call logs ---------- */
 
 export function setCallFilter(key, value) {
@@ -307,7 +355,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, issueSub: state.issueSub, search: state.search, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });

@@ -91,10 +91,11 @@ export async function downloadBackup() {
     const [franchisees, stores, staff, issues] = await Promise.all([fetchAll(TABLES.franchisees), fetchAll(TABLES.stores), fetchAll(TABLES.staff), fetchAll(TABLES.issues)]);
     const onboarding = await fetchAll(TABLES.onboarding).catch(() => []);
     const callLogs = await fetchAll(TABLES.callLogs).catch(() => []);
+    const caps = await fetchAll(TABLES.caps).catch(() => []);
     const payload = {
       exported_at: nowIso(),
-      counts: { franchisees: franchisees.length, stores: stores.length, staff: staff.length, issues: issues.length, onboarding: onboarding.length, call_logs: callLogs.length },
-      franchisees, stores, staff, issues, onboarding, call_logs: callLogs,
+      counts: { franchisees: franchisees.length, stores: stores.length, staff: staff.length, issues: issues.length, onboarding: onboarding.length, call_logs: callLogs.length, caps: caps.length },
+      franchisees, stores, staff, issues, onboarding, call_logs: callLogs, caps,
     };
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), `franchisee-tracker-backup-${localDateInput()}.json`);
     toast("Backup downloaded", "ok");
@@ -109,7 +110,7 @@ export async function readBackupFile(file) {
   try { data = JSON.parse(await file.text()); } catch { toast("That file isn't valid JSON", "err"); return null; }
   const backup = {
     franchisees: data.franchisees || [], stores: data.stores || [], staff: data.staff || [], issues: data.issues || [],
-    onboarding: data.onboarding || [], callLogs: data.call_logs || [],
+    onboarding: data.onboarding || [], callLogs: data.call_logs || [], caps: data.caps || [],
   };
   if (!backup.franchisees.length && !backup.stores.length && !backup.staff.length && !backup.issues.length) { toast("No data found in that file", "err"); return null; }
   return backup;
@@ -186,6 +187,11 @@ export async function restoreBackup(backup) {
     await restoreHistory(TABLES.callLogs, backup.callLogs),
     getContext().onboardingReady ? await restoreHistory(TABLES.onboarding, backup.onboarding) : null,
   ].filter(Boolean);
+  // CAPs: one record per store number, so the backup's record replaces the saved one for that store.
+  if (getContext().capsReady && backup.caps.length) {
+    const rows = backup.caps.map(({ id: _id, ...rest }) => rest);
+    for (const part of chunks(rows, 300)) { const error = await upsertRows(TABLES.caps, part, "store_num"); if (error) throw error; }
+  }
   return results.reduce((total, result) => ({ updated: total.updated + result.updated, added: total.added + result.added, skipped: total.skipped + result.skipped }), { updated: 0, added: 0, skipped: 0 });
 }
 

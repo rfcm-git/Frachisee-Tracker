@@ -3,6 +3,7 @@ import Icon from "./Icon.jsx";
 import { copyText } from "../../state/toastStore.js";
 import { CALL_OUTCOME_CLASS, ISSUE_STATES, PLATFORMS_UI, PLATFORM_SHORT } from "../../config/constants.js";
 import { callFollowUpDue } from "../../domain/calls.js";
+import { capStatusClass, normalizeCapStatus } from "../../domain/caps.js";
 import { issueStatusClass, shortStatus, statusCounts } from "../../domain/issues.js";
 import { obPlatformName, obStatusClass, obStatusLabel } from "../../domain/onboarding.js";
 import { platformChipClass, platformStatus, storeStatusClass } from "../../domain/records.js";
@@ -76,6 +77,11 @@ export function PlatformChips({ store }) {
 
 export function ObStatusBadge({ status }) {
   return <span className={`badge ${obStatusClass(status)}`}>{obStatusLabel(status)}</span>;
+}
+
+export function CapStatusBadge({ status }) {
+  const value = normalizeCapStatus(status);
+  return <span className={`badge ${capStatusClass(value)}`}>{value}</span>;
 }
 
 export function ObPlatformTag({ platform }) {
