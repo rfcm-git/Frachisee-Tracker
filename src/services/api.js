@@ -11,6 +11,7 @@ export const TABLES = {
   issues: "issues",
   onboarding: "onboarding",
   callLogs: "call_logs",
+  caps: "caps",
   settings: "app_settings",
 };
 
@@ -41,7 +42,7 @@ function isMissingTable(error) {
     || /(?:relation|table).+does not exist/.test(message);
 }
 
-/** Loads every table. Onboarding and call logs are optional (older databases may not have them). */
+/** Loads every table. Onboarding, call logs and CAPs are optional (older databases may not have them). */
 export async function loadAllTables() {
   const fetchOptional = async (table) => {
     try {
@@ -51,17 +52,19 @@ export async function loadAllTables() {
       throw error;
     }
   };
-  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult] = await Promise.all([
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult] = await Promise.all([
     fetchAll(TABLES.franchisees),
     fetchAll(TABLES.stores),
     fetchAll(TABLES.staff),
     fetchAll(TABLES.issues),
     fetchOptional(TABLES.onboarding),
     fetchOptional(TABLES.callLogs),
+    fetchOptional(TABLES.caps),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, onboardingReady, callLogsReady };
+  const { rows: caps, ready: capsReady } = capsResult;
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady };
 }
 
 /**

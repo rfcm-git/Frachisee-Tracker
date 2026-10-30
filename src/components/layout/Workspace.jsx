@@ -5,6 +5,7 @@ import { friendlyError } from "../../lib/errors.js";
 import { loadAll } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
 import { useUiStore } from "../../state/uiStore.js";
+import CapsView from "../../features/caps/CapsView.jsx";
 import CallLogsView from "../../features/calls/CallLogsView.jsx";
 import DashboardView from "../../features/dashboard/DashboardView.jsx";
 import FranchiseesView from "../../features/franchisees/FranchiseesView.jsx";
@@ -22,6 +23,7 @@ function CurrentView() {
     case "stores": return <StoresDirectory />;
     case "staff": return <StaffDirectory />;
     case "issues": return issueSub === "onboarding" ? <OnboardingView /> : <ConcernsView />;
+    case "caps": return <CapsView />;
     case "calls": return <CallLogsView />;
     case "reports": return <ReportsTab />;
     default: return <DashboardView />;

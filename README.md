@@ -16,6 +16,12 @@ Using `npm.cmd` in PowerShell avoids the `npm.ps1` execution-policy error withou
 
 All libraries (Supabase, Lucide icons, Excel and PDF export) come from npm. Only the Inter font loads from Google Fonts. The Excel and PDF libraries download on first use.
 
+## Database updates
+
+Some tabs need a table that older databases don't have yet. Run the matching script once in Supabase (SQL Editor → New query → paste → Run). Each script can safely be run again.
+
+- `migrate-caps.sql` — CAPs Monitoring (Corrective Action Plans). Until it is run, the CAPs tab shows a reminder and other tabs work as before.
+
 ## Deploy to Vercel
 
 Import the repository and use `npm run build` as the build command and `dist` as the output directory.
@@ -50,7 +56,7 @@ src/
     charts/                bars, donut, weekly columns, KPI cards
     dialogs/               DialogHost (renders the dialog stack) and confirm / password / conflict dialogs
   features/                one folder per screen, each with its view, dialogs, selectors (pure) and actions (saves)
-    dashboard, franchisees, stores, staff, issues, onboarding, calls, reports, settings
+    dashboard, franchisees, stores, staff, issues, onboarding, caps, calls, reports, settings
   styles/                  stylesheets (unchanged class names)
 ```
 

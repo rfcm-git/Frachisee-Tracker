@@ -3,6 +3,8 @@ import { DialogContext } from "./dialogContext.js";
 import { ConfirmDialog, ConflictDialog, PasswordDialog } from "./CommonDialogs.jsx";
 import { closeDialog, setDialogBusy, useDialogStore } from "../../state/dialogStore.js";
 import { DIALOG } from "../../state/dialogs.js";
+import CapFormDialog from "../../features/caps/CapFormDialog.jsx";
+import CapsImportDialog from "../../features/caps/CapsImportDialog.jsx";
 import CallDetailsDialog from "../../features/calls/CallDetailsDialog.jsx";
 import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
 import CallFollowUpDialog from "../../features/calls/CallFollowUpDialog.jsx";
@@ -54,6 +56,8 @@ const COMPONENTS = {
   [DIALOG.callFollowUp]: CallFollowUpDialog,
   [DIALOG.newOnboarding]: NewOnboardingDialog,
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
+  [DIALOG.capForm]: CapFormDialog,
+  [DIALOG.capsImport]: CapsImportDialog,
   [DIALOG.dashList]: DashboardListDialog,
   [DIALOG.report]: ReportBuilderDialog,
   [DIALOG.confirm]: ConfirmDialog,

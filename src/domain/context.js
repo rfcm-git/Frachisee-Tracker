@@ -7,8 +7,8 @@ import { contactsOf } from "./records.js";
 import { isIssueOpen } from "./issues.js";
 
 export const EMPTY_DATA = Object.freeze({
-  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [],
-  onboardingReady: true, callLogsReady: true,
+  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [],
+  onboardingReady: true, callLogsReady: true, capsReady: true,
 });
 
 export function buildContext(data) {

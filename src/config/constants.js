@@ -25,6 +25,10 @@ export const OB_CORE = ["ue", "dd", "gh"];
 export const OB_STATES = ["Pending", "Email Sent/Text Message", "Work in Progress", "Onboarded", "Exempted"];
 export const OB_STATUS_COLOR = { Pending: "var(--warn)", "Email Sent/Text Message": "#2f7fbf", "Work in Progress": "#7a4fc2", Onboarded: "var(--ok)", Exempted: "var(--idle)" };
 
+/** CAPs (Corrective Action Plan) monitoring: one record per store. New stores always start at the first status. */
+export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "Completed"];
+export const CAP_STATUS_COLOR = { "No Action Yet": "var(--danger)", "Email Sent": "#2f7fbf", "In Progress": "var(--warn)", Completed: "var(--ok)" };
+
 export const CALL_OUTCOMES = ["Answered", "No answer / voicemail", "Follow-up required", "Requested more info", "Completed"];
 export const CALL_OUTCOME_CLASS = {
   Answered: "cl-o-ans", "No answer / voicemail": "cl-o-nva", "Follow-up required": "cl-o-fu", "Requested more info": "cl-o-info", Completed: "cl-o-done",
@@ -47,10 +51,10 @@ export const PERIODS = [
 ];
 
 /** Paged lists: allowed and default page sizes. */
-export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100] };
-export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25 };
+export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100] };
+export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25 };
 
-export const TABS = ["dashboard", "franchisees", "stores", "staff", "issues", "calls", "reports"];
+export const TABS = ["dashboard", "franchisees", "stores", "staff", "issues", "caps", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
@@ -59,6 +63,7 @@ export const PAGE_TITLES = {
   staff: ["FBC / OM", "Field consultants and operations managers"],
   concerns: ["Issues · Concerns", "Log, track and report 3PD issues"],
   onboarding: ["Issues · Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
+  caps: ["CAPs Monitoring", "Corrective Action Plans — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
   reports: ["Reports", "Build any report — Excel or PDF, by date, territory, franchisee, store and category"],
 };
