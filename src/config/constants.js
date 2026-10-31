@@ -56,10 +56,11 @@ export const PERIODS = [
 export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100] };
 export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25 };
 
-export const TABS = ["dashboard", "franchisees", "stores", "staff", "issues", "caps", "calls", "reports"];
+export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "caps", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
+  search: ["Search", "Find any franchisee, store, FBC / OM, issue, CAP or call — use # @ and filters to be specific"],
   franchisees: ["Franchisees", "Owners, contacts and their stores"],
   stores: ["All Stores", "Every store with platforms and status"],
   staff: ["FBC / OM", "Field consultants and operations managers"],
@@ -96,4 +97,5 @@ export const STORAGE_KEYS = {
   linksSeeded: "ft2_links_seeded",
   report: (kind) => (kind === "issues" ? "ft2_report" : kind === "ob" ? "ft2_report_ob" : `ft2_report_${kind}`),
   uiSession: "ft2_ui_state",
+  recentSearches: "ft2_recent_search",
 };

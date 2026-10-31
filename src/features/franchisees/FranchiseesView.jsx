@@ -6,7 +6,7 @@ import { clickableProps } from "../../components/ui/clickable.js";
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { franchiseeOpenIssues, storesOf } from "../../domain/context.js";
-import { searchQuery } from "../../domain/search.js";
+import { freeTextQuery } from "../../domain/search.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openFranchiseeForm } from "../../state/dialogs.js";
 import { selectFranchisee, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
@@ -19,7 +19,8 @@ export default function FranchiseesView() {
   const terrFilter = useUiStore((state) => state.terrFilter);
   const issuesOnly = useUiStore((state) => state.issuesOnly);
   const selectedFr = useUiStore((state) => state.selectedFr);
-  const sq = useMemo(() => searchQuery(search), [search]);
+  // Franchisee details only; # and @ are plain text here (the Search tab handles them).
+  const sq = useMemo(() => ({ ...freeTextQuery(search), mode: "fr" }), [search]);
 
   const list = useMemo(() => filterFranchisees(ctx, { sq, terrFilter, issuesOnly }), [ctx, sq, terrFilter, issuesOnly]);
   const { items, pagerProps } = usePaged("fr", list);

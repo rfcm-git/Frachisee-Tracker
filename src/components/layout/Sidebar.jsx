@@ -7,10 +7,11 @@ import { useDataContext } from "../../state/dataStore.js";
 import { openLinks, openSettings } from "../../state/dialogs.js";
 import { setIssueSub, setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
 
-function TabButton({ tab, active, icon, label, count, countId, countTip }) {
-  return <button type="button" className={`tab${active ? " active" : ""}`} title={label} aria-current={active ? "page" : undefined} onClick={() => setTab(tab)}>
+function TabButton({ tab, active, icon, label, count, countId, countTip, kbd }) {
+  return <button type="button" className={`tab${active ? " active" : ""}`} title={kbd ? `${label} (${kbd} or Ctrl+K)` : label} aria-current={active ? "page" : undefined} onClick={() => setTab(tab)}>
     <span className="t-ic"><Icon name={icon} /></span><span className="t-lb">{label}</span>
     {count !== undefined && (count !== "" || !countId) && <span className="badge-num" id={countId} data-tip={countTip}>{count}</span>}
+    {kbd && <kbd className="t-kbd" aria-hidden="true">{kbd}</kbd>}
   </button>;
 }
 
@@ -36,6 +37,7 @@ export default function Sidebar() {
       <nav className="sb-nav">
         <div className="sb-label">Menu</div>
         <TabButton tab="dashboard" active={tab === "dashboard"} icon="layout-dashboard" label="Dashboard" />
+        <TabButton tab="search" active={tab === "search"} icon="search" label="Search" kbd="/" />
         <TabButton tab="franchisees" active={tab === "franchisees"} icon="users" label="Franchisees" count={ctx.franchisees.length} />
         <TabButton tab="stores" active={tab === "stores"} icon="store" label="All Stores" count={ctx.stores.length} />
         <TabButton tab="staff" active={tab === "staff"} icon="contact" label="FBC / OM" count={ctx.staff.length} />

@@ -8,7 +8,7 @@ import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
 import { openCallLog, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { setIssueSub, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
+import { openFind, setIssueSub, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
 const SEARCH_TABS = ["franchisees", "stores", "issues", "staff", "caps", "calls"];
 
@@ -17,7 +17,8 @@ function searchPlaceholder(tab, issueSub) {
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
   if (tab === "issues") return issueSub === "onboarding" ? "Search onboarding: store #, platform, notes, city…" : "Search issues, store #, phone, address, city, ZIP…";
-  return "Search store #, name, phone, address, city, ZIP, territory, email…";
+  if (tab === "franchisees") return "Search franchisee name, territory, email, phone or notes…";
+  return "Search store #, address, city, ZIP, phone or territory…";
 }
 
 /** "Log issue", "New onboarding", "Add FBC / OM" or "Log call", depending on the tab. */
@@ -64,6 +65,8 @@ export default function Toolbar() {
   const closedOnly = useUiStore((state) => state.closedOnly);
 
   const showSearch = SEARCH_TABS.includes(tab);
+  /** "#…" or "@…" typed on Franchisees / All Stores, where those prefixes no longer apply. */
+  const prefixTyped = /^[#@]/.test(search.trim());
   const primary = primaryAction(tab, issueSub);
   const concerns = tab === "issues" && issueSub === "concerns";
   const openConcerns = ctx.issues.filter(isIssueOpen).length;
@@ -77,7 +80,7 @@ export default function Toolbar() {
             <Icon name={icon} />{label}<span className="st-n">{count || ""}</span></button>
         ))}
       </div>}
-      {tab !== "dashboard" && tab !== "reports" && <div className="toolbar">
+      {tab !== "dashboard" && tab !== "reports" && tab !== "search" && <div className="toolbar">
         {showSearch && <div className="search-wrap">
           <span className="lead"><Icon name="search" /></span>
           <input type="search" aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={searchPlaceholder(tab, issueSub)} />
@@ -97,10 +100,16 @@ export default function Toolbar() {
         {(tab === "issues" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
       </div>}
-      {showSearch && tab !== "staff" && <div className="hintbar">
-        <span><kbd>#</kbd> store number only {"—"} e.g. #123</span>
-        <span><kbd>@</kbd> franchisee name only {"—"} e.g. @Aggarwal</span>
-        <span className="muted">{tab === "caps" ? "Or type anything: store #, franchisee, email, phone or notes" : "Or type anything: store #, name, phone, address, city, ZIP, territory or email"}</span>
+      {(tab === "franchisees" || tab === "stores") && <div className={`hintbar hintbar-scope${prefixTyped ? " moved" : ""}`}>
+        <span><Icon name={prefixTyped ? "triangle-alert" : "info"} />{prefixTyped ? <>“{search.trim()[0]}” searches moved to the Search tab — here the box searches {tab === "franchisees" ? "franchisee" : "store"} details as plain text.</>
+          : tab === "franchisees" ? "Searches franchisee details only — name, territory, email, phone and notes." : "Searches store details only — store #, address, city, ZIP, phone and territory."}</span>
+        <button type="button" className="btn link" onClick={() => openFind(search.trim() || undefined)}>
+          <Icon name="search" />Search everything{search.trim() ? ` for “${search.trim()}”` : ""} in the Search tab<kbd>/</kbd></button>
+      </div>}
+      {showSearch && !["staff", "franchisees", "stores"].includes(tab) && <div className="hintbar">
+        <span><kbd>#</kbd> store number</span>
+        <span><kbd>@</kbd> franchisee name</span>
+        <button type="button" className="btn link" onClick={() => openFind()}>All search options and tips in the Search tab</button>
       </div>}
     </>
   );

@@ -124,3 +124,53 @@ export function findStoresByNumber(ctx, text, exclude = [], limit = 8) {
     .sort((a, b) => numRank(a.num, value) - numRank(b.num, value) || compareStores(a, b))
     .slice(0, limit);
 }
+
+/* ---------- tab searches (no # / @: the Search tab handles those) ---------- */
+
+/** 0 = exact, 1 = starts with, 2 = a word starts with, 3 = contains, 9 = no match. */
+export function textRank(value, q) {
+  const text = String(value || "").toLowerCase().trim();
+  if (!q || !text) return 9;
+  if (text === q) return 0;
+  if (text.startsWith(q)) return 1;
+  const at = text.indexOf(q);
+  if (at < 0) return 9;
+  return /[\s,.&/(-]/.test(text[at - 1]) ? 2 : 3;
+}
+
+const CONTACT_LABEL = { email: "Email", cell: "Cell" };
+
+/**
+ * Franchisees tab: name first, then territory, contacts and notes. {rank, hint} or null.
+ * The hint explains a match that is not on the name.
+ */
+export function franchiseeInfoMatch(franchisee, sq) {
+  if (!sq.q) return { rank: 5, hint: "" };
+  const nameRank = textRank(franchisee.name, sq.q);
+  if (nameRank < 9) return { rank: nameRank, hint: "" };
+  if ([...String(franchisee.territory || "").split(",")].some((part) => part.trim().toLowerCase() === sq.q)) return { rank: 4, hint: `Territory ${franchisee.territory}` };
+  const contact = contactsOf(franchisee).find((item) => String(item.value || "").toLowerCase().includes(sq.q) || (sq.phoneLike && digitsOnly(item.value).includes(sq.d)));
+  if (contact) return { rank: 5, hint: `${CONTACT_LABEL[contact.type] || "Phone"} ${contact.value}` };
+  if (String(franchisee.notes || "").toLowerCase().includes(sq.q)) return { rank: 6, hint: "Notes" };
+  return null;
+}
+
+const STORE_FIELDS = [["address", "Address"], ["city", "City"], ["zip", "ZIP"], ["phone", "Phone"], ["state", "State"], ["territory", "Territory"]];
+
+/**
+ * All Stores tab: store number first, then address, city, ZIP, phone, state and territory. {rank, hint} or null.
+ * The owner and the owner's contacts are not searched here.
+ */
+export function storeInfoMatch(store, sq) {
+  if (!sq.q) return { rank: 5, hint: "" };
+  const numberRank = numRank(store.num, sq.q);
+  if (numberRank < 9) return { rank: numberRank, hint: "" };
+  for (const [key, label] of STORE_FIELDS) {
+    const value = String(store[key] || "");
+    const digitsHit = sq.phoneLike && (key === "phone" || key === "zip") && digitsOnly(value).includes(sq.d);
+    if (value.toLowerCase().includes(sq.q) || digitsHit) {
+      return { rank: key === "address" || key === "city" ? 3 : 4, hint: key === "zip" || key === "territory" ? `${label} ${value}` : "" }; // other fields are shown in the table
+    }
+  }
+  return null;
+}
