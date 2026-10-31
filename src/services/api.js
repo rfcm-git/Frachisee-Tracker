@@ -64,8 +64,10 @@ export async function loadAllTables() {
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: caps, ready: capsReady } = capsResult;
-  const capsDueReady = capsReady && await hasColumn(TABLES.caps, "due_date");
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady };
+  const [capsDueReady, capsHistoryReady] = capsReady
+    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history")])
+    : [false, false];
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

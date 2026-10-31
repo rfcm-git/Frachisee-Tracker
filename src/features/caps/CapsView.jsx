@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
@@ -6,7 +7,7 @@ import { CapDueBadge, EmptyState, InfoTip, StoreStatusIfClosed } from "../../com
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { CAP_DUE_SOON_DAYS, CAP_STATES, CAP_STATUS_COLOR } from "../../config/constants.js";
-import { capStatusClass, formatDueDate, normalizeCapStatus } from "../../domain/caps.js";
+import { capChangeText, capHistory, capStatusClass, formatDueDate, normalizeCapStatus } from "../../domain/caps.js";
 import { storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
 import { formatNumber, formatTimestamp, telHref } from "../../lib/format.js";
@@ -22,12 +23,72 @@ const DUE_LABELS = { overdue: "Overdue", today: "Due today", week: "Due in 7 day
 
 const shortDay = (ts) => new Date(ts).toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
 
-/** Date added, with the last update below it when different; full date and time on hover. */
-function AddedUpdatedCell({ record }) {
+const shortTime = (ts) => new Date(ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+/** "today, 2:15 PM" for today, else "Oct 30, 2026". */
+const updatedText = (ts) => (shortDay(ts) === shortDay(Date.now()) ? `today, ${shortTime(ts)}` : shortDay(ts));
+
+const LOG_LIMIT = 25;
+
+/** Title of a log entry: "Added", "Added by import", "Status changed", "Updated", "Updated by import". */
+function logTitle(entry) {
+  const imported = entry.source === "import" ? " by import" : "";
+  if (entry.kind === "created") return `Added${imported}`;
+  if (entry.legacy) return "Last updated";
+  const changes = entry.changes || [];
+  return changes.length === 1 && changes[0].field === "status" && !imported ? "Status changed" : `Updated${imported}`;
+}
+
+/** Change log of a record, newest first, in a panel next to the hovered date. */
+function CapLogPanel({ record, anchor, historyReady }) {
+  const panelRef = useRef(null);
+  const [pos, setPos] = useState({ left: -9999, top: 0 });
+  const entries = capHistory(record).slice().reverse();
+  const shown = entries.slice(0, LOG_LIMIT);
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const box = panel.getBoundingClientRect();
+    let top = anchor.bottom + 6;
+    if (top + box.height > window.innerHeight - 8) top = Math.max(8, anchor.top - box.height - 6);
+    const left = Math.min(Math.max(8, anchor.right - box.width), window.innerWidth - box.width - 8);
+    setPos({ left, top });
+  }, [anchor]);
+  const more = entries.length - shown.length;
+  return createPortal(<div className="cap-log" ref={panelRef} role="tooltip" style={pos}>
+    <div className="cap-log-h"><Icon name="history" />Change log · Store {record.store_num}<span>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span></div>
+    <ol>{shown.map((entry, index) => <li key={`${entry.ts}-${index}`} className={entry.kind === "created" ? "created" : ""}>
+      <div className="cap-log-t"><b>{logTitle(entry)}</b><time>{formatTimestamp(entry.ts)}</time></div>
+      {entry.kind === "created" && entry.status && <div className="cap-log-c">Status: {normalizeCapStatus(entry.status)}</div>}
+      {(entry.changes || []).map((change) => <div key={change.field} className="cap-log-c">{capChangeText(change)}</div>)}
+      {entry.legacy && <div className="cap-log-c">Changed before the log was kept, so the details were not recorded.</div>}
+    </li>)}</ol>
+    {more > 0 && <div className="cap-log-more">+{more} older {more === 1 ? "entry" : "entries"}</div>}
+    {!historyReady && <div className="cap-log-more">Run migrate-caps-history.sql to keep a full log of every change.</div>}
+  </div>, document.body);
+}
+
+/** Date added, with the last update below it (with the time when it was today). Hover or focus shows the change log. */
+function AddedUpdatedCell({ record, historyReady }) {
+  const [anchor, setAnchor] = useState(null);
   const updated = record.updated_at || record.created_at;
+  const changed = updated && record.created_at && Math.abs(new Date(updated) - new Date(record.created_at)) > 1000;
+  useEffect(() => {
+    if (!anchor) return undefined;
+    const hide = () => setAnchor(null);
+    window.addEventListener("scroll", hide, true);
+    window.addEventListener("resize", hide);
+    return () => { window.removeEventListener("scroll", hide, true); window.removeEventListener("resize", hide); };
+  }, [anchor]);
+  const open = (event) => setAnchor(event.currentTarget.getBoundingClientRect());
+  const close = () => setAnchor(null);
   return <td className="hide-sm muted cap-date">
-    <span data-tip={`Added ${formatTimestamp(record.created_at)}`}>{record.created_at ? shortDay(record.created_at) : "—"}</span>
-    {updated && shortDay(updated) !== shortDay(record.created_at) && <div className="cap-upd" data-tip={`Last updated ${formatTimestamp(updated)}`}>upd. {shortDay(updated)}</div>}
+    <div className="cap-logwrap" tabIndex={0} aria-label={`Store ${record.store_num}: change log`}
+      onMouseEnter={open} onMouseLeave={close} onFocus={open} onBlur={close} onKeyDown={(event) => { if (event.key === "Escape") close(); }}>
+      <span>{record.created_at ? shortDay(record.created_at) : "—"}</span>
+      {changed && <div className="cap-upd">upd. {updatedText(updated)}</div>}
+    </div>
+    {anchor && <CapLogPanel record={record} anchor={anchor} historyReady={historyReady} />}
   </td>;
 }
 
@@ -180,7 +241,7 @@ function CapsTable({ ctx, rows, sort, showDue }) {
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
           : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}
         <td className="hide-sm cap-notes">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
-        <AddedUpdatedCell record={record} />
+        <AddedUpdatedCell record={record} historyReady={ctx.capsHistoryReady} />
         <td className="c-act"><div className="row-acts">
           <button type="button" className="iconbtn mini" data-tip="Edit details, status and notes" aria-label="Edit" onClick={() => openCapForm(record.id)}><Icon name="pencil" /></button>
           <button type="button" className="iconbtn mini del" data-tip="Remove from CAPs Monitoring" aria-label="Remove" onClick={() => askDeleteCap(record.id)}><Icon name="trash-2" /></button>

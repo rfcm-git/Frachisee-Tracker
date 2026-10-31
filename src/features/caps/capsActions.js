@@ -5,7 +5,7 @@ import { addRows, getContext, removeRows, replaceRow } from "../../state/dataSto
 import { confirmAction } from "../../state/dialogs.js";
 import { saveSucceeded, toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
-import { contactToSave, storeContactDefaults } from "../../domain/caps.js";
+import { capChanges, capHistoryField, contactToSave, storeContactDefaults } from "../../domain/caps.js";
 import { nowIso } from "../../lib/format.js";
 import { cleanStoreNumber } from "../../lib/text.js";
 
@@ -30,6 +30,7 @@ export async function createCap({ num, name, email, phone, notes, dueDate }) {
   if (findCap(ctx, storeNum)) { toast(`Store ${storeNum} is already in CAPs Monitoring`, "err"); return false; }
   const ts = nowIso();
   const record = { store_num: storeNum, ...contactFields(ctx, storeNum, { name, email, phone }), status: CAP_STATES[0], notes: String(notes || "").trim(), ...dueField(ctx, dueDate), created_at: ts, updated_at: ts };
+  Object.assign(record, capHistoryField(ctx, null, { ts, kind: "created", status: CAP_STATES[0] }));
   const result = await insertRows(TABLES.caps, [record]);
   if (result.error) {
     if (isDuplicateError(result.error)) toast(`Store ${storeNum} was just added by a teammate — click Refresh`, "err");
@@ -41,14 +42,24 @@ export async function createCap({ num, name, email, phone, notes, dueDate }) {
   return true;
 }
 
-/** Saves changed fields of a record (status, contacts, notes, due date). Returns true when saved. */
+/**
+ * Saves changed fields of a record (status, contacts, notes, due date), stamps Last Updated and logs the change.
+ * Nothing is saved when no field changed. Returns true when saved (or nothing to save).
+ */
 export async function updateCap(record, { name, email, phone, status, notes, dueDate }, { quiet = false } = {}) {
   const ctx = getContext();
-  const patch = { updated_at: nowIso() };
-  if (name !== undefined || email !== undefined || phone !== undefined) Object.assign(patch, contactFields(ctx, record.store_num, { name, email, phone }));
-  if (status !== undefined) patch.status = status;
-  if (notes !== undefined) patch.notes = String(notes || "").trim();
-  if (dueDate !== undefined) Object.assign(patch, dueField(ctx, dueDate));
+  const fields = {};
+  if (name !== undefined || email !== undefined || phone !== undefined) Object.assign(fields, contactFields(ctx, record.store_num, { name, email, phone }));
+  if (status !== undefined) fields.status = status;
+  if (notes !== undefined) fields.notes = String(notes || "").trim();
+  if (dueDate !== undefined) Object.assign(fields, dueField(ctx, dueDate));
+  const changes = capChanges(record, fields);
+  if (!changes.length) {
+    if (!quiet) toast("No changes to save");
+    return true;
+  }
+  const ts = nowIso();
+  const patch = { ...fields, updated_at: ts, ...capHistoryField(ctx, record, { ts, kind: "update", changes }) };
   const result = await guardedUpdate(TABLES.caps, record, patch);
   if (!saveSucceeded(result, `CAPs record for store ${record.store_num}`)) return false;
   replaceRow("caps", result.row);
@@ -94,7 +105,8 @@ export async function runCapsImport(plan, overwrite, onProgress = () => {}) {
   try {
     for (const part of chunks(adds, 200)) {
       const ts = nowIso();
-      const result = await insertRows(TABLES.caps, part.map((row) => ({ ...row.save, created_at: ts, updated_at: ts })));
+      const ctx = getContext();
+      const result = await insertRows(TABLES.caps, part.map((row) => ({ ...row.save, created_at: ts, updated_at: ts, ...capHistoryField(ctx, null, { ts, kind: "created", source: "import", status: row.save.status }) })));
       if (result.error) {
         if (!isDuplicateError(result.error)) throw result.error;
         failures.push(`Some of stores ${part.map((row) => row.num).join(", ")} were added by a teammate meanwhile — click Refresh and import again`);
@@ -105,7 +117,11 @@ export async function runCapsImport(plan, overwrite, onProgress = () => {}) {
       step(part.length);
     }
     for (const row of updates) {
-      const result = await mergeRowSave(TABLES.caps, row.existingId, () => ({ ...row.patch, updated_at: nowIso() }));
+      const result = await mergeRowSave(TABLES.caps, row.existingId, (fresh) => {
+        const ts = nowIso();
+        const changes = capChanges(fresh, row.patch);
+        return { ...row.patch, updated_at: ts, ...(changes.length ? capHistoryField(getContext(), fresh, { ts, kind: "update", source: "import", changes }) : {}) };
+      });
       if (result.row) { replaceRow("caps", result.row); updated += 1; } else failures.push(`Store ${row.num}: ${result.error ? result.error.message || "error" : result.gone ? "was removed by a teammate" : "kept changing — try again"}`);
       step();
     }

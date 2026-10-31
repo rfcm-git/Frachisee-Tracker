@@ -94,7 +94,7 @@ export default function Toolbar() {
           openCapsImport();
         }}><Icon name="upload" />Import spreadsheet</button>}
         {concerns && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
-        {(tab === "issues" || tab === "calls") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
+        {(tab === "issues" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
       </div>}
       {showSearch && tab !== "staff" && <div className="hintbar">

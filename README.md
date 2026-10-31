@@ -22,6 +22,7 @@ Some tabs need a table that older databases don't have yet. Run the matching scr
 
 - `migrate-caps.sql` — CAPs Monitoring (Corrective Action Plans). Until it is run, the CAPs tab shows a reminder and other tabs work as before.
 - `migrate-caps-due-date.sql` — CAPs submission due dates and due-date reminders. Until it is run, CAPs Monitoring works without due dates.
+- `migrate-caps-history.sql` — CAPs change log (shown when hovering Date Added / Last Updated). Until it is run, the log only shows when a store was added and last updated.
 
 ## Deploy to Vercel
 

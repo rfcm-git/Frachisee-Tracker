@@ -30,6 +30,9 @@
   .app.collapsed .sb-brand{justify-content:center;padding:0}
   .app.collapsed .tab,.app.collapsed .sb-item{justify-content:center;padding:0}
   .app.collapsed .tab .badge-num{position:absolute;top:3px;right:4px;margin:0;min-width:18px;padding:0 5px;font-size:10px;line-height:16px}
+  /* icon-only menu: the count shows only while the tab is hovered or keyboard-focused */
+  .app.collapsed .tab .badge-num{opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .15s,transform .15s}
+  .app.collapsed .tab:hover .badge-num,.app.collapsed .tab:focus-visible .badge-num{opacity:1;transform:none}
   /* main area */
   .main{flex:1;min-width:0;display:flex;flex-direction:column}
   .mainbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:16px;height:64px;padding:0 28px;
@@ -47,6 +50,8 @@
     .app:not(.expanded-sm) .sb-brand{justify-content:center;padding:0}
     .app:not(.expanded-sm) .tab,.app:not(.expanded-sm) .sb-item{justify-content:center;padding:0}
     .app:not(.expanded-sm) .tab .badge-num{position:absolute;top:3px;right:4px;margin:0;min-width:18px;padding:0 5px;font-size:10px;line-height:16px}
+    .app:not(.expanded-sm) .tab .badge-num{opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .15s,transform .15s}
+    .app:not(.expanded-sm) .tab:hover .badge-num,.app:not(.expanded-sm) .tab:focus-visible .badge-num{opacity:1;transform:none}
     .mainbar{padding:0 16px} }
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
@@ -548,5 +553,7 @@
   .pcard h3{margin:9px 0 4px;font-size:16px}
   .pcard .terr{font-size:12.5px;color:var(--ink-soft)}
   .pcard .mini{margin-top:9px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:12px}
-
-  
+  /* Faint drifting ingredients behind the app (SubwayBackdrop). */
+  .subway-backdrop{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;opacity:.13}
+  @media print{ .subway-backdrop{display:none} }
+  @media (prefers-reduced-motion: reduce){ .tab .badge-num{transition:none} }
