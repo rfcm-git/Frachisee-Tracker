@@ -1,4 +1,5 @@
 import AppShell from "./components/layout/AppShell.jsx";
+import SubwayBackdrop from "./components/layout/SubwayBackdrop.jsx";
 import DialogHost from "./components/dialogs/DialogHost.jsx";
 import ToastHost from "./components/ui/ToastHost.jsx";
 import TooltipHost from "./components/ui/TooltipHost.jsx";
@@ -14,6 +15,7 @@ export default function App() {
 
   return (
     <>
+      <SubwayBackdrop />
       <AppShell />
       <DialogHost />
       <ToastHost />

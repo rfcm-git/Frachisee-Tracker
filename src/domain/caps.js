@@ -99,3 +99,57 @@ export function capsSummary(records, now = new Date()) {
   const completed = counts.Completed;
   return { total, counts, completed, overdue, dueSoon, percent: total ? Math.round((completed / total) * 100) : 0 };
 }
+
+/* ---------- change log ---------- */
+
+/** Field labels in the change log, in display order. */
+export const CAP_LOG_FIELDS = [["status", "Status"], ["due_date", "Due date"], ["store_name", "Franchisee"], ["email", "Email"], ["phone", "Phone"], ["notes", "Notes"]];
+
+function storedCapHistory(record) {
+  try {
+    const list = Array.isArray(record.history) ? record.history : JSON.parse(record.history || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Every logged step of a record, oldest first:
+ * { ts, kind: "created" | "update", source?: "import", status?, changes?: [{ field, from, to }] }.
+ * Records saved before the log existed get "Added" plus their last update rebuilt.
+ */
+export function capHistory(record) {
+  const list = storedCapHistory(record).slice();
+  if (list.length) return list.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+  const out = [{ ts: record.created_at, kind: "created", status: null }];
+  if (record.updated_at && record.created_at && Math.abs(new Date(record.updated_at) - new Date(record.created_at)) > 60000) {
+    out.push({ ts: record.updated_at, kind: "update", legacy: true, changes: [] });
+  }
+  return out;
+}
+
+/** Changes between the saved record and a patch, as [{ field, from, to }]. Only logged fields are compared. */
+export function capChanges(record, patch) {
+  const value = (field, source) => (field === "due_date" ? String(source[field] || "").slice(0, 10) : field === "status" ? normalizeCapStatus(source[field]) : String(source[field] ?? "").trim());
+  return CAP_LOG_FIELDS.map(([field]) => field)
+    .filter((field) => field in patch && value(field, record) !== value(field, patch))
+    .map((field) => ({ field, from: value(field, record), to: value(field, patch) }));
+}
+
+/** history to save with a patch: the record's log plus the new entry ({} when the column does not exist yet). */
+export const capHistoryField = (ctx, record, entry) => (ctx.capsHistoryReady ? { history: [...(record ? capHistory(record).filter((item) => !item.legacy) : []), entry] } : {});
+
+/** One-line text of a change: "Status: Email Sent → In Progress", "Due date set to Nov 15, 2026". */
+export function capChangeText({ field, from, to }) {
+  const label = CAP_LOG_FIELDS.find(([key]) => key === field)?.[1] || field;
+  const show = (value) => (field === "due_date" ? formatDueDate(value) : value);
+  if (field === "notes") return !to ? "Notes cleared" : from ? "Notes edited" : "Notes added";
+  if (field === "store_name" || field === "email" || field === "phone") {
+    if (!to) return `${label} reset to the store records`;
+    return `${label} changed to ${to}`;
+  }
+  if (!from) return `${label} set to ${show(to)}`;
+  if (!to) return `${label} cleared (was ${show(from)})`;
+  return `${label}: ${show(from)} → ${show(to)}`;
+}

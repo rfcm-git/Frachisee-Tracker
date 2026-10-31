@@ -79,7 +79,7 @@ export default function ReportBuilderDialog({ kind, preset }) {
 
   function copyTabFilters() {
     update(definition.useTab(ctx, useUiStore.getState()));
-    toast(definition.kind === "issues" ? "Copied the Issues tab filters" : definition.kind === "ob" ? "Copied the Onboarding filters" : "Copied the tab filters", "ok");
+    toast(definition.kind === "issues" ? "Copied the Issues tab filters" : definition.kind === "ob" ? "Copied the Onboarding filters" : definition.kind === "cap" ? "Copied the CAPs Monitoring filters" : "Copied the tab filters", "ok");
   }
 
   async function download() {
