@@ -12,6 +12,7 @@ import FranchiseesView from "../../features/franchisees/FranchiseesView.jsx";
 import ConcernsView from "../../features/issues/ConcernsView.jsx";
 import OnboardingView from "../../features/onboarding/OnboardingView.jsx";
 import ReportsTab from "../../features/reports/ReportsTab.jsx";
+import SearchView from "../../features/search/SearchView.jsx";
 import StaffDirectory from "../../features/staff/StaffDirectory.jsx";
 import StoresDirectory from "../../features/stores/StoresDirectory.jsx";
 
@@ -19,6 +20,7 @@ function CurrentView() {
   const tab = useUiStore((state) => state.tab);
   const issueSub = useUiStore((state) => state.issueSub);
   switch (tab) {
+    case "search": return <SearchView />;
     case "franchisees": return <FranchiseesView />;
     case "stores": return <StoresDirectory />;
     case "staff": return <StaffDirectory />;

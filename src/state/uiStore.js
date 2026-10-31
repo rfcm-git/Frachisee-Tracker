@@ -39,6 +39,9 @@ function baseState() {
     tab: "dashboard",
     issueSub: "concerns",
     search: "",
+    findQuery: "",
+    findScope: "all",
+    findFocus: 0,
     terrFilter: "",
     issuesOnly: false,
     closedOnly: false,
@@ -84,6 +87,8 @@ function restoredState() {
   if (TABS.includes(saved.tab)) state.tab = saved.tab;
   if (saved.issueSub === "onboarding" || saved.issueSub === "concerns") state.issueSub = saved.issueSub;
   state.search = typeof saved.search === "string" ? saved.search : "";
+  state.findQuery = typeof saved.findQuery === "string" ? saved.findQuery : "";
+  state.findScope = typeof saved.findScope === "string" ? saved.findScope : "all";
   state.terrFilter = saved.terrFilter || "";
   state.selectedFr = saved.selectedFr ?? null;
   state.issuesOnly = !!saved.issuesOnly;
@@ -142,6 +147,17 @@ export function setIssueSub(issueSub) {
   window.scrollTo(0, 0);
 }
 
+/* ---------- Search tab ---------- */
+
+export const setFindQuery = (findQuery) => set({ findQuery });
+export const setFindScope = (findScope) => set({ findScope });
+
+/** Opens the Search tab and focuses its box; query (optional) replaces what is typed. */
+export function openFind(query) {
+  set({ tab: "search", findFocus: get().findFocus + 1, ...(typeof query === "string" ? { findQuery: query, findScope: "all" } : {}) });
+  window.scrollTo(0, 0);
+}
+
 export function setSearch(search) {
   set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap") });
 }
@@ -157,7 +173,7 @@ export const selectFranchisee = (id) => set({ selectedFr: id, ...resetPages("frs
 
 /** Opens the Franchisees tab on one franchisee. */
 export function showFranchisee(franchisee) {
-  set({ tab: "franchisees", issuesOnly: false, search: `@${franchisee.name}`, selectedFr: franchisee.id, ...resetPages("fr", "frst") });
+  set({ tab: "franchisees", issuesOnly: false, search: String(franchisee.name || ""), selectedFr: franchisee.id, ...resetPages("fr", "frst") });
 }
 
 /** Opens the All Stores tab for one territory. */
@@ -360,7 +376,7 @@ export function toggleSidebar() {
 export function saveUiSession(extra) {
   const state = get();
   session.setJson(STORAGE_KEYS.uiSession, {
-    tab: state.tab, issueSub: state.issueSub, search: state.search, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
+    tab: state.tab, issueSub: state.issueSub, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
     issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,

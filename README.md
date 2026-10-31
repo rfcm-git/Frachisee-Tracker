@@ -38,7 +38,7 @@ src/
   domain/                  business rules on plain data (no React):
     context.js             builds the indexed "data context" (lookups by id / store number, search text, open counts)
     records.js             reading row fields (contacts, platforms, store status, roles…)
-    search.js              toolbar search (#store, @franchisee, free text) and ranking
+    search.js              tab searches (Franchisees / All Stores: own details only; other tabs: #store, @franchisee) and ranking
     issues.js, onboarding.js, calls.js, staff.js
   services/                Supabase access: client + credentials, paged reads, team-safe saves
   state/                   app state (zustand stores) and actions
@@ -58,7 +58,7 @@ src/
     charts/                bars, donut, weekly columns, KPI cards
     dialogs/               DialogHost (renders the dialog stack) and confirm / password / conflict dialogs
   features/                one folder per screen, each with its view, dialogs, selectors (pure) and actions (saves)
-    dashboard, franchisees, stores, staff, issues, onboarding, caps, calls, reports, settings
+    dashboard, search, franchisees, stores, staff, issues, onboarding, caps, calls, reports, settings
   styles/                  stylesheets (unchanged class names)
 ```
 

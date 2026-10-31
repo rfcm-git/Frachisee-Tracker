@@ -24,6 +24,7 @@ export function buildContext(data) {
   });
 
   // Search text: franchisee name, territory and contacts; store number, address, phone and owner.
+  // storeSearch.info leaves out the owner (All Stores searches the store's own details only).
   const frSearch = new Map();
   franchisees.forEach((franchisee) => {
     const contacts = contactsOf(franchisee).map((contact) => contact.value).filter(Boolean);
@@ -35,8 +36,10 @@ export function buildContext(data) {
   const storeSearch = new Map();
   data.stores.forEach((store) => {
     const owner = frById.get(store.franchisee_id);
+    const info = [store.num, store.address, store.city, store.state, store.zip, store.territory, store.phone].join(" ").toLowerCase();
     storeSearch.set(store.id, {
-      text: [store.num, store.address, store.city, store.state, store.zip, store.territory, store.phone, owner ? owner.name : ""].join(" ").toLowerCase(),
+      text: `${info} ${owner ? String(owner.name || "").toLowerCase() : ""}`,
+      info,
       digits: [digitsOnly(store.phone), digitsOnly(store.zip)].filter(Boolean).join(" "),
     });
   });

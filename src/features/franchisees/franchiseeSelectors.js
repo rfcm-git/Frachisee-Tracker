@@ -2,16 +2,16 @@
 import { franchiseeOpenIssues, storeOpenIssues, storesOf } from "../../domain/context.js";
 import { isIssueOpen } from "../../domain/issues.js";
 import { territorySet } from "../../domain/records.js";
-import { franchiseeMatch, numRank, storeMatches, storeRank } from "../../domain/search.js";
+import { franchiseeInfoMatch, numRank, storeMatches, storeRank } from "../../domain/search.js";
 import { compareStores, normalizeName } from "../../lib/text.js";
 
-/** Franchisees matching the toolbar: [{ franchisee, hint }] sorted by match quality when searching. */
+/** Franchisees matching the toolbar (name, territory, contacts, notes): [{ franchisee, hint }], best matches first when searching. */
 export function filterFranchisees(ctx, { sq, terrFilter, issuesOnly }) {
   const list = [];
   ctx.franchisees.forEach((franchisee) => {
     if (terrFilter && !territorySet(franchisee.territory).has(terrFilter)) return;
     if (issuesOnly && !franchiseeOpenIssues(ctx, franchisee.id)) return;
-    const match = franchiseeMatch(ctx, franchisee, sq);
+    const match = franchiseeInfoMatch(franchisee, sq);
     if (match) list.push({ franchisee, rank: match.rank, hint: match.hint });
   });
   if (sq.q) list.sort((a, b) => a.rank - b.rank || String(a.franchisee.name || "").localeCompare(String(b.franchisee.name || "")));
