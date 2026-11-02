@@ -9,6 +9,8 @@ import { isIssueOpen } from "./issues.js";
 export const EMPTY_DATA = Object.freeze({
   franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [],
   onboardingReady: true, callLogsReady: true, capsReady: true, capsDueReady: true, capsHistoryReady: true,
+  /** Last CAP import: { at, file, added, completed, updated } or null. */
+  capsLastImport: null,
 });
 
 export function buildContext(data) {

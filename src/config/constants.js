@@ -66,7 +66,7 @@ export const PAGE_TITLES = {
   staff: ["FBC / OM", "Field consultants and operations managers"],
   concerns: ["Issues · Concerns", "Log, track and report 3PD issues"],
   onboarding: ["Issues · Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
-  caps: ["CAPs Monitoring", "Corrective Action Plans — track each store from first contact to completed"],
+  caps: ["CAP", "Corrective Action Plan — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
   reports: ["Reports", "Build any report — Excel or PDF, by date, territory, franchisee, store and category"],
 };
@@ -91,6 +91,7 @@ export const STORAGE_KEYS = {
   callReminded: "ft2_cl_reminded",
   callSnooze: "ft2_cl_snooze",
   capReminded: "ft2_cap_reminded",
+  capLastImport: "ft2_cap_last_import",
   notifications: "ft2_notifications",
   notifyPosition: "ft2_notify_pos",
   links: "ft2_links",

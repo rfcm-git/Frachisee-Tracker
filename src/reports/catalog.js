@@ -20,7 +20,7 @@ export const REPORTS = {
 export const REPORT_TYPES = [
   { key: "issues", title: "Concerns", icon: "message-square-warning", description: "Issues logged for stores: status, platforms, updates and actions taken.", filters: "Date logged · status · franchisee · store · territory" },
   { key: "ob", title: "Onboarding", icon: "rocket", description: "Onboarding per store and platform: status, progress and days to onboard.", filters: "Date started · status · platform · franchisee · store · territory" },
-  { key: "cap", title: "CAPs Monitoring", icon: "list-checks", description: "Corrective Action Plans per store: status, submission due dates, contacts and notes.", filters: "Date added · status · due date · email · franchisee · store · territory" },
+  { key: "cap", title: "CAP (Corrective Action Plan)", icon: "list-checks", description: "Corrective Action Plans per store: status, submission due dates, contacts and notes.", filters: "Date added · status · due date · email · franchisee · store · territory" },
   { key: "cl", title: "Call logs", icon: "phone-call", description: "Every call: reason, result, outcome, follow-ups and franchisee contact.", filters: "Call date · outcome · follow-up · franchisee · store · territory" },
   { key: "act", title: "Activity (all categories)", icon: "activity", description: "Concerns, onboarding and calls together in one timeline.", filters: "Activity date · category · franchisee · store · territory" },
   { key: "stores", title: "Stores", icon: "store", description: "Store directory with 3PD, GBP and ezCater coverage, support team and gaps.", filters: "Store status · coverage · GBP · ezCater · team · territory" },

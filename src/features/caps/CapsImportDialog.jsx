@@ -9,20 +9,29 @@ import { getContext, useDataContext } from "../../state/dataStore.js";
 import { confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { runCapsImport } from "./capsActions.js";
-import { CAP_COLUMNS, downloadCapsList, downloadCapsTemplate, planCapsImport, readCapsFile } from "./capsImport.js";
+import { CAP_COLUMNS, FILE_STATUS_LABELS, downloadCapsList, downloadCapsTemplate, planCapsImport, readCapsFile } from "./capsImport.js";
 
 const xlsxFailed = () => toast("Spreadsheet tool didn't load — check internet", "err");
 const plural = (count, word) => `${count} ${word}${count !== 1 ? "s" : ""}`;
 
-/** Result of the store check for one row: new, already in CAPs, not in the database, or another problem. */
+/** Result of the store check for one row: new, to complete, already in the list, not in the database or the list, or another problem. */
 function CheckTag({ row }) {
   if (row.reason === "notFound") return <span className="cap-tag bad"><Icon name="circle-x" />Not in database</span>;
+  if (row.reason === "notInList") return <span className="cap-tag bad"><Icon name="circle-x" />Not in CAP list</span>;
   if (!row.ok) return <span className="cap-tag bad"><Icon name="circle-alert" />Problem</span>;
+  if (row.kind === "close") return row.changes.length ? <span className="cap-tag ok"><Icon name="badge-check" />To complete</span>
+    : <span className="cap-tag warn"><Icon name="check" />Already completed</span>;
   if (row.kind === "update") return <span className="cap-tag warn"><Icon name="copy" />Already added</span>;
   return <span className="cap-tag ok"><Icon name="circle-check" />New</span>;
 }
 
-/** Add many stores to CAPs Monitoring from a spreadsheet, with a preview first. Existing stores are only updated when allowed. */
+/** Store numbers in a check box, up to 40. */
+const StoreNums = ({ rows }) => <div className="cap-nums">{rows.slice(0, 40).map((row) => <span key={row.row}>{row.num}</span>)}{rows.length > 40 && <em>+{rows.length - 40} more</em>}</div>;
+
+/**
+ * Import stores into the CAP list from a spreadsheet, with a preview first.
+ * Not Started rows add new stores; Closed rows mark stores in the list Completed. Due dates of existing stores only change when allowed.
+ */
 export default function CapsImportDialog() {
   const ctx = useDataContext();
   const { close, setBusy } = useDialog();
@@ -47,8 +56,9 @@ export default function CapsImportDialog() {
       setParsed(result);
       setBusy(true);
       const checked = planCapsImport(getContext(), result);
-      const notes = [checked.existing.length && `${plural(checked.existing.length, "store")} already in CAPs`, checked.notFound.length && `${plural(checked.notFound.length, "store")} not in the database`].filter(Boolean);
-      if (notes.length) toast(`Checked: ${notes.join(" · ")} — see the preview`, checked.notFound.length ? "err" : "ok");
+      const notes = [checked.closes.length && `${plural(checked.closes.length, "store")} to mark Completed`, checked.existing.length && `${plural(checked.existing.length, "store")} already in the CAP list`,
+        checked.notFound.length && `${plural(checked.notFound.length, "store")} not in the database`, checked.notInList.length && `${plural(checked.notInList.length, "Closed store")} not in the CAP list`].filter(Boolean);
+      if (notes.length) toast(`Checked: ${notes.join(" · ")} — see the preview`, checked.notFound.length || checked.notInList.length ? "err" : "ok");
     } catch {
       xlsxFailed();
     }
@@ -57,9 +67,10 @@ export default function CapsImportDialog() {
   async function save() {
     const current = planCapsImport(getContext(), parsed);
     setProgress({ done: 0, total: 1 });
-    const result = await runCapsImport(current, overwrite, (done, total) => setProgress({ done, total }));
+    const result = await runCapsImport(current, overwrite, (done, total) => setProgress({ done, total }), fileName);
     setProgress(null);
-    const summary = [result.added && `${plural(result.added, "store")} added`, result.updated && `${plural(result.updated, "store")} updated`].filter(Boolean).join(" · ") || "Nothing was changed";
+    const summary = [result.added && `${plural(result.added, "store")} added`, result.completed && `${plural(result.completed, "store")} marked Completed`,
+      result.updated && `${plural(result.updated, "due date")} updated`].filter(Boolean).join(" · ") || "Nothing was changed";
     if (result.error || result.failures.length) {
       setFailures([...(result.error ? [`Stopped: ${errorTitle(result.error)}`] : []), ...result.failures]);
       setParsed(null);
@@ -71,31 +82,35 @@ export default function CapsImportDialog() {
   }
 
   function askSave() {
-    const parts = [plan.adds.length && `add ${plural(plan.adds.length, "store")}`, overwrite && plan.updates.length && `update ${plural(plan.updates.length, "existing store")}`].filter(Boolean);
+    const parts = [plan.adds.length && `add ${plural(plan.adds.length, "store")}`, plan.closes.length && `mark ${plural(plan.closes.length, "store")} Completed`,
+      overwrite && plan.updates.length && `update the due date of ${plural(plan.updates.length, "existing store")}`].filter(Boolean);
+    const last = parts.pop();
     confirmAction({
-      title: "Import into CAPs Monitoring?", okLabel: "Import", busyLabel: "Importing…", icon: "upload", okClass: "btn",
-      text: `This will ${parts.join(" and ")}.${!overwrite && plan.updates.length ? ` ${plural(plan.updates.length, "store")} already in CAPs will be left unchanged.` : ""}`,
+      title: "Import into the CAP list?", okLabel: "Import", busyLabel: "Importing…", icon: "upload", okClass: "btn",
+      text: `This will ${parts.length ? `${parts.join(", ")} and ${last}` : last}.${plan.existing.length ? ` ${plural(plan.existing.length, "Not Started store")} already in the CAP list will not be added again.` : ""}`,
       onConfirm: save,
     });
   }
 
   const saving = !!progress;
-  const count = plan ? plan.adds.length + (overwrite ? plan.updates.length : 0) : 0;
+  const count = plan ? plan.adds.length + plan.closes.length + (overwrite ? plan.updates.length : 0) : 0;
   const resultOf = (row) => {
     if (!row.ok) return <span className="bk-skip"><Icon name="circle-x" />Skipped: {row.msg}</span>;
     if (row.kind === "update" && row.changes.length && !overwrite) return <span className="cap-hold"><Icon name="lock" />{row.msg} — not updated unless you allow it</span>;
-    return <span className={row.kind === "update" ? "bk-ok bu-transfer" : "bk-ok"}><Icon name={row.kind === "update" ? "refresh-cw" : "circle-check"} />{row.msg}</span>;
+    if (row.kind === "update" || (row.kind === "close" && !row.changes.length)) return <span className="muted"><Icon name="check" />{row.msg}</span>;
+    return <span className={row.kind === "close" ? "bk-ok bu-transfer" : "bk-ok"}><Icon name={row.kind === "close" ? "badge-check" : "circle-check"} />{row.msg}</span>;
   };
   const ordered = plan ? plan.rows.slice().sort((a, b) => (a.ok - b.ok) || ((a.kind === "update") - (b.kind === "update")) || (a.row - b.row)) : [];
 
-  return <Modal icon="upload" title="Import stores into CAPs Monitoring" subtitle="Upload a list of store numbers — franchisee, email and phone come from the store records" modalStyle={{ maxWidth: 960 }}
+  return <Modal icon="upload" title="Import stores into the CAP list" subtitle="Upload store numbers with a status — franchisee, email and phone come from the store records" modalStyle={{ maxWidth: 960 }}
     onEscape={saving ? false : undefined}
     footer={<><button type="button" className="btn ghost" disabled={saving} onClick={close}>{failures.length ? "Close" : "Cancel"}</button>
       <button type="button" className="btn" disabled={!count || saving} onClick={askSave}><Icon name="upload" />
         <span>{saving ? `Importing… ${progress.done}/${progress.total}` : count ? `Import ${plural(count, "store")}` : "Import"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the template</h4>
-        <p>Only Store Number is needed. Franchisee, email and phone are filled in from the store records. Every imported store starts at <b>No Action Yet</b>. Due Date is optional.</p>
+        <p>Fill in Store Number and Status. <b>Not Started</b> adds the store at No Action Yet if it is not in the CAP list yet (stores already in the list are left as they are).
+          <b> Closed</b> marks a store already in the list <b>Completed</b>. A blank Status counts as Not Started. Due Date is optional.</p>
         <div className="bk-cols">{CAP_COLUMNS.map((column) => <span key={column} className={column === "Store Number" ? "req" : ""}>{column}</span>)}</div>
         <div className="bu-btns">
           <button type="button" className="btn sm round" onClick={() => downloadCapsTemplate().catch(xlsxFailed)}><Icon name="file-spreadsheet" />Download template</button>
@@ -122,23 +137,35 @@ export default function CapsImportDialog() {
     {plan && <>
       <div className="bk-sum">
         <div className={`s${plan.adds.length ? " ok" : ""}`}><b>{plan.adds.length}</b>New stores to add</div>
-        <div className={`s${plan.existing.length ? " warn" : ""}`}><b>{plan.existing.length}</b>Already in CAPs</div>
+        <div className={`s${plan.closes.length ? " ok" : ""}`}><b>{plan.closes.length}</b>To mark Completed</div>
+        <div className={`s${plan.existing.length + plan.alreadyDone.length ? " warn" : ""}`}><b>{plan.existing.length + plan.alreadyDone.length}</b>Already in list · no change</div>
         <div className={`s${plan.notFound.length ? " bad" : ""}`}><b>{plan.notFound.length}</b>Not in database</div>
+        <div className={`s${plan.notInList.length ? " bad" : ""}`}><b>{plan.notInList.length}</b>Closed · not in CAP list</div>
         <div className={`s${plan.problems.length ? " bad" : ""}`}><b>{plan.problems.length}</b>Other problems</div>
       </div>
 
       {plan.notFound.length > 0 && <div className="warnbox show cap-check bad"><Icon name="circle-x" /><div>
         <b>{plural(plan.notFound.length, "store")} {plan.notFound.length === 1 ? "is" : "are"} not in the database</b> and will be skipped. Check the store number, or add the store in All Stores first.
-        <div className="cap-nums">{plan.notFound.slice(0, 40).map((row) => <span key={row.row}>{row.num}</span>)}{plan.notFound.length > 40 && <em>+{plan.notFound.length - 40} more</em>}</div>
+        <StoreNums rows={plan.notFound} />
+      </div></div>}
+
+      {plan.notInList.length > 0 && <div className="warnbox show cap-check bad"><Icon name="circle-x" /><div>
+        <b>{plural(plan.notInList.length, "store")} marked Closed {plan.notInList.length === 1 ? "is" : "are"} not in the CAP list</b>, so there is nothing to complete. They will be skipped.
+        <StoreNums rows={plan.notInList} />
+      </div></div>}
+
+      {plan.closes.length > 0 && <div className="warnbox show cap-check ok"><Icon name="badge-check" /><div>
+        <b>{plural(plan.closes.length, "store")} will be marked Completed</b> — Closed in the file and still open in the CAP list.
+        <StoreNums rows={plan.closes} />
       </div></div>}
 
       {plan.existing.length > 0 && <div className="warnbox show cap-check"><Icon name="triangle-alert" /><div>
-        <b>{plural(plan.existing.length, "store")} {plan.existing.length === 1 ? "is" : "are"} already in CAPs Monitoring</b> and won't be added again.
-        <div className="cap-nums">{plan.existing.slice(0, 40).map((row) => <span key={row.row}>{row.num}</span>)}{plan.existing.length > 40 && <em>+{plan.existing.length - 40} more</em>}</div>
+        <b>{plural(plan.existing.length, "Not Started store")} {plan.existing.length === 1 ? "is" : "are"} already in the CAP list</b> and won't be added again. Their status is kept.
+        <StoreNums rows={plan.existing} />
         {plan.updates.length > 0 && <>
           <div style={{ marginTop: 8 }}>{plural(plan.updates.length, "of them")} {plan.updates.length === 1 ? "has" : "have"} a different due date in the file. They are <b>not changed</b> unless you allow it.</div>
           <label className="cap-overwrite"><input type="checkbox" checked={overwrite} disabled={saving} onChange={(event) => setOverwrite(event.target.checked)} />
-            Update the due date of stores already in CAPs (their status is kept; a blank Due Date keeps the saved one)</label>
+            Update the due date of stores already in the CAP list (their status is kept; a blank Due Date keeps the saved one)</label>
           {overwrite && <div className="bk-table bu-table" style={{ marginTop: 8, maxHeight: 180 }}><table><thead><tr><th>Store</th><th>Change</th></tr></thead><tbody>
             {plan.updates.map((row) => <tr key={row.row}><td className="store">{row.num}</td><td>
               {row.changes.map((change) => <div key={change.label} className="bu-change"><b>{change.label}:</b> <span className="bu-old">{change.before}</span>
@@ -149,9 +176,10 @@ export default function CapsImportDialog() {
       </div></div>}
 
       <div className="bu-h">Rows in the file</div>
-      {plan.rows.length ? <div className="bk-table bu-table"><table><thead><tr><th>Row</th><th>Store #</th><th>Check</th><th>From store records</th><th>Status</th>{ctx.capsDueReady && <th>Due Date</th>}<th>Result</th></tr></thead><tbody>
+      {plan.rows.length ? <div className="bk-table bu-table"><table><thead><tr><th>Row</th><th>Store #</th><th>File Status</th><th>Check</th><th>From store records</th><th>Status</th>{ctx.capsDueReady && <th>Due Date</th>}<th>Result</th></tr></thead><tbody>
         {ordered.map((row) => <tr key={row.row}>
           <td className="muted">{row.row}</td><td className="store">{row.num || "—"}</td>
+          <td style={{ whiteSpace: "nowrap" }}>{row.fileStatus ? FILE_STATUS_LABELS[row.fileStatus] : <span className="muted">—</span>}</td>
           <td><CheckTag row={row} /></td>
           <td className="cap-imp-contact">{row.shown ? <><b>{row.shown.name || "—"}</b>
             <span className="muted">{[row.shown.email, row.shown.phone].filter(Boolean).join(" · ") || "No email or phone saved"}</span></> : <span className="muted">—</span>}</td>

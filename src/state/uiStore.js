@@ -306,7 +306,7 @@ export function sortCaps(key, dir) {
 
 export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter(), sort: get().capsFilter.sort }, search: "", ...resetPages("cap") });
 
-/** Opens CAPs Monitoring, optionally on one status or due date filter (dashboard and reminders). */
+/** Opens the CAP tab, optionally on one status or due date filter (dashboard and reminders). */
 export function showCaps(status = "", due = "") {
   set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
   window.scrollTo(0, 0);

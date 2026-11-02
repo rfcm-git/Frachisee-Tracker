@@ -10,11 +10,11 @@ import { CAP_DUE_SOON_DAYS, CAP_STATES, CAP_STATUS_COLOR } from "../../config/co
 import { capChangeText, capHistory, capStatusClass, formatDueDate, normalizeCapStatus } from "../../domain/caps.js";
 import { storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
-import { formatNumber, formatTimestamp, telHref } from "../../lib/format.js";
+import { formatNumber, formatTimestamp, telHref, timeOf } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openCapForm, openCapsImport, openStore } from "../../state/dialogs.js";
 import { clearCapsFilters, setCapDueFilter, setCapEmailFilter, sortCaps, toggleCapDueFilter, toggleCapOnlyStatus, toggleCapStatus, useUiStore } from "../../state/uiStore.js";
-import { askDeleteCap, updateCap } from "./capsActions.js";
+import { askDeleteCap, lastCapsImport, updateCap } from "./capsActions.js";
 import { capsProgress, filterCaps } from "./capsSelectors.js";
 
 const SORT_LABELS = { num: "Store Number", status: "Status", added: "Date Added", updated: "Last Updated", due: "Due Date" };
@@ -103,7 +103,7 @@ function sortText(sort) {
 /** One-line progress strip: counts per status (click to filter) and the completion bar. All records, not affected by filters. */
 export function CapsProgress({ summary, statuses = [], due = "", showDue = true, onStatus = toggleCapOnlyStatus, onTotal = () => toggleCapStatus(""), onDue = toggleCapDueFilter }) {
   return <div className="cap-prog" role="group" aria-label="CAPs progress">
-    <button type="button" className={`cap-cnt total${!statuses.length ? " on" : ""}`} data-tip="All stores in CAPs Monitoring — click to show all" onClick={onTotal}>
+    <button type="button" className={`cap-cnt total${!statuses.length ? " on" : ""}`} data-tip="All stores in the CAP list — click to show all" onClick={onTotal}>
       <b>{formatNumber(summary.total)}</b>Total stores</button>
     {CAP_STATES.map((status) => {
       const on = statuses.length === 1 && statuses[0] === status;
@@ -124,6 +124,21 @@ export function CapsProgress({ summary, statuses = [], due = "", showDue = true,
         style={{ width: `${(summary.counts[status] / summary.total) * 100}%`, background: CAP_STATUS_COLOR[status] }} />) : null}</div>
       <b>{summary.percent}%</b><span className="muted">completed</span>
     </div>
+  </div>;
+}
+
+/** When the list was last imported (with what changed) and last changed by anyone. */
+function CapsLastImport({ ctx }) {
+  const info = lastCapsImport(ctx);
+  const lastChange = ctx.caps.reduce((latest, record) => Math.max(latest, timeOf(record.updated_at || record.created_at)), 0);
+  const counts = info ? [info.added && `${formatNumber(info.added)} added`, info.completed && `${formatNumber(info.completed)} completed`,
+    info.updated && `${formatNumber(info.updated)} due date${info.updated === 1 ? "" : "s"} updated`].filter(Boolean) : [];
+  return <div className="cap-meta">
+    <span data-tip={info ? `Imported ${formatTimestamp(info.at)}${info.file ? ` from ${info.file}` : ""}` : "No spreadsheet has been imported yet"}>
+      <Icon name="upload" />Last import: <b>{info ? formatTimestamp(info.at) : "never"}</b>
+      {info && <span className="muted"> · {counts.length ? counts.join(" · ") : "no changes"}{info.file ? ` · ${info.file}` : ""}</span>}</span>
+    {lastChange > 0 && <span data-tip="Last time any store in the CAP list was added or changed (import, edit or status change)">
+      <Icon name="history" />List last updated: <b>{formatTimestamp(lastChange)}</b></span>}
   </div>;
 }
 
@@ -244,7 +259,7 @@ function CapsTable({ ctx, rows, sort, showDue }) {
         <AddedUpdatedCell record={record} historyReady={ctx.capsHistoryReady} />
         <td className="c-act"><div className="row-acts">
           <button type="button" className="iconbtn mini" data-tip="Edit details, status and notes" aria-label="Edit" onClick={() => openCapForm(record.id)}><Icon name="pencil" /></button>
-          <button type="button" className="iconbtn mini del" data-tip="Remove from CAPs Monitoring" aria-label="Remove" onClick={() => askDeleteCap(record.id)}><Icon name="trash-2" /></button>
+          <button type="button" className="iconbtn mini del" data-tip="Remove from the CAP list" aria-label="Remove" onClick={() => askDeleteCap(record.id)}><Icon name="trash-2" /></button>
         </div></td>
       </tr>;
     })}
@@ -261,9 +276,9 @@ export default function CapsView() {
   const summary = useMemo(() => capsProgress(ctx), [ctx]);
   useToolbarCount(ctx.capsReady ? `${formatNumber(rows.length)} store${rows.length !== 1 ? "s" : ""} · ${formatNumber(summary.completed)} completed` : "");
 
-  if (!ctx.capsReady) return <EmptyState icon="database" title="CAPs Monitoring needs a quick database update">Run migrate-caps.sql in the Supabase SQL Editor, then click Refresh. Other tabs are not affected.</EmptyState>;
+  if (!ctx.capsReady) return <EmptyState icon="database" title="The CAP tab needs a quick database update">Run migrate-caps.sql in the Supabase SQL Editor, then click Refresh. Other tabs are not affected.</EmptyState>;
   if (!ctx.caps.length) {
-    return <EmptyState icon="list-checks" title="No stores in CAPs Monitoring yet"
+    return <EmptyState icon="list-checks" title="No stores in the CAP list yet"
       actions={<><button type="button" className="btn round" onClick={() => openCapForm()}><Icon name="plus" />Add store</button>
         <button type="button" className="btn outline round" onClick={openCapsImport}><Icon name="upload" />Import spreadsheet</button></>}>
       Add a single store, or import many from an Excel spreadsheet.</EmptyState>;
@@ -272,8 +287,9 @@ export default function CapsView() {
   const anyFilter = !!(filter.statuses.length || filter.email || (showDue && filter.due) || search.trim());
   return <>
     {!showDue && <div className="warnbox show cap-migrate"><Icon name="database" /><div>
-      <b>Submission due dates need a quick database update.</b> Run <code>migrate-caps-due-date.sql</code> in the Supabase SQL Editor, then click Refresh. Everything else in CAPs Monitoring works as before.</div></div>}
+      <b>Submission due dates need a quick database update.</b> Run <code>migrate-caps-due-date.sql</code> in the Supabase SQL Editor, then click Refresh. Everything else in the CAP list works as before.</div></div>}
     <CapsProgress summary={summary} statuses={filter.statuses} due={filter.due} showDue={showDue} />
+    <CapsLastImport ctx={ctx} />
     <CapsFilters filter={filter} anyFilter={anyFilter} showDue={showDue} />
     {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
   </>;

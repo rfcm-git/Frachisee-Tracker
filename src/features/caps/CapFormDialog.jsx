@@ -16,7 +16,7 @@ import { createCap, findCap, updateCap } from "./capsActions.js";
 const FIELDS = ["name", "email", "phone"];
 const DUE_SHORTCUTS = [7, 14, 30];
 
-/** Add a store to CAPs Monitoring (capId null) or edit one. Name, email and phone come from the store records until changed. */
+/** Add a store to the CAP list (capId null) or edit one. Name, email and phone come from the store records until changed. */
 export default function CapFormDialog({ capId = null }) {
   const ctx = useDataContext();
   const { close, setBusy } = useDialog();
@@ -63,7 +63,7 @@ export default function CapFormDialog({ capId = null }) {
 
   async function save() {
     if (!storeNum) { toast("Enter the store number", "err"); return; }
-    if (duplicate) { toast(`Store ${storeNum} is already in CAPs Monitoring`, "err"); return; }
+    if (duplicate) { toast(`Store ${storeNum} is already in the CAP list`, "err"); return; }
     if (emailBad) { toast("Email address is not valid", "err"); return; }
     if (phoneBad) { toast("Phone number must be 10 digits", "err"); return; }
     const contact = { name: values.name.trim(), email: values.email.trim(), phone: values.phone.trim() ? phone10(values.phone) : "" };
@@ -77,7 +77,7 @@ export default function CapFormDialog({ capId = null }) {
   const differs = defaults.found && FIELDS.some((field) => values[field].trim().toLowerCase() !== String(defaults[field] || "").toLowerCase());
   const fieldHint = (field) => (fromStore(field) ? <span className="cap-src"><Icon name="store" />from store records</span> : null);
 
-  return <Modal icon={editing ? "pencil" : "plus"} title={editing ? `Edit CAP · Store ${record.store_num}` : "Add store to CAPs Monitoring"}
+  return <Modal icon={editing ? "pencil" : "plus"} title={editing ? `Edit CAP · Store ${record.store_num}` : "Add store to the CAP list"}
     subtitle={editing ? `Added ${formatTimestamp(record.created_at)}${record.updated_at && record.updated_at !== record.created_at ? ` · last updated ${formatTimestamp(record.updated_at)}` : ""}` : "Contact details are filled from the store records — change them if needed"}
     modalStyle={{ maxWidth: 620 }}
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
@@ -87,7 +87,7 @@ export default function CapFormDialog({ capId = null }) {
         onChange={(event) => changeNum(event.target.value)} /></div>
     <div className="cap-storeinfo" role="status">
       {!storeNum ? <span className="muted">Type a store number to look up its contact details.</span>
-        : duplicate ? <span className="cap-err"><Icon name="circle-alert" />Store {storeNum} is already in CAPs Monitoring.
+        : duplicate ? <span className="cap-err"><Icon name="circle-alert" />Store {storeNum} is already in the CAP list.
           <button type="button" className="btn link" onClick={() => { close(); openCapForm(duplicate.id); }}>Edit it instead</button></span>
           : store ? <span><Icon name="store" />Store {storeNum}{defaults.name ? ` · ${defaults.name}` : ""}{store.city ? ` · ${store.city}${store.state ? `, ${store.state}` : ""}` : ""}</span>
             : <span className="cap-warn"><Icon name="triangle-alert" />Store {storeNum} is not in the store list. You can still add it — fill in the contact details.</span>}

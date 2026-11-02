@@ -49,7 +49,7 @@ export default function Sidebar() {
               <Icon name={icon} /><span className="t-lb">{label}</span><span className="sb-cnt">{count}</span></button>;
           })}
         </div>
-        <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAPs Monitoring" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
+        <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAP" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
         <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>

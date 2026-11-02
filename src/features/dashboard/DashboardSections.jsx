@@ -99,14 +99,14 @@ export function DashboardTerritoryTable({ rows, sort }) {
   </DashboardCard></div>;
 }
 
-/** Compact CAPs summary; click a number to open CAPs Monitoring on that status. */
+/** Compact CAPs summary; click a number to open the CAP tab on that status. */
 export function DashboardCaps({ summary, territory, showDue }) {
   return <div className="db-sec db-caps">
-    <h3 className="db-sech"><Icon name="list-checks" />CAPs Monitoring
-      <InfoTip text={`Corrective Action Plan progress${territory ? ` for stores in territory ${territory}` : " for every store in CAPs Monitoring"}. Same numbers as the CAPs Monitoring tab. Click a number to open the list.`} />
-      <button type="button" className="btn link db-caps-open" onClick={() => showCaps("")}>Open CAPs<Icon name="chevron-right" /></button></h3>
+    <h3 className="db-sech"><Icon name="list-checks" />CAP · Corrective Action Plan
+      <InfoTip text={`Corrective Action Plan progress${territory ? ` for stores in territory ${territory}` : " for every store in the CAP list"}. Same numbers as the CAP tab. Click a number to open the list.`} />
+      <button type="button" className="btn link db-caps-open" onClick={() => showCaps("")}>Open CAP<Icon name="chevron-right" /></button></h3>
     {summary.total ? <CapsProgress summary={summary} showDue={showDue} onStatus={showCaps} onTotal={() => showCaps("")} onDue={(due) => showCaps("", due)} />
-      : <div className="db-empty"><Icon name="circle-check" />{territory ? "No CAPs stores in this territory" : "No stores in CAPs Monitoring yet"}</div>}
+      : <div className="db-empty"><Icon name="circle-check" />{territory ? "No CAPs stores in this territory" : "No stores in the CAP list yet"}</div>}
   </div>;
 }
 
