@@ -52,7 +52,7 @@ export default {
   nounPl: "stores",
   emptyText: "No CAPs match these choices",
   whichLabel: "Which CAPs",
-  tabName: "CAPs Monitoring tab",
+  tabName: "CAP tab",
   dateLabel: "Date added",
   mainSheet: "caps",
   mainSheetLabel: "CAPs",

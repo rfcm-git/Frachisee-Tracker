@@ -83,7 +83,7 @@ export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { ca
 export const openNewOnboarding = () => openDialog(DIALOG.newOnboarding);
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
 
-/** Add a store to CAPs Monitoring (capId null) or edit one. */
+/** Add a store to the CAP list (capId null) or edit one. */
 export const openCapForm = (capId = null) => openDialog(DIALOG.capForm, { capId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
 

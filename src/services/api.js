@@ -15,6 +15,9 @@ export const TABLES = {
   settings: "app_settings",
 };
 
+/** app_settings key of the last CAP import. */
+export const CAPS_LAST_IMPORT_KEY = "caps_last_import";
+
 function db() {
   const client = getDb();
   if (!client) throw new Error("Not connected");
@@ -64,10 +67,12 @@ export async function loadAllTables() {
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: caps, ready: capsReady } = capsResult;
-  const [capsDueReady, capsHistoryReady] = capsReady
-    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history")])
-    : [false, false];
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady };
+  const [capsDueReady, capsHistoryReady, lastImport] = capsReady
+    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"), readSetting(CAPS_LAST_IMPORT_KEY).catch((error) => ({ error }))])
+    : [false, false, { value: null }];
+  // lastImport.error: app_settings is not set up; the CAP tab then shows the import saved on this computer.
+  const capsLastImport = lastImport.error ? undefined : lastImport.value || null;
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

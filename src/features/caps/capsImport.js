@@ -1,7 +1,8 @@
 /*
- * CAPs spreadsheet: template, export of the current list, reading and checking rows.
- * Only Store Number (and an optional Due Date) is read: franchisee, email and phone always come from the store records,
- * and every imported store starts at No Action Yet (a Status column in the file is ignored).
+ * CAP spreadsheet: template, export of the current list, reading and checking rows.
+ * Store Number, Status and an optional Due Date are read: franchisee, email and phone always come from the store records.
+ * Status "Not Started" (or blank) adds a store that is not in the CAP list yet, at No Action Yet; stores already in the list are left alone.
+ * Status "Closed" marks a store already in the CAP list Completed.
  * Nothing is saved here — the import dialog shows the plan first, then capsActions.runCapsImport saves it.
  */
 import { CAP_STATES } from "../../config/constants.js";
@@ -11,18 +12,32 @@ import { cleanStoreNumber, compareNumbers } from "../../lib/text.js";
 import { loadXlsx } from "../../lib/xlsx.js";
 
 /** Columns read on import. */
-export const CAP_COLUMNS = ["Store Number", "Due Date"];
-const COLUMN_WIDTHS = [14, 14];
+export const CAP_COLUMNS = ["Store Number", "Status", "Due Date"];
+const COLUMN_WIDTHS = [14, 14, 14];
 /** The "Current list" export adds these for reading only — they are ignored on import. */
-const EXPORT_COLUMNS = [...CAP_COLUMNS, "Status", "Franchisee", "Email Address", "Phone Number", "Notes"];
+const EXPORT_COLUMNS = [...CAP_COLUMNS, "Status in App", "Franchisee", "Email Address", "Phone Number", "Notes"];
 const EXPORT_WIDTHS = [...COLUMN_WIDTHS, 16, 30, 32, 18, 50];
 const SHEET_NAME = "CAPs";
 
 /** Field of each column, with the header spellings accepted for it. Other columns are ignored. */
 const HEADERS = {
   num: ["store number", "store #", "store", "store no", "store num"],
+  status: ["status", "cap status"],
   due: ["due date", "submission due date", "due", "deadline"],
 };
+
+/** Status values accepted in the file. A blank status (or no Status column) counts as Not Started. */
+export const FILE_STATUS_LABELS = { notStarted: "Not Started", closed: "Closed" };
+const FILE_STATUSES = {
+  notStarted: ["not started", "notstarted", "", "new", "no action yet"],
+  closed: ["closed", "close", "completed", "complete", "done"],
+};
+
+/** "notStarted" | "closed", or null when the value is not known. */
+export function readFileStatus(value) {
+  const text = String(value || "").toLowerCase().replace(/[-_]/g, " ").replace(/\s+/g, " ").trim();
+  return Object.keys(FILE_STATUSES).find((key) => FILE_STATUSES[key].includes(text)) || null;
+}
 
 const headerKey = (value) => String(value || "").replace(/\*/g, "").toLowerCase().replace(/\s*\/\s*/g, " / ").replace(/\s+/g, " ").trim();
 const fieldOfHeader = (value) => Object.keys(HEADERS).find((field) => HEADERS[field].includes(headerKey(value))) || null;
@@ -62,18 +77,23 @@ function instructionsSheet(XLSX) {
     ["How to fill the CAPs sheet"], [""],
     ["• One row = one store. Store Number is required on every row and must be unique in the file."],
     ["• Franchisee, Email Address and Phone Number are filled in automatically from the store records — don't add them."],
-    ["• The store must already be in the store list (All Stores). Rows for unknown stores are skipped."],
-    ["• Every imported store starts at No Action Yet. Change the status in the app as you act on it."],
-    ["• Due Date is optional: the CAP submission due date, e.g. 11/15/2026 (month/day/year) or 2026-11-15. Reminders are sent as it gets close."],
-    ["• Stores already in CAPs Monitoring are listed separately in the preview. They keep their status; their due date only changes if you tick \"Update the due date of stores already in CAPs\"."],
+    ["• Status is Not Started or Closed:"],
+    ["    Not Started — adds the store to the CAP list at No Action Yet. If the store is already in the list, it is left as it is (not added again)."],
+    ["    Closed — the store's CAP is done: a store already in the CAP list is changed to Completed. Closed stores that are not in the list are skipped."],
+    ["• A blank Status counts as Not Started."],
+    ["• Not Started stores must already be in the store list (All Stores). Rows for unknown stores are skipped."],
+    ["• Due Date is optional: the CAP submission due date, e.g. 11/15/2026 (month/day/year) or 2026-11-15. Reminders are sent as it gets close. It is not used for Closed rows."],
+    ["• Not Started stores already in the CAP list keep their status; their due date only changes if you tick \"Update the due date of stores already in the CAP list\"."],
     ["• Notes are added in the app, not in the file. Other columns are ignored."],
     ["• Nothing is saved until you check the preview and click Import in the app."], [""],
     ["Example rows (do not paste these into the CAPs sheet):"],
     CAP_COLUMNS,
-    ["99901", ""],
-    ["99902", "11/15/2026"],
+    ["99901", "Not Started", ""],
+    ["99902", "Not Started", "11/15/2026"],
+    ["99903", "Closed", ""],
     [""],
     ["Row 1: adds store 99901 with no due date. Row 2: adds store 99902, due Nov 15, 2026. Both start at No Action Yet."],
+    ["Row 3: store 99903 is already in the CAP list and is changed to Completed."],
   ]);
   sheet["!cols"] = COLUMN_WIDTHS.map((wch) => ({ wch }));
   return sheet;
@@ -95,16 +115,21 @@ function writeWorkbook(XLSX, columns, widths, rows, fileName) {
 }
 
 export async function downloadCapsTemplate() {
-  writeWorkbook(await loadXlsx(), CAP_COLUMNS, COLUMN_WIDTHS, [], "caps-monitoring-template.xlsx");
+  writeWorkbook(await loadXlsx(), CAP_COLUMNS, COLUMN_WIDTHS, [], "cap-template.xlsx");
 }
 
-/** Every CAPs record with its status, franchisee, email, phone and notes. Only Store Number and Due Date are read back on import. */
+/**
+ * Every CAP record with its status, franchisee, email, phone and notes. Status is Closed for Completed CAPs, else Not Started,
+ * so importing the file back changes nothing. Only Store Number, Status and Due Date are read back on import.
+ */
 export async function downloadCapsList(ctx) {
   const rows = ctx.caps.slice().sort((a, b) => compareNumbers(a.store_num, b.store_num)).map((record) => {
     const contact = capContact(ctx, record);
-    return [record.store_num, capDueDate(record), normalizeCapStatus(record.status), contact.name, contact.email, contact.phone, record.notes || ""];
+    const status = normalizeCapStatus(record.status);
+    const fileStatus = FILE_STATUS_LABELS[status === "Completed" ? "closed" : "notStarted"];
+    return [record.store_num, fileStatus, capDueDate(record), status, contact.name, contact.email, contact.phone, record.notes || ""];
   });
-  writeWorkbook(await loadXlsx(), EXPORT_COLUMNS, EXPORT_WIDTHS, rows, `caps-monitoring-${localDateInput()}.xlsx`);
+  writeWorkbook(await loadXlsx(), EXPORT_COLUMNS, EXPORT_WIDTHS, rows, `cap-list-${localDateInput()}.xlsx`);
 }
 
 /* ---------- reading ---------- */
@@ -137,26 +162,31 @@ export async function readCapsFile(file) {
 
 /**
  * Checks every row against the store list and the saved records, without saving.
- * Each row: { row, num, ok, kind: "add" | "update", reason, msg, shown, save (new record), patch + changes (existing record), existingId }.
- * reason (skipped rows): "missing" | "repeat" | "notFound" (not in the store database) | "badDate".
- * New stores always start at No Action Yet; stores already in CAPs keep their status.
+ * Each row: { row, num, fileStatus, ok, kind, reason, msg, shown, save (new record), patch + changes (existing record), existingId }.
+ * kind: "add" (Not Started, not in the CAP list) | "update" (Not Started, already in the list: only the due date can change)
+ *     | "close" (Closed, in the list: becomes Completed).
+ * reason (skipped rows): "missing" | "repeat" | "badStatus" | "notFound" (not in the store database) | "notInList" (Closed, not in the CAP list) | "badDate".
  * New records save no franchisee, email or phone, so they always show the store records.
  * withDue: the database has the due_date column.
  */
 export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady) {
   const seen = {};
   const rows = parsed.rows.map(({ row, values }) => {
-    const out = { row, num: cleanStoreNumber(values.num), ok: false, kind: "add", reason: "", msg: "", changes: [] };
+    const out = { row, num: cleanStoreNumber(values.num), fileStatus: "", ok: false, kind: "add", reason: "", msg: "", changes: [] };
     const skip = (reason, msg) => Object.assign(out, { reason, msg });
     if (!out.num) return skip("missing", "Store Number is missing");
     if (seen[out.num]) return skip("repeat", `Store ${out.num} is repeated (row ${seen[out.num]})`);
     seen[out.num] = row;
+    out.fileStatus = readFileStatus(values.status);
+    if (!out.fileStatus) return skip("badStatus", `Status "${values.status}" is not known — use Not Started or Closed`);
+    const existing = ctx.caps.find((record) => String(record.store_num) === out.num);
+    if (out.fileStatus === "closed") return planClose(ctx, out, existing, skip);
+
     const defaults = storeContactDefaults(ctx, out.num);
     if (!defaults.found) return skip("notFound", `Store ${out.num} is not in the database`);
     const due = withDue ? readDueDate(values.due) : "";
     if (due === null) return skip("badDate", `Due Date "${values.due}" is not a date — use month/day/year, e.g. 11/15/2026`);
 
-    const existing = ctx.caps.find((record) => String(record.store_num) === out.num);
     out.ok = true;
     if (!existing) {
       out.save = { store_num: out.num, store_name: "", email: "", phone: "", status: CAP_STATES[0], notes: "", ...(withDue ? { due_date: due || null } : {}) };
@@ -165,32 +195,49 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady) {
       return out;
     }
 
-    // Already in CAPs: the status is kept; only the due date can change, and only when the file fills it in.
+    // Already in the CAP list: not added again and the status is kept; only the due date can change, and only when the file fills it in.
     out.kind = "update";
     out.existingId = existing.id;
     const current = capContact(ctx, existing);
-    const before = normalizeCapStatus(existing.status);
     const beforeDue = capDueDate(existing);
     out.patch = {};
     if (due && due !== beforeDue) {
       out.patch.due_date = due;
       out.changes.push({ label: "Due Date", before: beforeDue ? formatDueDate(beforeDue) : "—", after: formatDueDate(due) });
     }
-    out.msg = out.changes.length ? `Already in CAPs · changes ${out.changes.map((change) => change.label).join(", ")}` : "Already in CAPs · no changes";
-    out.shown = { name: current.name, email: current.email, phone: current.phone, status: before, due: due || beforeDue };
+    out.msg = out.changes.length ? "Already in the CAP list · not added again · due date differs" : "Already in the CAP list · not added again";
+    out.shown = { name: current.name, email: current.email, phone: current.phone, status: normalizeCapStatus(existing.status), due: due || beforeDue };
     return out;
   });
 
   const ok = rows.filter((row) => row.ok);
   const skipped = rows.filter((row) => !row.ok);
+  const closing = ok.filter((row) => row.kind === "close");
   return {
     rows,
     adds: ok.filter((row) => row.kind === "add"),
+    closes: closing.filter((row) => row.changes.length),
+    alreadyDone: closing.filter((row) => !row.changes.length),
     existing: ok.filter((row) => row.kind === "update"),
     updates: ok.filter((row) => row.kind === "update" && row.changes.length),
-    unchanged: ok.filter((row) => row.kind === "update" && !row.changes.length),
     notFound: skipped.filter((row) => row.reason === "notFound"),
-    problems: skipped.filter((row) => row.reason !== "notFound"),
+    notInList: skipped.filter((row) => row.reason === "notInList"),
+    problems: skipped.filter((row) => row.reason !== "notFound" && row.reason !== "notInList"),
     skipped,
   };
+}
+
+/** Closed row: a store in the CAP list becomes Completed (the Due Date cell is not used); one not in the list is skipped. */
+function planClose(ctx, out, existing, skip) {
+  if (!existing) return skip("notInList", `Closed, but store ${out.num} is not in the CAP list — nothing to complete`);
+  const before = normalizeCapStatus(existing.status);
+  const current = capContact(ctx, existing);
+  Object.assign(out, { ok: true, kind: "close", existingId: existing.id, patch: {} });
+  if (before !== "Completed") {
+    out.patch.status = "Completed";
+    out.changes.push({ label: "Status", before, after: "Completed" });
+  }
+  out.msg = out.changes.length ? `In the CAP list · ${before} → Completed` : "Already Completed · no changes";
+  out.shown = { name: current.name, email: current.email, phone: current.phone, status: "Completed", due: capDueDate(existing) };
+  return out;
 }

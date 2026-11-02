@@ -1,4 +1,4 @@
-/* CAPs Monitoring: search, filters, sorting and the progress numbers. */
+/* CAP tab: search, filters, sorting and the progress numbers. */
 import { CAP_STATES } from "../../config/constants.js";
 import { capContact, capDueDays, capDueState, capsSummary, normalizeCapStatus } from "../../domain/caps.js";
 import { primaryTerritory } from "../../domain/records.js";
