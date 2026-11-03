@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/*
+  3PD Ops design tokens. Every color, radius and motion value used in the app
+  comes from here so components stay consistent. See docs/COMPONENTS.md.
+*/
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Brand: Subway green (UI accents, primary actions, active nav) */
+  --color-brand-50: #ecf6f0;
+  --color-brand-100: #d3ebdd;
+  --color-brand-200: #a6d6ba;
+  --color-brand-500: #00843d;
+  --color-brand-600: #00703c; /* 6.1:1 on white: safe for text */
+  --color-brand-700: #005c31;
+  --color-brand-800: #00462a;
+  --color-mustard: #ffc600; /* Subway yellow, used once in the logo mark */
+
+  /* Neutrals (warm gray, matches chart chrome) */
+  --color-page: #f6f6f3;
+  --color-surface: #ffffff;
+  --color-subtle: #f9f9f7;
+  --color-line: #e4e3dd;
+  --color-line-strong: #c9c8c0;
+  --color-ink: #121613;
+  --color-ink-2: #474b47;
+  --color-muted: #63665f; /* 5.6:1 on white */
+
+  /* Chart series: validated categorical slots 1-3 (all-pairs CVD safe) */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+  /* Darker steps of the same hues for logo tiles with white text (>=4.5:1) */
+  --color-series-1-strong: #1c5cab;
+  --color-series-2-strong: #b0471d;
+  --color-series-3-strong: #0b7553;
+  --color-grid: #e8e7e1;
+  --color-axis: #c3c2b7;
+  --color-axis-text: #6e6c66;
+
+  /* Status: reserved for state, always paired with an icon or label */
+  --color-good: #0ca30c;
+  --color-good-ink: #006300;
+  --color-good-bg: #e9f6e9;
+  --color-warning: #fab219;
+  --color-warning-ink: #7a4f00;
+  --color-warning-bg: #fef5df;
+  --color-serious: #ec835a;
+  --color-serious-ink: #973b14;
+  --color-serious-bg: #fdeee7;
+  --color-critical: #d03b3b;
+  --color-critical-ink: #a82424;
+  --color-critical-bg: #fbeaea;
+  --color-info-ink: #1c5cab;
+  --color-info-bg: #eaf2fc;
+
+  --radius-card: 12px;
+  --shadow-card: 0 1px 2px rgb(18 22 19 / 0.04), 0 1px 1px rgb(18 22 19 / 0.03);
+  --shadow-pop: 0 12px 32px -8px rgb(18 22 19 / 0.18), 0 2px 6px rgb(18 22 19 / 0.06);
+
+  /* Motion: ease-out entering, ease-in leaving, never linear for moves */
+  --ease-out: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --ease-in: cubic-bezier(0.5, 0, 0.75, 0.2);
+  --animate-fade-up: fade-up 240ms var(--ease-out);
+  --animate-fade-in: fade-in 160ms ease-out;
+  --animate-pop-in: pop-in 200ms var(--ease-out);
+  --animate-slide-in-right: slide-in-right 280ms var(--ease-out);
+  --animate-slide-in-left: slide-in-left 260ms var(--ease-out);
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-in-right {
+    from { transform: translateX(24px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  @keyframes slide-in-left {
+    from { transform: translateX(-24px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+}
+
+@layer base {
+  html { color-scheme: light; }
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .tnum { font-variant-numeric: tabular-nums; }
+}
+
+@layer components {
+  /* Skeleton placeholder for loading metrics */
+  .skeleton {
+    background: linear-gradient(90deg, #eeede8 0%, #f6f5f1 50%, #eeede8 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+    border-radius: 6px;
+  }
+}
+
+/* Respect reduced motion: cut movement, keep fades short */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton { animation: none; }
+}
+
+@media (forced-colors: active) {
+  .chart-line { stroke: CanvasText; }
+}
