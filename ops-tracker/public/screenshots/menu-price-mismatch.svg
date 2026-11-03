@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="640" height="400" fill="#f3f4f6"/>
+  <rect width="640" height="44" fill="#1f2937"/>
+  <text x="20" y="28" fill="#fff" font-size="15" font-weight="700">Merchant Portal · Menu</text>
+  <text x="470" y="28" fill="#9ca3af" font-size="12">Store #11119 · Costa Mesa</text>
+  <rect x="20" y="62" width="600" height="318" rx="10" fill="#fff" stroke="#e5e7eb"/>
+  <text x="40" y="94" font-size="16" font-weight="700" fill="#111827">Footlongs</text>
+  <g font-size="12" fill="#6b7280"><text x="40" y="122">Item</text><text x="380" y="122">Listed</text><text x="470" y="122">POS price</text><text x="600" y="122" text-anchor="end">Status</text></g>
+  <line x1="40" y1="132" x2="600" y2="132" stroke="#e5e7eb"/>
+  <g font-size="13" fill="#111827">
+    <text x="40" y="160">Turkey &amp; Provolone</text><text x="380" y="160">$11.49</text><text x="470" y="160">$11.49</text><text x="600" y="160" text-anchor="end" fill="#15803d">Match</text>
+    <rect x="34" y="174" width="572" height="30" rx="6" fill="#fef2f2"/>
+    <text x="40" y="194">Steak &amp; Cheese</text><text x="380" y="194" fill="#b91c1c" font-weight="700">$10.29</text><text x="470" y="194">$12.79</text><text x="600" y="194" text-anchor="end" fill="#b91c1c" font-weight="600">−$2.50</text>
+    <text x="40" y="230">Spicy Italian</text><text x="380" y="230">$10.99</text><text x="470" y="230">$10.99</text><text x="600" y="230" text-anchor="end" fill="#15803d">Match</text>
+    <rect x="34" y="244" width="572" height="30" rx="6" fill="#fef2f2"/>
+    <text x="40" y="264">Seasonal Melt (retired)</text><text x="380" y="264" fill="#b91c1c" font-weight="700">$11.99</text><text x="470" y="264">—</text><text x="600" y="264" text-anchor="end" fill="#b91c1c" font-weight="600">Should be hidden</text>
+  </g>
+  <text x="40" y="320" font-size="12" fill="#374151">Last menu sync: Oct 29, 6:02 AM</text>
+  <text x="600" y="353" font-size="11" fill="#9ca3af" text-anchor="end">Sample screenshot · dummy data</text>
+</svg>

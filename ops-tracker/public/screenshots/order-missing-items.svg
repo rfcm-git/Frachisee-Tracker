@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="640" height="400" fill="#f3f4f6"/>
+  <rect width="640" height="44" fill="#1f2937"/>
+  <text x="20" y="28" fill="#fff" font-size="15" font-weight="700">Merchant Portal</text>
+  <text x="470" y="28" fill="#9ca3af" font-size="12">Store #10969 · Santa Ana</text>
+  <rect x="20" y="62" width="600" height="318" rx="10" fill="#fff" stroke="#e5e7eb"/>
+  <text x="40" y="94" font-size="18" font-weight="700" fill="#111827">Order #8F3A2C</text>
+  <rect x="470" y="78" width="130" height="24" rx="12" fill="#fee2e2"/>
+  <text x="535" y="95" font-size="12" font-weight="600" fill="#b91c1c" text-anchor="middle">Customer reported issue</text>
+  <text x="40" y="118" font-size="12" fill="#6b7280">Delivered 12:42 PM · Courier: Alex R. · Subtotal $41.27</text>
+  <line x1="40" y1="134" x2="600" y2="134" stroke="#e5e7eb"/>
+  <g font-size="13" fill="#111827">
+    <text x="40" y="160">1 × Footlong Turkey &amp; Provolone</text><text x="600" y="160" text-anchor="end">$11.49</text>
+    <text x="40" y="188">1 × Footlong Spicy Italian</text><text x="600" y="188" text-anchor="end">$10.99</text>
+    <text x="40" y="216" fill="#b91c1c">1 × Cookies (3-pack) — MISSING</text><text x="600" y="216" text-anchor="end" fill="#b91c1c">$3.29</text>
+    <text x="40" y="244" fill="#b91c1c">1 × Fountain Drink (L) — MISSING</text><text x="600" y="244" text-anchor="end" fill="#b91c1c">$2.79</text>
+  </g>
+  <line x1="40" y1="262" x2="600" y2="262" stroke="#e5e7eb"/>
+  <text x="40" y="290" font-size="13" font-weight="600" fill="#111827">Customer note</text>
+  <text x="40" y="312" font-size="13" fill="#374151">“Cookies and drink weren't in the bag. Bag seal was intact.”</text>
+  <rect x="40" y="332" width="160" height="32" rx="8" fill="#111827"/>
+  <text x="120" y="353" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">Error charge: $6.08</text>
+  <text x="600" y="353" font-size="11" fill="#9ca3af" text-anchor="end">Sample screenshot · dummy data</text>
+</svg>
