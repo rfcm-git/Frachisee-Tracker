@@ -47,6 +47,9 @@ export function issueFranchiseeId(ctx, issue) {
   return store ? store.franchisee_id : null;
 }
 
+/** "Store 12345", or "General" for an issue logged to a franchisee with no specific store. */
+export const issueStoreLabel = (issue) => (issue.store_num ? `Store ${issue.store_num}` : "General");
+
 /** When the issue was resolved (last "Resolved" step), or null when still open. */
 export function resolvedAt(issue) {
   if (isIssueOpen(issue)) return null;

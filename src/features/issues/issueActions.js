@@ -10,15 +10,17 @@ import { oneLine } from "../../lib/richText.js";
 
 const newGroupId = (prefix) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-/** Logs an issue for one store. Returns true when saved. */
-export async function logIssue({ storeNum, title, status, platforms }) {
-  const store = getContext().storeByNum.get(storeNum);
+/** Logs an issue for one store, or a General issue for a franchisee (storeNum ""). Returns true when saved. */
+export async function logIssue({ storeNum, franchiseeId = null, title, status, platforms }) {
+  const store = storeNum ? getContext().storeByNum.get(storeNum) : null;
   const ts = nowIso();
   const record = {
-    franchisee_id: store ? store.franchisee_id : null, store_num: storeNum, title, status, platforms, action_taken: "", notes: "", updated_at: ts,
+    franchisee_id: store ? store.franchisee_id : franchiseeId, store_num: storeNum || null, title, status, platforms, action_taken: "", notes: "", updated_at: ts,
     history: [{ ts, kind: "created", status }],
   };
-  const result = await insertRows(TABLES.issues, [record]);
+  let result = await insertRows(TABLES.issues, [record]);
+  // Databases where store_num is required keep General issues as an empty store number.
+  if (result.error?.code === "23502" && !record.store_num) result = await insertRows(TABLES.issues, [{ ...record, store_num: "" }]);
   if (result.error) { toastError(result.error); return false; }
   addRows("issues", result.rows);
   const number = result.rows[0]?.issue_no;

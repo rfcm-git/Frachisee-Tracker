@@ -10,14 +10,15 @@ import { compareStores, looksLikeName, splitStoreNumbers } from "../../lib/text.
 /**
  * Picks several stores: type a store #, paste many, or type a franchisee name and tick their stores.
  * value: string[] of store numbers; onChange(next)
+ * initialFranchisee: franchisee whose store list starts open
  * ref exposes commitTyped(): adds store numbers still typed in the box (call before saving).
  */
-export default function StorePicker({ ref, value, onChange, inputId, autoFocus = true }) {
+export default function StorePicker({ ref, value, onChange, inputId, autoFocus = true, initialFranchisee = null }) {
   const ctx = useDataContext();
   const inputRef = useRef(null);
   const [text, setText] = useState("");
   const [suggestOpen, setSuggestOpen] = useState(false);
-  const [pickerFr, setPickerFr] = useState(null);
+  const [pickerFr, setPickerFr] = useState(initialFranchisee);
   const [picked, setPicked] = useState([]);
 
   function addStores(raw) {

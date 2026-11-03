@@ -51,7 +51,11 @@ export function openStore(storeId, { focusIssues = false, storeNum = null } = {}
 export const openStoreIssues = (storeNum) => openDialog(DIALOG.storeIssues, { mode: "store", storeNum: String(storeNum ?? "") });
 export const openFranchiseeIssues = (franchiseeId) => openDialog(DIALOG.storeIssues, { mode: "fr", franchiseeId: franchiseeId || 0 });
 
-export const openLogIssue = (storeId = null) => openDialog(DIALOG.logIssue, { storeId });
+/** Log an issue. storeId fixes the store; franchiseeId fixes the franchisee (pick one of their stores or General). */
+export const openLogIssue = (storeId = null, franchiseeId = null) => openDialog(DIALOG.logIssue, { storeId, franchiseeId });
+
+/** Issues of the issue's store, or of its franchisee when it is a General issue (no store). */
+export const openIssueScope = (issue) => (issue.store_num ? openStoreIssues(issue.store_num) : openFranchiseeIssues(issue.franchisee_id || 0));
 export const openUpdateIssue = (issueId) => openDialog(DIALOG.updateIssue, { issueId });
 export const openGroupUpdate = (groupId, preselectId = null) => openDialog(DIALOG.groupUpdate, { groupId, preselectId });
 export const openMultiIssue = () => openDialog(DIALOG.multiIssue);
@@ -75,16 +79,17 @@ export const openBulkUpdate = () => openDialog(DIALOG.bulkUpdate);
 export const openStaffDetail = (staffId) => openDialog(DIALOG.staffDetail, { staffId });
 export const openStaffForm = (staffId = null) => openDialog(DIALOG.staffForm, { staffId });
 
-/** Log a call (franchiseeId fixes the franchisee) or edit one (callId). */
-export const openCallLog = (franchiseeId = null, callId = null) => openDialog(DIALOG.callLog, { franchiseeId, callId });
+/** Log a call (franchiseeId fixes the franchisee, storeId preselects the store) or edit one (callId). */
+export const openCallLog = (franchiseeId = null, callId = null, storeId = null) => openDialog(DIALOG.callLog, { franchiseeId, callId, storeId });
 export const openCallDetails = (callId) => openDialog(DIALOG.callDetails, { callId });
 export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { callId });
 
-export const openNewOnboarding = () => openDialog(DIALOG.newOnboarding);
+/** New onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
+export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
 
-/** Add a store to the CAP list (capId null) or edit one. */
-export const openCapForm = (capId = null) => openDialog(DIALOG.capForm, { capId });
+/** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
+export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
 
 /** key: "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed", … */

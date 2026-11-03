@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
+import QuickLogActions from "../../components/ui/QuickLogActions.jsx";
 import { CopyButton, IssueNumber, IssueStatusBadge, OpenIssueDot, PlatformChips, StoreStatusIfClosed } from "../../components/ui/common.jsx";
 import { clickableProps } from "../../components/ui/clickable.js";
 import { usePaged } from "../../hooks/usePaged.js";
@@ -11,7 +12,7 @@ import { staffForStores } from "../../domain/staff.js";
 import { formatTimestamp, telHref } from "../../lib/format.js";
 import { oneLine } from "../../lib/richText.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openAddStore, openCallLog, openFranchiseeForm, openStaffDetail, openStore } from "../../state/dialogs.js";
+import { openAddStore, openFranchiseeForm, openIssueScope, openStaffDetail, openStore } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import FranchiseeCallsPanel from "../calls/FranchiseeCallsPanel.jsx";
 import { askRemoveStore } from "../stores/storeActions.js";
@@ -37,6 +38,7 @@ export default function FranchiseeDetail({ franchisee, sq }) {
   const territory = franchisee.territory || "—";
 
   const openIssueStore = (issue) => {
+    if (!issue.store_num) { openIssueScope(issue); return; }
     const store = ctx.storeByNum.get(String(issue.store_num));
     if (store) openStore(store.id, { focusIssues: true, storeNum: store.num });
     else toast("No matching store to open");
@@ -49,11 +51,11 @@ export default function FranchiseeDetail({ franchisee, sq }) {
         <div className="muted" style={{ fontSize: 13.5 }}>Territory {territory} · {stores.length} store{stores.length !== 1 ? "s" : ""}</div>
       </div>
       <div className="hd-actions">
-        <button type="button" className="call-btn lg" data-tip="Log Call" aria-label={`Log a call to ${franchisee.name}`} onClick={() => openCallLog(franchisee.id)}><Icon name="phone" /></button>
         <button type="button" className="btn outline round xs" title="Edit franchisee" onClick={() => openFranchiseeForm(franchisee.id)}><Icon name="pencil" />Edit</button>
         <button type="button" className="iconbtn del" title="Delete franchisee (password required)" aria-label="Delete franchisee" onClick={() => askDeleteFranchisee(franchisee.id)}><Icon name="trash-2" /></button>
       </div>
     </div>
+    <QuickLogActions franchiseeId={franchisee.id} />
     <div className="grid2">
       <div className="panel"><div className="ph"><Icon name="mail" />Contacts</div><div className="pb">
         {contacts.length ? contacts.map((contact, index) => {
@@ -93,7 +95,7 @@ export default function FranchiseeDetail({ franchisee, sq }) {
       <div className="panel" style={{ gridColumn: "1 / -1" }}><div className="ph"><Icon name="triangle-alert" />Issues</div><div className="pb">
         {issues.length ? issues.map((issue) => <div className="issue-line" key={issue.id} {...clickableProps(() => openIssueStore(issue))}>
           <IssueStatusBadge status={normalizeIssueStatus(issue.status)} />
-          <span className="val"><IssueNumber number={issueNumber(issue)} /> {oneLine(issue.title)}{issue.store_num && <> <span className="muted">(#{issue.store_num})</span></>}</span>
+          <span className="val"><IssueNumber number={issueNumber(issue)} /> {oneLine(issue.title)}{" "}<span className="muted">({issue.store_num ? `#${issue.store_num}` : "General"})</span></span>
           <span className="muted" style={{ fontSize: 11.5 }}>{formatTimestamp(issue.updated_at || issue.created_at)}</span>
         </div>) : <p className="muted">No issues logged.</p>}
       </div></div>

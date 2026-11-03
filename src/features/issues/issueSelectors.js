@@ -30,18 +30,19 @@ export function issueMatchers(ctx, filter, sq) {
 const lastOf = (items) => Math.max(...items.map((issue) => timeOf(issue.updated_at || issue.created_at)));
 const firstOf = (items) => Math.min(...items.map((issue) => timeOf(issue.created_at)));
 
-/** One row per store: [{ num, items, franchiseeId, open, last, first }] */
+/** One row per store, plus one per franchisee for General issues: [{ key, num, items, franchiseeId, open, last, first }] */
 export function issuesByStore(ctx, matchers, sort) {
   const groups = new Map();
   ctx.issues.filter(matchers.pass).forEach((issue) => {
-    const key = String(issue.store_num || "");
+    const key = String(issue.store_num || "") || `fr:${issueFranchiseeId(ctx, issue) || 0}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(issue);
   });
-  return [...groups.entries()].map(([num, items]) => {
+  return [...groups.entries()].map(([key, items]) => {
+    const num = key.startsWith("fr:") ? "" : key;
     const store = ctx.storeByNum.get(num);
     return {
-      num, items,
+      key, num, items,
       franchiseeId: store ? store.franchisee_id : items.find((issue) => issue.franchisee_id)?.franchisee_id,
       open: items.filter(isIssueOpen).length, last: lastOf(items), first: firstOf(items),
     };
@@ -58,7 +59,7 @@ export function issuesByFranchisee(ctx, matchers, sort) {
   });
   return [...groups.entries()].map(([franchiseeId, items]) => ({
     franchiseeId, items, open: items.filter(isIssueOpen).length,
-    stores: new Set(items.map((issue) => String(issue.store_num || ""))).size, last: lastOf(items), first: firstOf(items),
+    stores: new Set(items.map((issue) => String(issue.store_num || "")).filter(Boolean)).size, last: lastOf(items), first: firstOf(items),
   })).sort((a, b) => (sort === "new" ? b.last - a.last : a.first - b.first));
 }
 

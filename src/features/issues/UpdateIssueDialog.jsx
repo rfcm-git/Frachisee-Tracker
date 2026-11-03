@@ -32,7 +32,7 @@ export default function UpdateIssueDialog({ issueId }) {
     if (ok) close();
   }
 
-  return <Modal size="wide" icon="refresh-cw" title={`Update Status · Store #${issue.store_num || ""}`}
+  return <Modal size="wide" icon="refresh-cw" title={`Update Status · ${issue.store_num ? `Store #${issue.store_num}` : "General"}`}
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
       <button type="button" className="btn" disabled={saving} onClick={save}><Icon name="save" />Save update</button></>}>
     <div className="field" style={{ marginBottom: 12 }}><label>Issue <IssueNumber number={issueNumber(issue)} /></label>
