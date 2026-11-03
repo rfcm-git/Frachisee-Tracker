@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import QuickLogActions from "../../components/ui/QuickLogActions.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { STORE_STATES } from "../../config/constants.js";
 import { storeStatus, storeStatusClass } from "../../domain/records.js";
@@ -67,6 +68,7 @@ export default function StoreWindow({ storeId }) {
       <button type="button" className="x" aria-label="Close" onClick={close}>&times;</button>
     </>}
     bare>
+    <div className="sw-qlog"><QuickLogActions store={store} /></div>
     <div className="sw-cols">
       <div className="sw-left" id="sw_left"><StoreWindowLeft key={String(lastRefreshAt)} store={store} /></div>
       <div className="sw-right" id="sw_right"><StoreWindowRight store={store} /></div>

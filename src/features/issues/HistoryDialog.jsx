@@ -3,7 +3,7 @@ import Modal from "../../components/ui/Modal.jsx";
 import { IssueNumber, IssueStatusBadge, ObPlatformTag, ObStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { ISSUE_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
-import { groupMembers, historyEntries, issueNumber, issueStatusColor, normalizeIssueStatus, shortStatus, statusCounts } from "../../domain/issues.js";
+import { groupMembers, historyEntries, issueNumber, issueStatusColor, issueStoreLabel, normalizeIssueStatus, shortStatus, statusCounts } from "../../domain/issues.js";
 import { obHistory, obPlatformName } from "../../domain/onboarding.js";
 import { issuePlatforms } from "../../domain/records.js";
 import { formatTimestamp } from "../../lib/format.js";
@@ -138,7 +138,7 @@ export default function HistoryDialog({ kind, issueId, groupId, fromId, onboardi
 
   const isGroup = !!groupKey;
   const owner = ctx.frById.get(members[0].franchisee_id);
-  const title = isGroup ? "Issue updates · Multi-store issue" : `Issue updates · Store ${members[0].store_num || ""}`;
+  const title = isGroup ? "Issue updates · Multi-store issue" : `Issue updates · ${issueStoreLabel(members[0])}`;
   const subtitle = isGroup ? `${members.length} stores` : owner?.name || "";
 
   function goToUpdate() {

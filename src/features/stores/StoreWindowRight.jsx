@@ -5,7 +5,7 @@ import { notesOf } from "../../domain/records.js";
 import { formatTimestamp } from "../../lib/format.js";
 import { oneLine, richHtml } from "../../lib/richText.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openAddNote, openLogIssue, openStoreIssues } from "../../state/dialogs.js";
+import { openAddNote, openStoreIssues } from "../../state/dialogs.js";
 
 /** Right column of the store window: issue summary and notes. */
 export default function StoreWindowRight({ store }) {
@@ -16,8 +16,7 @@ export default function StoreWindowRight({ store }) {
 
   return <>
     <div className="rpanel">
-      <div className="rph"><Icon name="triangle-alert" />Issues<span className="act">
-        <button type="button" className="btn sm outline round" onClick={() => openLogIssue(store.id)}><Icon name="plus" />Log issue</button></span></div>
+      <div className="rph"><Icon name="triangle-alert" />Issues</div>
       <div className="rpb">
         {issues.length ? <div className="iss-sum">
           <div className="iss-big"><b>{issues.length}</b><span>issue{issues.length !== 1 ? "s" : ""}</span></div>

@@ -8,7 +8,10 @@
   .tab:hover,.sb-item:hover{background:rgba(140,198,63,.28);color:#fff}
   .tab.active{background:rgba(140,198,63,.34);color:#fff}
   .tab.active::before{background:var(--yellow);width:5px}
-  .tab .badge-num{background:rgba(255,255,255,.2);color:#fff}
+  .tab .badge-num{background:#fff;color:var(--green-dark)}
+  /* icon-only menu: a ring in the sidebar color keeps the count apart from the icon under it */
+  .app.collapsed .tab .badge-num{box-shadow:0 0 0 2px var(--green)}
+  @media(max-width:900px){ .app:not(.expanded-sm) .tab .badge-num{box-shadow:0 0 0 2px var(--green)} }
   .tab.active .badge-num{background:var(--yellow);color:var(--green-dark)}
   .tab[data-tab="issues"] .badge-num{background:#ffe1dc;color:#b3261e}
   .sb-foot{border-top:1px solid rgba(255,255,255,.16)}

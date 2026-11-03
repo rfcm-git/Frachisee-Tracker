@@ -12,7 +12,7 @@ import { searchQuery } from "../../domain/search.js";
 import { formatTimestamp } from "../../lib/format.js";
 import { richHtml } from "../../lib/richText.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openFranchiseeIssues, openGroupHistory, openGroupUpdate, openIssueDetails, openIssueHistory, openStoreIssues } from "../../state/dialogs.js";
+import { openFranchiseeIssues, openGroupHistory, openGroupUpdate, openIssueDetails, openIssueHistory, openIssueScope, openStoreIssues } from "../../state/dialogs.js";
 import { useUiStore } from "../../state/uiStore.js";
 import IssueFilters from "./IssueFilters.jsx";
 import { historyCount, issueMatchers, issuesByFranchisee, issuesByIssue, issuesByStore } from "./issueSelectors.js";
@@ -36,8 +36,8 @@ function ByStoreTable({ rows, ctx }) {
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table"><thead><tr>
     <th className="c-snum">Store #</th><th className="c-cnt">Issues</th><th>Franchisee</th><th className="hide-sm">Status</th><th className="hide-sm c-logged">Last activity</th><th className="c-go" aria-label="Open" />
   </tr></thead><tbody>
-    {items.map((row) => <tr className="click" key={row.num || "__none__"} {...clickableProps(() => openStoreIssues(row.num))}>
-      <td className="store c-snum"><OpenDotCell open={row.open} />{row.num || "—"}</td>
+    {items.map((row) => <tr className="click" key={row.key} {...clickableProps(() => (row.num ? openStoreIssues(row.num) : openFranchiseeIssues(row.franchiseeId || 0)))}>
+      <td className="store c-snum"><OpenDotCell open={row.open} />{row.num || <span className="muted">General</span>}</td>
       <CountCell count={row.items.length} open={row.open} />
       <td>{franchiseeName(ctx, row.franchiseeId) || "—"}</td>
       <td className="hide-sm"><StatusSummary items={row.items} /></td>
@@ -75,9 +75,9 @@ function ByIssueTable({ rows, ctx }) {
       const owners = [...new Set(entry.items.map((issue) => franchiseeName(ctx, issue.franchisee_id)).filter(Boolean))];
       const steps = group ? Math.max(...entry.items.map(historyCount)) : historyCount(first);
       const updated = group ? lastActivity(entry.items) : first.updated_at;
-      const open = () => (group ? openGroupUpdate(entry.groupId) : openStoreIssues(first.store_num || ""));
+      const open = () => (group ? openGroupUpdate(entry.groupId) : openIssueScope(first));
       const platforms = issuePlatforms(first);
-      return <tr className="click" key={group ? entry.groupId : first.id} title={group ? "Update this multi-store issue" : "Open this store’s issues"} {...clickableProps(open)}>
+      return <tr className="click" key={group ? entry.groupId : first.id} title={group ? "Update this multi-store issue" : first.store_num ? "Open this store’s issues" : "Open this franchisee’s issues"} {...clickableProps(open)}>
         <td className="c-status">{group ? <GroupStatusBadge items={entry.items} /> : <span className={`badge ${issueStatusClass(normalizeIssueStatus(first.status))}`}>{normalizeIssueStatus(first.status)}</span>}</td>
         <td className="c-upd"><button type="button" className="upd-pill" title={`View all updates (${steps} step${steps === 1 ? "" : "s"})`} aria-label="View all updates"
           onClick={(event) => { event.stopPropagation(); if (group) openGroupHistory(entry.groupId); else openIssueHistory(first.id); }}><Icon name="history" />{steps}</button></td>
@@ -88,7 +88,7 @@ function ByIssueTable({ rows, ctx }) {
           {platforms.length > 0 && <><br /><span className="muted" style={{ fontSize: 11.5 }}>{platforms.join(", ")}</span></>}
         </td>
         <td className="hide-sm store c-store" style={group ? { fontSize: 12.5 } : undefined}>
-          {group ? `${nums.slice(0, 4).join(", ")}${nums.length > 4 ? ` +${nums.length - 4} more` : ""}` : first.store_num || "—"}</td>
+          {group ? `${nums.slice(0, 4).join(", ")}${nums.length > 4 ? ` +${nums.length - 4} more` : ""}` : first.store_num || <span className="muted">General</span>}</td>
         <td className="hide-sm">{group ? (owners.length > 1 ? `${owners.length} franchisees` : owners[0] || "") : franchiseeName(ctx, first.franchisee_id)}</td>
         <td className="hide-sm muted c-logged" style={{ fontSize: 12 }}>{formatTimestamp(first.created_at)}
           {updated && updated !== first.created_at && <><br />upd. {formatTimestamp(updated)}</>}</td>

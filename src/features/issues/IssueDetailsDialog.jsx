@@ -3,7 +3,7 @@ import Modal from "../../components/ui/Modal.jsx";
 import { GroupStatusBadge, IssueNumber, IssueStatusBadge, ObPlatformTag, ObStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { franchiseeName } from "../../domain/context.js";
-import { historyEntries, issueFranchiseeId, issueNumber, normalizeIssueStatus } from "../../domain/issues.js";
+import { historyEntries, issueFranchiseeId, issueNumber, issueStoreLabel, normalizeIssueStatus } from "../../domain/issues.js";
 import { obFranchiseeId, obHistory, obPlatformName } from "../../domain/onboarding.js";
 import { issuePlatforms } from "../../domain/records.js";
 import { formatTimestamp } from "../../lib/format.js";
@@ -23,7 +23,7 @@ function Block({ label, html }) {
 }
 
 function StoreField({ num, store }) {
-  return <Field label="Store"><b>{num || "—"}</b>{store && <> · {[store.address, store.city].filter(Boolean).join(", ")}</>}</Field>;
+  return <Field label="Store"><b>{num || "General — no specific store"}</b>{store && <> · {[store.address, store.city].filter(Boolean).join(", ")}</>}</Field>;
 }
 
 /** Everything about one issue (all its stores for a multi-store issue) or one onboarding record. */
@@ -39,7 +39,7 @@ function issueModel(ctx, id) {
   return {
     store: multi ? null : store,
     title: `${issueNumber(issue) ? `Issue #${issueNumber(issue)}` : "Concern details"}${multi ? " · multi-store" : ""}`,
-    subtitle: multi ? `${members.length} stores` : `Store ${issue.store_num || "—"}${owner ? ` · ${owner}` : ""}`,
+    subtitle: multi ? `${members.length} stores` : `${issueStoreLabel(issue)}${owner ? ` · ${owner}` : ""}`,
     history: () => openIssueHistory(issue.id),
     update: () => (multi ? openGroupUpdate(issue.group_id, issue.id) : openUpdateIssue(issue.id)),
     body: <>

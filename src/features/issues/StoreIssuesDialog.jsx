@@ -31,8 +31,8 @@ function IssueTable({ ctx, issues, showStore }) {
           {platforms.length > 0 && <div className="muted" style={{ fontSize: 11.5, marginTop: 3 }}>{platforms.join(", ")}</div>}
           {issue.action_taken && <div className="muted" style={{ fontSize: 11.5, marginTop: 3 }}>Last action: {oneLine(issue.action_taken, 120)}</div>}
         </td>
-        {showStore && <td className="c-store"><button type="button" className="btn link" style={{ padding: 0, fontWeight: 700 }} title="Show only this store's issues"
-          onClick={() => openStoreIssues(issue.store_num || "")}>{String(issue.store_num || "—")}</button></td>}
+        {showStore && <td className="c-store">{issue.store_num ? <button type="button" className="btn link" style={{ padding: 0, fontWeight: 700 }} title="Show only this store's issues"
+          onClick={() => openStoreIssues(issue.store_num)}>{String(issue.store_num)}</button> : <span className="muted" title="Not about a specific store">General</span>}</td>}
         <td className="hide-sm muted c-logged" style={{ fontSize: 12 }}>{formatTimestamp(issue.created_at)}{updated && <><br />upd. {updated}</>}</td>
         <td className="c-act"><div className="row-acts">
           <button type="button" className="iconbtn mini" title="Update status" aria-label="Update status"
@@ -60,7 +60,7 @@ export default function StoreIssuesDialog({ mode, storeNum, franchiseeId }) {
     franchisee = ctx.frById.get(franchiseeId) || null;
     issues = ctx.issues.filter((issue) => (issueFranchiseeId(ctx, issue) || 0) === franchiseeId).sort(sortOpenThenRecent);
     const open = issues.filter(isIssueOpen).length;
-    const stores = new Set(issues.map((issue) => String(issue.store_num || ""))).size;
+    const stores = new Set(issues.map((issue) => String(issue.store_num || "")).filter(Boolean)).size;
     title = franchisee ? franchisee.name : "Unknown franchisee";
     subtitle = `${plural(stores, "store")} with issues · ${plural(issues.length, "issue")}${open ? ` · ${open} open` : ""}`;
   } else {
@@ -87,7 +87,8 @@ export default function StoreIssuesDialog({ mode, storeNum, franchiseeId }) {
       title={byFranchisee ? (franchisee ? "Franchisee contact info and support team" : "") : (store ? "Open store information" : "This store is not in the store list")}>
       <Icon name={byFranchisee ? "user-round" : "info"} />{byFranchisee ? "View franchisee information" : "View store information"}</button>}
     footer={<><button type="button" className="btn ghost" onClick={close}>Close</button>
-      {!byFranchisee && store && <button type="button" className="btn outline round" onClick={() => openLogIssue(store.id)}><Icon name="plus" />Log issue</button>}</>}>
+      {!byFranchisee && store && <button type="button" className="btn outline round" onClick={() => openLogIssue(store.id)}><Icon name="plus" />Log issue</button>}
+      {byFranchisee && franchisee && <button type="button" className="btn outline round" onClick={() => openLogIssue(null, franchisee.id)}><Icon name="plus" />Log issue</button>}</>}>
     {issues.length ? <IssueTable ctx={ctx} issues={issues} showStore={byFranchisee} />
       : <EmptyState icon="circle-check" title={byFranchisee ? "No issues for this franchisee" : "No issues for this store"}>All issues were deleted.</EmptyState>}
   </Modal>;

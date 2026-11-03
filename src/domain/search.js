@@ -102,14 +102,14 @@ export function franchiseeMatch(ctx, franchisee, sq) {
   return null;
 }
 
-/** Franchisees whose name matches typed text, starts-with first (used by store pickers). */
-export function findFranchiseesByName(ctx, text, limit = 8) {
+/** Franchisees whose name matches typed text, starts-with first (used by store pickers). withoutStores also lists franchisees with no stores. */
+export function findFranchiseesByName(ctx, text, limit = 8, { withoutStores = false } = {}) {
   const q = String(text || "").replace(/^@/, "").toLowerCase().replace(/\s+/g, " ").trim();
   if (!q) return [];
   const starts = [];
   const contains = [];
   ctx.franchisees.forEach((franchisee) => {
-    if (!storesOf(ctx, franchisee.id).length) return;
+    if (!withoutStores && !storesOf(ctx, franchisee.id).length) return;
     const name = String(franchisee.name || "").toLowerCase().replace(/\s+/g, " ").trim();
     if (name.startsWith(q)) starts.push(franchisee);
     else if (name.includes(q)) contains.push(franchisee);

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import StoreLookup from "../../components/ui/StoreLookup.jsx";
 import { BusyButton } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { CALL_OUTCOMES } from "../../config/constants.js";
@@ -11,7 +12,6 @@ import { localDateTimeInput } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { findDuplicateFranchisee } from "../franchisees/franchiseeSelectors.js";
 import CallContacts from "./CallContacts.jsx";
 import { saveCall } from "./callActions.js";
 
@@ -56,9 +56,9 @@ function FieldError({ id, message }) {
 
 /**
  * Log a call or edit one.
- * franchiseeId: fixed franchisee (from the franchisee page); callId: the call to edit.
+ * franchiseeId: fixed franchisee (from the franchisee page); storeId: store to preselect; callId: the call to edit.
  */
-export default function CallLogDialog({ franchiseeId, callId }) {
+export default function CallLogDialog({ franchiseeId, callId, storeId = null }) {
   const ctx = useDataContext();
   const { close, setBusy } = useDialog();
   const existing = callId ? ctx.callLogs.find((call) => call.id === callId) : null;
@@ -66,12 +66,13 @@ export default function CallLogDialog({ franchiseeId, callId }) {
   const fixed = !!(existing || franchiseeId);
 
   const [initial] = useState(() => {
-    const options = storeOptions(ctx, fixedId, existing?.store_num || "");
+    const presetNum = storeId != null ? ctx.stores.find((store) => store.id === storeId)?.num : "";
+    const options = storeOptions(ctx, fixedId, existing?.store_num || presetNum || "");
     return {
       franchiseeId: fixedId ?? null, franchiseeText: "", when: localDateTimeInput(existing ? new Date(existing.call_at) : new Date()),
       store: options.selected, reason: existing?.reason || "", result: existing?.result || "", outcome: existing?.outcome || "", followUp: !!existing && hasOpenFollowUp(existing),
       nextFollowUp: localDateTimeInput(existing?.next_follow_up_at ? new Date(existing.next_follow_up_at) : tomorrowAtNine()), note: "",
-      savedNum: existing?.store_num || "",
+      savedNum: existing?.store_num || presetNum || "",
     };
   });
   const [form, setForm] = useState(initial);
@@ -94,11 +95,12 @@ export default function CallLogDialog({ franchiseeId, callId }) {
   const change = (patch) => { setForm((current) => ({ ...current, ...patch })); setBusy(true); };
   const setError = (key, message) => setErrors((current) => ({ ...current, [key]: message }));
 
-  /** Resolves the typed franchisee name (exact match, ignoring case and spaces). */
-  function resolveFranchisee(text, showError) {
-    const match = findDuplicateFranchisee(ctx, text.trim(), null);
-    if (match?.id !== form.franchiseeId) change({ franchiseeId: match ? match.id : null, store: "" });
-    if (showError) setError("franchiseeText", text.trim() && !match ? "No franchisee with that exact name — pick one from the list." : "");
+  /** The franchisee and store picked in the lookup (store "" = General). */
+  const lookupValue = { franchiseeId: form.franchiseeId, storeNum: form.franchiseeId ? (form.store ? String(ctx.stores.find((store) => store.id === +form.store)?.num ?? "") : "") : null };
+  function pickTarget(next) {
+    const store = next.storeNum ? ctx.storeByNum.get(next.storeNum) : null;
+    change({ franchiseeId: next.franchiseeId, store: store ? String(store.id) : "" });
+    setError("franchiseeText", next.storeNum && !next.franchiseeId ? "That store has no franchisee — type the franchisee's name instead." : "");
   }
 
   function requestClose() {
@@ -113,7 +115,7 @@ export default function CallLogDialog({ franchiseeId, callId }) {
     const when = form.when ? new Date(form.when) : null;
     const reason = form.reason.trim();
     const result = form.result.trim();
-    if (!fixed && !form.franchiseeId) next.franchiseeText = "Pick the franchisee you called.";
+    if (!fixed && !form.franchiseeId) next.franchiseeText = "Pick the franchisee you called — type their name or a store #.";
     if (fixed && !form.franchiseeId && !existing) { toast("Franchisee missing", "err"); return; }
     if (!when || Number.isNaN(when.getTime())) next.when = "Enter the date and time of the call.";
     else if (when > latestCallTime()) next.when = "The call time can't be in the future.";
@@ -176,12 +178,8 @@ export default function CallLogDialog({ franchiseeId, callId }) {
       {fixed ? <div className="cl-fr-ro" style={{ display: "flex" }}><span className="sf-av"><Icon name="user-round" /></span>
         <div><div className="lbl">Franchisee</div><b>{franchisee ? franchisee.name : existing?.franchisee_name || "—"}</b><div className="muted" style={{ fontSize: 12 }}>{fixedMeta}</div></div>
         <span className="cl-lock" data-tip="Filled in from the franchisee you picked. To log a call for someone else, close this and use their phone button."><Icon name="lock" /></span></div>
-        : <div className="field" style={{ marginBottom: 14 }}><label htmlFor="cl_fr_in">Franchisee *</label>
-          <input id="cl_fr_in" ref={franchiseeRef} list="cl_frlist2" placeholder="Type a franchisee name…" autoComplete="off" autoFocus aria-describedby="cl_fr_in_err"
-            value={form.franchiseeText} {...invalid("franchiseeText")}
-            onChange={(event) => { change({ franchiseeText: event.target.value }); if (findDuplicateFranchisee(ctx, event.target.value.trim(), null)) resolveFranchisee(event.target.value, true); }}
-            onBlur={(event) => resolveFranchisee(event.target.value, true)} />
-          <datalist id="cl_frlist2">{ctx.franchisees.map((item) => item.name).filter(Boolean).map((name) => <option key={name} value={name} />)}</datalist>
+        : <div className="field" style={{ marginBottom: 14 }}><label htmlFor="cl_fr_in">Franchisee and store *</label>
+          <StoreLookup ref={franchiseeRef} inputId="cl_fr_in" value={lookupValue} allowGeneral invalid={!!errors.franchiseeText} describedBy="cl_fr_in_err" onChange={pickTarget} />
           <FieldError id="cl_fr_in_err" message={errors.franchiseeText} /></div>}
 
       <div className={`cl-frcon${form.franchiseeId ? " show" : ""}`} aria-live="polite">
@@ -195,11 +193,11 @@ export default function CallLogDialog({ franchiseeId, callId }) {
             value={form.when} {...invalid("when")} onChange={(event) => change({ when: event.target.value })} />
           <div className="help" id="cl_when_hint" style={{ marginTop: 4 }}>Now by default — change it to log an earlier call</div>
           <FieldError id="cl_when_err" message={errors.when} /></div>
-        <div className="field"><label htmlFor="cl_store">Store number (optional)</label>
+        {fixed && <div className="field"><label htmlFor="cl_store">Store number (optional)</label>
           <select id="cl_store" aria-describedby="cl_store_hint" disabled={!form.franchiseeId} value={form.store} onChange={(event) => change({ store: event.target.value })}>
             {options.options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
-          <div className="help" id="cl_store_hint" style={{ marginTop: 4 }}>{storeHint}</div></div>
+          <div className="help" id="cl_store_hint" style={{ marginTop: 4 }}>{storeHint}</div></div>}
       </div>
 
       <div className="field" style={{ marginBottom: 14 }}><label htmlFor="cl_reason">Reason for call *</label>

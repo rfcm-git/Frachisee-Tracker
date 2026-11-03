@@ -61,11 +61,14 @@ function confirmText(flagged) {
   </>;
 }
 
-/** Start onboarding for several stores and platforms at once (one record per store + platform). */
-export default function NewOnboardingDialog() {
+/**
+ * Start onboarding for several stores and platforms at once (one record per store + platform).
+ * storeNums preselects stores; franchiseeId opens that franchisee's store list to tick from.
+ */
+export default function NewOnboardingDialog({ storeNums = [], franchiseeId = null }) {
   const ctx = useDataContext();
   const { close, setBusy } = useDialog();
-  const [stores, setStores] = useState([]);
+  const [stores, setStores] = useState(() => storeNums.filter((num) => ctx.storeByNum.has(String(num))).map(String));
   const [platforms, setPlatforms] = useState([]);
   const [status, setStatus] = useState("Pending");
   const [syncStores, setSyncStores] = useState(true);
@@ -100,7 +103,7 @@ export default function NewOnboardingDialog() {
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
       <button type="button" className="btn" disabled={saving} onClick={save}><Icon name="rocket" />Create onboarding</button></>}>
     <div className="field" style={{ marginBottom: 14 }}><label htmlFor="ob_store_in">Stores — type a store # or a franchisee name, or paste many store #s</label>
-      <StorePicker ref={pickerRef} inputId="ob_store_in" value={stores} onChange={(next) => { setStores(next); setBusy(true); }} />
+      <StorePicker ref={pickerRef} inputId="ob_store_in" value={stores} initialFranchisee={franchiseeId} onChange={(next) => { setStores(next); setBusy(true); }} />
       <StoreStatusNotice stores={plan.stores} picked={platforms} /></div>
     <div className="field" style={{ marginBottom: 14 }}><label>Platforms — pick one or more</label><div className="ob-picks" role="group" aria-label="Platforms">
       {OB_PLATFORMS.map(([key, name]) => {

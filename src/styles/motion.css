@@ -1,0 +1,99 @@
+/* ---------- Motion: easing tokens, entrances and feedback ---------- */
+  :root{
+    --ease-out:cubic-bezier(.22,.8,.3,1);   /* entering: slows down as it arrives */
+    --ease-in:cubic-bezier(.5,0,.75,.2);    /* leaving: speeds up as it goes */
+    --ease-io:cubic-bezier(.45,0,.25,1);
+    --t-fast:160ms; --t-med:240ms; --t-slow:360ms;
+  }
+
+  /* Sidebar ("Menu") backdrop: drifting light, a dot grid and a rolling wave. Never takes clicks. */
+  .sidebar{overflow:hidden}
+  .sb-brand,.sb-nav,.sb-foot{position:relative;z-index:1}
+  .sb-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .sb-glow{position:absolute;border-radius:50%;filter:blur(38px);will-change:transform}
+  .sb-glow.g1{width:220px;height:220px;left:-70px;top:-40px;background:rgba(140,198,63,.42);animation:sbDrift1 22s var(--ease-io) infinite alternate}
+  .sb-glow.g2{width:180px;height:180px;right:-80px;top:38%;background:rgba(255,198,0,.2);animation:sbDrift2 27s var(--ease-io) infinite alternate}
+  .sb-glow.g3{width:240px;height:240px;left:-60px;bottom:-60px;background:rgba(0,70,28,.5);animation:sbDrift3 31s var(--ease-io) infinite alternate}
+  .sb-dots{position:absolute;inset:-40px;background-image:radial-gradient(rgba(255,255,255,.09) 1.2px,transparent 1.4px);background-size:18px 18px;animation:sbDots 40s linear infinite}
+  .sb-wave{position:absolute;left:0;bottom:0;width:200%;height:90px;animation:sbWave 18s linear infinite}
+  .sb-wave path{fill:rgba(255,255,255,.05)}
+  .sb-wave path.w2{fill:rgba(255,198,0,.07)}
+  @keyframes sbDrift1{to{transform:translate(70px,120px) scale(1.15)}}
+  @keyframes sbDrift2{to{transform:translate(-60px,-110px) scale(.9)}}
+  @keyframes sbDrift3{to{transform:translate(80px,-70px) scale(1.1)}}
+  @keyframes sbDots{to{transform:translate(18px,36px)}}
+  @keyframes sbWave{to{transform:translateX(-50%)}}
+
+  /* Menu feedback: hover fades in, the active marker grows in from its edge */
+  .tab,.sb-item,.sb-sub{transition:background var(--t-fast) ease,color var(--t-fast) ease}
+  .tab .t-ic{transition:transform var(--t-fast) var(--ease-out)}
+  .tab:hover .t-ic{transform:translateX(2px)}
+  .tab.active::before{animation:tabMark var(--t-med) var(--ease-out)}
+  @keyframes tabMark{from{transform:scaleY(0)}to{transform:none}}
+  .sb-subs.show{animation:fadeDown var(--t-med) var(--ease-out)}
+
+  /* A newly shown tab eases up into place */
+  #view > *{animation:viewIn var(--t-med) var(--ease-out)}
+  @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  /* Dialogs: the backdrop fades, the box rises and settles */
+  .overlay.show{animation:ovIn var(--t-fast) ease-out}
+  .overlay.show > .modal{animation:modalIn var(--t-med) var(--ease-out)}
+  @keyframes ovIn{from{opacity:0}to{opacity:1}}
+  @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+
+  /* Buttons acknowledge the press */
+  .btn,.iconbtn,.mchip,.fchip,.ob-pick,.sbtn,.pbtn{transition:background var(--t-fast) ease,border-color var(--t-fast) ease,box-shadow var(--t-fast) ease,transform 120ms var(--ease-out)}
+  .btn:active:not(:disabled),.iconbtn:active:not(:disabled),.mchip:active,.ob-pick:active,.sbtn:active,.pbtn:active{transform:scale(.97)}
+
+  /* Rows and cards respond to the pointer */
+  .store-line,.issue-line,.fr-item,tbody tr.click{transition:background var(--t-fast) ease}
+  .panel{transition:box-shadow var(--t-med) ease}
+
+  /* Dropdown suggestions open just under the field */
+  .spick-sug.show,.sst-menu,.pmenu{animation:fadeDown var(--t-fast) var(--ease-out)}
+
+  /* Quick log bar (store window + franchisee page) */
+  .qlog{display:flex;flex-wrap:wrap;gap:8px}
+  .qlog-btn{height:38px;padding:0 14px 0 5px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);
+    font-family:var(--font);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    transition:border-color var(--t-fast) ease,background var(--t-fast) ease,box-shadow var(--t-fast) ease,transform var(--t-fast) var(--ease-out)}
+  .qlog-btn .qi{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;transition:transform var(--t-med) var(--ease-out)}
+  .qlog-btn .qi svg{width:15px;height:15px}
+  .qlog-btn:hover{border-color:var(--green);box-shadow:0 4px 12px rgba(0,80,30,.12);transform:translateY(-1px)}
+  .qlog-btn:hover .qi{transform:scale(1.08)}
+  .qlog-btn:active{transform:scale(.97);box-shadow:none}
+  .qlog-btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+  .q-issue .qi{background:var(--danger-soft);color:var(--danger)}
+  .q-call .qi{background:var(--green-soft);color:var(--green-dark)}
+  .q-cap .qi{background:var(--yellow-soft);color:var(--yellow-dark)}
+  .q-ob .qi{background:var(--lime-soft);color:var(--lime-dark)}
+  .detail-head + .qlog{margin:-4px 0 16px}
+  .sw-qlog{flex:none;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+  @media(max-width:560px){ .qlog-btn{flex:1 1 calc(50% - 8px);justify-content:flex-start} }
+
+  /* Store / franchisee lookup in the log forms */
+  .slk-card{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--lime-soft);border-radius:11px;background:var(--lime-tint);animation:fadeDown var(--t-fast) var(--ease-out)}
+  .slk-card .sf-av svg{width:18px;height:18px}
+  .slk-who{flex:1;min-width:0}
+  .slk-list{margin-top:8px;border:1px solid var(--line);border-radius:10px;max-height:240px;overflow:auto;background:var(--surface)}
+  .field label.slk-row{display:flex;align-items:center;gap:10px;margin:0;padding:9px 11px;border-top:1px solid var(--line);font-size:13px;font-weight:400;color:var(--ink);cursor:pointer;transition:background var(--t-fast) ease}
+  .field label.slk-row:first-child{border-top:none}
+  .field label.slk-row:hover{background:var(--lime-tint)}
+  .field label.slk-row.on{background:var(--green-soft);box-shadow:inset 3px 0 0 var(--green)}
+  .field .slk-row input[type=radio]{width:16px;height:16px;margin:0;padding:0;border:none;accent-color:var(--green);flex:none;cursor:pointer}
+  .slk-row .n{font-weight:700;color:var(--green-dark);min-width:56px;display:inline-flex;align-items:center}
+  .slk-row .n svg{width:16px;height:16px}
+  .slk-row .a{flex:1;min-width:0;color:var(--ink-soft);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slk-row .a b{color:var(--ink)}
+  .slk-empty{padding:10px 12px;font-size:13px}
+  .spick input.bad{box-shadow:0 0 0 3px var(--danger-soft)}
+
+  /* Reduced motion: no drifting or sliding; state changes still show, without movement */
+  @media (prefers-reduced-motion: reduce){
+    .sb-glow,.sb-dots,.sb-wave{animation:none}
+    #view > *,.overlay.show,.overlay.show > .modal,.tab.active::before,.sb-subs.show,.spick-sug.show,.sst-menu,.pmenu,.slk-card{animation:none}
+    .tab:hover .t-ic,.qlog-btn:hover,.qlog-btn:hover .qi,.qlog-btn:active,
+    .btn:active:not(:disabled),.iconbtn:active:not(:disabled),.mchip:active,.ob-pick:active,.sbtn:active,.pbtn:active{transform:none}
+  }

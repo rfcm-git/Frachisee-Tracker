@@ -15,6 +15,18 @@ function TabButton({ tab, active, icon, label, count, countId, countTip, kbd }) 
   </button>;
 }
 
+/** Slow drifting light and a rolling wave behind the menu. Decorative only; still when the user prefers reduced motion. */
+function SidebarBackdrop() {
+  return <div className="sb-bg" aria-hidden="true">
+    <span className="sb-glow g1" /><span className="sb-glow g2" /><span className="sb-glow g3" />
+    <span className="sb-dots" />
+    <svg className="sb-wave" viewBox="0 0 480 120" preserveAspectRatio="none">
+      <path d="M0 60 C40 40 80 40 120 60 S200 80 240 60 S320 40 360 60 S440 80 480 60 V120 H0 Z" />
+      <path className="w2" d="M0 78 C40 62 80 62 120 78 S200 94 240 78 S320 62 360 78 S440 94 480 78 V120 H0 Z" />
+    </svg>
+  </div>;
+}
+
 export default function Sidebar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
@@ -30,6 +42,7 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar" id="sidebar" aria-label="Main navigation">
+      <SidebarBackdrop />
       <div className="sb-brand">
         <div className="mark">3PD</div>
         <div className="sb-name"><b>Franchisee Tracker</b><span>3PD Helpdesk</span></div>

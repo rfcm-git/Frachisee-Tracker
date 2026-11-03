@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import StoreLookup from "../../components/ui/StoreLookup.jsx";
 import { StatusButtons } from "../../components/ui/Choices.jsx";
 import { CapDueBadge, CapStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
@@ -16,15 +17,19 @@ import { createCap, findCap, updateCap } from "./capsActions.js";
 const FIELDS = ["name", "email", "phone"];
 const DUE_SHORTCUTS = [7, 14, 30];
 
-/** Add a store to the CAP list (capId null) or edit one. Name, email and phone come from the store records until changed. */
-export default function CapFormDialog({ capId = null }) {
+/**
+ * Add a store to the CAP list (capId null) or edit one. Name, email and phone come from the store records until changed.
+ * storeNum / franchiseeId preselect the store (or the franchisee whose store to pick) for a new record.
+ */
+export default function CapFormDialog({ capId = null, storeNum: presetNum = "", franchiseeId = null }) {
   const ctx = useDataContext();
   const { close, setBusy } = useDialog();
   const record = capId != null ? ctx.caps.find((item) => item.id === capId) : null;
   const editing = !!record;
-  const [num, setNum] = useState(() => (record ? String(record.store_num) : ""));
+  const [num, setNum] = useState(() => (record ? String(record.store_num) : presetNum));
+  const [target, setTarget] = useState(() => ({ franchiseeId: franchiseeId ?? ctx.storeByNum.get(presetNum)?.franchisee_id ?? null, storeNum: presetNum || null }));
   const [values, setValues] = useState(() => {
-    const shown = record ? capContact(ctx, record) : { name: "", email: "", phone: "" };
+    const shown = record ? capContact(ctx, record) : presetNum ? storeContactDefaults(ctx, presetNum) : { name: "", email: "", phone: "" };
     return { name: shown.name, email: shown.email, phone: shown.phone };
   });
   const [touched, setTouched] = useState({});
@@ -32,6 +37,7 @@ export default function CapFormDialog({ capId = null }) {
   const [notes, setNotes] = useState(() => record?.notes || "");
   const [dueDate, setDueDate] = useState(() => capDueDate(record));
   const [saving, setSaving] = useState(false);
+  const lookupRef = useRef(null);
   if (capId != null && !record) return null;
 
   const storeNum = cleanStoreNumber(num);
@@ -61,8 +67,13 @@ export default function CapFormDialog({ capId = null }) {
     setBusy(true);
   }
 
+  function changeTarget(next) {
+    setTarget(next);
+    changeNum(next.storeNum || "");
+  }
+
   async function save() {
-    if (!storeNum) { toast("Enter the store number", "err"); return; }
+    if (!storeNum) { toast(target.franchiseeId ? "Pick the store" : "Pick the store or franchisee first", "err"); lookupRef.current?.focus(); return; }
     if (duplicate) { toast(`Store ${storeNum} is already in the CAP list`, "err"); return; }
     if (emailBad) { toast("Email address is not valid", "err"); return; }
     if (phoneBad) { toast("Phone number must be 10 digits", "err"); return; }
@@ -82,11 +93,12 @@ export default function CapFormDialog({ capId = null }) {
     modalStyle={{ maxWidth: 620 }}
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
       <button type="button" className="btn" disabled={saving || !!duplicate} onClick={save}><Icon name="save" />{saving ? "Saving…" : editing ? "Save changes" : "Add store"}</button></>}>
-    <div className="field" style={{ marginBottom: 6 }}><label htmlFor="cap_num">Store Number</label>
-      <input id="cap_num" value={num} disabled={editing} autoFocus={!editing} autoComplete="off" placeholder="e.g. 12345" className={duplicate ? "bad" : ""}
-        onChange={(event) => changeNum(event.target.value)} /></div>
+    <div className="field" style={{ marginBottom: 6 }}><label htmlFor="cap_num">{editing ? "Store Number" : "Store — type a store # or a franchisee name"}</label>
+      {editing ? <input id="cap_num" value={num} disabled autoComplete="off" />
+        : <StoreLookup ref={lookupRef} inputId="cap_num" value={target} allowUnknown lockFranchisee={franchiseeId != null} invalid={!!duplicate}
+          storeTag={(storeNumber) => (findCap(ctx, storeNumber) ? "In CAP list" : "")} onChange={changeTarget} />}</div>
     <div className="cap-storeinfo" role="status">
-      {!storeNum ? <span className="muted">Type a store number to look up its contact details.</span>
+      {!storeNum ? <span className="muted">Pick a store to look up its contact details.</span>
         : duplicate ? <span className="cap-err"><Icon name="circle-alert" />Store {storeNum} is already in the CAP list.
           <button type="button" className="btn link" onClick={() => { close(); openCapForm(duplicate.id); }}>Edit it instead</button></span>
           : store ? <span><Icon name="store" />Store {storeNum}{defaults.name ? ` · ${defaults.name}` : ""}{store.city ? ` · ${store.city}${store.state ? `, ${store.state}` : ""}` : ""}</span>
