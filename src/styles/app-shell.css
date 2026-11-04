@@ -35,6 +35,8 @@
   .app.collapsed .tab:hover .badge-num,.app.collapsed .tab:focus-visible .badge-num{opacity:1;transform:none}
   /* main area */
   .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  /* <main> takes focus after the intro closes; no ring around the whole page. */
+  #main:focus{outline:none}
   .mainbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:16px;height:64px;padding:0 28px;
     background:rgba(255,255,255,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
   .mb-title{flex:1;min-width:0}

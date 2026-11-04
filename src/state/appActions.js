@@ -29,10 +29,10 @@ export function loadAll({ silent = false } = {}) {
     notifyDatabaseProblem(error);
     return Promise.resolve(false);
   }
-  if (!silent) setPhase("loading", { loadingText: "Loading data…" });
+  if (!silent) setPhase("loading", { loadingText: "Loading data…", loadProgress: 0 });
   activeLoad = (async () => {
     try {
-      const data = await loadAllTables();
+      const data = await loadAllTables({ onProgress: silent ? undefined : (loadProgress) => useDataStore.setState({ loadProgress }) });
       setAllData(data);
       lastDatabaseNotice = "";
       setConnection("ok", "Connected", "Connected");

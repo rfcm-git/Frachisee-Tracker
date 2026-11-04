@@ -5,7 +5,7 @@
 import {
   Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowRightLeft, ShieldCheck, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellOff, BellRing,
   Bike, Bold, Bookmark, Building2, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
-  CircleAlert, CircleCheck, CircleOff, CircleX, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
+  CircleAlert, CircleCheck, CircleOff, CircleX, Clapperboard, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
   FileBarChart, FileSpreadsheet, FileText, Filter, Flag, Folder, FolderPlus, Globe, Hash, History, Hourglass, IdCard, IndentDecrease,
   IndentIncrease, Info, Keyboard, Lightbulb, Sparkles, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, Map as MapIcon, MapPin, MapPinned,
   Maximize2, MessageSquare, MessageSquareWarning, MousePointerClick, PanelLeftClose, PanelLeftOpen, Pencil, Phone, PhoneCall, PieChart, Plus,
@@ -28,6 +28,7 @@ export const ICONS = {
   "bar-chart-3": BarChart3,
   bell: Bell,
   "bell-off": BellOff,
+  clapperboard: Clapperboard,
   "bell-ring": BellRing,
   bike: Bike,
   bold: Bold,

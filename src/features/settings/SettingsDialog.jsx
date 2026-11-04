@@ -11,6 +11,7 @@ import { askPassword, confirmAction, openBulkImport, openBulkUpdate } from "../.
 import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
+import { isIntroDisabled, playIntro, setIntroDisabled } from "../../intro/settings.js";
 
 const sectionStyle = { marginTop: 16, borderTop: "1px solid var(--line)", paddingTop: 15 };
 const labelStyle = { display: "block", fontSize: 12.5, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 7 };
@@ -49,6 +50,7 @@ export default function SettingsDialog() {
   const [idleDraft, setIdleDraft] = useState(String(idleMinutes));
   const [backingUp, setBackingUp] = useState(false);
   const [notification, setNotification] = useState(notificationPermission);
+  const [introOn, setIntroOn] = useState(() => !isIntroDisabled());
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -102,6 +104,16 @@ export default function SettingsDialog() {
           : notification === "unsupported" ? <><span className="badge cl-o-nva">Not supported here</span> <span className="muted">— in-app reminders still work</span></>
             : <button type="button" className="btn sm outline round" onClick={enableNotifications}><Icon name="bell" />Allow desktop notifications</button>}</div>
       <div className="help">Reminders pop up in the app when a follow-up is due, while the app is open. Desktop notifications also show when this tab is in the background.</div>
+    </div>
+
+    <div style={sectionStyle}>
+      <label style={labelStyle}>Intro</label>
+      <button type="button" className="btn ghost" onClick={() => { close(); requestAnimationFrame(playIntro); }}><Icon name="clapperboard" />Play intro</button>
+      <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, fontSize: 13.5, cursor: "pointer" }}>
+        <input type="checkbox" checked={introOn} onChange={(event) => { setIntroDisabled(!event.target.checked); setIntroOn(event.target.checked); }} />
+        Play the intro when the tracker opens
+      </label>
+      <div className="help">The 3D intro plays once each time you open the tracker in a new tab. Untick to turn it off; Play intro still works.</div>
     </div>
 
     <div style={sectionStyle}>

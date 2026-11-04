@@ -53,7 +53,7 @@ function ViewArea() {
 
 export default function Workspace() {
   return (
-    <main className="main">
+    <main className="main" id="main" tabIndex={-1}>
       <TopBar />
       <div className="wrap">
         <Toolbar />
