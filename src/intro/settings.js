@@ -82,7 +82,7 @@ export function setIntroDisabled(off) {
   write(localStorage, OFF_KEY, off ? "1" : null);
 }
 
-/** Ask the app to play the intro now (used by the sidebar's "Play intro" button). */
+/** Ask the app to play the intro now (used by Settings → Play intro). */
 export function playIntro() {
   window.dispatchEvent(new Event(PLAY_INTRO_EVENT));
 }

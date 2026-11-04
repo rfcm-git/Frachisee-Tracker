@@ -11,7 +11,7 @@ When you open the Franchisee Tracker, a short animated scene plays first. The ca
 - Click **Skip intro** or press `Esc`.
 - Tick **Don't show the intro again** to turn it off for future visits.
 - It plays once per browser tab session.
-- The sidebar's **Play intro** button replays it.
+- **Settings → Intro → Play intro** replays it, and the **Play the intro when the tracker opens** checkbox there turns it on or off.
 
 **Testing overrides:** add `?intro=1` to the address to force the intro to play, or `?intro=0` to turn it off.
 

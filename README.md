@@ -18,7 +18,7 @@ All libraries (Supabase, Lucide icons, Excel and PDF export) come from npm. Only
 
 ## 3D intro
 
-When the tracker opens, a short 3D intro plays first: a street scene that ends on a Subway store with **3PD HELPDESK / MGBD** on its roof sign. A circular loading ring with the percentage inside keeps running in the corner while the tracker's data loads during the animation. The intro also has **Skip intro** (`Esc`) and **Don't show the intro again**. It plays once per browser tab session, and the sidebar's **Play intro** button replays it. Add `?intro=1` to the address to force it to play, or `?intro=0` to turn it off. `npm.cmd run intro:assets` rebuilds its models and font. See [docs/INTRO.md](docs/INTRO.md) for settings, replacing the models, and accessibility.
+When the tracker opens, a short 3D intro plays first: a street scene that ends on a Subway store with **3PD HELPDESK / MGBD** on its roof sign. A circular loading ring with the percentage inside keeps running in the corner while the tracker's data loads during the animation. The intro also has **Skip intro** (`Esc`) and **Don't show the intro again**. It plays once per browser tab session, and **Settings → Play intro** replays it. Add `?intro=1` to the address to force it to play, or `?intro=0` to turn it off. `npm.cmd run intro:assets` rebuilds its models and font. See [docs/INTRO.md](docs/INTRO.md) for settings, replacing the models, and accessibility.
 
 ## Database updates
 
