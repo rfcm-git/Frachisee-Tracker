@@ -1,0 +1,228 @@
+/* 3D intro overlay. Plain CSS (no Tailwind) so it works on any page.
+   Every class is prefixed tpdi- ("3PD intro"). */
+
+.tpdi {
+  --tpdi-bg: #0b1f14;
+  --tpdi-green: #00843d;
+  --tpdi-yellow: #ffc20e;
+  --tpdi-ink: #ffffff;
+  --tpdi-ink-2: rgba(255, 255, 255, 0.78);
+  --tpdi-line: rgba(255, 255, 255, 0.28);
+  --tpdi-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --tpdi-ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 35%, #134a2c 0%, var(--tpdi-bg) 70%);
+  color: var(--tpdi-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  opacity: 1;
+  transition: opacity 600ms var(--tpdi-ease-in);
+}
+.tpdi.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tpdi-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 700ms var(--tpdi-ease-out), transform 1200ms var(--tpdi-ease-out);
+}
+.tpdi.is-playing .tpdi-canvas {
+  opacity: 1;
+  transform: none;
+}
+.tpdi.is-leaving .tpdi-canvas {
+  transform: scale(1.03);
+  transition: transform 600ms var(--tpdi-ease-in);
+}
+
+/* Darkens the bottom edge so the controls stay legible over the scene. */
+.tpdi-shade {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 140px;
+  background: linear-gradient(to top, rgba(6, 18, 11, 0.72), rgba(6, 18, 11, 0));
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- loader */
+.tpdi-loader {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 28px;
+  padding: 24px;
+  text-align: center;
+  transition: opacity 400ms var(--tpdi-ease-in), transform 400ms var(--tpdi-ease-in);
+}
+.tpdi.is-playing .tpdi-loader {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+.tpdi-brand {
+  display: grid;
+  gap: 6px;
+  animation: tpdi-rise 500ms var(--tpdi-ease-out) both;
+}
+.tpdi-heading {
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+.tpdi-sub {
+  font-size: clamp(14px, 2.4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--tpdi-yellow);
+}
+.tpdi-meter {
+  width: min(360px, 78vw);
+  margin: 0 auto;
+  animation: tpdi-rise 500ms 80ms var(--tpdi-ease-out) both;
+}
+.tpdi-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.tpdi-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tpdi-yellow);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.tpdi-readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--tpdi-ink-2);
+}
+.tpdi-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--tpdi-ink);
+}
+
+/* -------------------------------------------------------------- controls */
+.tpdi-controls {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: 16px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  animation: tpdi-fade 400ms 200ms var(--tpdi-ease-out) both;
+}
+.tpdi-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--tpdi-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+.tpdi-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--tpdi-green);
+  cursor: pointer;
+}
+.tpdi-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--tpdi-line);
+  border-radius: 999px;
+  background: rgba(8, 24, 15, 0.62);
+  color: var(--tpdi-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background-color 200ms var(--tpdi-ease-out), border-color 200ms var(--tpdi-ease-out), transform 150ms var(--tpdi-ease-out);
+}
+.tpdi-skip:hover {
+  background: rgba(0, 132, 61, 0.85);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.tpdi-skip:active {
+  transform: scale(0.97);
+}
+.tpdi-skip kbd {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border: 1px solid var(--tpdi-line);
+  border-radius: 6px;
+  color: var(--tpdi-ink-2);
+}
+.tpdi-skip:focus-visible,
+.tpdi-check input:focus-visible {
+  outline: 3px solid var(--tpdi-yellow);
+  outline-offset: 3px;
+}
+
+.tpdi-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes tpdi-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tpdi-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .tpdi-controls { flex-direction: column-reverse; align-items: stretch; }
+  .tpdi-skip { justify-content: center; }
+  .tpdi-check { justify-content: center; }
+}
+
+/* Reduced motion: no zoom or slide, instant swaps. The scene itself is rendered still. */
+@media (prefers-reduced-motion: reduce) {
+  .tpdi, .tpdi-canvas, .tpdi-loader, .tpdi-skip { transition: none !important; }
+  .tpdi-canvas { transform: none !important; }
+  .tpdi-brand, .tpdi-meter, .tpdi-controls { animation: none !important; }
+}
+
+@media (forced-colors: active) {
+  .tpdi-skip, .tpdi-bar { border: 1px solid CanvasText; }
+  .tpdi-bar span { background: Highlight; }
+}

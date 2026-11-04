@@ -28,9 +28,13 @@ export async function runFlows({ newPage, base, failures, log }) {
     await dialog.waitFor();
     await dialog.getByRole("button", { name: "Flag issue" }).click();
     await dialog.getByText("Choose the store this issue is for.").waitFor();
-    const focused = await page.evaluate(() => document.activeElement?.getAttribute("aria-invalid"));
-    expect(focused === "true", "focus did not move to the first invalid field");
+    // Focus moves on the next animation frame, so wait for it rather than reading once.
+    const focused = await page
+      .waitForFunction(() => document.activeElement?.getAttribute("aria-invalid") === "true", null, { timeout: 2000 })
+      .then(() => true, () => false);
+    expect(focused, "focus did not move to the first invalid field");
     await dialog.getByRole("combobox", { name: "Store" }).fill("Anaheim");
+    await page.getByRole("option", { name: /Anaheim/ }).first().waitFor();
     await page.keyboard.press("Enter");
     await dialog.getByLabel("Platform").selectOption("ubereats");
     await dialog.getByLabel("Category").selectOption("Missing items");
@@ -87,8 +91,9 @@ export async function runFlows({ newPage, base, failures, log }) {
     await page.keyboard.press("Escape");
     await drawer.waitFor({ state: "detached" });
     await page.waitForFunction((n) => document.querySelectorAll("tbody tr[data-row]").length === n - 1, before);
-    const focusOnRow = await page.evaluate(() => document.activeElement?.tagName);
     // The resolved row leaves the Active list, so focus falls back to the page heading.
+    await page.waitForFunction(() => ["TR", "H1"].includes(document.activeElement?.tagName), null, { timeout: 2000 }).catch(() => {});
+    const focusOnRow = await page.evaluate(() => document.activeElement?.tagName);
     expect(["TR", "H1"].includes(focusOnRow), `focus after close was ${focusOnRow}`);
   });
 

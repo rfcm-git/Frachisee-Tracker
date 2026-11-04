@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Plus, SearchX, CircleCheck, Paperclip } from "lucide-react";
 import { api } from "../../data/index.js";
@@ -37,6 +37,22 @@ export default function IssuesPage() {
   const storeById = Object.fromEntries(lookups.stores.map((s) => [s.id, s]));
   const filtered = f.severity !== "all" || f.platform !== "all" || f.category !== "all" || f.assignee !== "all" || f.q;
   const open = (id) => navigate({ pathname: `/issues/${id}`, search: location.search });
+
+  // Closing the drawer returns focus to the row that opened it. If that row has
+  // gone (e.g. the issue was resolved and left the Active list), focus would be
+  // lost on <body>; put it on the row if it's still there, otherwise the heading.
+  const lastOpened = useRef(null);
+  const list = q.data?.list;
+  useEffect(() => {
+    if (issueId) {
+      lastOpened.current = issueId;
+      return;
+    }
+    if (!lastOpened.current) return;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    const row = document.querySelector(`tr[data-row][data-id="${lastOpened.current}"]`);
+    (row ?? document.querySelector("main h1"))?.focus({ preventScroll: true });
+  }, [issueId, list]);
 
   return (
     <div className="animate-fade-up">
@@ -128,6 +144,7 @@ export default function IssuesPage() {
                     <tr
                       key={i.id}
                       data-row
+                      data-id={i.id}
                       tabIndex={0}
                       aria-label={`${i.id}: ${i.title}`}
                       onClick={() => open(i.id)}

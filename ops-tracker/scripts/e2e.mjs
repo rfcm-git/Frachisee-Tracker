@@ -1,6 +1,7 @@
 // Browser checks against the production build, using the installed Microsoft Edge.
 //   npm run build && npm run e2e            -> all routes + flows
 //   node scripts/e2e.mjs --only=dashboard  -> one route by name
+//   node scripts/e2e.mjs --only=intro      -> just the 3D intro checks
 // Writes screenshots to scripts/out/ and exits non-zero if any check fails.
 import { preview } from "vite";
 import { chromium } from "playwright-core";
@@ -12,7 +13,8 @@ const OUT = new URL("./out/", import.meta.url);
 mkdirSync(OUT, { recursive: true });
 const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 
-const ROUTES = process.env.FLOWS_ONLY ? [] : [
+const INTRO_ONLY = only === "intro";
+const ROUTES = process.env.FLOWS_ONLY || INTRO_ONLY ? [] : [
   { path: "/", name: "dashboard", ready: "text=Stores to watch" },
   { path: "/issues", name: "issues", ready: "role=table" },
   { path: "/issues/ISS-1203", name: "issue-detail", ready: "role=dialog" },
@@ -23,7 +25,7 @@ const ROUTES = process.env.FLOWS_ONLY ? [] : [
   { path: "/terms", name: "terms", ready: "role=heading[name=/Acceptable use/]" },
   { path: "/nope", name: "not-found", ready: "text=This page doesn't exist" },
 ].filter((r) => !only || r.name === only);
-if (!ROUTES.length && !process.env.FLOWS_ONLY) throw new Error(`No route named "${only}"`);
+if (!ROUTES.length && !process.env.FLOWS_ONLY && !INTRO_ONLY) throw new Error(`No route named "${only}"`);
 
 const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 900 },
@@ -32,12 +34,15 @@ const VIEWPORTS = [
 
 const server = await preview({ preview: { port: 5287, strictPort: true }, logLevel: "error" });
 const base = "http://localhost:5287";
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+// SwiftShader gives headless Edge software WebGL for the 3D intro.
+const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"] });
 const failures = [];
 const log = (...a) => console.log(...a);
 
-async function newPage(vp, opts = {}) {
+// The 3D intro is switched off unless a test asks for it ({ intro: true }).
+async function newPage(vp, { intro = false, ...opts } = {}) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, ...opts });
+  if (!intro) await ctx.addInitScript(() => localStorage.setItem("opsTracker.intro.off", "1"));
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
@@ -79,6 +84,10 @@ try {
   if (!only) {
     const { runFlows } = await import("./flows.mjs");
     await runFlows({ newPage, base, failures, log, OUT });
+  }
+  if (!only || INTRO_ONLY) {
+    const { runIntroFlows } = await import("./intro-flows.mjs");
+    await runIntroFlows({ newPage, base, failures, log });
   }
 } finally {
   await browser.close();

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import {
   LayoutDashboard, TriangleAlert, Store, SlidersHorizontal, Users, Search, Plus, Menu as MenuIcon,
-  X, ChevronDown, Keyboard, ScrollText, LogOut, RotateCcw, UserCog, Database,
+  X, ChevronDown, Keyboard, ScrollText, LogOut, RotateCcw, UserCog, Database, Clapperboard,
 } from "lucide-react";
 import { useApp } from "../../state/appContext.js";
 import { useHotkeys } from "../../hooks/useHotkeys.js";
@@ -13,6 +13,7 @@ import { Avatar, Button, Kbd } from "../ui/core.jsx";
 import { cx } from "../../lib/cx.js";
 import { Menu } from "../ui/overlays.jsx";
 import { useFocusTrap } from "../../hooks/useFocusTrap.js";
+import { playIntro } from "../../intro/settings.js";
 
 export function Logo({ compact = false }) {
   return (
@@ -108,6 +109,7 @@ function UserMenu() {
     { label: "Team & users", icon: UserCog, onSelect: () => navigate("/settings/users") },
     { label: "3PD settings", icon: SlidersHorizontal, onSelect: () => navigate("/settings/platforms") },
     { label: "Terms of service", icon: ScrollText, onSelect: () => navigate("/terms") },
+    { label: "Play intro", icon: Clapperboard, onSelect: playIntro },
     ...(api.kind === "demo"
       ? [{ label: "Reset demo data", icon: RotateCcw, onSelect: () => api.resetDemoData().then(() => toast({ title: "Demo data reset", body: "Issues, users and settings are back to the original sample." })) }]
       : []),
@@ -209,7 +211,7 @@ export function AppShell() {
             <UserMenu />
           </div>
         </header>
-        <main id="main" className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1400px] px-4 py-6 outline-none sm:px-6 lg:px-8">
           <Outlet />
         </main>
       </div>

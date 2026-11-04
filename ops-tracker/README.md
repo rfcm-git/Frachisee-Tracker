@@ -20,9 +20,14 @@ npm.cmd run dev        # http://localhost:5180, demo data
 | `npm run build` / `preview` | Production build / serve it |
 | `npm run lint` | ESLint, including React Hooks rules |
 | `npm test` | Unit tests (Vitest): metric math, view models, validation |
-| `npm run e2e` | Builds, then runs every page at 1440px and 390px in Microsoft Edge (Playwright), with an axe WCAG 2.2 AA scan, a sideways-scroll check and console errors, plus 11 key flows. Screenshots go to `scripts/out/`. |
+| `npm run e2e` | Builds, then runs every page at 1440px and 390px in Microsoft Edge (Playwright), with an axe WCAG 2.2 AA scan, a sideways-scroll check and console errors, plus 11 key flows and 6 intro checks. Screenshots go to `scripts/out/`. |
+| `npm run intro:assets` | Regenerates the 3D intro's models and font in `public/intro/` |
 | `npm run seed` | Prints SQL that loads the dummy data into Supabase |
 | `npm run terms` | Regenerates `docs/TERMS-OF-SERVICE.md` from the in-app terms |
+
+## 3D intro
+
+On first load in a session, a short 3D intro plays: a street scene that ends on a Subway store with **3PD HELPDESK / MGBD** on its rooftop sign. It has a loading screen with progress, Skip (`Esc`) and "Don't show again". **Play intro** in the user menu replays it, and `?intro=0` or `?intro=1` turns it off or on. See [docs/INTRO.md](docs/INTRO.md) for settings, integration on other sites, replacing the models, and accessibility.
 
 ## Pages
 
@@ -64,8 +69,12 @@ src/
   components/charts     Sparkline, TrendChart, BarList, ShareBar
   components/layout     AppShell, CommandPalette, ShortcutsDialog
   pages/                dashboard, issues, stores, settings, terms
+  intro/                3D intro: overlay (loader, controls), scene (three.js), settings, IntroGate
 docs/COMPONENTS.md      component library and design rules
+docs/INTRO.md           3D intro: settings, integration, assets, accessibility
+public/intro/           intro models (.glb) and 3D font
 docs/TERMS-OF-SERVICE.md
 supabase/schema.sql
-scripts/                e2e.mjs + flows.mjs (browser checks), export-seed.mjs, terms-md.mjs
+scripts/                e2e.mjs + flows.mjs + intro-flows.mjs (browser checks), export-seed.mjs,
+                        terms-md.mjs, build-intro-assets.mjs
 ```
