@@ -7,23 +7,25 @@ export const INTRO_DEFAULTS = {
   enabled: true,
   /** "session" = once per browser tab session, "always" = every load, "once" = first visit only. */
   frequency: "session",
-  /** Close the intro on its own when the camera move finishes. */
+  /** Open the site on its own once the animation has finished and the data has loaded. When false, it waits for Skip. */
   autoHide: true,
-  /** How long to hold the last shot before closing, in ms. */
-  holdMs: 1800,
+  /** How long the final shot holds after the camera move, before the site opens, in ms. */
+  holdMs: 600,
   /** With "reduce motion" on: "still" shows the finished scene without movement, "skip" doesn't show the intro. */
   reducedMotion: "still",
-  /** How long the still version stays up before closing, in ms. */
+  /** Shortest time the still version stays up, in ms. */
   stillHoldMs: 3500,
   /** Where models/ and fonts/ are served from. */
   assetBase: `${import.meta.env.BASE_URL}intro/`,
   heading: "3PD HELPDESK",
   subheading: "MGBD",
   wordmark: "SUBWAY",
+  /** Letters of the wordmark before this index are yellow, the rest white (SUB / WAY). */
+  wordmarkSplit: 3,
   /** Accessible description of the animation for screen reader users. */
   description:
     "An animated street scene. The camera glides down a sunny street past people walking on the sidewalk and cars on the road, " +
-    "then settles in front of a Subway restaurant with green and yellow branding. A sign on its roof lights up and reads " +
+    "then settles in front of a two-storey Subway restaurant with green walls, red awnings and glass shop windows. A sign on its roof lights up and reads " +
     "3PD HELPDESK, with MGBD in smaller letters below.",
 };
 

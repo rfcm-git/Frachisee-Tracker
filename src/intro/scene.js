@@ -80,15 +80,24 @@ function mulberry32(seed) {
   };
 }
 
-/** One mesh per letter so letters can animate in one after another. Centred on the group origin. */
+/**
+ * One mesh per letter so letters can animate in one after another. Centred on
+ * the group origin. `material` may be a function (letterIndex) => material.
+ */
 function letterGroup(font, text, { size, depth, material, maxWidth }) {
+  const materialFor = typeof material === "function" ? material : () => material;
+  let index = 0;
   const group = new THREE.Group();
   const scale = size / font.data.resolution;
   const cache = new Map();
   const letters = [];
+  const kern = font.data.kern ?? {};
   let x = 0;
+  let prev = "";
   for (const ch of text) {
     const glyph = font.data.glyphs[ch] ?? font.data.glyphs["?"];
+    x += (kern[prev + ch] ?? 0) * scale;
+    prev = ch;
     if (ch.trim()) {
       let geo = cache.get(ch);
       if (!geo) {
@@ -109,12 +118,13 @@ function letterGroup(font, text, { size, depth, material, maxWidth }) {
         geo.userData.cx = cx;
         cache.set(ch, geo);
       }
-      const mesh = new THREE.Mesh(geo, material);
+      const mesh = new THREE.Mesh(geo, materialFor(index));
       mesh.position.x = x + geo.userData.cx;
       mesh.castShadow = true;
       group.add(mesh);
       letters.push(mesh);
     }
+    index++;
     x += (glyph?.ha ?? font.data.resolution * 0.3) * scale;
   }
   const capHeight = size * 0.7;
@@ -134,19 +144,19 @@ const CAMERA_PATH = [
   { pos: [46, 19, 11], look: [8, 1, 4] }, // high above the road, looking down the street
   { pos: [25, 6.5, 13.5], look: [2, 2.4, 2] }, // descending over the road
   { pos: [10, 1.9, 9.2], look: [-3, 1.7, 2.5] }, // street level beside the walkers
-  { pos: [-7, 3.4, 14], look: [0, 4.2, 0] }, // swing across to face the store
-  { pos: [0, 4.8, 18.6], look: [0, 5.2, -0.5] }, // final front-on shot, from the far sidewalk
+  { pos: [-7, 4.0, 14], look: [0, 5.0, 0] }, // swing across to face the store
+  { pos: [0, 5.4, 18.6], look: [0, 6.0, -0.5] }, // final front-on shot, from the far sidewalk
 ];
-const MOVE_SECONDS = 10.5;
+export const MOVE_SECONDS = 8;
 // Cars are timed so none passes in front of the camera during the final shot.
 const CAR_LANES = [
   { z: 12.7, dir: 1, speed: 9.5, xAtEnd: -20 },
-  { z: 7.7, dir: -1, speed: 8.5, xAtEnd: -30 },
+  { z: 7.7, dir: -1, speed: 8.5, xAtEnd: -45 },
   { z: 12.7, dir: 1, speed: 10.5, xAtEnd: 32 },
   { z: 7.7, dir: -1, speed: 9, xAtEnd: 58 },
 ];
-const END_SECONDS = 11.5;
-const REVEAL = { lamps: 6.0, heading: 6.4, letterStagger: 0.07, letterDur: 0.6, subheading: 7.6 };
+const END_SECONDS = 8.6;
+const REVEAL = { lamps: 4.5, heading: 4.8, letterStagger: 0.055, letterDur: 0.5, subheading: 5.8 };
 
 const SHIRTS = ["#3d6fb6", "#d2553d", "#f0c04a", "#5a9e6f", "#8a5bb8", "#e7e2d6", "#2f3d4f", "#d97aa0", "#4fa3a5", "#b8472f"];
 const PANTS = ["#30343b", "#3b4a66", "#5a4a3a", "#26292e", "#6b6f75", "#7b6a52"];
@@ -181,13 +191,14 @@ export class IntroScene {
     this.renderer = renderer;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog("#efdcc0", 55, 150);
+    scene.fog = new THREE.Fog("#cfe2f2", 60, 170);
     this.scene = scene;
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.3, 400);
 
     this.#buildSky();
     this.#buildLights(high);
     this.#buildWorld(assets);
+    this.#buildGlass(high);
     this.#buildText(assets.font);
     this.#buildPeople(assets.person, high ? 14 : 8);
     this.#buildCars(assets.car);
@@ -207,7 +218,7 @@ export class IntroScene {
         side: THREE.BackSide,
         depthWrite: false,
         fog: false,
-        uniforms: { top: { value: new THREE.Color("#5c9bd6") }, horizon: { value: new THREE.Color("#f6dcb8") } },
+        uniforms: { top: { value: new THREE.Color("#2f7fd6") }, horizon: { value: new THREE.Color("#cfe4f5") } },
         vertexShader: "varying float vH; void main(){ vH = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }",
         fragmentShader:
           "uniform vec3 top; uniform vec3 horizon; varying float vH;\nvoid main(){ float t = pow(clamp(vH,0.0,1.0),0.55); gl_FragColor = vec4(mix(horizon, top, t),1.0);\n#include <colorspace_fragment>\n}",
@@ -215,12 +226,29 @@ export class IntroScene {
     );
     sky.renderOrder = -1;
     this.scene.add(sky);
+
+    // A few soft low-poly clouds
+    const cloudMat = new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#ffffff", emissiveIntensity: 0.55, roughness: 1, flatShading: true, fog: false });
+    const puff = new THREE.IcosahedronGeometry(1, 1);
+    const rand = mulberry32(3);
+    for (const [x, y, z, s] of [[-60, 46, -120, 9], [10, 58, -160, 12], [70, 42, -110, 8], [-120, 52, -60, 10], [120, 50, -40, 9], [-30, 62, -200, 14]]) {
+      const cloud = new THREE.Group();
+      for (let i = 0; i < 5; i++) {
+        const m = new THREE.Mesh(puff, cloudMat);
+        const r = s * (0.55 + rand() * 0.5);
+        m.scale.set(r * 1.3, r * 0.8, r);
+        m.position.set((i - 2) * s * 0.75, (rand() - 0.3) * s * 0.4, (rand() - 0.5) * s * 0.4);
+        cloud.add(m);
+      }
+      cloud.position.set(x, y, z);
+      this.scene.add(cloud);
+    }
   }
 
   #buildLights(high) {
-    this.scene.add(new THREE.HemisphereLight("#d4e7ff", "#8c7a5a", 1.5));
-    const sun = new THREE.DirectionalLight("#ffe0b5", 2.8);
-    sun.position.set(-28, 32, 30);
+    this.scene.add(new THREE.HemisphereLight("#d6eaff", "#8f8a70", 1.6));
+    const sun = new THREE.DirectionalLight("#fff4e2", 3.0);
+    sun.position.set(-24, 40, 30);
     sun.target.position.set(0, 0, 4);
     if (high) {
       sun.castShadow = true;
@@ -254,6 +282,74 @@ export class IntroScene {
     this.signLight = new THREE.PointLight("#fff1cf", 0, 14, 1.6);
     if (lightAnchor) this.signLight.position.copy(lightAnchor.position);
     store.scene.add(this.signLight);
+    // Warm light inside the shop; it also spills onto the sidewalk through the glass.
+    const inside = new THREE.PointLight("#ffd9a8", 7, 13, 1.4);
+    inside.position.copy(store.scene.getObjectByName("Anchor_InteriorLight")?.position ?? new THREE.Vector3(0, 2.6, -4.2));
+    store.scene.add(inside);
+  }
+
+  /**
+   * Shop windows: clear glass that shows the interior, tinted slightly green
+   * at grazing angles, with reflections of the street (an environment map
+   * captured from the middle of the road). Low-end devices get a cheaper
+   * transparent glass with the same reflections.
+   */
+  #buildGlass(high) {
+    let envMap = null;
+    try {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      envMap = pmrem.fromScene(this.scene, 0.02, 0.5, 200, { size: 128, position: new THREE.Vector3(0, 1.8, 10) }).texture;
+      pmrem.dispose();
+      this.envMap = envMap;
+    } catch {
+      /* no reflections; the glass still works */
+    }
+    const glass = high
+      ? new THREE.MeshPhysicalMaterial({
+          name: "ShopGlass",
+          color: "#f2fbf8",
+          metalness: 0,
+          roughness: 0.03,
+          transmission: 1,
+          thickness: 0.04,
+          ior: 1.52,
+          specularIntensity: 1,
+          envMap,
+          envMapIntensity: 1.25,
+        })
+      : new THREE.MeshStandardMaterial({
+          name: "ShopGlass",
+          color: "#b9d6db",
+          metalness: 0.2,
+          roughness: 0.04,
+          transparent: true,
+          opacity: 0.28,
+          depthWrite: false,
+          envMap,
+          envMapIntensity: 1.4,
+        });
+    const upper = new THREE.MeshPhysicalMaterial({
+      name: "UpperGlass",
+      color: "#1f3a4d",
+      metalness: 0.15,
+      roughness: 0.05,
+      clearcoat: 1,
+      clearcoatRoughness: 0.05,
+      envMap,
+      envMapIntensity: 1.8,
+    });
+    this.store.traverse((o) => {
+      if (!o.isMesh) return;
+      if (o.material.name === "ShopGlass") {
+        o.material.dispose();
+        o.material = glass;
+        o.castShadow = false;
+        o.renderOrder = 2;
+      } else if (o.material.name === "UpperGlass") {
+        o.material.dispose();
+        o.material = upper;
+      }
+    });
   }
 
   #buildText(font) {
@@ -263,7 +359,9 @@ export class IntroScene {
     const yellow = new THREE.MeshStandardMaterial({ color: "#ffc20e", emissive: "#ffb000", emissiveIntensity: 0.12, roughness: 0.45 });
     this.headingMaterial = white;
 
-    const word = letterGroup(font, wordmark, { size: 0.8, depth: 0.12, material: yellow, maxWidth: 10 });
+    const wordWhite = new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#ffffff", emissiveIntensity: 0.08, roughness: 0.45 });
+    const split = this.opts.wordmarkSplit ?? wordmark.length;
+    const word = letterGroup(font, wordmark, { size: 0.95, depth: 0.14, material: (i) => (i < split ? yellow : wordWhite), maxWidth: 7.6 });
     word.group.position.copy(anchor("Anchor_Wordmark").position);
     this.store.add(word.group);
 
@@ -284,9 +382,9 @@ export class IntroScene {
     const walk = THREE.AnimationClip.findByName(person.animations, "Walk");
     const idle = THREE.AnimationClip.findByName(person.animations, "Idle");
 
-    const spawn = () => {
+    const spawn = (override = {}) => {
       const p = person.scene.clone(true);
-      const colors = { Shirt: pick(SHIRTS), Pants: pick(PANTS), Skin: pick(SKIN), Hair: pick(HAIR) };
+      const colors = { Shirt: pick(SHIRTS), Pants: pick(PANTS), Skin: pick(SKIN), Hair: pick(HAIR), ...override };
       const made = {};
       p.traverse((o) => {
         if (!o.isMesh) return;
@@ -305,8 +403,19 @@ export class IntroScene {
       return { p, mixer };
     };
 
+    // Inside, seen through the glass: a sandwich artist behind the counter (in
+    // Subway green) and two customers ordering.
+    for (const [x, z, ry, shirt] of [[-0.9, -6.95, 0, "#1e7a3c"], [0.5, -4.85, Math.PI, null], [1.6, -4.6, Math.PI + 0.35, null]]) {
+      const { p, mixer } = spawn(shirt ? { Shirt: shirt, Pants: "#26292e" } : {});
+      p.position.set(x, 0.15, z);
+      p.rotation.y = ry;
+      const a = mixer.clipAction(idle);
+      a.time = rand() * idle.duration;
+      a.play();
+    }
+
     // People standing by the store: two chatting by the door, one reading the A-frame.
-    for (const [x, z, ry] of [[2.1, 1.35, -2.2], [2.75, 1.85, 1.0], [5.55, 2.05, Math.PI]]) {
+    for (const [x, z, ry] of [[2.1, 1.35, -2.2], [2.75, 1.85, 1.0], [-2.9, 1.9, -0.5]]) {
       const { p, mixer } = spawn();
       p.position.set(x, 0.15, z);
       p.rotation.y = ry;
@@ -363,7 +472,7 @@ export class IntroScene {
     if (!width || !height) return;
     const aspect = width / height;
     // Keep the 13.5 m wide store front in frame on narrow (portrait) screens.
-    const halfFit = 7.2 / 18.6;
+    const halfFit = 7.4 / 18.6;
     const vfov = THREE.MathUtils.radToDeg(2 * Math.atan(halfFit / aspect));
     this.camera.fov = THREE.MathUtils.clamp(vfov, 42, 78);
     this.camera.aspect = aspect;
@@ -377,6 +486,13 @@ export class IntroScene {
     const u = easeInOutCubic(clamp01(t / MOVE_SECONDS));
     this.posCurve.getPoint(u, this.camera.position);
     this.lookCurve.getPoint(u, this.lookAt);
+    // If the site is still loading after the move, keep the shot alive with a slow sway.
+    if (Number.isFinite(t) && t > MOVE_SECONDS) {
+      const d = t - MOVE_SECONDS;
+      const k = easeInOutCubic(clamp01(d / 2.5));
+      this.camera.position.x += Math.sin(d * 0.35) * 2.2 * k;
+      this.camera.position.y += Math.sin(d * 0.23) * 0.35 * k;
+    }
     this.camera.lookAt(this.lookAt);
 
     // Sign lamps flicker on, then the letters pop up one by one.
@@ -455,6 +571,7 @@ export class IntroScene {
       const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
       for (const m of mats) if (!seen.has(m)) (seen.add(m), m.dispose());
     });
+    this.envMap?.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
   }
