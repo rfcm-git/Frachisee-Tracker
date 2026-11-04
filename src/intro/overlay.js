@@ -1,12 +1,15 @@
 // The intro overlay: loading screen with progress, the 3D canvas, Skip and
 // "Don't show again" controls, and the hand-off to the site.
-// Plain DOM so it can be dropped into any page (see intro.html), not just React.
+// Plain DOM, so the React app only has to call mountIntro().
 
 import "./intro.css";
 import { INTRO_DEFAULTS, markIntroSeen, setIntroDisabled, prefersReducedMotion } from "./settings.js";
 
-// Relative weights for the progress bar.
-const WEIGHTS = { engine: 3, store: 1, street: 2, person: 1, car: 1, font: 1, data: 1 };
+// Relative weights for the progress ring. The site data keeps loading while the
+// animation plays, so it carries real weight.
+const WEIGHTS = { engine: 3, store: 1, street: 2, person: 1, car: 1, font: 1, data: 3 };
+const RING_R = 52;
+const RING_C = 2 * Math.PI * RING_R;
 
 let uid = 0;
 
@@ -15,7 +18,8 @@ let uid = 0;
  * @param {object}   options
  * @param {object}   [options.config]   overrides for INTRO_DEFAULTS
  * @param {Element}  [options.parent]   where to mount (default document.body)
- * @param {() => Promise<any>} [options.preload]  site data to load while the intro loads
+ * @param {(report: (fraction: number) => void) => Promise<any>} [options.preload]
+ *        site data to load while the intro plays; may call report(0..1) as it goes
  * @param {(reason: "complete"|"skip"|"error"|"unsupported") => void} [options.onFinish]
  * @returns {{ finish: (reason?: string) => void, destroy: () => void }}
  */
@@ -36,13 +40,16 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
     <div class="tpdi-shade" aria-hidden="true"></div>
     <h1 class="tpdi-sr" id="${id}-title"></h1>
     <p class="tpdi-sr" id="${id}-desc"></p>
-    <div class="tpdi-loader">
-      <div class="tpdi-brand" aria-hidden="true"><span class="tpdi-heading"></span><span class="tpdi-sub"></span></div>
-      <div class="tpdi-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="${id}-status">
-        <div class="tpdi-bar"><span></span></div>
-        <div class="tpdi-readout"><span class="tpdi-status" id="${id}-status">Loading</span><span class="tpdi-pct">0%</span></div>
-      </div>
+    <div class="tpdi-brand" aria-hidden="true"><span class="tpdi-heading"></span><span class="tpdi-sub"></span></div>
+    <div class="tpdi-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="${id}-status">
+      <svg class="tpdi-ring" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="tpdi-ring-bg" cx="60" cy="60" r="59" />
+        <circle class="tpdi-ring-track" cx="60" cy="60" r="${RING_R}" />
+        <circle class="tpdi-ring-fill" cx="60" cy="60" r="${RING_R}" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}" />
+      </svg>
+      <span class="tpdi-pct" aria-hidden="true">0<small>%</small></span>
     </div>
+    <p class="tpdi-status" id="${id}-status">Loading</p>
     <div class="tpdi-controls">
       <label class="tpdi-check"><input type="checkbox" /> <span>Don't show the intro again</span></label>
       <button type="button" class="tpdi-skip">Skip intro <kbd aria-hidden="true">Esc</kbd></button>
@@ -56,7 +63,7 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
   $(".tpdi-sub").textContent = config.subheading;
   const canvas = $(".tpdi-canvas");
   const meter = $(".tpdi-meter");
-  const barFill = $(".tpdi-bar span");
+  const ringFill = $(".tpdi-ring-fill");
   const pctText = $(".tpdi-pct");
   const statusText = $(".tpdi-status");
   const live = root.querySelector("[aria-live]");
@@ -76,6 +83,8 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
   const target = () => Object.entries(progress).reduce((s, [k, f]) => s + WEIGHTS[k] * f, 0) / total;
   let shown = 0;
   let meterRaf = 0;
+  let meterFull;
+  const meterDone = new Promise((resolve) => (meterFull = resolve));
   const setStatus = (text) => (statusText.textContent = text);
   const report = (key, f) => (progress[key] = Math.max(progress[key], f));
   const tickMeter = () => {
@@ -83,9 +92,16 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
     // Ease the readout toward the real value so it never jumps or runs backwards.
     shown = goal - shown < 0.002 ? goal : shown + (goal - shown) * (reduced ? 1 : 0.18);
     const pct = Math.round(shown * 100);
-    barFill.style.transform = `scaleX(${shown})`;
-    pctText.textContent = `${pct}%`;
+    ringFill.setAttribute("stroke-dashoffset", String(RING_C * (1 - shown)));
+    pctText.firstChild.nodeValue = String(pct);
     meter.setAttribute("aria-valuenow", String(pct));
+    if (pct >= 100) {
+      // Everything is loaded: the ring turns green, then fades out of the corner.
+      root.classList.add("is-loaded");
+      setStatus("Loaded");
+      meterFull();
+      return;
+    }
     meterRaf = requestAnimationFrame(tickMeter);
   };
   meterRaf = requestAnimationFrame(tickMeter);
@@ -140,7 +156,7 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
 
   /* -------------------------------------------------------------- loading */
   const dataReady = Promise.resolve()
-    .then(() => preload?.())
+    .then(() => preload?.((f) => report("data", Math.min(0.99, f))))
     .catch((err) => console.warn("[intro] site data preload failed", err))
     .finally(() => report("data", 1));
 
@@ -156,8 +172,6 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
         return finish("unsupported");
       }
       const assets = await mod.loadAssets(config.assetBase, report);
-      setStatus("Loading store data");
-      await dataReady;
       if (finished) return;
 
       scene = new mod.IntroScene(canvas, assets, {
@@ -173,18 +187,23 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
       resizeObs = new ResizeObserver(fit);
       resizeObs.observe(root);
 
-      setStatus("Ready");
-      // Let the readout catch up to 100% before the scene fades in.
-      for (let waited = 0; shown < 0.995 && waited < 1200; waited += 50) await new Promise((r) => setTimeout(r, 50));
-      await new Promise((r) => setTimeout(r, reduced ? 0 : 250));
-      if (finished) return;
+      // The scene starts as soon as it can; the ring moves to the corner and keeps
+      // counting while the site data finishes loading in the background.
+      setStatus("Loading store data");
       root.classList.add("is-playing");
       live.textContent = still ? "Intro ready. It closes on its own, or press Escape to skip." : "Intro playing. Press Escape to skip.";
+      // Hand off only when the animation is done AND the site is ready, after the
+      // ring has visibly reached 100%.
+      const handOff = () =>
+        dataReady
+          .then(() => meterDone)
+          .then(() => new Promise((r) => setTimeout(r, reduced ? 0 : 450)))
+          .then(() => !finished && finish("complete"));
       if (still) {
         scene.start();
-        if (config.autoHide) setTimeout(() => finish("complete"), config.stillHoldMs);
+        if (config.autoHide) setTimeout(handOff, config.stillHoldMs);
       } else {
-        scene.start({ holdMs: config.holdMs, onEnd: () => config.autoHide && finish("complete") });
+        scene.start({ holdMs: config.holdMs, onEnd: () => config.autoHide && handOff() });
       }
       root.dataset.state = "playing";
     })

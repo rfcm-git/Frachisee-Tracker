@@ -6,7 +6,7 @@
 //   fonts/montserrat-black.typeface.json  subset of Montserrat Black (SIL OFL)
 //
 // Everything is generated from code so it can be tweaked and rebuilt:
-//   npm run intro:assets
+//   npm run intro:assets   (from the project root)
 // Static meshes are merged per material, so each model is a handful of draw calls.
 
 import { mkdirSync, writeFileSync, readFileSync, copyFileSync } from "node:fs";

@@ -5,7 +5,7 @@ import { INTRO_DEFAULTS, shouldShowIntro, PLAY_INTRO_EVENT } from "./settings.js
 /**
  * Plays the 3D intro over the app on first load (see settings.js for the rules)
  * and whenever "Play intro" is chosen. The app renders underneath the whole
- * time, so its data loads in the background; it is inert until the intro ends.
+ * time, so its data loads in the background; #root is inert until the intro ends.
  *
  * Pass `config` and `preload` as stable references (module-level constants).
  */
@@ -23,18 +23,20 @@ export function IntroGate({ children, config, preload }) {
   useLayoutEffect(() => {
     if (!show) return;
     played.current = true;
+    const root = document.getElementById("root");
+    root?.setAttribute("inert", "");
     const intro = mountIntro({ config, preload, onFinish: () => setShow(false) });
-    return () => intro.destroy();
+    return () => {
+      intro.destroy();
+      root?.removeAttribute("inert");
+    };
   }, [show, config, preload]);
 
   // Once the app is interactive again, hand focus to the page content.
   useEffect(() => {
     if (show || !played.current) return;
-    const main = document.getElementById("main");
-    if (!main) return;
-    if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
-    main.focus({ preventScroll: true });
+    document.getElementById("main")?.focus({ preventScroll: true });
   }, [show]);
 
-  return <div inert={show || undefined}>{children}</div>;
+  return children;
 }

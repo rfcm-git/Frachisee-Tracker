@@ -9,6 +9,8 @@ export const useDataStore = create(() => ({
   data: EMPTY_DATA,
   /** "disconnected" | "loading" | "ready" | "error" */
   phase: "loading",
+  /** 0..1 while the tables load (shown by the intro's loading ring). */
+  loadProgress: 0,
   loadingText: "Connecting…",
   error: null,
   connection: { state: "", header: "Not connected", popup: "Not connected" },

@@ -46,7 +46,13 @@ function isMissingTable(error) {
 }
 
 /** Loads every table. Onboarding, call logs and CAPs are optional (older databases may not have them). */
-export async function loadAllTables() {
+/** onProgress(fraction) is called as each table arrives (used by the intro's loading ring). */
+export async function loadAllTables({ onProgress } = {}) {
+  let done = 0;
+  const tick = (promise) => promise.then((value) => {
+    onProgress?.(++done / 7);
+    return value;
+  });
   const fetchOptional = async (table) => {
     try {
       return { rows: await fetchAll(table), ready: true };
@@ -56,13 +62,13 @@ export async function loadAllTables() {
     }
   };
   const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult] = await Promise.all([
-    fetchAll(TABLES.franchisees),
-    fetchAll(TABLES.stores),
-    fetchAll(TABLES.staff),
-    fetchAll(TABLES.issues),
-    fetchOptional(TABLES.onboarding),
-    fetchOptional(TABLES.callLogs),
-    fetchOptional(TABLES.caps),
+    tick(fetchAll(TABLES.franchisees)),
+    tick(fetchAll(TABLES.stores)),
+    tick(fetchAll(TABLES.staff)),
+    tick(fetchAll(TABLES.issues)),
+    tick(fetchOptional(TABLES.onboarding)),
+    tick(fetchOptional(TABLES.callLogs)),
+    tick(fetchOptional(TABLES.caps)),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;

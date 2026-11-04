@@ -55,25 +55,18 @@
 }
 
 /* ---------------------------------------------------------------- loader */
-.tpdi-loader {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  gap: 28px;
-  padding: 24px;
-  text-align: center;
-  transition: opacity 400ms var(--tpdi-ease-in), transform 400ms var(--tpdi-ease-in);
-}
-.tpdi.is-playing .tpdi-loader {
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
-}
+/* Before the scene is ready: brand, a 120px progress ring and a status line,
+   centred. Once the animation starts, the brand and status fade and the ring
+   moves to the top-right corner, where it keeps counting until the site has
+   loaded, then turns green and fades out. */
 .tpdi-brand {
+  position: absolute;
+  inset: auto 16px calc(50% + 84px) 16px;
   display: grid;
   gap: 6px;
-  animation: tpdi-rise 500ms var(--tpdi-ease-out) both;
+  text-align: center;
+  animation: tpdi-rise 500ms var(--tpdi-ease-out) backwards;
+  transition: opacity 400ms var(--tpdi-ease-in), transform 400ms var(--tpdi-ease-in);
 }
 .tpdi-heading {
   font-size: clamp(28px, 6vw, 52px);
@@ -87,37 +80,92 @@
   letter-spacing: 0.32em;
   color: var(--tpdi-yellow);
 }
-.tpdi-meter {
-  width: min(360px, 78vw);
-  margin: 0 auto;
-  animation: tpdi-rise 500ms 80ms var(--tpdi-ease-out) both;
-}
-.tpdi-bar {
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  overflow: hidden;
-}
-.tpdi-bar span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--tpdi-yellow);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-.tpdi-readout {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 10px;
+.tpdi-status {
+  position: absolute;
+  inset: calc(50% + 76px) 16px auto 16px;
+  margin: 0;
+  text-align: center;
   font-size: 14px;
   color: var(--tpdi-ink-2);
+  transition: opacity 400ms var(--tpdi-ease-in);
+}
+.tpdi.is-playing .tpdi-brand {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.tpdi.is-playing .tpdi-status {
+  opacity: 0;
+}
+
+.tpdi-meter {
+  --tpdi-ring-scale: 1;
+  position: absolute;
+  top: calc(50% - 60px);
+  left: calc(50% - 60px);
+  width: 120px;
+  height: 120px;
+  transform: scale(var(--tpdi-ring-scale));
+  transform-origin: top left;
+  animation: tpdi-rise 500ms 80ms var(--tpdi-ease-out) backwards;
+  transition:
+    top 700ms var(--tpdi-ease-out),
+    left 700ms var(--tpdi-ease-out),
+    transform 700ms var(--tpdi-ease-out),
+    opacity 500ms var(--tpdi-ease-in) 600ms;
+}
+.tpdi.is-playing .tpdi-meter {
+  --tpdi-ring-scale: 0.6;
+  top: max(16px, env(safe-area-inset-top));
+  left: calc(100% - 72px - max(16px, env(safe-area-inset-right)));
+}
+.tpdi.is-playing.is-loaded .tpdi-meter {
+  opacity: 0;
+}
+.tpdi-ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* fill starts at 12 o'clock */
+}
+.tpdi-ring-bg {
+  fill: rgba(8, 24, 15, 0);
+  transition: fill 400ms var(--tpdi-ease-out);
+}
+.tpdi.is-playing .tpdi-ring-bg {
+  fill: rgba(8, 24, 15, 0.62); /* keeps the number readable over the scene */
+}
+.tpdi-ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 7;
+}
+.tpdi-ring-fill {
+  fill: none;
+  stroke: var(--tpdi-yellow);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke 300ms var(--tpdi-ease-out);
+}
+.tpdi.is-loaded .tpdi-ring-fill {
+  stroke: #3ccf7a;
 }
 .tpdi-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--tpdi-ink);
+}
+.tpdi-pct small {
+  margin: 6px 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tpdi-ink-2);
 }
 
 /* -------------------------------------------------------------- controls */
@@ -130,7 +178,7 @@
   gap: 12px 20px;
   flex-wrap: wrap;
   padding: 16px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
-  animation: tpdi-fade 400ms 200ms var(--tpdi-ease-out) both;
+  animation: tpdi-fade 400ms 200ms var(--tpdi-ease-out) backwards;
 }
 .tpdi-check {
   display: inline-flex;
@@ -217,12 +265,13 @@
 
 /* Reduced motion: no zoom or slide, instant swaps. The scene itself is rendered still. */
 @media (prefers-reduced-motion: reduce) {
-  .tpdi, .tpdi-canvas, .tpdi-loader, .tpdi-skip { transition: none !important; }
+  .tpdi, .tpdi-canvas, .tpdi-brand, .tpdi-status, .tpdi-meter, .tpdi-ring-fill, .tpdi-skip { transition: none !important; }
   .tpdi-canvas { transform: none !important; }
   .tpdi-brand, .tpdi-meter, .tpdi-controls { animation: none !important; }
 }
 
 @media (forced-colors: active) {
-  .tpdi-skip, .tpdi-bar { border: 1px solid CanvasText; }
-  .tpdi-bar span { background: Highlight; }
+  .tpdi-skip { border: 1px solid CanvasText; }
+  .tpdi-ring-track { stroke: CanvasText; }
+  .tpdi-ring-fill { stroke: Highlight; }
 }

@@ -27,10 +27,10 @@ export const INTRO_DEFAULTS = {
     "3PD HELPDESK, with MGBD in smaller letters below.",
 };
 
-const OFF_KEY = "opsTracker.intro.off";
-const SEEN_SESSION_KEY = "opsTracker.intro.seen";
-const SEEN_EVER_KEY = "opsTracker.intro.seenOnce";
-export const PLAY_INTRO_EVENT = "opstracker:play-intro";
+const OFF_KEY = "franchiseeTracker.intro.off";
+const SEEN_SESSION_KEY = "franchiseeTracker.intro.seen";
+const SEEN_EVER_KEY = "franchiseeTracker.intro.seenOnce";
+export const PLAY_INTRO_EVENT = "franchiseetracker:play-intro";
 
 function read(storage, key) {
   try {
@@ -82,7 +82,7 @@ export function setIntroDisabled(off) {
   write(localStorage, OFF_KEY, off ? "1" : null);
 }
 
-/** Ask the app to play the intro now (used by the "Play intro" menu item). */
+/** Ask the app to play the intro now (used by the sidebar's "Play intro" button). */
 export function playIntro() {
   window.dispatchEvent(new Event(PLAY_INTRO_EVENT));
 }

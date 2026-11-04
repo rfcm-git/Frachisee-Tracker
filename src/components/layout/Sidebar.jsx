@@ -5,6 +5,7 @@ import { capsProgress, openCapsCount } from "../../features/caps/capsSelectors.j
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openLinks, openSettings } from "../../state/dialogs.js";
+import { playIntro } from "../../intro/settings.js";
 import { setIssueSub, setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
 
 function TabButton({ tab, active, icon, label, count, countId, countTip, kbd }) {
@@ -68,6 +69,7 @@ export default function Sidebar() {
       </nav>
       <div className="sb-foot">
         <button type="button" className="sb-item" title="Links" aria-label="Links" onClick={openLinks}><span className="t-ic"><Icon name="link" /></span><span className="t-lb">Links</span></button>
+        <button type="button" className="sb-item" title="Play intro" aria-label="Play intro" onClick={playIntro}><span className="t-ic"><Icon name="clapperboard" /></span><span className="t-lb">Play intro</span></button>
         <button type="button" className="sb-item" title="Settings" aria-label="Settings" onClick={openSettings}><span className="t-ic"><Icon name="settings" /></span><span className="t-lb">Settings</span></button>
         <button type="button" className="sb-item sb-collapse" title={toggleLabel} aria-label={toggleLabel} aria-expanded={!collapsed} onClick={toggleSidebar}>
           <span className="t-ic"><Icon name={collapsed ? "panel-left-open" : "panel-left-close"} /></span><span className="t-lb">{collapsed ? "Expand" : "Collapse"}</span></button>
