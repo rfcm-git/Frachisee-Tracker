@@ -15,6 +15,7 @@ import { useDataContext } from "../../state/dataStore.js";
 import { openCapForm, openCapsImport, openStore } from "../../state/dialogs.js";
 import { clearCapsFilters, setCapDueFilter, setCapEmailFilter, sortCaps, toggleCapDueFilter, toggleCapOnlyStatus, toggleCapStatus, useUiStore } from "../../state/uiStore.js";
 import { askDeleteCap, lastCapsImport, updateCap } from "./capsActions.js";
+import { sendCapEmail } from "./capEmailActions.js";
 import { capsProgress, filterCaps } from "./capsSelectors.js";
 
 const SORT_LABELS = { num: "Store Number", status: "Status", added: "Date Added", updated: "Last Updated", due: "Due Date" };
@@ -207,6 +208,16 @@ function StatusSelect({ record }) {
   </select>;
 }
 
+/** Opens the store's CAP email in Outlook and sets Email Sent. Dimmed once the store is past No Action Yet (it asks first). */
+function EmailButton({ record, email }) {
+  const status = normalizeCapStatus(record.status);
+  const fresh = status === CAP_STATES[0];
+  const tip = !email ? "No email address on file — add one with Edit"
+    : fresh ? `Open the CAP email to ${email} in Outlook · status → Email Sent` : status === "Email Sent" ? "Already emailed — click to email again" : `${status} — click to email (status → Email Sent)`;
+  return <button type="button" className={`iconbtn mini cap-mailbtn${!email ? " off" : fresh ? " fresh" : " done"}`} aria-disabled={!email} data-tip={tip}
+    aria-label={`Email store ${record.store_num}`} onClick={() => sendCapEmail(record.id)}><Icon name={fresh ? "send" : "mail-check"} /></button>;
+}
+
 function SortButton({ sortKey, sort, children }) {
   const on = sort.key === sortKey;
   return <button type="button" className={on ? "on" : ""} data-tip={`Sort by ${SORT_LABELS[sortKey]}`} onClick={() => sortCaps(sortKey)}>{children}
@@ -251,7 +262,8 @@ function CapsTable({ ctx, rows, sort, showDue }) {
         <td><ContactValue value={contact.name} fromStore={contact.fromStore.name} /></td>
         <td className="hide-sm cap-email"><ContactValue value={contact.email} fromStore={contact.fromStore.email} href={contact.email ? `mailto:${contact.email}` : ""} /></td>
         <td className="hide-sm cap-phone"><ContactValue value={contact.phone} text={keepPhoneTogether(contact.phone)} fromStore={contact.fromStore.phone} href={contact.phone ? telHref(contact.phone) : ""} /></td>
-        <td className="cap-statuscol"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} /></td>
+        <td className="cap-statuscol"><div className="cap-statuswrap"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} />
+          <EmailButton record={record} email={contact.email} /></div></td>
         {showDue && <td className="cap-duecol">{record.due_date
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
           : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}

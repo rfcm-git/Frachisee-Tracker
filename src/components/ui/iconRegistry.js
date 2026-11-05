@@ -7,10 +7,10 @@ import {
   Bike, Bold, Bookmark, Building2, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
   CircleAlert, CircleCheck, CircleOff, CircleX, Clapperboard, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
   FileBarChart, FileSpreadsheet, FileText, Filter, Flag, Folder, FolderPlus, Globe, Hash, History, Hourglass, IdCard, IndentDecrease,
-  IndentIncrease, Info, Keyboard, Lightbulb, Sparkles, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, Map as MapIcon, MapPin, MapPinned,
+  IndentIncrease, Info, Keyboard, Lightbulb, Sparkles, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, MailCheck, Map as MapIcon, MapPin, MapPinned,
   Maximize2, MessageSquare, MessageSquareWarning, MousePointerClick, PanelLeftClose, PanelLeftOpen, Pencil, Phone, PhoneCall, PieChart, Plus,
   RefreshCw, Repeat, Rocket,
-  RotateCcw, Save, Search, SearchX, Settings, Settings2, SlidersHorizontal, StickyNote, Store, Table2, Tag, Timer, Trash2, TriangleAlert, Unlock,
+  RotateCcw, Save, Search, SearchX, Send, Settings, Settings2, SlidersHorizontal, StickyNote, Store, Table2, Tag, Timer, Trash2, TriangleAlert, Unlock,
   Unplug, Upload, UserCog, UserPlus, UserRound, UserRoundPen, UserRoundPlus, UserX, Users, Utensils, X, Zap,
 } from "lucide-react";
 
@@ -87,6 +87,7 @@ export const ICONS = {
   loader: Loader,
   lock: Lock,
   mail: Mail,
+  "mail-check": MailCheck,
   map: MapIcon,
   "map-pin": MapPin,
   "map-pinned": MapPinned,
@@ -108,6 +109,7 @@ export const ICONS = {
   save: Save,
   search: Search,
   "search-x": SearchX,
+  send: Send,
   settings: Settings,
   "settings-2": Settings2,
   "shield-check": ShieldCheck,

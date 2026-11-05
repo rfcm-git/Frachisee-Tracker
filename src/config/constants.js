@@ -92,6 +92,7 @@ export const STORAGE_KEYS = {
   callSnooze: "ft2_cl_snooze",
   capReminded: "ft2_cap_reminded",
   capLastImport: "ft2_cap_last_import",
+  capEmail: "ft2_cap_email",
   notifications: "ft2_notifications",
   notifyPosition: "ft2_notify_pos",
   links: "ft2_links",
