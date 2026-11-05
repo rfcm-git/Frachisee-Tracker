@@ -5,6 +5,7 @@ import { closeDialog, setDialogBusy, useDialogStore } from "../../state/dialogSt
 import { DIALOG } from "../../state/dialogs.js";
 import CapFormDialog from "../../features/caps/CapFormDialog.jsx";
 import CapsImportDialog from "../../features/caps/CapsImportDialog.jsx";
+import CapEmailDialog from "../../features/caps/CapEmailDialog.jsx";
 import CallDetailsDialog from "../../features/calls/CallDetailsDialog.jsx";
 import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
 import CallFollowUpDialog from "../../features/calls/CallFollowUpDialog.jsx";
@@ -58,6 +59,7 @@ const COMPONENTS = {
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
   [DIALOG.capForm]: CapFormDialog,
   [DIALOG.capsImport]: CapsImportDialog,
+  [DIALOG.capEmail]: CapEmailDialog,
   [DIALOG.dashList]: DashboardListDialog,
   [DIALOG.report]: ReportBuilderDialog,
   [DIALOG.confirm]: ConfirmDialog,

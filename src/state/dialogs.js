@@ -32,6 +32,7 @@ export const DIALOG = {
   updateOnboarding: "updateOnboarding",
   capForm: "capForm",
   capsImport: "capsImport",
+  capEmail: "capEmail",
   dashList: "dashList",
   report: "report",
   confirm: "confirm",
@@ -91,6 +92,9 @@ export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOn
 /** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
 export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
+
+/** CAP email message editor; previewCapId picks the store shown in the preview. */
+export const openCapEmail = (previewCapId = null) => openDialog(DIALOG.capEmail, { previewCapId });
 
 /** key: "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed", … */
 export const openDashboardList = (key) => openDialog(DIALOG.dashList, { storeKey: key });

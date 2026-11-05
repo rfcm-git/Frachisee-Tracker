@@ -6,7 +6,7 @@ import { openOnboardingCount } from "../../features/onboarding/onboardingSelecto
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapEmail, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setIssueSub, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
@@ -96,6 +96,10 @@ export default function Toolbar() {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapsImport();
         }}><Icon name="upload" />Import spreadsheet</button>}
+        {tab === "caps" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each store" onClick={() => {
+          if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
+          openCapEmail();
+        }}><Icon name="mail" />Email message</button>}
         {concerns && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
         {(tab === "issues" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
