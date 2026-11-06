@@ -1,20 +1,4 @@
-/* ---------- Issues sub-categories + Onboarding ---------- */
-  .sb-subs{display:none;flex-direction:column;gap:2px;margin:2px 0 6px 22px;padding-left:10px;border-left:2px solid rgba(255,255,255,.18)}
-  .sb-subs.show{display:flex}
-  .sb-sub{display:flex;align-items:center;gap:9px;height:34px;padding:0 10px;border:none;border-radius:8px;background:none;color:#d9efc6;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);text-align:left}
-  .sb-sub [data-lucide]{width:15px;height:15px;flex:none}
-  .sb-sub:hover{background:rgba(140,198,63,.24);color:#fff}
-  .sb-sub.on{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 3px 0 0 var(--yellow)}
-  .sb-cnt{margin-left:auto;font-size:10.5px;font-weight:700;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:0 7px;line-height:17px}
-  .app.collapsed .sb-subs{display:none!important}
-  @media(max-width:900px){ .app:not(.expanded-sm) .sb-subs{display:none!important} }
-  .subtabs{display:none;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--line)}
-  .subtab{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border:none;background:none;font-family:var(--font);font-size:14px;font-weight:700;color:var(--ink-soft);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
-  .subtab [data-lucide]{width:17px;height:17px}
-  .subtab:hover{color:var(--green-dark)}
-  .subtab.on{color:var(--green-dark);border-bottom-color:var(--yellow)}
-  .subtab .st-n{font-size:11px;background:var(--lime-soft);color:var(--lime-dark);border-radius:999px;padding:1px 8px}
-  .subtab .st-n:empty{display:none}
+/* ---------- Onboarding ---------- */
   .badge.ob-pend{background:var(--warn-soft);color:#8a5600}
   .badge.ob-sent{background:#e3effa;color:#225f91}
   .badge.ob-wip{background:#efe8fa;color:#5b3699}

@@ -25,12 +25,11 @@
   @keyframes sbWave{to{transform:translateX(-50%)}}
 
   /* Menu feedback: hover fades in, the active marker grows in from its edge */
-  .tab,.sb-item,.sb-sub{transition:background var(--t-fast) ease,color var(--t-fast) ease}
+  .tab,.sb-item{transition:background var(--t-fast) ease,color var(--t-fast) ease}
   .tab .t-ic{transition:transform var(--t-fast) var(--ease-out)}
   .tab:hover .t-ic{transform:translateX(2px)}
   .tab.active::before{animation:tabMark var(--t-med) var(--ease-out)}
   @keyframes tabMark{from{transform:scaleY(0)}to{transform:none}}
-  .sb-subs.show{animation:fadeDown var(--t-med) var(--ease-out)}
 
   /* A newly shown tab eases up into place */
   #view > *{animation:viewIn var(--t-med) var(--ease-out)}
@@ -93,7 +92,7 @@
   /* Reduced motion: no drifting or sliding; state changes still show, without movement */
   @media (prefers-reduced-motion: reduce){
     .sb-glow,.sb-dots,.sb-wave{animation:none}
-    #view > *,.overlay.show,.overlay.show > .modal,.tab.active::before,.sb-subs.show,.spick-sug.show,.sst-menu,.pmenu,.slk-card{animation:none}
+    #view > *,.overlay.show,.overlay.show > .modal,.tab.active::before,.spick-sug.show,.sst-menu,.pmenu,.slk-card{animation:none}
     .tab:hover .t-ic,.qlog-btn:hover,.qlog-btn:hover .qi,.qlog-btn:active,
     .btn:active:not(:disabled),.iconbtn:active:not(:disabled),.mchip:active,.ob-pick:active,.sbtn:active,.pbtn:active{transform:none}
   }
