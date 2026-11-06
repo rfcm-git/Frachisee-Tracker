@@ -18,13 +18,13 @@ import StoresDirectory from "../../features/stores/StoresDirectory.jsx";
 
 function CurrentView() {
   const tab = useUiStore((state) => state.tab);
-  const issueSub = useUiStore((state) => state.issueSub);
   switch (tab) {
     case "search": return <SearchView />;
     case "franchisees": return <FranchiseesView />;
     case "stores": return <StoresDirectory />;
     case "staff": return <StaffDirectory />;
-    case "issues": return issueSub === "onboarding" ? <OnboardingView /> : <ConcernsView />;
+    case "issues": return <ConcernsView />;
+    case "onboarding": return <OnboardingView />;
     case "caps": return <CapsView />;
     case "calls": return <CallLogsView />;
     case "reports": return <ReportsTab />;

@@ -56,7 +56,7 @@ export const PERIODS = [
 export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100] };
 export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25 };
 
-export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "caps", "calls", "reports"];
+export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "caps", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
@@ -64,8 +64,8 @@ export const PAGE_TITLES = {
   franchisees: ["Franchisees", "Owners, contacts and their stores"],
   stores: ["All Stores", "Every store with platforms and status"],
   staff: ["FBC / OM", "Field consultants and operations managers"],
-  concerns: ["Issues · Concerns", "Log, track and report 3PD issues"],
-  onboarding: ["Issues · Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
+  issues: ["Issues", "Log, track and report 3PD issues"],
+  onboarding: ["Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
   caps: ["CAP", "Corrective Action Plan — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
   reports: ["Reports", "Build any report — Excel or PDF, by date, territory, franchisee, store and category"],

@@ -42,10 +42,10 @@ export const QUICK_REPORTS = [
   { kind: "act", title: "All activity — last 7 days", icon: "activity", preset: { period: "lastdays", days: 7 } },
 ];
 
-/** Report type for the current tab: Call Logs, CAPs, Onboarding, else Concerns. */
-export function reportKindForTab(tab, issueSub) {
+/** Report type for the current tab: Call Logs, CAPs, Onboarding, else Issues. */
+export function reportKindForTab(tab) {
   if (tab === "calls") return "cl";
   if (tab === "caps") return "cap";
-  if (tab === "issues" && issueSub === "onboarding") return "ob";
+  if (tab === "onboarding") return "ob";
   return "issues";
 }

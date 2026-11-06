@@ -5,8 +5,7 @@ import { useUiStore } from "../../state/uiStore.js";
 
 export default function TopBar() {
   const tab = useUiStore((state) => state.tab);
-  const issueSub = useUiStore((state) => state.issueSub);
-  const [title, subtitle] = PAGE_TITLES[tab === "issues" ? issueSub : tab] || PAGE_TITLES.dashboard;
+  const [title, subtitle] = PAGE_TITLES[tab] || PAGE_TITLES.dashboard;
 
   useEffect(() => { document.title = `${title} · Franchisee Tracker`; }, [title]);
 

@@ -1,28 +1,27 @@
 import { useMemo } from "react";
 import Icon from "../ui/Icon.jsx";
-import { isIssueOpen } from "../../domain/issues.js";
 import { territorySet } from "../../domain/records.js";
-import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
 import { openCallLog, openCapEmail, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { openFind, setIssueSub, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
+import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
-const SEARCH_TABS = ["franchisees", "stores", "issues", "staff", "caps", "calls"];
+const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "staff", "caps", "calls"];
 
-function searchPlaceholder(tab, issueSub) {
+function searchPlaceholder(tab) {
   if (tab === "caps") return "Search CAPs: store #, franchisee, email, phone or notes…";
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
-  if (tab === "issues") return issueSub === "onboarding" ? "Search onboarding: store #, platform, notes, city…" : "Search issues, store #, phone, address, city, ZIP…";
+  if (tab === "onboarding") return "Search onboarding: store #, platform, notes, city…";
+  if (tab === "issues") return "Search issues, store #, phone, address, city, ZIP…";
   if (tab === "franchisees") return "Search franchisee name, territory, email, phone or notes…";
   return "Search store #, address, city, ZIP, phone or territory…";
 }
 
 /** "Log issue", "New onboarding", "Add FBC / OM" or "Log call", depending on the tab. */
-function primaryAction(tab, issueSub) {
+function primaryAction(tab) {
   if (tab === "staff") return ["Add FBC / OM", () => openStaffForm(null)];
   if (tab === "caps") return ["Add store", () => {
     if (!getContext().capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
@@ -32,7 +31,7 @@ function primaryAction(tab, issueSub) {
     if (!getContext().callLogsReady) { toast("Run migrate-call-logs.sql first", "err"); return; }
     openCallLog(null);
   }];
-  if (tab === "issues" && issueSub === "onboarding") return ["New onboarding", () => {
+  if (tab === "onboarding") return ["New onboarding", () => {
     if (!getContext().onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
     openNewOnboarding();
   }];
@@ -58,7 +57,6 @@ function TerritoryFilter() {
 export default function Toolbar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
-  const issueSub = useUiStore((state) => state.issueSub);
   const search = useUiStore((state) => state.search);
   const countText = useUiStore((state) => state.countText);
   const issuesOnly = useUiStore((state) => state.issuesOnly);
@@ -67,23 +65,14 @@ export default function Toolbar() {
   const showSearch = SEARCH_TABS.includes(tab);
   /** "#…" or "@…" typed on Franchisees / All Stores, where those prefixes no longer apply. */
   const prefixTyped = /^[#@]/.test(search.trim());
-  const primary = primaryAction(tab, issueSub);
-  const concerns = tab === "issues" && issueSub === "concerns";
-  const openConcerns = ctx.issues.filter(isIssueOpen).length;
-  const openOnboarding = openOnboardingCount(ctx);
+  const primary = primaryAction(tab);
 
   return (
     <>
-      {tab === "issues" && <div className="subtabs" role="tablist" aria-label="Issue categories" style={{ display: "flex" }}>
-        {[["concerns", "message-square-warning", "Concerns", openConcerns], ["onboarding", "rocket", "Onboarding", openOnboarding]].map(([sub, icon, label, count]) => (
-          <button type="button" key={sub} className={`subtab${issueSub === sub ? " on" : ""}`} role="tab" aria-selected={issueSub === sub} onClick={() => setIssueSub(sub)}>
-            <Icon name={icon} />{label}<span className="st-n">{count || ""}</span></button>
-        ))}
-      </div>}
       {tab !== "dashboard" && tab !== "reports" && tab !== "search" && <div className="toolbar">
         {showSearch && <div className="search-wrap">
           <span className="lead"><Icon name="search" /></span>
-          <input type="search" aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={searchPlaceholder(tab, issueSub)} />
+          <input type="search" aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={searchPlaceholder(tab)} />
         </div>}
         {(tab === "franchisees" || tab === "stores") && <TerritoryFilter />}
         {tab === "stores" && <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
@@ -100,8 +89,8 @@ export default function Toolbar() {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapEmail();
         }}><Icon name="mail" />Email message</button>}
-        {concerns && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
-        {(tab === "issues" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab, issueSub))}><Icon name="file-bar-chart" />Report</button>}
+        {tab === "issues" && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
+        {(tab === "issues" || tab === "onboarding" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
       </div>}
       {(tab === "franchisees" || tab === "stores") && <div className={`hintbar hintbar-scope${prefixTyped ? " moved" : ""}`}>

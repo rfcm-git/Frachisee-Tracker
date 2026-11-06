@@ -5,7 +5,7 @@ import { capsProgress, openCapsCount } from "../../features/caps/capsSelectors.j
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openLinks, openSettings } from "../../state/dialogs.js";
-import { setIssueSub, setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
+import { setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
 
 function TabButton({ tab, active, icon, label, count, countId, countTip, kbd }) {
   return <button type="button" className={`tab${active ? " active" : ""}`} title={kbd ? `${label} (${kbd} or Ctrl+K)` : label} aria-current={active ? "page" : undefined} onClick={() => setTab(tab)}>
@@ -30,14 +30,12 @@ function SidebarBackdrop() {
 export default function Sidebar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
-  const issueSub = useUiStore((state) => state.issueSub);
   const collapsed = useUiStore((state) => state.sidebarCollapsed);
-  const openConcerns = ctx.issues.filter(isIssueOpen).length;
+  const openIssues = ctx.issues.filter(isIssueOpen).length;
   const openOnboarding = openOnboardingCount(ctx);
   const openFollowUps = ctx.callLogs.filter(hasOpenFollowUp).length;
   const openCaps = openCapsCount(ctx);
   const overdueCaps = ctx.capsDueReady ? capsProgress(ctx).overdue : 0;
-  const onIssues = tab === "issues";
   const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
 
   return (
@@ -54,14 +52,8 @@ export default function Sidebar() {
         <TabButton tab="franchisees" active={tab === "franchisees"} icon="users" label="Franchisees" count={ctx.franchisees.length} />
         <TabButton tab="stores" active={tab === "stores"} icon="store" label="All Stores" count={ctx.stores.length} />
         <TabButton tab="staff" active={tab === "staff"} icon="contact" label="FBC / OM" count={ctx.staff.length} />
-        <TabButton tab="issues" active={onIssues} icon="triangle-alert" label="Issues" count={openConcerns + openOnboarding} />
-        <div className={`sb-subs${onIssues ? " show" : ""}`}>
-          {[["concerns", "message-square-warning", "Concerns", openConcerns], ["onboarding", "rocket", "Onboarding", openOnboarding]].map(([sub, icon, label, count]) => {
-            const on = onIssues && issueSub === sub;
-            return <button type="button" key={sub} className={`sb-sub${on ? " on" : ""}`} title={label} aria-selected={on} onClick={() => setIssueSub(sub)}>
-              <Icon name={icon} /><span className="t-lb">{label}</span><span className="sb-cnt">{count}</span></button>;
-          })}
-        </div>
+        <TabButton tab="issues" active={tab === "issues"} icon="triangle-alert" label="Issues" count={openIssues} />
+        <TabButton tab="onboarding" active={tab === "onboarding"} icon="rocket" label="Onboarding" count={openOnboarding} />
         <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAP" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
         <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />

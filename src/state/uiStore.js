@@ -37,7 +37,6 @@ const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key
 function baseState() {
   return {
     tab: "dashboard",
-    issueSub: "concerns",
     search: "",
     findQuery: "",
     findScope: "all",
@@ -85,7 +84,8 @@ function restoredState() {
   if (!saved || typeof saved !== "object") return { state: {}, pending: null };
   const state = {};
   if (TABS.includes(saved.tab)) state.tab = saved.tab;
-  if (saved.issueSub === "onboarding" || saved.issueSub === "concerns") state.issueSub = saved.issueSub;
+  // Sessions saved before Onboarding became its own tab stored it as an Issues sub-tab.
+  if (saved.tab === "issues" && saved.issueSub === "onboarding") state.tab = "onboarding";
   state.search = typeof saved.search === "string" ? saved.search : "";
   state.findQuery = typeof saved.findQuery === "string" ? saved.findQuery : "";
   state.findScope = typeof saved.findScope === "string" ? saved.findScope : "all";
@@ -142,11 +142,6 @@ export function setTab(tab) {
   set({ tab, search: "", ...resetPages("fr", "st") });
 }
 
-export function setIssueSub(issueSub) {
-  set({ tab: "issues", issueSub, search: "" });
-  window.scrollTo(0, 0);
-}
-
 /* ---------- Search tab ---------- */
 
 export const setFindQuery = (findQuery) => set({ findQuery });
@@ -191,7 +186,7 @@ export function openTabFromDashboard(tab) {
 }
 
 export function showOpenConcerns() {
-  set({ tab: "issues", issueSub: "concerns", search: "", issueFilter: { ...get().issueFilter, statuses: ["Pending", "Work in Progress"] }, ...resetPages("is") });
+  set({ tab: "issues", search: "", issueFilter: { ...get().issueFilter, statuses: ["Pending", "Work in Progress"] }, ...resetPages("is") });
   window.scrollTo(0, 0);
 }
 
@@ -376,7 +371,7 @@ export function toggleSidebar() {
 export function saveUiSession(extra) {
   const state = get();
   session.setJson(STORAGE_KEYS.uiSession, {
-    tab: state.tab, issueSub: state.issueSub, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
+    tab: state.tab, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
     issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
