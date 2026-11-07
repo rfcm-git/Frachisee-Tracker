@@ -2,6 +2,7 @@
  * CAP email: the shared template, its {{placeholders}}, who is CC'd and the Outlook (mailto:) link.
  * Houston stores (territory 540, or a Houston, TX address) CC Christophe; every other store CCs Aziza.
  * The store's FBC and OM are always CC'd too. Each address is listed once (e.g. when Aziza is also the OM).
+ * Stores owned by Rohit or Raghu Marwaha go to Rajeev instead, with the owner moved to CC.
  */
 import { franchiseeName } from "./context.js";
 import { capContact, formatDueDate, normalizeCapStatus } from "./caps.js";
@@ -62,6 +63,18 @@ export function emailList(text) {
 
 /** Parts of a CC box that are not valid email addresses. */
 export const badEmails = (text) => String(text || "").split(/[;,\s]+/).map((part) => part.trim()).filter((part) => part && !isEmail(part));
+
+/** Owners whose CAP emails go to Rajeev; the owner is CC'd instead. Each entry is the words of the name. */
+const RAJEEV_EMAIL = "rajeev@marwahagroup.com";
+const ROUTED_TO_RAJEEV = [["rohit", "marwaha"], ["raghu", "marwaha"]];
+
+/** True when a name has all the words of Rohit or Raghu Marwaha ("Rohit Marwaha", "Marwaha, Rohit"…). */
+function isRoutedToRajeev(...names) {
+  return names.some((name) => {
+    const words = new Set(String(name || "").toLowerCase().split(/[^a-z]+/).filter(Boolean));
+    return ROUTED_TO_RAJEEV.some((owner) => owner.every((word) => words.has(word)));
+  });
+}
 
 /** Store territory, or its franchisee's when the store has none. */
 function territoryOf(ctx, store) {
@@ -127,10 +140,10 @@ export function mailtoHref({ to, cc = [], subject = "", body = "" }) {
 }
 
 /**
- * CC of one store, each address once: [{ email, why: ["FBC", "OM", "Houston", "Other territory", "Always"], name }].
- * The franchisee (to) is never CC'd on their own email.
+ * CC of one store, each address once: [{ email, why: ["Owner", "FBC", "OM", "Houston", "Other territory", "Always"], name }].
+ * The recipient (to) is never CC'd on their own email. owner = { email, name } when the owner is moved from To to CC.
  */
-function ccFor(ctx, store, template, houston, to) {
+function ccFor(ctx, store, template, houston, to, owner) {
   const byEmail = new Map();
   const add = (email, why, name = "") => {
     const key = email.toLowerCase();
@@ -140,6 +153,7 @@ function ccFor(ctx, store, template, houston, to) {
     if (name && !entry.name) entry.name = name;
     byEmail.set(key, entry);
   };
+  if (owner) emailList(owner.email).forEach((email) => add(email, "Owner", owner.name));
   const team = staffForStore(ctx, store);
   [["FBC", team.fbc[0]], ["OM", team.om[0]]].forEach(([role, person]) => emailList(emailOf(person)).forEach((email) => add(email, role, person.name || "")));
   emailList(houston ? template.ccHouston : template.ccOther).forEach((email) => add(email, houston ? "Houston" : "Other territory"));
@@ -148,18 +162,20 @@ function ccFor(ctx, store, template, houston, to) {
 }
 
 /**
- * The email for one CAP record: { to, cc, ccInfo, subject, body, href, houston, missing: [field names with no value] }.
+ * The email for one CAP record: { to, cc, ccInfo, subject, body, href, houston, rajeev, missing: [field names with no value] }.
+ * rajeev = true when the store belongs to Rohit or Raghu Marwaha, so it goes to Rajeev with the owner in CC.
  */
 export function buildCapEmail(ctx, record, template) {
   const values = capEmailValues(ctx, record);
   const store = ctx.storeByNum.get(String(record.store_num));
   const houston = isHoustonStore(ctx, store);
-  const to = values.Email;
-  const ccInfo = ccFor(ctx, store, template, houston, to);
+  const rajeev = isRoutedToRajeev(store && franchiseeName(ctx, store.franchisee_id), values.Franchisee);
+  const to = rajeev ? RAJEEV_EMAIL : values.Email;
+  const ccInfo = ccFor(ctx, store, template, houston, to, rajeev ? { email: values.Email, name: values.Franchisee } : null);
   const cc = ccInfo.map((entry) => entry.email);
   const missing = new Set();
   const subject = fillTemplate(template.subject, values, missing).replace(/\s*\r?\n\s*/g, " ").trim();
   const body = fillTemplate(template.body, values, missing);
   const team = { fbc: ccInfo.some((entry) => entry.why.includes("FBC")), om: ccInfo.some((entry) => entry.why.includes("OM")) };
-  return { to, cc, ccInfo, team, store: !!store, subject, body, houston, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
+  return { to, cc, ccInfo, team, store: !!store, subject, body, houston, rajeev, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
 }
