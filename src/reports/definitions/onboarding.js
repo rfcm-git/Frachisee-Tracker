@@ -10,12 +10,12 @@ import { reportMonth } from "../reportDates.js";
 import { average, distinct, franchiseeContactsText, names, percentText, searchToReportFilters } from "./shared.js";
 
 const COLUMN_WIDTHS = { store: 10, fr: 28, terr: 10, addr: 30, city: 14, state: 7, plat: 12, status: 22, storeplat: 16, req: 12, details: 44, lastupd: 40, allupd: 60, started: 17, updated: 17, days: 12, nupd: 10, fbc: 18, om: 18, frcontact: 32 };
-const COUNT_HEADERS = ["Total", "Pending", "Email Sent/Text Message", "Work in Progress", "Onboarded"];
+const COUNT_HEADERS = ["Total", ...OB_STATES];
 
 const counts = (items) => {
   const byStatus = {};
   items.forEach((item) => { byStatus[item.status] = (byStatus[item.status] || 0) + 1; });
-  return [items.length, byStatus.Pending || 0, byStatus["Email Sent/Text Message"] || 0, byStatus["Work in Progress"] || 0, byStatus.Onboarded || 0];
+  return [items.length, ...OB_STATES.map((status) => byStatus[status] || 0)];
 };
 
 const lastOf = (items) => items.map((item) => item.updated_at || item.created_at).sort().pop();
@@ -77,15 +77,16 @@ export default {
     const platforms = OB_PLATFORMS.filter(([key]) => (state.chips.plat || []).includes(key));
 
     if (state.sheets.includes("summary")) {
-      const [total, pending, sent, wip, done] = counts(records);
+      const [total, ...byStatus] = counts(records);
+      const done = byStatus[OB_STATES.indexOf("Onboarded")];
       h.summarySheet(workbook, "Onboarding Report", [
         { title: "Totals", rows: [
           ["Records (store + platform)", total], ["Stores", distinct(records, (record) => String(record.store_num || ""))], ["Franchisees", distinct(records, (record) => obFranchiseeId(ctx, record))],
-          ["Pending", pending], ["Email Sent/Text Message", sent], ["Work in Progress", wip], ["Onboarded", done],
+          ...OB_STATES.map((status, index) => [status, byStatus[index]]),
           ["Onboarded rate", percentText(done, total)],
           ["Average days to onboard", average(records.filter((record) => record.status === "Onboarded").map(obDays).filter((value) => value !== ""), "—")],
         ] },
-        { title: "By platform", value: "Total / Pending / Email-Text / Work in Progress / Onboarded",
+        { title: "By platform", value: `Total / ${OB_STATES.join(" / ")}`,
           rows: platforms.map(([key, name]) => [name, counts(records.filter((record) => record.platform === key)).join(" / ")]) },
       ]);
     }

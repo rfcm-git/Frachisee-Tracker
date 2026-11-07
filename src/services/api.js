@@ -21,6 +21,9 @@ export const CAPS_LAST_IMPORT_KEY = "caps_last_import";
 /** app_settings key of the CAP email template. */
 export const CAPS_EMAIL_KEY = "caps_email_template";
 
+/** app_settings key of the onboarding email template. */
+export const ONBOARDING_EMAIL_KEY = "onboarding_email_template";
+
 function db() {
   const client = getDb();
   if (!client) throw new Error("Not connected");
@@ -84,7 +87,10 @@ export async function loadAllTables({ onProgress } = {}) {
   const capsLastImport = lastImport.error ? undefined : lastImport.value || null;
   // Same for the email template: undefined means it is kept on this computer instead.
   const capsEmail = emailTemplate.error ? undefined : emailTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail };
+  // Onboarding email template: undefined when app_settings is not set up (kept on this computer instead).
+  const obTemplate = onboardingReady ? await readSetting(ONBOARDING_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const onboardingEmail = obTemplate.error ? undefined : obTemplate.value || null;
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

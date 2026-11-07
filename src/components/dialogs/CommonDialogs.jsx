@@ -55,7 +55,7 @@ export function ConflictDialog({ what }) {
 
   async function reload() {
     setLoading(true);
-    closeDialogs(DIALOG.franchiseeForm, DIALOG.updateIssue, DIALOG.groupUpdate, DIALOG.staffForm, DIALOG.staffDetail, DIALOG.updateOnboarding, DIALOG.callLog);
+    closeDialogs(DIALOG.franchiseeForm, DIALOG.updateIssue, DIALOG.groupUpdate, DIALOG.staffForm, DIALOG.staffDetail, DIALOG.updateOnboarding, DIALOG.storeOnboarding, DIALOG.callLog);
     await loadAll();
     setLoading(false);
     close();

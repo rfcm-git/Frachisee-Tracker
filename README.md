@@ -27,6 +27,7 @@ Some tabs need a table that older databases don't have yet. Run the matching scr
 - `migrate-caps.sql` — CAP tab (Corrective Action Plan). Until it is run, the CAP tab shows a reminder and other tabs work as before.
 - `migrate-caps-due-date.sql` — CAPs submission due dates and due-date reminders. Until it is run, the CAP tab works without due dates.
 - `migrate-caps-history.sql` — CAPs change log (shown when hovering Date Added / Last Updated). Until it is run, the log only shows when a store was added and last updated.
+- `migrate-onboarding-statuses.sql` — one set of statuses for onboarding and Delivery Platforms (Not enrolled · Work in Progress · Onboarded · Exempted), a one-time sync of the two, and Walmart as an onboarding platform. Until it is run, the app shows the new statuses but saving an onboarding status asks you to run it.
 
 ## Deploy to Vercel
 

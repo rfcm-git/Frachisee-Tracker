@@ -1,5 +1,5 @@
 /* Directory reports: Stores, Franchisees and FBC / OM. */
-import { CORE3 } from "../../config/constants.js";
+import { CORE3, PLATFORM_STATES } from "../../config/constants.js";
 import { franchiseeContactBits, hasOpenFollowUp } from "../../domain/calls.js";
 import { franchiseeName, franchiseeOpenIssues, staffMember, storeOpenIssues, storesOf } from "../../domain/context.js";
 import { obFranchiseeId, obIsOpen, obVisible } from "../../domain/onboarding.js";
@@ -28,9 +28,9 @@ export const storesReport = {
   mainSheetLabel: "Stores",
   chips: [
     { key: "status", label: "Store status", options: [["Open", "Open"], ["Temporarily closed", "Temporarily closed"], ["Closed", "Closed"]], ok: (ctx, store, selected) => selected.includes(storeStatus(store)) },
-    { key: "core", label: "Core 3PD active", options: [["3", "All 3"], ["2", "2 of 3"], ["1", "1 of 3"], ["0", "None"]], ok: (ctx, store, selected) => selected.includes(String(coreActive(store))) },
+    { key: "core", label: "Core 3PD onboarded", options: [["3", "All 3"], ["2", "2 of 3"], ["1", "1 of 3"], ["0", "None"]], ok: (ctx, store, selected) => selected.includes(String(coreActive(store))) },
     { key: "gbp", label: "Google Business Profile", options: [["yes", "Linked"], ["no", "Not linked"]], ok: (ctx, store, selected) => selected.includes(hasGbp(store) ? "yes" : "no") },
-    { key: "ez", label: "ezCater", options: [["Active", "Active"], ["Pending", "Pending"], ["Not enrolled", "Not enrolled"], ["Exempted", "Exempted"]], ok: (ctx, store, selected) => selected.includes(platformStatus(store, "ez")) },
+    { key: "ez", label: "ezCater", options: PLATFORM_STATES.map((status) => [status, status]), ok: (ctx, store, selected) => selected.includes(platformStatus(store, "ez")) },
     { key: "team", label: "Support team", options: [["both", "FBC + OM"], ["nofbc", "No FBC"], ["noom", "No OM"]],
       ok: (ctx, store, selected) => {
         const fbc = !!staffMember(ctx, store.fbc_id);
@@ -42,7 +42,7 @@ export const storesReport = {
   defSheets: ["summary", "stores", "byterr"],
   cols: [
     ["num", "Store #"], ["fr", "Franchisee"], ["status", "Store status"], ["addr", "Address"], ["city", "City"], ["state", "State"], ["zip", "ZIP"], ["terr", "Territory"], ["phone", "Store phone"],
-    ["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["core", "Core 3PD active (of 3)"], ["gbp", "GBP link"], ["fbc", "FBC"], ["fbcmail", "FBC email"], ["om", "OM"], ["ommail", "OM email"],
+    ["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["wm", "Walmart"], ["core", "Core 3PD onboarded (of 3)"], ["gbp", "GBP link"], ["fbc", "FBC"], ["fbcmail", "FBC email"], ["om", "OM"], ["ommail", "OM email"],
     ["issues", "Open concerns"], ["onb", "Open onboarding"], ["calls", "Calls"], ["lastcall", "Last call"], ["frcontact", "Franchisee email / phone"],
   ],
   defOff: ["zip", "fbcmail", "ommail", "frcontact", "lastcall"],
@@ -61,11 +61,11 @@ export const storesReport = {
       h.summarySheet(workbook, "Store Report", [{ title: "Totals", rows: [
         ["Stores", stores.length], ["Open", live.length], ["Temporarily closed", stores.filter((store) => storeStatus(store) === "Temporarily closed").length], ["Closed", stores.filter((store) => storeStatus(store) === "Closed").length],
         ["Open stores on all 3 core apps", `${allThree} (${percent(allThree, live.length)}%)`], ["Open stores with no core app", live.filter((store) => coreActive(store) === 0).length],
-        ["GBP linked (open stores)", `${gbp} (${percent(gbp, live.length)}%)`], ["ezCater active (open stores)", live.filter((store) => platformStatus(store, "ez") === "Active").length],
+        ["GBP linked (open stores)", `${gbp} (${percent(gbp, live.length)}%)`], ["ezCater onboarded (open stores)", live.filter((store) => platformStatus(store, "ez") === "Onboarded").length],
         ["Stores without FBC", stores.filter((store) => !staffMember(ctx, store.fbc_id)).length], ["Stores without OM", stores.filter((store) => !staffMember(ctx, store.om_id)).length],
       ] }]);
     }
-    const widths = { num: 9, fr: 28, status: 16, addr: 30, city: 14, state: 6, zip: 8, terr: 9, phone: 15, ue: 12, dd: 12, gh: 12, ez: 12, core: 10, gbp: 30, fbc: 14, fbcmail: 26, om: 14, ommail: 26, issues: 9, onb: 9, calls: 7, lastcall: 17, frcontact: 32 };
+    const widths = { num: 9, fr: 28, status: 16, addr: 30, city: 14, state: 6, zip: 8, terr: 9, phone: 15, ue: 12, dd: 12, gh: 12, ez: 12, wm: 12, core: 10, gbp: 30, fbc: 14, fbcmail: 26, om: 14, ommail: 26, issues: 9, onb: 9, calls: 7, lastcall: 17, frcontact: 32 };
     if (state.sheets.includes("stores") && state.cols.length) {
       const columns = this.cols.filter(([key]) => state.cols.includes(key));
       const rows = [columns.map(([, label]) => label), ...stores.map((store) => {
@@ -76,7 +76,7 @@ export const storesReport = {
         const lastCall = calls.map((call) => call.call_at).sort().pop();
         const value = {
           num: store.num, fr: franchiseeName(ctx, store.franchisee_id), status: storeStatus(store), addr: store.address || "", city: store.city || "", state: store.state || "", zip: store.zip || "",
-          terr: primaryTerritory(store), phone: store.phone || "", ue: platformStatus(store, "ue"), dd: platformStatus(store, "dd"), gh: platformStatus(store, "gh"), ez: platformStatus(store, "ez"),
+          terr: primaryTerritory(store), phone: store.phone || "", ue: platformStatus(store, "ue"), dd: platformStatus(store, "dd"), gh: platformStatus(store, "gh"), ez: platformStatus(store, "ez"), wm: platformStatus(store, "wm"),
           core: coreActive(store), gbp: store.gbp || "", fbc: fbc ? fbc.name : "", fbcmail: fbc ? emailOf(fbc) : "", om: om ? om.name : "", ommail: om ? emailOf(om) : "",
           issues: storeOpenIssues(ctx, store.num), onb: openOnboardingFor(ctx, (record) => String(record.store_num) === String(store.num)),
           calls: calls.length, lastcall: lastCall ? h.date(lastCall) : "", frcontact: [...contacts.emails, ...contacts.phones].join(", "),
@@ -88,10 +88,10 @@ export const storesReport = {
     const coverage = (items) => {
       const open = items.filter(isOpenStore);
       return [items.length, open.length, average(open.map(coreActive), 0), `${percent(open.filter((store) => coreActive(store) === 3).length, open.length)}%`,
-        `${percent(open.filter(hasGbp).length, open.length)}%`, `${percent(open.filter((store) => platformStatus(store, "ez") === "Active").length, open.length)}%`,
+        `${percent(open.filter(hasGbp).length, open.length)}%`, `${percent(open.filter((store) => platformStatus(store, "ez") === "Onboarded").length, open.length)}%`,
         items.reduce((sum, store) => sum + storeOpenIssues(ctx, store.num), 0)];
     };
-    const coverageHeaders = ["Stores", "Open", "Avg core 3PD", "All 3 apps", "GBP linked", "ezCater active", "Open concerns"];
+    const coverageHeaders = ["Stores", "Open", "Avg core 3PD", "All 3 apps", "GBP linked", "ezCater onboarded", "Open concerns"];
     if (state.sheets.includes("byterr")) {
       h.groupSheet(workbook, stores, { title: "By territory", key: primaryTerritory, head: (key) => [key], headers: ["Territory", ...coverageHeaders], widths: [10, 8, 8, 11, 10, 10, 12, 12], count: coverage, sort: (a, b) => (+a[0] || 0) - (+b[0] || 0) });
     }
@@ -101,8 +101,8 @@ export const storesReport = {
     if (state.sheets.includes("gaps")) {
       const rows = [["Store #", "Franchisee", "Territory", "Status", "Missing"]];
       live.forEach((store) => {
-        const missing = [...CORE3.filter(([key]) => platformStatus(store, key) !== "Active").map(([, name]) => name), hasGbp(store) ? null : "GBP link",
-          platformStatus(store, "ez") === "Active" ? null : "ezCater", staffMember(ctx, store.fbc_id) ? null : "FBC", staffMember(ctx, store.om_id) ? null : "OM"].filter(Boolean);
+        const missing = [...CORE3.filter(([key]) => platformStatus(store, key) !== "Onboarded").map(([, name]) => name), hasGbp(store) ? null : "GBP link",
+          platformStatus(store, "ez") === "Onboarded" ? null : "ezCater", staffMember(ctx, store.fbc_id) ? null : "FBC", staffMember(ctx, store.om_id) ? null : "OM"].filter(Boolean);
         if (missing.length) rows.push([store.num, franchiseeName(ctx, store.franchisee_id), primaryTerritory(store), storeStatus(store), missing.join(", ")]);
       });
       workbook.addSheet("Coverage gaps", rows, [9, 28, 9, 14, 60], { filter: true });
@@ -137,7 +137,7 @@ export const franchiseesReport = {
   sheets: [["summary", "Summary", "Totals"], ["frs", "Franchisees", "One row per franchisee"], ["stores", "Their stores", "One row per store, grouped by franchisee"]],
   defSheets: ["summary", "frs"],
   cols: [
-    ["name", "Franchisee"], ["terr", "Territories"], ["stores", "Stores"], ["open", "Open stores"], ["email", "Email"], ["phone", "Phone"], ["core", "Avg core 3PD"], ["gbp", "GBP linked"], ["ez", "ezCater active"],
+    ["name", "Franchisee"], ["terr", "Territories"], ["stores", "Stores"], ["open", "Open stores"], ["email", "Email"], ["phone", "Phone"], ["core", "Avg core 3PD"], ["gbp", "GBP linked"], ["ez", "ezCater onboarded"],
     ["issues", "Open concerns"], ["onb", "Open onboarding"], ["calls", "Calls"], ["lastcall", "Last call"], ["fu", "Open follow-ups"], ["fbc", "FBC(s)"], ["om", "OM(s)"],
   ],
   defOff: ["fbc", "om"],
@@ -169,7 +169,7 @@ export const franchiseesReport = {
           name: franchisee.name, terr: [...new Set(stores.map(primaryTerritory))].join(", ") || franchisee.territory || "", stores: stores.length, open: open.length,
           email: contacts.emails.join(", "), phone: contacts.phones.join(", "),
           core: open.length ? average(open.map(coreActive)) : "", gbp: open.length ? `${percent(open.filter(hasGbp).length, open.length)}%` : "",
-          ez: open.length ? `${percent(open.filter((store) => platformStatus(store, "ez") === "Active").length, open.length)}%` : "",
+          ez: open.length ? `${percent(open.filter((store) => platformStatus(store, "ez") === "Onboarded").length, open.length)}%` : "",
           issues: franchiseeOpenIssues(ctx, franchisee.id), onb: openOnboardingFor(ctx, (record) => obFranchiseeId(ctx, record) === franchisee.id),
           calls: calls.length, lastcall: calls.length ? h.date(calls.map((call) => call.call_at).sort().pop()) : "", fu: calls.filter(hasOpenFollowUp).length,
           fbc: team.fbc.map((entry) => entry.person.name).join(", "), om: team.om.map((entry) => entry.person.name).join(", "),
@@ -179,12 +179,12 @@ export const franchiseesReport = {
       workbook.addSheet("Franchisees", rows, columns.map(([key]) => widths[key] || 12), { filter: true });
     }
     if (state.sheets.includes("stores")) {
-      const rows = [["Franchisee", "Store #", "Status", "City", "Territory", "Uber Eats", "DoorDash", "Grubhub", "ezCater", "GBP linked"]];
+      const rows = [["Franchisee", "Store #", "Status", "City", "Territory", "Uber Eats", "DoorDash", "Grubhub", "ezCater", "Walmart", "GBP linked"]];
       franchisees.forEach((franchisee) => storesOf(ctx, franchisee.id).slice().sort(compareStores).forEach((store) => rows.push([
         franchisee.name, store.num, storeStatus(store), store.city || "", primaryTerritory(store),
-        platformStatus(store, "ue"), platformStatus(store, "dd"), platformStatus(store, "gh"), platformStatus(store, "ez"), hasGbp(store) ? "Yes" : "No",
+        platformStatus(store, "ue"), platformStatus(store, "dd"), platformStatus(store, "gh"), platformStatus(store, "ez"), platformStatus(store, "wm"), hasGbp(store) ? "Yes" : "No",
       ])));
-      workbook.addSheet("Their stores", rows, [28, 9, 16, 14, 9, 12, 12, 12, 12, 10], { filter: true });
+      workbook.addSheet("Their stores", rows, [28, 9, 16, 14, 9, 12, 12, 12, 12, 12, 10], { filter: true });
     }
   },
 };

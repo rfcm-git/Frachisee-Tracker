@@ -52,9 +52,8 @@ export async function addStoreNote(store, text) {
 }
 
 /**
- * Keeps stores' Delivery Platforms in step with onboarding:
- * Onboarded -> Active; otherwise Not enrolled -> Pending. Exempted statuses remain unchanged.
- * items = [{ num, platform, status }]
+ * Keeps stores' Delivery Platforms in step with onboarding: each store + platform gets the onboarding record's status
+ * (both use the same four statuses). items = [{ num, platform, status }]
  */
 export async function syncStorePlatforms(items) {
   const byStore = {};
@@ -64,13 +63,7 @@ export async function syncStorePlatforms(items) {
     if (!store) continue;
     const result = await mergeStoreSave(store.id, (fresh) => {
       const platforms = platformsOf(fresh);
-      byStore[num].forEach((item) => {
-        const current = normalizePlatformStatus(platforms[item.platform] || "Not enrolled");
-        if (item.status === "Exempted") { platforms[item.platform] = "Exempted"; return; }
-        if (current === "Exempted") return;
-        if (item.status === "Onboarded") platforms[item.platform] = "Active";
-        else if (current === "Not enrolled") platforms[item.platform] = "Pending";
-      });
+      byStore[num].forEach((item) => { platforms[item.platform] = normalizePlatformStatus(item.status); });
       return { platforms: normalizedPlatforms(platforms) };
     });
     if (result.row) replaceRow("stores", result.row);

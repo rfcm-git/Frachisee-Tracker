@@ -4,7 +4,7 @@ import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapEmail, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openNewOnboarding, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapEmail, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
@@ -20,7 +20,7 @@ function searchPlaceholder(tab) {
   return "Search store #, address, city, ZIP, phone or territory…";
 }
 
-/** "Log issue", "New onboarding", "Add FBC / OM" or "Log call", depending on the tab. */
+/** "Log issue", "Add store" (onboarding), "Add FBC / OM" or "Log call", depending on the tab. */
 function primaryAction(tab) {
   if (tab === "staff") return ["Add FBC / OM", () => openStaffForm(null)];
   if (tab === "caps") return ["Add store", () => {
@@ -31,9 +31,9 @@ function primaryAction(tab) {
     if (!getContext().callLogsReady) { toast("Run migrate-call-logs.sql first", "err"); return; }
     openCallLog(null);
   }];
-  if (tab === "onboarding") return ["New onboarding", () => {
+  if (tab === "onboarding") return ["Add store", () => {
     if (!getContext().onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
-    openNewOnboarding();
+    openAddOnboarding();
   }];
   if (tab === "issues") return ["Log issue", () => openLogIssue(null)];
   return null;
@@ -88,6 +88,10 @@ export default function Toolbar() {
         {tab === "caps" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each store" onClick={() => {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapEmail();
+        }}><Icon name="mail" />Email message</button>}
+        {tab === "onboarding" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each onboarding row" onClick={() => {
+          if (!ctx.onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
+          openOnboardingEmail();
         }}><Icon name="mail" />Email message</button>}
         {tab === "issues" && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
         {(tab === "issues" || tab === "onboarding" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}

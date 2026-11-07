@@ -27,10 +27,31 @@ export const DEFAULT_CAP_EMAIL = Object.freeze({
     "",
     "Thank you,",
   ].join("\n"),
+  multiSubject: "Corrective Action Plans · {{Store count}} stores",
+  multiBody: [
+    "Hi {{Franchisee}},",
+    "",
+    "We need a Corrective Action Plan (CAP) for each of these stores:",
+    "{{Stores}}",
+    "",
+    "Please send them by the due dates above.",
+    "",
+    "Let us know if you have any questions.",
+    "",
+    "Thank you,",
+  ].join("\n"),
   ccHouston: "christophe@marwahagroup.com",
   ccOther: "aziza@marwahagroup.com",
   ccAlways: "richard@subsource.com, karl@subsource.com",
 });
+
+/** Placeholders of the several-stores message. */
+export const CAP_EMAIL_MULTI_FIELDS = [
+  ["Franchisee", "Franchisee name"],
+  ["Stores", "One line per store: number, address and due date"],
+  ["Store count", "Number of stores in the email"],
+  ["Email", "Franchisee email"],
+];
 
 /** Placeholder name -> description, in the order shown in the editor. */
 export const CAP_EMAIL_FIELDS = [
@@ -124,9 +145,9 @@ export function fillTemplate(text, values, missing = new Set()) {
   });
 }
 
-/** Placeholders in the text that are not known fields. */
-export function unknownPlaceholders(text) {
-  const known = new Set(CAP_EMAIL_FIELDS.map(([name]) => name.toLowerCase()));
+/** Placeholders in the text that are not known fields (fields: [[name, description]], the CAP fields by default). */
+export function unknownPlaceholders(text, fields = CAP_EMAIL_FIELDS) {
+  const known = new Set(fields.map(([name]) => name.toLowerCase()));
   return [...new Set([...String(text || "").matchAll(PLACEHOLDER)].map((match) => match[1]).filter((name) => !known.has(name.toLowerCase())))];
 }
 
@@ -143,7 +164,7 @@ export function mailtoHref({ to, cc = [], subject = "", body = "" }) {
  * CC of one store, each address once: [{ email, why: ["Owner", "FBC", "OM", "Houston", "Other territory", "Always"], name }].
  * The recipient (to) is never CC'd on their own email. owner = { email, name } when the owner is moved from To to CC.
  */
-function ccFor(ctx, store, template, houston, to, owner) {
+function ccFor(ctx, stores, template, to, owner) {
   const byEmail = new Map();
   const add = (email, why, name = "") => {
     const key = email.toLowerCase();
@@ -154,28 +175,83 @@ function ccFor(ctx, store, template, houston, to, owner) {
     byEmail.set(key, entry);
   };
   if (owner) emailList(owner.email).forEach((email) => add(email, "Owner", owner.name));
-  const team = staffForStore(ctx, store);
-  [["FBC", team.fbc[0]], ["OM", team.om[0]]].forEach(([role, person]) => emailList(emailOf(person)).forEach((email) => add(email, role, person.name || "")));
-  emailList(houston ? template.ccHouston : template.ccOther).forEach((email) => add(email, houston ? "Houston" : "Other territory"));
+  stores.forEach((store) => {
+    const team = staffForStore(ctx, store);
+    [["FBC", team.fbc[0]], ["OM", team.om[0]]].forEach(([role, person]) => emailList(emailOf(person)).forEach((email) => add(email, role, person.name || "")));
+  });
+  // Houston stores CC the Houston list, the others CC the other-territory list (both when the email mixes them).
+  const houston = stores.map((store) => isHoustonStore(ctx, store));
+  if (houston.some(Boolean)) emailList(template.ccHouston).forEach((email) => add(email, "Houston"));
+  if (!stores.length || houston.some((value) => !value)) emailList(template.ccOther).forEach((email) => add(email, "Other territory"));
   emailList(template.ccAlways).forEach((email) => add(email, "Always"));
   return [...byEmail.values()];
 }
 
 /**
- * The email for one CAP record: { to, cc, ccInfo, subject, body, href, houston, rajeev, missing: [field names with no value] }.
- * rajeev = true when the store belongs to Rohit or Raghu Marwaha, so it goes to Rajeev with the owner in CC.
+ * Who gets an email about one store or several stores of one franchisee (shared by the CAP and onboarding emails), using the template's CC rules.
+ * storeOrStores: a store row, or a list of them. owner = { email, name } of the franchisee.
+ * Returns { to, cc, ccInfo, team: { fbc, om } (every store has one), houston (any store in Houston), mixed (Houston and other stores), rajeev }.
+ * rajeev = true when the stores belong to Rohit or Raghu Marwaha, so it goes to Rajeev with the owner in CC.
+ */
+export function recipientsFor(ctx, storeOrStores, template, owner) {
+  const stores = (Array.isArray(storeOrStores) ? storeOrStores : [storeOrStores]).filter(Boolean);
+  const houstonFlags = stores.map((store) => isHoustonStore(ctx, store));
+  const first = stores[0];
+  const rajeev = isRoutedToRajeev(first && franchiseeName(ctx, first.franchisee_id), owner.name);
+  const to = rajeev ? RAJEEV_EMAIL : owner.email;
+  const ccInfo = ccFor(ctx, stores, template, to, rajeev ? owner : null);
+  const has = (role) => stores.length > 0 && stores.every((store) => emailList(emailOf(staffForStore(ctx, store)[role][0])).length > 0);
+  const team = { fbc: has("fbc"), om: has("om") };
+  return { to, cc: ccInfo.map((entry) => entry.email), ccInfo, team, houston: houstonFlags.some(Boolean), mixed: houstonFlags.some(Boolean) && houstonFlags.some((value) => !value), rajeev };
+}
+
+/** Fills the template (its several-stores message when multi) for these values and recipients: { subject, body, href, missing }. */
+export function composeEmail(template, values, recipients, multi = false) {
+  const missing = new Set();
+  const subject = fillTemplate(multi ? template.multiSubject : template.subject, values, missing).replace(/\s*\r?\n\s*/g, " ").trim();
+  const body = fillTemplate(multi ? template.multiBody : template.body, values, missing);
+  const { to, cc } = recipients;
+  return { subject, body, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
+}
+
+/**
+ * The email for one CAP record: { to, cc, ccInfo, team, store, subject, body, href, houston, rajeev, missing: [field names with no value] }.
  */
 export function buildCapEmail(ctx, record, template) {
   const values = capEmailValues(ctx, record);
   const store = ctx.storeByNum.get(String(record.store_num));
-  const houston = isHoustonStore(ctx, store);
-  const rajeev = isRoutedToRajeev(store && franchiseeName(ctx, store.franchisee_id), values.Franchisee);
-  const to = rajeev ? RAJEEV_EMAIL : values.Email;
-  const ccInfo = ccFor(ctx, store, template, houston, to, rajeev ? { email: values.Email, name: values.Franchisee } : null);
-  const cc = ccInfo.map((entry) => entry.email);
-  const missing = new Set();
-  const subject = fillTemplate(template.subject, values, missing).replace(/\s*\r?\n\s*/g, " ").trim();
-  const body = fillTemplate(template.body, values, missing);
-  const team = { fbc: ccInfo.some((entry) => entry.why.includes("FBC")), om: ccInfo.some((entry) => entry.why.includes("OM")) };
-  return { to, cc, ccInfo, team, store: !!store, subject, body, houston, rajeev, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
+  const recipients = recipientsFor(ctx, store, template, { email: values.Email, name: values.Franchisee });
+  return { ...recipients, store: !!store, ...composeEmail(template, values, recipients) };
+}
+
+/** "• Store #100 · 1 Main St, Austin · due Nov 15, 2026" */
+function capStoreLine(ctx, record) {
+  const store = ctx.storeByNum.get(String(record.store_num));
+  const place = [store?.address, store?.city].filter(Boolean).join(", ");
+  const due = formatDueDate(record.due_date);
+  return `• Store #${record.store_num}${place ? ` · ${place}` : ""}${due ? ` · due ${due}` : ""}`;
+}
+
+/** Other stores of the same franchisee in the CAP list that are not Completed (none when the store has no franchisee). */
+export function capFranchiseeRecords(ctx, record) {
+  const store = ctx.storeByNum.get(String(record.store_num));
+  if (!store || store.franchisee_id == null) return [record];
+  const records = ctx.caps.filter((item) => {
+    const itemStore = ctx.storeByNum.get(String(item.store_num));
+    return itemStore && itemStore.franchisee_id === store.franchisee_id && (item.id === record.id || normalizeCapStatus(item.status) !== "Completed");
+  });
+  return records.sort((a, b) => String(a.store_num).localeCompare(String(b.store_num), undefined, { numeric: true }));
+}
+
+/**
+ * One email for several CAP records of one franchisee, using the several-stores message:
+ * { to, cc, ccInfo, team, store, subject, body, href, houston, mixed, rajeev, missing, records }.
+ * The recipient is the clicked record's contact (its saved email, or the franchisee's).
+ */
+export function buildCapEmailMulti(ctx, record, records, template) {
+  const values = capEmailValues(ctx, record);
+  const stores = records.map((item) => ctx.storeByNum.get(String(item.store_num))).filter(Boolean);
+  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee });
+  const multiValues = { "Franchisee": values.Franchisee, "Stores": records.map((item) => capStoreLine(ctx, item)).join("\n"), "Store count": String(records.length), "Email": values.Email };
+  return { ...recipients, store: stores.length > 0, records, ...composeEmail(template, multiValues, recipients, true) };
 }

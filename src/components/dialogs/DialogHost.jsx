@@ -5,6 +5,7 @@ import { closeDialog, setDialogBusy, useDialogStore } from "../../state/dialogSt
 import { DIALOG } from "../../state/dialogs.js";
 import CapFormDialog from "../../features/caps/CapFormDialog.jsx";
 import CapsImportDialog from "../../features/caps/CapsImportDialog.jsx";
+import EmailScopeDialog from "../email/EmailScopeDialog.jsx";
 import CapEmailDialog from "../../features/caps/CapEmailDialog.jsx";
 import CallDetailsDialog from "../../features/calls/CallDetailsDialog.jsx";
 import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
@@ -21,8 +22,12 @@ import LogIssueDialog from "../../features/issues/LogIssueDialog.jsx";
 import MultiStoreIssueDialog from "../../features/issues/MultiStoreIssueDialog.jsx";
 import StoreIssuesDialog from "../../features/issues/StoreIssuesDialog.jsx";
 import UpdateIssueDialog from "../../features/issues/UpdateIssueDialog.jsx";
+import AddOnboardingDialog from "../../features/onboarding/AddOnboardingDialog.jsx";
 import NewOnboardingDialog from "../../features/onboarding/NewOnboardingDialog.jsx";
+import OnboardingImportDialog from "../../features/onboarding/OnboardingImportDialog.jsx";
+import OnboardingEmailDialog from "../../features/onboarding/OnboardingEmailDialog.jsx";
 import UpdateOnboardingDialog from "../../features/onboarding/UpdateOnboardingDialog.jsx";
+import StoreOnboardingDialog from "../../features/onboarding/StoreOnboardingDialog.jsx";
 import ReportBuilderDialog from "../../features/reports/ReportBuilderDialog.jsx";
 import LinksDialog from "../../features/settings/LinksDialog.jsx";
 import SettingsDialog from "../../features/settings/SettingsDialog.jsx";
@@ -55,10 +60,15 @@ const COMPONENTS = {
   [DIALOG.callLog]: CallLogDialog,
   [DIALOG.callDetails]: CallDetailsDialog,
   [DIALOG.callFollowUp]: CallFollowUpDialog,
+  [DIALOG.addOnboarding]: AddOnboardingDialog,
   [DIALOG.newOnboarding]: NewOnboardingDialog,
+  [DIALOG.onboardingImport]: OnboardingImportDialog,
+  [DIALOG.onboardingEmail]: OnboardingEmailDialog,
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
+  [DIALOG.storeOnboarding]: StoreOnboardingDialog,
   [DIALOG.capForm]: CapFormDialog,
   [DIALOG.capsImport]: CapsImportDialog,
+  [DIALOG.emailScope]: EmailScopeDialog,
   [DIALOG.capEmail]: CapEmailDialog,
   [DIALOG.dashList]: DashboardListDialog,
   [DIALOG.report]: ReportBuilderDialog,

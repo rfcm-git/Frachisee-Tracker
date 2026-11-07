@@ -1,5 +1,5 @@
 /* Reading fields from database rows (some columns are JSON stored as text). */
-import { CORE3, PLATFORMS, STORE_STATES } from "../config/constants.js";
+import { CORE3, PLATFORMS, PLATFORM_STATES, STORE_STATES } from "../config/constants.js";
 
 function parseJson(value, fallback) {
   if (value && typeof value === "object") return value;
@@ -9,7 +9,7 @@ function parseJson(value, fallback) {
 /** [{type: "email"|"cell"|"other", value}] */
 export const contactsOf = (row) => { const list = parseJson(row?.contacts, []); return Array.isArray(list) ? list : []; };
 
-/** {ue: "Active", dd: "Pending", ...} */
+/** {ue: "Onboarded", dd: "Work in Progress", ...} (older saves may hold Active / Pending; read them with platformStatus) */
 export const platformsOf = (store) => { const value = parseJson(store?.platforms, {}); return value && typeof value === "object" ? value : {}; };
 
 /** [{ts, text}] */
@@ -24,17 +24,27 @@ export const territorySet = (value) => new Set(String(value || "").split(",").ma
 /** First territory of a store, or an em dash. */
 export const primaryTerritory = (store) => String(store?.territory || "").split(",")[0].trim() || "—";
 
-export const normalizePlatformStatus = (value) => (["Active", "Pending", "Not enrolled", "Exempted"].includes(value) ? value : "Not enrolled");
+/** Older saves used Active (now Onboarded) and Pending (now Not enrolled: nothing had been done yet). */
+const OLD_PLATFORM_STATUS = { Active: "Onboarded", Pending: "Not enrolled" };
+
+/** One of PLATFORM_STATES; old and unknown values are read as their new status (unknown = Not enrolled). */
+export const normalizePlatformStatus = (value) => {
+  const status = OLD_PLATFORM_STATUS[value] || value;
+  return PLATFORM_STATES.includes(status) ? status : "Not enrolled";
+};
 
 export const platformStatus = (store, key) => normalizePlatformStatus(platformsOf(store)[key] || "Not enrolled");
 
 export const platformColor = (status) => {
   const value = normalizePlatformStatus(status);
-  return value === "Active" ? "var(--ok)" : value === "Pending" ? "var(--warn)" : value === "Exempted" ? "var(--idle)" : "var(--danger)";
+  return value === "Onboarded" ? "var(--ok)" : value === "Work in Progress" ? "var(--warn)" : value === "Exempted" ? "var(--idle)" : "var(--danger)";
 };
 
 /** Chip class: on / pend / off / exempt. */
-export const platformChipClass = (status) => (status === "Active" ? "on" : status === "Pending" ? "pend" : status === "Exempted" ? "exempt" : "off");
+export const platformChipClass = (status) => {
+  const value = normalizePlatformStatus(status);
+  return value === "Onboarded" ? "on" : value === "Work in Progress" ? "pend" : value === "Exempted" ? "exempt" : "off";
+};
 
 /** A full platforms object with every platform set to Not enrolled. */
 export const emptyPlatforms = () => Object.fromEntries(PLATFORMS.map(([key]) => [key, "Not enrolled"]));
@@ -42,8 +52,8 @@ export const emptyPlatforms = () => Object.fromEntries(PLATFORMS.map(([key]) => 
 /** Normalizes every platform value before saving. */
 export const normalizedPlatforms = (platforms) => Object.fromEntries(PLATFORMS.map(([key]) => [key, normalizePlatformStatus(platforms[key] || "Not enrolled")]));
 
-/** Number of core delivery apps (UE, DD, GH) that are Active. */
-export const coreActive = (store) => CORE3.filter(([key]) => platformStatus(store, key) === "Active").length;
+/** Number of core delivery apps (UE, DD, GH) the store is Onboarded on. */
+export const coreActive = (store) => CORE3.filter(([key]) => platformStatus(store, key) === "Onboarded").length;
 
 export const hasGbp = (store) => !!String(store?.gbp || "").trim();
 

@@ -1,11 +1,13 @@
 /* CAP email: saving the template and opening a filled-in email in Outlook. */
 import { CAP_STATES, STORAGE_KEYS } from "../../config/constants.js";
-import { CAP_EMAIL_STATUS, buildCapEmail, capEmailTemplate } from "../../domain/capEmail.js";
+import { CAP_EMAIL_STATUS, MAILTO_SAFE_LENGTH, buildCapEmail, buildCapEmailMulti, capEmailTemplate, capFranchiseeRecords } from "../../domain/capEmail.js";
+import { formatDueDate } from "../../domain/caps.js";
 import { normalizeCapStatus } from "../../domain/caps.js";
 import { CAPS_EMAIL_KEY, writeSetting } from "../../services/api.js";
 import { local } from "../../lib/storage.js";
+import { openMailto } from "../../lib/mailto.js";
 import { getContext, updateData } from "../../state/dataStore.js";
-import { confirmAction, openCapEmail } from "../../state/dialogs.js";
+import { confirmAction, openCapEmail, openEmailScope } from "../../state/dialogs.js";
 import { toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
 import { updateCap } from "./capsActions.js";
@@ -33,17 +35,6 @@ export async function saveCapEmail(template) {
   return true;
 }
 
-/** Opens a mailto: link without leaving the page. */
-function openMailto(href) {
-  const link = document.createElement("a");
-  link.href = href;
-  link.rel = "noopener";
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-}
-
 /** Opens the email in Outlook, then sets the status to Email Sent (whatever it was before). */
 async function openAndMark(record, email) {
   openMailto(email.href);
@@ -55,9 +46,29 @@ async function openAndMark(record, email) {
   if (ok) toast(`Outlook opened for store ${record.store_num} · status → ${CAP_EMAIL_STATUS}`, "ok");
 }
 
+/** One email about several stores: opens Outlook, then sets every record to Email Sent. */
+async function openAndMarkAll(email) {
+  openMailto(email.href);
+  const todo = email.records.filter((record) => normalizeCapStatus(record.status) !== CAP_EMAIL_STATUS);
+  let marked = 0;
+  for (const record of todo) {
+    const fresh = getContext().caps.find((item) => item.id === record.id) || record;
+    if (await updateCap(fresh, { status: CAP_EMAIL_STATUS }, { quiet: true })) marked += 1;
+  }
+  const long = email.href.length > MAILTO_SAFE_LENGTH ? " · the email is long, check Outlook kept all of it" : "";
+  if (marked === todo.length) toast(`Outlook opened for ${email.records.length} stores — press Send there · status → ${CAP_EMAIL_STATUS}${long}`, long ? "err" : "ok");
+  else toast(`Outlook opened for ${email.records.length} stores, but only ${marked} of ${todo.length} were set to ${CAP_EMAIL_STATUS}`, "err");
+}
+
+/** "Store #100 · Email Sent · due Nov 15, 2026" */
+const capLine = (record) => {
+  const due = formatDueDate(record.due_date);
+  return `Store #${record.store_num} · ${normalizeCapStatus(record.status)}${due ? ` · due ${due}` : ""}`;
+};
+
 /**
  * The row's email button. Opens the editor first when no template was ever saved.
- * Stores already past No Action Yet ask first; sending always sets the status to Email Sent.
+ * When the franchisee has other stores in the CAP list that are not Completed, asks: just this store, or all of them in one email.
  */
 export function sendCapEmail(recordId) {
   const ctx = getContext();
@@ -68,6 +79,27 @@ export function sendCapEmail(recordId) {
     openCapEmail(record.id);
     return;
   }
+  const records = capFranchiseeRecords(ctx, record);
+  if (records.length < 2) { sendOneCapEmail(record); return; }
+  openEmailScope({
+    heading: `Email about store ${record.store_num}`,
+    one: { title: `Just store #${record.store_num}`, text: `Uses the one-store message. Status → ${CAP_EMAIL_STATUS}.`, run: () => sendOneCapEmail(record) },
+    all: { title: `All ${records.length} stores of this franchisee`, text: `One email using the several-stores message. Each store's status → ${CAP_EMAIL_STATUS}.`,
+      lines: records.map(capLine), run: () => sendAllCapEmail(record, records) },
+    note: "Completed stores are left out.",
+  });
+}
+
+function sendAllCapEmail(record, records) {
+  const ctx = getContext();
+  const email = buildCapEmailMulti(ctx, record, records, currentCapEmail(ctx));
+  if (!email.to) { toast(`Store ${record.store_num} has no email address — add one with Edit`, "err"); return; }
+  openAndMarkAll(email);
+}
+
+/** Email about one store (asks first when it is past No Action Yet). */
+function sendOneCapEmail(record) {
+  const ctx = getContext();
   const email = buildCapEmail(ctx, record, currentCapEmail(ctx));
   if (!email.to) { toast(`Store ${record.store_num} has no email address — add one with Edit`, "err"); return; }
   const status = normalizeCapStatus(record.status);

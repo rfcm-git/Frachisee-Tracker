@@ -28,11 +28,16 @@ export const DIALOG = {
   callLog: "callLog",
   callDetails: "callDetails",
   callFollowUp: "callFollowUp",
+  addOnboarding: "addOnboarding",
   newOnboarding: "newOnboarding",
+  onboardingImport: "onboardingImport",
+  onboardingEmail: "onboardingEmail",
   updateOnboarding: "updateOnboarding",
+  storeOnboarding: "storeOnboarding",
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
+  emailScope: "emailScope",
   dashList: "dashList",
   report: "report",
   confirm: "confirm",
@@ -85,18 +90,29 @@ export const openCallLog = (franchiseeId = null, callId = null, storeId = null) 
 export const openCallDetails = (callId) => openDialog(DIALOG.callDetails, { callId });
 export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { callId });
 
-/** New onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
+/** Onboarding tab "Add store": choose one store or many from a spreadsheet. */
+export const openAddOnboarding = () => openDialog(DIALOG.addOnboarding);
+export const openOnboardingImport = () => openDialog(DIALOG.onboardingImport);
+/** Onboarding email message editor; previewId picks the record whose store is shown in the preview. */
+export const openOnboardingEmail = (previewId = null) => openDialog(DIALOG.onboardingEmail, { previewId });
+
+/** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
 export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
+/** Update all of one store's onboarding platforms at once. */
+export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboarding, { storeNum: String(storeNum) });
 
 /** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
 export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
 
+/** "Just this store" or "All of the franchisee's stores" before an email: { heading, one, all, note } (see EmailScopeDialog). */
+export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);
+
 /** CAP email message editor; previewCapId picks the store shown in the preview. */
 export const openCapEmail = (previewCapId = null) => openDialog(DIALOG.capEmail, { previewCapId });
 
-/** key: "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed", … */
+/** key: "core:0", "plat:ue:Onboarded", "gbp:no", "gap:nofbc", "status:Closed", … */
 export const openDashboardList = (key) => openDialog(DIALOG.dashList, { storeKey: key });
 
 /** Report builder. download = "xlsx" | "pdf" downloads right away with the preset, then closes. */
