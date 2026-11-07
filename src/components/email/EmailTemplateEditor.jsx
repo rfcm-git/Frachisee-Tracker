@@ -10,7 +10,9 @@ const CC_FIELDS = [
   ["ccOther", "CC for every other store", "Any store not in Houston"],
   ["ccAlways", "Always CC", "Added to every email"],
 ];
-const TEMPLATE_KEYS = ["subject", "body", ...CC_FIELDS.map(([key]) => key)];
+const TEMPLATE_KEYS = ["subject", "body", "multiSubject", "multiBody", ...CC_FIELDS.map(([key]) => key)];
+/** Subject and message keys of each message. */
+const MESSAGE_KEYS = { one: { subject: "subject", body: "body" }, multi: { subject: "multiSubject", body: "multiBody" } };
 const pick = (template) => Object.fromEntries(TEMPLATE_KEYS.map((key) => [key, template[key] ?? ""]));
 
 /**
@@ -19,13 +21,22 @@ const pick = (template) => Object.fromEntries(TEMPLATE_KEYS.map((key) => [key, t
  *   fields: [[name, description]] placeholders offered as chips
  *   initial / defaults: templates ({ subject, body, ccHouston, ccOther, ccAlways })
  *   previewOptions: [{ id, label }]; buildPreview(values, id) -> email from recipientsFor + composeEmail
+ *   multi: the several-stores message, { fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, help }
  *   onSave(values) -> Promise<boolean>
  */
-export default function EmailTemplateEditor({ title, subtitle, fields, initial, defaults, neverSaved, starterText, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, onSave }) {
+export default function EmailTemplateEditor({ title, subtitle, fields, initial, defaults, neverSaved, starterText, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, multi, onSave }) {
   const { close, setBusy } = useDialog();
   const [values, setValues] = useState(() => pick(initial));
   const [saving, setSaving] = useState(false);
-  const [previewId, setPreviewId] = useState(() => initialPreviewId ?? previewOptions[0]?.id ?? null);
+  const [mode, setMode] = useState("one");
+  const [previewIds, setPreviewIds] = useState(() => ({
+    one: initialPreviewId ?? previewOptions[0]?.id ?? null,
+    multi: multi ? multi.initialPreviewId ?? multi.previewOptions[0]?.id ?? null : null,
+  }));
+  /** The message being edited: its keys, placeholders and preview. */
+  const view = mode === "multi" && multi ? { ...multi, keys: MESSAGE_KEYS.multi } : { fields, previewOptions, buildPreview, emptyPreviewText, keys: MESSAGE_KEYS.one };
+  const previewId = previewIds[mode];
+  const setPreviewId = (id) => setPreviewIds((current) => ({ ...current, [mode]: id }));
   const subjectRef = useRef(null);
   const bodyRef = useRef(null);
   const lastField = useRef("body");
@@ -34,8 +45,9 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
 
   /** Inserts {{name}} at the cursor of the subject or message (whichever was used last). */
   function insert(name) {
-    const field = lastField.current;
-    const element = (field === "subject" ? subjectRef : bodyRef).current;
+    const which = lastField.current;
+    const field = view.keys[which];
+    const element = (which === "subject" ? subjectRef : bodyRef).current;
     const token = `{{${name}}}`;
     const text = values[field];
     const start = element ? element.selectionStart ?? text.length : text.length;
@@ -55,13 +67,17 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
 
   const ccBad = Object.fromEntries(CC_FIELDS.map(([key]) => [key, badEmails(values[key])]));
   const anyCcBad = Object.values(ccBad).some((list) => list.length);
-  const unknown = unknownPlaceholders(`${values.subject}\n${values.body}`, fields);
-  const email = previewId != null && previewOptions.some((option) => option.id === previewId) ? buildPreview(values, previewId) : null;
+  const subjectKey = view.keys.subject;
+  const bodyKey = view.keys.body;
+  const unknown = unknownPlaceholders(`${values[subjectKey]}\n${values[bodyKey]}`, view.fields);
+  const email = previewId != null && view.previewOptions.some((option) => option.id === previewId) ? view.buildPreview(values, previewId) : null;
   const tooLong = !!email?.href && email.href.length > MAILTO_SAFE_LENGTH;
 
   async function save() {
-    if (!values.subject.trim()) { toast("Add a subject", "err"); subjectRef.current?.focus(); return; }
-    if (!values.body.trim()) { toast("Add a message", "err"); bodyRef.current?.focus(); return; }
+    if (!values.subject.trim()) { setMode("one"); toast("Add a subject", "err"); return; }
+    if (!values.body.trim()) { setMode("one"); toast("Add a message", "err"); return; }
+    if (multi && !values.multiSubject.trim()) { setMode("multi"); toast("Add a subject for the several-stores message", "err"); return; }
+    if (multi && !values.multiBody.trim()) { setMode("multi"); toast("Add a message for the several-stores message", "err"); return; }
     if (anyCcBad) { toast("Fix the CC addresses marked in red", "err"); return; }
     setSaving(true);
     const ok = await onSave(values);
@@ -77,15 +93,20 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
     {neverSaved && <div className="cem-note" role="status"><Icon name="info" />{starterText}</div>}
     <div className="cem-grid">
       <div className="cem-edit">
+        {multi && <div className="cem-mode" role="tablist" aria-label="Which message">
+          {[["one", "One store", "store"], ["multi", "Several stores", "stores"]].map(([key, label, icon]) => <button type="button" key={key} role="tab" aria-selected={mode === key}
+            className={`cem-mode-btn${mode === key ? " on" : ""}`} onClick={() => setMode(key)}><Icon name={icon === "store" ? "store" : "layers"} />{label}</button>)}
+        </div>}
+        {multi && mode === "multi" && <div className="cem-help" style={{ margin: "0 0 8px" }}>{multi.help}</div>}
         <div className="field"><label htmlFor="cem_subject">Subject</label>
-          <input id="cem_subject" ref={subjectRef} value={values.subject} className={values.subject.trim() ? "" : "bad"}
-            onFocus={() => { lastField.current = "subject"; }} onChange={(event) => change("subject", event.target.value)} /></div>
+          <input id="cem_subject" ref={subjectRef} value={values[subjectKey]} className={values[subjectKey].trim() ? "" : "bad"}
+            onFocus={() => { lastField.current = "subject"; }} onChange={(event) => change(subjectKey, event.target.value)} /></div>
         <div className="field"><label htmlFor="cem_body">Message</label>
-          <textarea id="cem_body" ref={bodyRef} className={`cem-ta${values.body.trim() ? "" : " bad"}`} value={values.body}
-            onFocus={() => { lastField.current = "body"; }} onChange={(event) => change("body", event.target.value)} /></div>
+          <textarea id="cem_body" ref={bodyRef} className={`cem-ta${values[bodyKey].trim() ? "" : " bad"}`} value={values[bodyKey]}
+            onFocus={() => { lastField.current = "body"; }} onChange={(event) => change(bodyKey, event.target.value)} /></div>
         <div className="cem-fields" role="group" aria-label="Insert a store detail">
           <span className="cem-fields-h">Insert at the cursor:</span>
-          {fields.map(([name, tip]) => <button type="button" key={name} className="cem-chip" data-tip={`${tip} — inserts {{${name}}}`}
+          {view.fields.map(([name, tip]) => <button type="button" key={name} className="cem-chip" data-tip={`${tip} — inserts {{${name}}}`}
             onMouseDown={(event) => event.preventDefault()} onClick={() => insert(name)}>{name}</button>)}
         </div>
         {unknown.length > 0 && <div className="cem-warn"><Icon name="triangle-alert" />Not a store detail, so it is sent as typed: {unknown.map((name) => `{{${name}}}`).join(", ")}</div>}
@@ -102,18 +123,18 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
 
       <div className="cem-prev" aria-live="polite">
         <div className="field"><label htmlFor="cem_store">Preview for</label>
-          {previewOptions.length ? <select id="cem_store" value={previewId ?? ""} onChange={(event) => setPreviewId(previewOptions.find((option) => String(option.id) === event.target.value)?.id ?? null)}>
-            {previewOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-          </select> : <div className="muted">{emptyPreviewText}</div>}</div>
+          {view.previewOptions.length ? <select id="cem_store" value={previewId ?? ""} onChange={(event) => setPreviewId(view.previewOptions.find((option) => String(option.id) === event.target.value)?.id ?? null)}>
+            {view.previewOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+          </select> : <div className="muted">{view.emptyPreviewText}</div>}</div>
         {email && <div className="cem-mail">
           <div className="cem-row"><span>To</span><b>{email.to || <span className="cem-miss">No email address on file</span>}{email.rajeev && <span className="cem-why">Marwaha store · owner in CC</span>}</b></div>
           <div className="cem-row"><span>CC</span><div>
-            <span className={`cem-tag first${email.houston ? " hou" : ""}`}>{email.houston ? "Houston store" : "Other territory"}</span>
+            <span className={`cem-tag first${email.houston ? " hou" : ""}`}>{email.mixed ? "Houston and other stores" : email.houston ? "Houston store" : "Other territory"}</span>
             {email.ccInfo.length ? <ul className="cem-cclist">{email.ccInfo.map((entry) => <li key={entry.email}>
               <span className="cem-addr" data-tip={entry.name || undefined}>{entry.email}</span>{entry.why.map((why) => <span key={why} className="cem-why">{why}</span>)}</li>)}</ul>
               : <span className="muted">Nobody</span>}
             {email.store && (!email.team.fbc || !email.team.om) && <div className="cem-miss-team">
-              {[!email.team.fbc && "FBC", !email.team.om && "OM"].filter(Boolean).join(" and ")} not set (or has no email) for this store</div>}</div></div>
+              {[!email.team.fbc && "FBC", !email.team.om && "OM"].filter(Boolean).join(" and ")} not set (or has no email) for {mode === "multi" ? "some of these stores" : "this store"}</div>}</div></div>
           <div className="cem-row"><span>Subject</span><b>{email.subject || <span className="cem-miss">Empty</span>}</b></div>
           <div className="cem-text">{email.body}</div>
         </div>}

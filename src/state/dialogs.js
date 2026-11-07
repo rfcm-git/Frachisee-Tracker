@@ -37,6 +37,7 @@ export const DIALOG = {
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
+  emailScope: "emailScope",
   dashList: "dashList",
   report: "report",
   confirm: "confirm",
@@ -104,6 +105,9 @@ export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboardi
 /** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
 export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
+
+/** "Just this store" or "All of the franchisee's stores" before an email: { heading, one, all, note } (see EmailScopeDialog). */
+export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);
 
 /** CAP email message editor; previewCapId picks the store shown in the preview. */
 export const openCapEmail = (previewCapId = null) => openDialog(DIALOG.capEmail, { previewCapId });

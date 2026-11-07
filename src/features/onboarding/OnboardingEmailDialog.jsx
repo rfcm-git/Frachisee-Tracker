@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import EmailTemplateEditor from "../../components/email/EmailTemplateEditor.jsx";
 import { franchiseeName } from "../../domain/context.js";
 import { obIsOpen, obVisible } from "../../domain/onboarding.js";
-import { DEFAULT_OB_EMAIL, OB_EMAIL_FIELDS, OB_EMAIL_NOTE, buildOnboardingEmail } from "../../domain/onboardingEmail.js";
+import { DEFAULT_OB_EMAIL, OB_EMAIL_FIELDS, OB_EMAIL_MULTI_FIELDS, OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obFranchiseeStores } from "../../domain/onboardingEmail.js";
 import { emailOf } from "../../domain/records.js";
 import { compareNumbers } from "../../lib/text.js";
 import { useDataContext } from "../../state/dataStore.js";
@@ -37,6 +37,16 @@ export default function OnboardingEmailDialog({ previewId = null }) {
   const picked = previewId != null ? ctx.onboarding.find((item) => item.id === previewId) : null;
   const pickedOption = picked ? records.find((record) => String(record.store_num) === String(picked.store_num)) : null;
   const firstWithEmail = records.find((record) => { const owner = ownerOf(record); return owner && emailOf(owner); }) || records[0];
+  // Several-stores preview: one option per franchisee with two or more stores still being onboarded.
+  const seen = new Set();
+  const multiOptions = records.flatMap((record) => {
+    const store = ctx.storeByNum.get(String(record.store_num));
+    if (!store || seen.has(store.franchisee_id)) return [];
+    const stores = obFranchiseeStores(ctx, record);
+    if (stores.length < 2) return [];
+    seen.add(store.franchisee_id);
+    return [{ id: record.id, label: `${franchiseeName(ctx, store.franchisee_id) || "Franchisee"} · ${stores.length} stores` }];
+  }).sort((a, b) => a.label.localeCompare(b.label));
 
   return <EmailTemplateEditor title="Onboarding email message"
     subtitle={`Used by the email button on each onboarding row. One email covers the store's platforms still being onboarded; “${OB_EMAIL_NOTE}” is added to their updates.`}
@@ -46,5 +56,11 @@ export default function OnboardingEmailDialog({ previewId = null }) {
     previewOptions={options} initialPreviewId={pickedOption?.id ?? firstWithEmail?.id ?? null}
     buildPreview={(values, id) => buildOnboardingEmail(ctx, records.find((item) => item.id === id), values)}
     emptyPreviewText="Add a store to onboarding to see a preview."
+    multi={{
+      fields: OB_EMAIL_MULTI_FIELDS, previewOptions: multiOptions,
+      buildPreview: (values, id) => { const record = records.find((item) => item.id === id); return buildOnboardingEmailMulti(ctx, record, obFranchiseeStores(ctx, record), values); },
+      emptyPreviewText: "No franchisee has two or more stores being onboarded yet.",
+      help: <>Used when you choose <b>All stores of this franchisee</b> on the email button. {"{{Stores}}"} lists each store with its address and the platforms still being onboarded.</>,
+    }}
     onSave={saveObEmail} />;
 }

@@ -1,12 +1,14 @@
 /* Onboarding email: saving the template and opening a filled-in email in Outlook. */
 import { STORAGE_KEYS } from "../../config/constants.js";
 import { obHistory } from "../../domain/onboarding.js";
-import { OB_EMAIL_NOTE, buildOnboardingEmail, obEmailSent, obEmailTemplate, targetsText } from "../../domain/onboardingEmail.js";
+import { OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obEmailSent, obEmailTemplate, obFranchiseeStores, targetsText } from "../../domain/onboardingEmail.js";
+import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
+import { obPlatformName } from "../../domain/onboarding.js";
 import { ONBOARDING_EMAIL_KEY, writeSetting } from "../../services/api.js";
 import { openMailto } from "../../lib/mailto.js";
 import { local } from "../../lib/storage.js";
 import { getContext, updateData } from "../../state/dataStore.js";
-import { confirmAction, openOnboardingEmail } from "../../state/dialogs.js";
+import { confirmAction, openEmailScope, openOnboardingEmail } from "../../state/dialogs.js";
 import { toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
 import { updateOnboarding } from "./onboardingActions.js";
@@ -40,19 +42,21 @@ export async function saveObEmail(template) {
  */
 async function openAndLog(email, storeNum) {
   openMailto(email.href);
+  const label = email.stores ? `${email.stores.length} stores` : `store ${storeNum}`;
+  const long = email.href.length > MAILTO_SAFE_LENGTH ? " · the email is long, check Outlook kept all of it" : "";
   let logged = 0;
   for (const target of email.targets) {
     const fresh = getContext().onboarding.find((item) => item.id === target.id) || target;
     const status = fresh.status === "Not enrolled" ? "Work in Progress" : fresh.status;
     if (await updateOnboarding(fresh, { status, text: OB_EMAIL_NOTE, quiet: true })) logged += 1;
   }
-  if (logged === email.targets.length) toast(`Outlook opened for store ${storeNum} — press Send there · “${OB_EMAIL_NOTE}” added to ${logged} record${logged !== 1 ? "s" : ""}`, "ok");
-  else toast(`Outlook opened for store ${storeNum}, but “${OB_EMAIL_NOTE}” was only added to ${logged} of ${email.targets.length} records`, "err");
+  if (logged === email.targets.length) toast(`Outlook opened for ${label} — press Send there · “${OB_EMAIL_NOTE}” added to ${logged} record${logged !== 1 ? "s" : ""}${long}`, long ? "err" : "ok");
+  else toast(`Outlook opened for ${label}, but “${OB_EMAIL_NOTE}” was only added to ${logged} of ${email.targets.length} records`, "err");
 }
 
 /**
  * The row's email button. Opens the editor first when no template was ever saved.
- * Asks first when the store was already emailed or nothing is still being onboarded.
+ * When the franchisee has other stores still being onboarded, asks: just this store, or all of them in one email.
  */
 export function sendOnboardingEmail(recordId) {
   const ctx = getContext();
@@ -63,6 +67,28 @@ export function sendOnboardingEmail(recordId) {
     openOnboardingEmail(record.id);
     return;
   }
+  const stores = obFranchiseeStores(ctx, record);
+  if (stores.length < 2) { sendOneOnboardingEmail(record); return; }
+  const platforms = (group) => group.targets.map((item) => obPlatformName(item.platform)).join(", ");
+  openEmailScope({
+    heading: `Email about store ${record.store_num}`,
+    one: { title: `Just store #${record.store_num}`, text: `Uses the one-store message. “${OB_EMAIL_NOTE}” is added to its open platforms.`, run: () => sendOneOnboardingEmail(record) },
+    all: { title: `All ${stores.length} stores of this franchisee`, text: `One email using the several-stores message. “${OB_EMAIL_NOTE}” is added to every open platform.`,
+      lines: stores.map((group) => `Store #${group.num} · ${platforms(group)}`), run: () => sendAllOnboardingEmail(record, stores) },
+    note: "Only stores with platforms still being onboarded (Not enrolled or Work in Progress) are included. Not enrolled becomes Work in Progress.",
+  });
+}
+
+function sendAllOnboardingEmail(record, stores) {
+  const ctx = getContext();
+  const email = buildOnboardingEmailMulti(ctx, record, stores, currentObEmail(ctx));
+  if (!email.to) { toast(`Store ${record.store_num}'s franchisee has no email address — add one on the franchisee`, "err"); return; }
+  openAndLog(email, record.store_num);
+}
+
+/** Email about one store (asks first when it was already emailed or nothing is still being onboarded). */
+function sendOneOnboardingEmail(record) {
+  const ctx = getContext();
   const email = buildOnboardingEmail(ctx, record, currentObEmail(ctx));
   if (!email.to) { toast(`Store ${record.store_num}'s franchisee has no email address — add one on the franchisee`, "err"); return; }
   const alreadySent = email.targets.some((target) => obEmailSent(target, obHistory(target)));

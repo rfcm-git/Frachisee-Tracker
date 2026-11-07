@@ -24,10 +24,29 @@ export const DEFAULT_OB_EMAIL = Object.freeze({
     "",
     "Thank you,",
   ].join("\n"),
+  multiSubject: "Delivery app onboarding · {{Store count}} stores",
+  multiBody: [
+    "Hi {{Franchisee}},",
+    "",
+    "We'd like to get these stores set up on their delivery apps:",
+    "{{Stores}}",
+    "",
+    "Please reply with a good time to go over the next steps, or let us know if you have any questions.",
+    "",
+    "Thank you,",
+  ].join("\n"),
   ccHouston: "christophe@marwahagroup.com",
   ccOther: "aziza@marwahagroup.com",
   ccAlways: "richard@subsource.com, karl@subsource.com",
 });
+
+/** Placeholders of the several-stores message. */
+export const OB_EMAIL_MULTI_FIELDS = [
+  ["Franchisee", "Franchisee name"],
+  ["Stores", "One line per store: number, address and the platforms still being onboarded"],
+  ["Store count", "Number of stores in the email"],
+  ["Email", "Franchisee email"],
+];
 
 /** Placeholder name -> description, in the order shown in the editor. */
 export const OB_EMAIL_FIELDS = [
@@ -94,6 +113,41 @@ export function buildOnboardingEmail(ctx, record, template) {
   const store = ctx.storeByNum.get(String(record.store_num));
   const recipients = recipientsFor(ctx, store, template, { email: values.Email, name: values.Franchisee });
   return { ...recipients, store: !!store, targets, ...composeEmail(template, values, recipients) };
+}
+
+/**
+ * The franchisee's stores with platforms still being onboarded, for one email to all of them:
+ * [{ num, targets }] in store-number order. The clicked record's store is always included.
+ */
+export function obFranchiseeStores(ctx, record) {
+  const store = ctx.storeByNum.get(String(record.store_num));
+  if (!store || store.franchisee_id == null) return [{ num: String(record.store_num), targets: obEmailTargets(ctx, record) }];
+  const nums = new Set(ctx.onboarding.filter((item) => obVisible(item) && obIsOpen(item)).map((item) => String(item.store_num))
+    .filter((num) => ctx.storeByNum.get(num)?.franchisee_id === store.franchisee_id));
+  nums.add(String(record.store_num));
+  return [...nums].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((num) => {
+    const sample = num === String(record.store_num) ? record : ctx.onboarding.find((item) => String(item.store_num) === num && obVisible(item));
+    return { num, targets: obEmailTargets(ctx, sample) };
+  });
+}
+
+/** "• Store #100 (1 Main St, Austin): Uber Eats and DoorDash" */
+function obStoreLine(ctx, { num, targets }) {
+  const store = ctx.storeByNum.get(num);
+  const place = [store?.address, store?.city].filter(Boolean).join(", ");
+  return `• Store #${num}${place ? ` (${place})` : ""}: ${joinNames(targets.map((item) => obPlatformName(item.platform)))}`;
+}
+
+/**
+ * One email to the franchisee about several stores, using the several-stores message:
+ * { to, cc, ccInfo, team, store, houston, mixed, rajeev, subject, body, href, missing, targets (every record that gets Email Sent), stores }.
+ */
+export function buildOnboardingEmailMulti(ctx, record, storeGroups, template) {
+  const values = obEmailValues(ctx, record, obEmailTargets(ctx, record));
+  const stores = storeGroups.map((group) => ctx.storeByNum.get(group.num)).filter(Boolean);
+  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee });
+  const multiValues = { "Franchisee": values.Franchisee, "Stores": storeGroups.map((group) => obStoreLine(ctx, group)).join("\n"), "Store count": String(storeGroups.length), "Email": values.Email };
+  return { ...recipients, store: stores.length > 0, stores: storeGroups, targets: storeGroups.flatMap((group) => group.targets), ...composeEmail(template, multiValues, recipients, true) };
 }
 
 /** "Uber Eats (Not enrolled), DoorDash (Work in Progress)" — for confirmations. */
