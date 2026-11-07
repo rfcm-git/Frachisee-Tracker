@@ -114,7 +114,7 @@ export default function CapEmailDialog({ previewCapId = null }) {
               Store {item.store_num}{contact.name ? ` · ${contact.name}` : ""}{contact.email ? "" : " · no email"}</option>; })}
           </select> : <div className="muted">Add a store to the CAP list to see a preview.</div>}</div>
         {email && <div className="cem-mail">
-          <div className="cem-row"><span>To</span><b>{email.to || <span className="cem-miss">No email address on file</span>}</b></div>
+          <div className="cem-row"><span>To</span><b>{email.to || <span className="cem-miss">No email address on file</span>}{email.rajeev && <span className="cem-why">Marwaha store · owner in CC</span>}</b></div>
           <div className="cem-row"><span>CC</span><div>
             <span className={`cem-tag first${email.houston ? " hou" : ""}`}>{email.houston ? "Houston store" : "Other territory"}</span>
             {email.ccInfo.length ? <ul className="cem-cclist">{email.ccInfo.map((entry) => <li key={entry.email}>
