@@ -189,7 +189,7 @@ export default function OnboardingView() {
 
   return <>
     <OnboardingFilters filter={filter} anyFilter={anyFilter} />
-    {!ctx.onboarding.length ? <EmptyState icon="rocket" title="No onboarding yet">Click “New onboarding” to start one for one or more stores and platforms.</EmptyState>
+    {!ctx.onboarding.length ? <EmptyState icon="rocket" title="No onboarding yet">Click “Add store” to add one store, or many from a spreadsheet.</EmptyState>
       : !records.length ? <>{progress}<EmptyState icon="search-x" title="No onboarding matches">Try a different search or filter.</EmptyState></>
         : <>{progress}<RecordTable ctx={ctx} records={records} platforms={filter.platforms} /></>}
   </>;

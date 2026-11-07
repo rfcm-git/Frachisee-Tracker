@@ -28,7 +28,9 @@ export const DIALOG = {
   callLog: "callLog",
   callDetails: "callDetails",
   callFollowUp: "callFollowUp",
+  addOnboarding: "addOnboarding",
   newOnboarding: "newOnboarding",
+  onboardingImport: "onboardingImport",
   updateOnboarding: "updateOnboarding",
   capForm: "capForm",
   capsImport: "capsImport",
@@ -85,7 +87,11 @@ export const openCallLog = (franchiseeId = null, callId = null, storeId = null) 
 export const openCallDetails = (callId) => openDialog(DIALOG.callDetails, { callId });
 export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { callId });
 
-/** New onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
+/** Onboarding tab "Add store": choose one store or many from a spreadsheet. */
+export const openAddOnboarding = () => openDialog(DIALOG.addOnboarding);
+export const openOnboardingImport = () => openDialog(DIALOG.onboardingImport);
+
+/** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
 export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
 
@@ -96,7 +102,7 @@ export const openCapsImport = () => openDialog(DIALOG.capsImport);
 /** CAP email message editor; previewCapId picks the store shown in the preview. */
 export const openCapEmail = (previewCapId = null) => openDialog(DIALOG.capEmail, { previewCapId });
 
-/** key: "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed", … */
+/** key: "core:0", "plat:ue:Onboarded", "gbp:no", "gap:nofbc", "status:Closed", … */
 export const openDashboardList = (key) => openDialog(DIALOG.dashList, { storeKey: key });
 
 /** Report builder. download = "xlsx" | "pdf" downloads right away with the preset, then closes. */

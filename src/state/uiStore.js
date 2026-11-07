@@ -185,6 +185,12 @@ export function openTabFromDashboard(tab) {
   window.scrollTo(0, 0);
 }
 
+/** Onboarding tab showing one store's records (platform and status filters cleared so none are hidden). */
+export function showStoreOnboarding(storeNum) {
+  set({ tab: "onboarding", search: `#${storeNum}`, obFilter: { ...get().obFilter, platforms: [], threePd: [], ezCater: [] }, ...resetPages("ob") });
+  window.scrollTo(0, 0);
+}
+
 export function showOpenConcerns() {
   set({ tab: "issues", search: "", issueFilter: { ...get().issueFilter, statuses: ["Pending", "Work in Progress"] }, ...resetPages("is") });
   window.scrollTo(0, 0);

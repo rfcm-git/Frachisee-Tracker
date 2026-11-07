@@ -21,7 +21,9 @@ import LogIssueDialog from "../../features/issues/LogIssueDialog.jsx";
 import MultiStoreIssueDialog from "../../features/issues/MultiStoreIssueDialog.jsx";
 import StoreIssuesDialog from "../../features/issues/StoreIssuesDialog.jsx";
 import UpdateIssueDialog from "../../features/issues/UpdateIssueDialog.jsx";
+import AddOnboardingDialog from "../../features/onboarding/AddOnboardingDialog.jsx";
 import NewOnboardingDialog from "../../features/onboarding/NewOnboardingDialog.jsx";
+import OnboardingImportDialog from "../../features/onboarding/OnboardingImportDialog.jsx";
 import UpdateOnboardingDialog from "../../features/onboarding/UpdateOnboardingDialog.jsx";
 import ReportBuilderDialog from "../../features/reports/ReportBuilderDialog.jsx";
 import LinksDialog from "../../features/settings/LinksDialog.jsx";
@@ -55,7 +57,9 @@ const COMPONENTS = {
   [DIALOG.callLog]: CallLogDialog,
   [DIALOG.callDetails]: CallDetailsDialog,
   [DIALOG.callFollowUp]: CallFollowUpDialog,
+  [DIALOG.addOnboarding]: AddOnboardingDialog,
   [DIALOG.newOnboarding]: NewOnboardingDialog,
+  [DIALOG.onboardingImport]: OnboardingImportDialog,
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
   [DIALOG.capForm]: CapFormDialog,
   [DIALOG.capsImport]: CapsImportDialog,

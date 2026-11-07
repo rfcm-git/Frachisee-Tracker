@@ -31,7 +31,7 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
   live.forEach((store) => { coreDist[coreActive(store)] += 1; });
   const avgCore = live.length ? live.reduce((sum, store) => sum + coreActive(store), 0) / live.length : 0;
   const gbpYes = live.filter(hasGbp).length;
-  const ez = { Active: 0, Pending: 0, "Not enrolled": 0, Exempted: 0 };
+  const ez = { Onboarded: 0, "Work in Progress": 0, "Not enrolled": 0, Exempted: 0 };
   live.forEach((store) => { ez[platformStatus(store, "ez")] += 1; });
   const openIssues = issues.filter(isIssueOpen);
   const resolvedIssues = issues.filter((issue) => !isIssueOpen(issue));
@@ -43,9 +43,9 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
     { icon: "users", label: "Franchisees", value: formatNumber(franchiseeIds.size), sub: "owners with stores here", tip: "Number of franchisees (owners) who have at least one store in this view.", action: ["tab", "franchisees"] },
     { icon: "store", label: "Stores", value: formatNumber(stores.length), statusCount, tip: "All stores in this view, split by store status.", action: ["tab", "stores"] },
     { icon: "map", label: "Territories", value: territory ? "1" : formatNumber(territories.length), sub: territory ? "filtered" : "covered", tip: "Number of territories with stores." },
-    { icon: "bike", label: "Avg 3PD per store", value: avgCore.toFixed(1), valueSuffix: " / 3", sub: `${percent(coreDist[3], live.length)}% on all 3`, tip: "Average number of core delivery apps (Uber Eats, DoorDash, Grubhub) that are Active, across open stores.", action: ["list", "core:3"] },
+    { icon: "bike", label: "Avg 3PD per store", value: avgCore.toFixed(1), valueSuffix: " / 3", sub: `${percent(coreDist[3], live.length)}% on all 3`, tip: "Average number of core delivery apps (Uber Eats, DoorDash, Grubhub) that are Onboarded, across open stores.", action: ["list", "core:3"] },
     { icon: "map-pinned", label: "Google Business Profile", value: `${percent(gbpYes, live.length)}%`, sub: `${formatNumber(gbpYes)} of ${formatNumber(live.length)} open stores`, tip: "Open stores that have a Google Business Profile link saved (synced).", action: ["list", "gbp:no"] },
-    { icon: "utensils", label: "ezCater active", value: `${percent(ez.Active, live.length)}%`, sub: `${formatNumber(ez.Active)} active · ${formatNumber(ez.Pending)} pending`, tip: "Open stores with ezCater set to Active.", action: ["list", "plat:ez:Active"] },
+    { icon: "utensils", label: "ezCater onboarded", value: `${percent(ez.Onboarded, live.length)}%`, sub: `${formatNumber(ez.Onboarded)} onboarded · ${formatNumber(ez["Work in Progress"])} in progress`, tip: "Open stores with ezCater set to Onboarded.", action: ["list", "plat:ez:Onboarded"] },
     { icon: "triangle-alert", label: "Open issues", value: formatNumber(openIssues.length), sub: `${formatNumber(storesWithOpen)} store${storesWithOpen !== 1 ? "s" : ""} affected`, tip: "Issues that are Pending or Work in Progress.", tone: openIssues.length ? "warn" : "", action: ["issues", ""] },
   ];
 
@@ -54,14 +54,14 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
     value: coreDist[count],
     color: count === 0 ? DC.redSoft : count === 3 ? DC.green : count === 2 ? DC.lime : DC.yellow,
     act: `core:${count}`,
-    tip: `${count === 0 ? "Open stores with no core delivery app active" : count === 3 ? "Open stores active on Uber Eats, DoorDash and Grubhub" : `Open stores active on ${count} of the 3 core apps`}: ${formatNumber(coreDist[count])} (${percent(coreDist[count], live.length)}%) — click to see them`,
+    tip: `${count === 0 ? "Open stores not onboarded on any core delivery app" : count === 3 ? "Open stores onboarded on Uber Eats, DoorDash and Grubhub" : `Open stores onboarded on ${count} of the 3 core apps`}: ${formatNumber(coreDist[count])} (${percent(coreDist[count], live.length)}%) — click to see them`,
   }));
   const platformRows = PLATFORMS_UI.map(([key, name]) => {
-    const counts = { Active: 0, Pending: 0, "Not enrolled": 0, Exempted: 0 };
+    const counts = { Onboarded: 0, "Work in Progress": 0, "Not enrolled": 0, Exempted: 0 };
     live.forEach((store) => { counts[platformStatus(store, key)] += 1; });
     return { label: name, parts: [
-      { label: "Active", value: counts.Active, color: DC.green, act: `plat:${key}:Active` },
-      { label: "Pending", value: counts.Pending, color: DC.yellow, act: `plat:${key}:Pending` },
+      { label: "Onboarded", value: counts.Onboarded, color: DC.green, act: `plat:${key}:Onboarded` },
+      { label: "Work in Progress", value: counts["Work in Progress"], color: DC.yellow, act: `plat:${key}:Work in Progress` },
       { label: "Not enrolled", value: counts["Not enrolled"], color: DC.redSoft, act: `plat:${key}:Not enrolled` },
       { label: "Exempted", value: counts.Exempted, color: DC.gray, act: `plat:${key}:Exempted` },
     ] };
@@ -69,8 +69,8 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
   const donuts = [
     { title: "Google Business Profile", icon: "map-pinned", tip: "An open store counts as synced when its Google Business Profile link is saved in the store window.", center: `${percent(gbpYes, live.length)}%`, sub: "synced",
       segments: [{ label: "Synced (link saved)", value: gbpYes, color: DC.green, act: "gbp:yes", tip: "Click to see these stores" }, { label: "Not synced", value: live.length - gbpYes, color: DC.gray, act: "gbp:no", tip: "No GBP link saved; click to see these stores" }] },
-    { title: "ezCater", icon: "utensils", tip: "ezCater status of open stores (set in Delivery Platforms in the store window).", center: `${percent(ez.Active, live.length)}%`, sub: "active",
-      segments: [{ label: "Active", value: ez.Active, color: DC.green, act: "plat:ez:Active" }, { label: "Pending", value: ez.Pending, color: DC.yellow, act: "plat:ez:Pending" }, { label: "Not enrolled", value: ez["Not enrolled"], color: DC.redSoft, act: "plat:ez:Not enrolled" }, { label: "Exempted", value: ez.Exempted, color: DC.gray, act: "plat:ez:Exempted" }] },
+    { title: "ezCater", icon: "utensils", tip: "ezCater status of open stores (set in Delivery Platforms in the store window).", center: `${percent(ez.Onboarded, live.length)}%`, sub: "onboarded",
+      segments: [{ label: "Onboarded", value: ez.Onboarded, color: DC.green, act: "plat:ez:Onboarded" }, { label: "Work in Progress", value: ez["Work in Progress"], color: DC.yellow, act: "plat:ez:Work in Progress" }, { label: "Not enrolled", value: ez["Not enrolled"], color: DC.redSoft, act: "plat:ez:Not enrolled" }, { label: "Exempted", value: ez.Exempted, color: DC.gray, act: "plat:ez:Exempted" }] },
   ];
 
   const territoryRows = (territory ? [territory] : territories).map((value) => {
@@ -82,7 +82,7 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
       avg: open.length ? open.reduce((sum, store) => sum + coreActive(store), 0) / open.length : 0,
       all3: percent(open.filter((store) => coreActive(store) === 3).length, open.length),
       gbp: percent(open.filter(hasGbp).length, open.length),
-      ez: percent(open.filter((store) => platformStatus(store, "ez") === "Active").length, open.length),
+      ez: percent(open.filter((store) => platformStatus(store, "ez") === "Onboarded").length, open.length),
       issues: ctx.issues.filter((issue) => isIssueOpen(issue) && numbers.has(String(issue.store_num || ""))).length,
     };
   }).sort((a, b) => ((a[sort.key] > b[sort.key] ? 1 : a[sort.key] < b[sort.key] ? -1 : 0) * sort.dir) || (+a.t || 0) - (+b.t || 0));
@@ -155,7 +155,7 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
   const fbcRows = Object.entries(byFbc).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([label, value]) => ({ label, value, color: DC.orange, tip: `${label}: ${value} open issue${value !== 1 ? "s" : ""}` }));
 
   const gaps = [
-    ["gap:no3pd", "circle-off", "No core 3PD active", live.filter((store) => coreActive(store) === 0).length, "Open stores with none of Uber Eats, DoorDash or Grubhub active"],
+    ["gap:no3pd", "circle-off", "No core 3PD onboarded", live.filter((store) => coreActive(store) === 0).length, "Open stores not onboarded on Uber Eats, DoorDash or Grubhub"],
     ["plat:ue:Not enrolled", "bike", "Not on Uber Eats", live.filter((store) => platformStatus(store, "ue") === "Not enrolled").length, "Open stores not enrolled on Uber Eats"],
     ["plat:dd:Not enrolled", "bike", "Not on DoorDash", live.filter((store) => platformStatus(store, "dd") === "Not enrolled").length, "Open stores not enrolled on DoorDash"],
     ["plat:gh:Not enrolled", "bike", "Not on Grubhub", live.filter((store) => platformStatus(store, "gh") === "Not enrolled").length, "Open stores not enrolled on Grubhub"],
@@ -172,7 +172,7 @@ export function buildDashboard(ctx, territory, sort, now = Date.now()) {
   };
 }
 
-/** Stores behind a dashboard number, e.g. "core:0", "plat:ue:Active", "gbp:no", "gap:nofbc", "status:Closed". */
+/** Stores behind a dashboard number, e.g. "core:0", "plat:ue:Onboarded", "gbp:no", "gap:nofbc", "status:Closed". */
 export function dashboardStores(ctx, territory, key) {
   const { stores, live } = dashboardScope(ctx, territory);
   const [kind, a, b] = key.split(":");
@@ -189,10 +189,10 @@ export function dashboardStores(ctx, territory, key) {
 export function dashboardListTitle(key) {
   const [kind, a, b] = key.split(":");
   const platformName = (value) => (PLATFORMS.find(([k]) => k === value) || [value, value])[1];
-  if (kind === "core") return +a === 0 ? "Open stores with no core 3PD active" : +a === 3 ? "Open stores active on all 3 core apps" : `Open stores active on ${a} of 3 core apps`;
+  if (kind === "core") return +a === 0 ? "Open stores with no core 3PD onboarded" : +a === 3 ? "Open stores onboarded on all 3 core apps" : `Open stores onboarded on ${a} of 3 core apps`;
   if (kind === "plat") return `${platformName(a)} — ${b} (open stores)`;
   if (kind === "gbp") return a === "yes" ? "Open stores synced with Google Business Profile" : "Open stores without a GBP link";
-  if (key === "gap:no3pd") return "Open stores with no core 3PD active";
+  if (key === "gap:no3pd") return "Open stores with no core 3PD onboarded";
   if (key === "gap:nofbc") return "Stores without an FBC";
   if (key === "gap:noom") return "Stores without an OM";
   if (kind === "status") return `Stores — ${a}`;

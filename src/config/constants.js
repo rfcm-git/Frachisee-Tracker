@@ -10,7 +10,8 @@ export const ADMIN_PASSWORD = "Sup3rUs3r!";
 export const PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["fj", "Foodja"]];
 export const PLATFORMS_UI = PLATFORMS.filter(([key]) => key !== "fj");
 export const PLATFORM_SHORT = { ue: "UE", dd: "DD", gh: "GH", ez: "EZ", fj: "FJ" };
-export const PLATFORM_STATES = ["Active", "Pending", "Not enrolled", "Exempted"];
+/** Status of a store on a delivery app. The same four statuses are used by onboarding records (OB_STATES), and the two are kept in sync. */
+export const PLATFORM_STATES = ["Onboarded", "Work in Progress", "Not enrolled", "Exempted"];
 /** The three core delivery apps used for coverage numbers. */
 export const CORE3 = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"]];
 
@@ -22,8 +23,8 @@ export const ISSUE_STATUS_COLOR = { Pending: "var(--danger)", "Work in Progress"
 
 export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"]];
 export const OB_CORE = ["ue", "dd", "gh"];
-export const OB_STATES = ["Pending", "Email Sent/Text Message", "Work in Progress", "Onboarded", "Exempted"];
-export const OB_STATUS_COLOR = { Pending: "var(--warn)", "Email Sent/Text Message": "#2f7fbf", "Work in Progress": "#7a4fc2", Onboarded: "var(--ok)", Exempted: "var(--idle)" };
+export const OB_STATES = ["Not enrolled", "Work in Progress", "Onboarded", "Exempted"];
+export const OB_STATUS_COLOR = { "Not enrolled": "var(--danger)", "Work in Progress": "var(--warn)", Onboarded: "var(--ok)", Exempted: "var(--idle)" };
 
 /** CAPs (Corrective Action Plan) monitoring: one record per store. New stores always start at the first status. */
 export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "Completed"];

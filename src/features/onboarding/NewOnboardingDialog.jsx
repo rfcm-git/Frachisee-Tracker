@@ -12,7 +12,7 @@ import { platformChipClass } from "../../domain/records.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { createOnboarding } from "./onboardingActions.js";
+import { saveOnboardingPlan } from "./onboardingActions.js";
 import { hasPlatformStatus, planOnboarding } from "./onboardingSelectors.js";
 
 /** ["ue", "dd", "gh"] -> "Uber Eats, DoorDash and Grubhub" */
@@ -23,15 +23,15 @@ const platformList = (keys) => {
 
 const MAX_STATUS_STORES = 10;
 
-/** "Uber Eats: Active · last onboarding Onboarded" */
-const statusText = ({ key, delivery, onboarding }) => `${obPlatformName(key)}: ${delivery}${onboarding ? ` · last onboarding ${obStatusLabel(onboarding)}` : ""}`;
+/** "Uber Eats: Work in Progress · on the onboarding list" */
+const statusText = ({ key, delivery, onboarding }) => `${obPlatformName(key)}: ${onboarding ? obStatusLabel(onboarding) : delivery}${onboarding ? " · on the onboarding list" : ""}`;
 
 /**
  * Current status of each picked store that already has one, on all supported platforms
- * (Delivery Platforms status + latest onboarding), with the exempted and eligible platforms spelled out.
+ * (Delivery Platforms status, or the onboarding record when it is on the list), with the exempted and eligible platforms spelled out.
  */
 function StoreStatusNotice({ stores, picked }) {
-  const shown = stores.filter((store) => store.platforms.some(hasPlatformStatus));
+  const shown = stores.filter((store) => store.platforms.some((entry) => hasPlatformStatus(entry) || entry.onboarding));
   if (!shown.length) return null;
   const anyExempt = shown.some((store) => store.platforms.some((entry) => entry.delivery === "Exempted"));
   return <div className={`ob-status-note${anyExempt ? " exempt" : ""}`} role="status"><Icon name={anyExempt ? "circle-off" : "info"} /><div>
@@ -40,7 +40,7 @@ function StoreStatusNotice({ stores, picked }) {
       const exempt = platforms.filter((entry) => entry.delivery === "Exempted").map((entry) => entry.key);
       const eligible = platforms.filter((entry) => entry.delivery !== "Exempted").map((entry) => entry.key);
       return <li key={num}><b>Store {num}</b>
-        <span className="ob-status-chips">{platforms.map((entry) => <span key={entry.key} className={`chip ${platformChipClass(entry.delivery)}${picked.includes(entry.key) ? " picked" : ""}`}>{statusText(entry)}</span>)}</span>
+        <span className="ob-status-chips">{platforms.map((entry) => <span key={entry.key} className={`chip ${platformChipClass(entry.onboarding || entry.delivery)}${picked.includes(entry.key) ? " picked" : ""}`}>{statusText(entry)}</span>)}</span>
         {exempt.length > 0 && <span className="ob-status-exempt">Exempted from onboarding for <b>{platformList(exempt)}</b>.{" "}
           {eligible.length ? <>Eligible: <b>{platformList(eligible)}</b>.</> : <>Not eligible on any platform.</>}</span>}
       </li>;
@@ -50,19 +50,31 @@ function StoreStatusNotice({ stores, picked }) {
   </div></div>;
 }
 
-/** Text of the "already has a status" confirmation. */
-function confirmText(flagged) {
+/** Confirmation text when picked items are already on the list, or already have a status in Delivery Platforms. */
+function confirmText(plan, status) {
   return <>
-    <p>These stores already have a status on the picked platforms:</p>
-    <ul className="ob-confirm-list">{flagged.slice(0, 12).map((item) => <li key={`${item.num}-${item.platform}`}>
-      <b>Store {item.num}</b> · {statusText(item.current)}{item.exempt ? " — will be recorded as Exempted" : ""}</li>)}</ul>
-    {flagged.length > 12 && <p>…and {flagged.length - 12} more.</p>}
-    <p>Create the onboarding records anyway?</p>
+    {plan.updates.length > 0 && <>
+      <p><b>Already on the onboarding list.</b> These are not added again — their record is updated instead, and any details you wrote are added as a progress update:</p>
+      <ul className="ob-confirm-list">{plan.updates.slice(0, 12).map((item) => <li key={`${item.num}-${item.platform}`}>
+        <b>Store {item.num}</b> · {obPlatformName(item.platform)}: {obStatusLabel(item.record.status)}{item.record.status !== item.status ? ` → ${item.status}` : " (status unchanged)"}</li>)}</ul>
+      {plan.updates.length > 12 && <p>…and {plan.updates.length - 12} more.</p>}
+    </>}
+    {plan.flagged.length > 0 && <>
+      <p>These stores already have a status on the picked platforms:</p>
+      <ul className="ob-confirm-list">{plan.flagged.slice(0, 12).map((item) => <li key={`${item.num}-${item.platform}`}>
+        <b>Store {item.num}</b> · {statusText(item.current)}{item.exempt ? " — will be recorded as Exempted" : item.status ? ` — will be recorded as ${item.status}` : ` — will be set to ${status}`}</li>)}</ul>
+      {plan.flagged.length > 12 && <p>…and {plan.flagged.length - 12} more.</p>}
+    </>}
+    <p>Continue?</p>
   </>;
 }
 
+/** "2 added · 1 already on the list updated" */
+const resultText = ({ created, updated }) => [created && `${created} added`, updated && `${updated} already on the list updated`].filter(Boolean).join(" · ") || "Nothing was changed";
+
 /**
- * Start onboarding for several stores and platforms at once (one record per store + platform).
+ * Add one store (or several, or a franchisee's stores) to onboarding: one record per store + platform.
+ * A store + platform already on the list is not added again; its record is updated when the status differs or details are written.
  * storeNums preselects stores; franchiseeId opens that franchisee's store list to tick from.
  */
 export default function NewOnboardingDialog({ storeNums = [], franchiseeId = null }) {
@@ -70,38 +82,49 @@ export default function NewOnboardingDialog({ storeNums = [], franchiseeId = nul
   const { close, setBusy } = useDialog();
   const [stores, setStores] = useState(() => storeNums.filter((num) => ctx.storeByNum.has(String(num))).map(String));
   const [platforms, setPlatforms] = useState([]);
-  const [status, setStatus] = useState("Pending");
-  const [syncStores, setSyncStores] = useState(true);
+  const [status, setStatus] = useState(OB_STATES[0]);
+  const [details, setDetails] = useState("");
   const [saving, setSaving] = useState(false);
   const pickerRef = useRef(null);
   const editorRef = useRef(null);
-  const plan = useMemo(() => planOnboarding(ctx, stores, platforms), [ctx, stores, platforms]);
+  const plan = useMemo(() => planOnboarding(ctx, stores, platforms, { status, details }), [ctx, stores, platforms, status, details]);
+
+  async function run(current, text) {
+    const result = await saveOnboardingPlan(current, { status, details: text });
+    if (result.failures.length) { toast(`${resultText(result)} — ${result.failures.join(" · ")}`, "err"); return result.created + result.updated > 0; }
+    toast(resultText(result), "ok");
+    return true;
+  }
 
   async function save() {
     const storeNums = pickerRef.current.commitTyped();
-    const current = planOnboarding(ctx, storeNums, platforms);
+    const text = editorRef.current.getValue();
+    const current = planOnboarding(ctx, storeNums, platforms, { status, details: text });
     if (!storeNums.length) { toast("Add at least one store", "err"); return; }
     if (!platforms.length) { toast("Pick at least one platform", "err"); return; }
-    if (!current.make.length) { toast("All picked store + platform items already have an open onboarding", "err"); return; }
-    const details = editorRef.current.getValue();
-    const create = () => createOnboarding({ items: current.make, status, details, syncStores, skipped: current.skip.length });
-    if (current.flagged.length) {
+    if (!current.make.length && !current.updates.length) {
+      toast("Already on the onboarding list with this status. Change the status or write details to update it.", "err");
+      return;
+    }
+    if (current.updates.length || current.flagged.length) {
       confirmAction({
-        title: "Store already has a status", okLabel: "Create anyway", busyLabel: "Creating…", icon: "circle-alert", okClass: "btn", text: confirmText(current.flagged),
-        onConfirm: async () => { const ok = await create(); if (ok) close(); return ok; },
+        title: current.updates.length ? "Already on the onboarding list" : "Store already has a status",
+        okLabel: current.make.length ? "Add and update" : "Update", busyLabel: "Saving…", icon: "circle-alert", okClass: "btn", text: confirmText(current, status),
+        onConfirm: async () => { const ok = await run(current, text); if (ok) close(); return ok; },
       });
       return;
     }
     setSaving(true);
-    const ok = await create();
+    const ok = await run(current, text);
     setSaving(false);
     if (ok) close();
   }
 
   const ready = stores.length > 0 && platforms.length > 0;
-  return <Modal size="wide" icon="rocket" title="New onboarding" subtitle="Pick one or more stores and platforms — each store + platform gets its own record"
+  const itemList = (items) => `${items.slice(0, 6).map((item) => `${item.num} ${obPlatformName(item.platform)}`).join(", ")}${items.length > 6 ? "…" : ""}`;
+  return <Modal size="wide" icon="store" title="Add a store" subtitle="Search a store # or a franchisee and pick the platforms — each store + platform gets its own record"
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
-      <button type="button" className="btn" disabled={saving} onClick={save}><Icon name="rocket" />Create onboarding</button></>}>
+      <button type="button" className="btn" disabled={saving} onClick={save}><Icon name="plus" />Add to onboarding</button></>}>
     <div className="field" style={{ marginBottom: 14 }}><label htmlFor="ob_store_in">Stores — type a store # or a franchisee name, or paste many store #s</label>
       <StorePicker ref={pickerRef} inputId="ob_store_in" value={stores} initialFranchisee={franchiseeId} onChange={(next) => { setStores(next); setBusy(true); }} />
       <StoreStatusNotice stores={plan.stores} picked={platforms} /></div>
@@ -114,13 +137,14 @@ export default function NewOnboardingDialog({ storeNums = [], franchiseeId = nul
     </div></div>
     <div className="field" style={{ marginBottom: 14 }}><label>Starting status</label><StatusButtons options={OB_STATES} value={status} onChange={setStatus} label="Starting status" /></div>
     <div className="field" style={{ marginBottom: 12 }}><label>Onboarding details (optional)</label>
-      <RichTextEditor ref={editorRef} placeholder="e.g. New owner wants Uber Eats and DoorDash. Sent the onboarding links by email." minHeight={140} onInput={() => setBusy(true)} /></div>
-    <label className="ob-syncrow"><input type="checkbox" checked={syncStores} onChange={(event) => setSyncStores(event.target.checked)} />
-      <span>Also set these platforms to <b>Pending</b> in each store's Delivery Platforms (only where Not enrolled)</span></label>
-    <div className={`ob-preview${ready ? " ok" : ""}`}>
-      {ready ? <><Icon name="list-checks" /><span><b>{plan.make.length}</b> record{plan.make.length !== 1 ? "s" : ""} will be created ({stores.length} store{stores.length !== 1 ? "s" : ""} × {platforms.length} platform{platforms.length !== 1 ? "s" : ""})
-        {plan.skip.length > 0 && <> · <b className="warn">{plan.skip.length} skipped</b> — already have an open onboarding: {plan.skip.slice(0, 6).map((item) => `${item.num} ${obPlatformName(item.platform)}`).join(", ")}{plan.skip.length > 6 ? "…" : ""}</>}
-        {plan.exempt.length > 0 && <> · <b className="warn">{plan.exempt.length} exempted</b> — recorded as Exempted: {plan.exempt.slice(0, 6).map((item) => `${item.num} ${obPlatformName(item.platform)}`).join(", ")}{plan.exempt.length > 6 ? "…" : ""}</>}</span></>
+      <RichTextEditor ref={editorRef} placeholder="e.g. New owner wants Uber Eats and DoorDash. Sent the onboarding links by email." minHeight={140}
+        onInput={() => { setBusy(true); setDetails(editorRef.current?.getValue() || ""); }} /></div>
+    <div className="help" style={{ marginBottom: 10 }}>The status is also set in each store's Delivery Platforms.</div>
+    <div className={`ob-preview${ready ? " ok" : ""}`} aria-live="polite">
+      {ready ? <><Icon name="list-checks" /><span><b>{plan.make.length}</b> new record{plan.make.length !== 1 ? "s" : ""}
+        {plan.updates.length > 0 && <> · <b className="warn">{plan.updates.length} already on the list</b> — will be updated: {itemList(plan.updates)}</>}
+        {plan.skip.length > 0 && <> · <b className="warn">{plan.skip.length} already on the list</b> with this status — no change: {itemList(plan.skip)}</>}
+        {plan.exempt.length > 0 && <> · <b className="warn">{plan.exempt.length} exempted</b> — recorded as Exempted: {itemList(plan.exempt)}</>}</span></>
         : <><Icon name="info" /><span>Pick at least one store and one platform. One record is created for each store + platform.</span></>}
     </div>
   </Modal>;

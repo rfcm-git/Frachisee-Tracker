@@ -40,11 +40,11 @@ export function DashboardCoverage({ coverage, donuts }) {
     <div className="db-grid">
       <DashboardCard title="3PD coverage" icon="bike" className="span4" tip="Delivery apps per open store. Core 3PD = Uber Eats, DoorDash and Grubhub. Click any bar to see the stores.">
         <div className="db-split">
-          <div><div className="db-sub">Core apps active per store</div>
+          <div><div className="db-sub">Core apps onboarded per store</div>
             <HorizontalBars rows={coverage.coreRows} liveCount={coverage.liveCount} valueMode="coverage" onSelect={openDashboardList} /></div>
           <div><div className="db-sub">Status by platform</div>
             <HorizontalBars rows={coverage.platformRows} full valueMode="platform" onSelect={openDashboardList} />
-            <ChartKey items={[["var(--green)", "Active"], ["var(--warn)", "Pending"], ["#e9968c", "Not enrolled"], ["#c9d3c4", "Exempted"]]} /></div>
+            <ChartKey items={[["var(--green)", "Onboarded"], ["var(--warn)", "Work in Progress"], ["#e9968c", "Not enrolled"], ["#c9d3c4", "Exempted"]]} /></div>
         </div>
       </DashboardCard>
     </div>
@@ -67,10 +67,10 @@ const TERRITORY_COLUMNS = [
   ["t", "Territory", "Territory number"],
   ["fr", "Franchisees", "Owners with stores in the territory"],
   ["stores", "Stores", "All stores (open ones in green)"],
-  ["avg", "Avg 3PD", "Average core apps active per open store (out of 3)"],
-  ["all3", "All 3 apps", "% of open stores active on Uber Eats, DoorDash and Grubhub"],
+  ["avg", "Avg 3PD", "Average core apps onboarded per open store (out of 3)"],
+  ["all3", "All 3 apps", "% of open stores onboarded on Uber Eats, DoorDash and Grubhub"],
   ["gbp", "GBP synced", "% of open stores with a GBP link"],
-  ["ez", "ezCater", "% of open stores active on ezCater"],
+  ["ez", "ezCater", "% of open stores onboarded on ezCater"],
   ["issues", "Open issues", "Pending + Work in Progress issues"],
 ];
 

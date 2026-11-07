@@ -7,8 +7,10 @@ import { contactsOf, emailOf, googleSearchUrl, platformColor, platformStatus, st
 import { staffForStore, staffOptions } from "../../domain/staff.js";
 import { telHref } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openStaffDetail } from "../../state/dialogs.js";
-import { toggleFrCard, useUiStore } from "../../state/uiStore.js";
+import { closeAll, openStaffDetail } from "../../state/dialogs.js";
+import { showStoreOnboarding, toggleFrCard, useUiStore } from "../../state/uiStore.js";
+import { latestOnboarding } from "../onboarding/onboardingSelectors.js";
+import { obStatusLabel } from "../../domain/onboarding.js";
 import { saveStoreFields, setStorePlatform } from "./storeActions.js";
 
 function EditButton({ onClick }) {
@@ -74,6 +76,14 @@ export default function StoreWindowLeft({ store }) {
   }
 
   const menuPlatform = platformMenu ? PLATFORMS.find(([key]) => key === platformMenu) : null;
+  /** Platforms on the onboarding list are changed in the Onboarding tab, so the change is recorded in the record's updates. */
+  const menuRecord = menuPlatform ? latestOnboarding(ctx, store.num, menuPlatform[0]) : null;
+
+  function goToOnboarding() {
+    setPlatformMenu(null);
+    closeAll();
+    showStoreOnboarding(store.num);
+  }
 
   return <>
     <div className={`lc collapsible${frCardOpen ? "" : " closed"}`}>
@@ -130,17 +140,21 @@ export default function StoreWindowLeft({ store }) {
     </div></div>
 
     <div className="lc"><div className="lch"><Icon name="bike" />Delivery Platforms</div><div className="lcb">
-      <div className="legend"><span><span className="d" style={{ background: "var(--ok)" }} />Active</span><span><span className="d" style={{ background: "var(--warn)" }} />Pending</span><span><span className="d" style={{ background: "var(--danger)" }} />Not enrolled</span><span><span className="d" style={{ background: "var(--idle)" }} />Exempted</span></div>
+      <div className="legend">{PLATFORM_STATES.map((value) => <span key={value}><span className="d" style={{ background: platformColor(value) }} />{value}</span>)}</div>
       <div className="pbtns">{PLATFORMS_UI.map(([key, name]) => {
         const status = platformStatus(store, key);
         return <button type="button" className="pbtn" title={`${name}: ${status}`} aria-expanded={platformMenu === key} key={key}
           onClick={() => { setEditing(null); setPlatformMenu(platformMenu === key ? null : key); }}>
           <span className="d" style={{ background: platformColor(status) }} />{name}</button>;
       })}</div>
-      {menuPlatform && <div className="pmenu"><div className="lbl">Set {menuPlatform[1]} status</div><div className="sbtns">
+      {menuPlatform && (menuRecord ? <div className="pmenu pmenu-ob" role="status">
+        <div className="lbl"><Icon name="rocket" />{menuPlatform[1]} is on the onboarding list · {obStatusLabel(menuRecord.status)}</div>
+        <p>Change its status in the Onboarding tab, so the change is saved in its updates.</p>
+        <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in Onboarding</button>
+      </div> : <div className="pmenu"><div className="lbl">Set {menuPlatform[1]} status</div><div className="sbtns">
         {PLATFORM_STATES.map((value) => <button type="button" className="sbtn" key={value} onClick={() => choosePlatform(menuPlatform[0], value)}>
           <span className="d" style={{ background: platformColor(value) }} />{value}</button>)}
-      </div></div>}
+      </div></div>)}
     </div></div>
 
     <div className="lc"><div className="lch"><Icon name="map" />Google Business Profile<EditButton onClick={() => startEdit("gbp")} /></div><div className="lcb">

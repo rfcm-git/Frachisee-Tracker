@@ -50,8 +50,8 @@ export function progressModel(ctx, filter) {
 }
 
 /** Most recent onboarding record of a store + platform, or null. */
-const latestOnboarding = (ctx, num, platform) => ctx.onboarding
-  .filter((record) => String(record.store_num) === num && record.platform === platform)
+export const latestOnboarding = (ctx, num, platform) => ctx.onboarding
+  .filter((record) => String(record.store_num) === String(num) && record.platform === platform)
   .sort((a, b) => timeOf(b.created_at) - timeOf(a.created_at))[0] || null;
 
 /** Status of a store on each supported platform: its Delivery Platforms status and its latest onboarding status ("" when none). */
@@ -64,23 +64,36 @@ export function storePlatformStatuses(ctx, num) {
   }));
 }
 
-/** True when a store + platform already has a status, so adding it should be confirmed. */
-export const hasPlatformStatus = (entry) => entry.delivery !== "Not enrolled" || Boolean(entry.onboarding);
+/** True when a store + platform already has a status in Delivery Platforms, so adding it should be confirmed. */
+export const hasPlatformStatus = (entry) => entry.delivery !== "Not enrolled";
 
 /**
- * Store + platform items to create and the ones skipped because an open record exists.
- * Items on a platform where the store is Exempted are still created, flagged exempt, so they can be reported.
- * flagged = items to create that already have a status; stores = picked stores with their statuses.
+ * What adding these stores + platforms will do. A store + platform already on the list is not added again:
+ * when the status differs or details are written it becomes an update of that record, otherwise it is skipped.
+ * Items on a platform where the store is already Onboarded or Exempted keep that status (the store wins), so nothing is downgraded.
+ * Returns { make: [{ num, platform, exempt, status? (Onboarded when the store already is), current }], updates: [{ num, platform, record, status, text }], skip: [{ num, platform, record }],
+ *   exempt, flagged (new items whose store already has a status there), stores (picked stores with their statuses) }.
  */
-export function planOnboarding(ctx, storeNums, platformKeys) {
+export function planOnboarding(ctx, storeNums, platformKeys, { status = OB_STATES[0], details = "" } = {}) {
   const make = [];
+  const updates = [];
   const skip = [];
+  const hasDetails = !!richToPlain(details).trim();
   const stores = storeNums.map((num) => ({ num, platforms: storePlatformStatuses(ctx, num) }));
   stores.forEach(({ num, platforms }) => platformKeys.forEach((platform) => {
-    const duplicate = ctx.onboarding.find((record) => String(record.store_num) === num && record.platform === platform && obIsOpen(record));
+    const record = latestOnboarding(ctx, num, platform);
     const current = platforms.find((entry) => entry.key === platform);
-    if (duplicate) skip.push({ num, platform });
-    else make.push({ num, platform, exempt: current.delivery === "Exempted", current });
+    if (!record) {
+      make.push({ num, platform, exempt: current.delivery === "Exempted", ...(current.delivery === "Onboarded" ? { status: "Onboarded" } : {}), current });
+      return;
+    }
+    if (record.status !== status || hasDetails) updates.push({ num, platform, record, status, text: details });
+    else skip.push({ num, platform, record });
   }));
-  return { make, skip, exempt: make.filter((item) => item.exempt), flagged: make.filter((item) => hasPlatformStatus(item.current)), stores };
+  return { make, updates, skip, exempt: make.filter((item) => item.exempt), flagged: make.filter((item) => hasPlatformStatus(item.current)), stores };
+}
+
+/** Platforms of a store that are not on the onboarding list yet, with the store's Delivery Platforms status. */
+export function platformsNotOnList(ctx, num) {
+  return storePlatformStatuses(ctx, num).filter((entry) => !entry.onboarding);
 }

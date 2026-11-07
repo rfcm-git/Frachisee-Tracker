@@ -31,7 +31,7 @@ export const REPORT_TYPES = [
 export const QUICK_REPORTS = [
   { kind: "issues", title: "Open concerns", icon: "circle-alert", preset: { chips: { status: ["Pending", "Work in Progress"] } } },
   { kind: "issues", title: "Concerns logged this week", icon: "calendar-range", preset: { period: "thisweek" } },
-  { kind: "ob", title: "Onboarding still in progress", icon: "loader", preset: { chips: { status: ["Pending", "Email Sent/Text Message", "Work in Progress"] } } },
+  { kind: "ob", title: "Onboarding still in progress", icon: "loader", preset: { chips: { status: ["Not enrolled", "Work in Progress"] } } },
   { kind: "ob", title: "Onboarding started this month", icon: "calendar", preset: { period: "thismonth" } },
   { kind: "cap", title: "Open CAPs", icon: "list-checks", preset: { chips: { status: ["No Action Yet", "Email Sent", "In Progress"] } } },
   { kind: "cap", title: "CAPs overdue or due soon", icon: "alarm-clock", preset: { chips: { due: ["overdue", "today", "soon"] } } },

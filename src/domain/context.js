@@ -5,6 +5,16 @@
 import { byName, digitsOnly } from "../lib/text.js";
 import { contactsOf } from "./records.js";
 import { isIssueOpen } from "./issues.js";
+import { normalizeObStatus } from "./onboarding.js";
+
+/** Onboarding rows with old statuses read as the new ones. Cached per row so unchanged rows keep their identity. */
+const obRowCache = new WeakMap();
+function normalizedObRow(record) {
+  const status = normalizeObStatus(record.status);
+  if (status === record.status) return record;
+  if (!obRowCache.has(record)) obRowCache.set(record, { ...record, status });
+  return obRowCache.get(record);
+}
 
 export const EMPTY_DATA = Object.freeze({
   franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [],
@@ -59,6 +69,7 @@ export function buildContext(data) {
 
   return {
     ...data,
+    onboarding: data.onboarding.map(normalizedObRow),
     franchisees,
     frById,
     staffById,

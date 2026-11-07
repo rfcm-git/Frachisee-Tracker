@@ -1,9 +1,20 @@
 /* Onboarding records: one row per store + platform. */
-import { OB_PLATFORMS } from "../config/constants.js";
+import { OB_PLATFORMS, OB_STATES } from "../config/constants.js";
 
 export const obPlatformName = (key) => (OB_PLATFORMS.find(([value]) => value === key) || [key, key])[1];
 
-export const obStatusClass = (status) => (status === "Onboarded" ? "ob-done" : status === "Exempted" ? "ob-exempt" : status === "Email Sent/Text Message" ? "ob-sent" : status === "Work in Progress" ? "ob-wip" : "ob-pend");
+/** Older records used Pending (now Not enrolled) and Email Sent/Text Message (now Work in Progress). History entries keep the old names. */
+const OLD_OB_STATUS = { Pending: "Not enrolled", "Email Sent/Text Message": "Work in Progress" };
+
+/** One of OB_STATES; old values are read as their new status. */
+export const normalizeObStatus = (status) => {
+  const value = OLD_OB_STATUS[status] || status;
+  return OB_STATES.includes(value) ? value : "Not enrolled";
+};
+
+/** Badge class. Old statuses still appear in history entries, so they keep their own colors. */
+export const obStatusClass = (status) => (status === "Onboarded" ? "ob-done" : status === "Exempted" ? "ob-exempt" : status === "Work in Progress" ? "ob-wip"
+  : status === "Email Sent/Text Message" ? "ob-sent" : status === "Pending" ? "ob-pend" : "ob-none");
 
 /** Label used on badges. */
 export const obStatusLabel = (status) => (status === "Email Sent/Text Message" ? "Email / Text sent" : status);
@@ -11,6 +22,7 @@ export const obStatusLabel = (status) => (status === "Email Sent/Text Message" ?
 /** Shorter label used in filters and the progress table. */
 export const obShortLabel = (status) => (status === "Email Sent/Text Message" ? "Email/Text" : status === "Work in Progress" ? "WIP" : status);
 
+/** Not enrolled and Work in Progress are open; Onboarded and Exempted are done. */
 export const obIsOpen = (record) => record.status !== "Onboarded" && record.status !== "Exempted";
 
 /** Foodja records are kept but not shown. */
@@ -42,10 +54,3 @@ export function obDays(record) {
   }
   return Math.max(0, Math.round(((end - start) / 864e5) * 10) / 10);
 }
-
-/** Text for the "keep Delivery Platforms in step" checkbox. */
-export const obSyncLabel = (platform, status) => (status === "Onboarded"
-  ? `Also set ${obPlatformName(platform)} to Active in this store's Delivery Platforms`
-  : status === "Exempted"
-    ? `Also set ${obPlatformName(platform)} to Exempted in this store's Delivery Platforms`
-    : `Also set ${obPlatformName(platform)} to Pending in this store's Delivery Platforms (only if Not enrolled)`);
