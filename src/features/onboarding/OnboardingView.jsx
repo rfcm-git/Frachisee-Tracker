@@ -18,6 +18,7 @@ import { openOnboardingDetails, openOnboardingHistory, openStore, openUpdateOnbo
 import { toast } from "../../state/toastStore.js";
 import { clearObFilters, setObSort, toggleObCell, toggleObFilter, toggleObOnlyPlatform, useUiStore } from "../../state/uiStore.js";
 import { askDeleteOnboarding } from "./onboardingActions.js";
+import { sendOnboardingEmail } from "./onboardingEmailActions.js";
 import { filterOnboarding, progressModel } from "./onboardingSelectors.js";
 
 function StatusFilter({ icon, label, name, values }) {
@@ -165,6 +166,8 @@ function RecordTable({ ctx, records, platforms }) {
           {record.updated_at && record.updated_at !== record.created_at && <><br />upd. {formatTimestamp(record.updated_at)}</>}</td>
         <td className="c-act"><div className="row-acts">
           <button type="button" className="iconbtn mini" data-tip="Update status / add progress" aria-label="Update" onClick={() => openUpdateOnboarding(record.id)}><Icon name="refresh-cw" /></button>
+          <button type="button" className="iconbtn mini" data-tip="Email the franchisee about onboarding (opens Outlook and adds “Email Sent” to the updates)" aria-label="Email"
+            onClick={() => sendOnboardingEmail(record.id)}><Icon name="mail" /></button>
           <button type="button" className="iconbtn mini del" data-tip="Delete this store + platform record" aria-label="Delete" onClick={() => askDeleteOnboarding(record.id)}><Icon name="trash-2" /></button>
         </div></td>
       </tr>;

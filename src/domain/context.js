@@ -23,6 +23,8 @@ export const EMPTY_DATA = Object.freeze({
   capsLastImport: null,
   /** Saved CAP email template, null when never saved, undefined when app_settings is not set up. */
   capsEmail: null,
+  /** Saved onboarding email template, null when never saved, undefined when app_settings is not set up. */
+  onboardingEmail: null,
 });
 
 export function buildContext(data) {

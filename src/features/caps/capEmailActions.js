@@ -4,6 +4,7 @@ import { CAP_EMAIL_STATUS, buildCapEmail, capEmailTemplate } from "../../domain/
 import { normalizeCapStatus } from "../../domain/caps.js";
 import { CAPS_EMAIL_KEY, writeSetting } from "../../services/api.js";
 import { local } from "../../lib/storage.js";
+import { openMailto } from "../../lib/mailto.js";
 import { getContext, updateData } from "../../state/dataStore.js";
 import { confirmAction, openCapEmail } from "../../state/dialogs.js";
 import { toastError } from "../../state/feedback.js";
@@ -31,17 +32,6 @@ export async function saveCapEmail(template) {
   updateData(() => ({ capsEmail: value }));
   toast("Email template saved for the whole team", "ok");
   return true;
-}
-
-/** Opens a mailto: link without leaving the page. */
-function openMailto(href) {
-  const link = document.createElement("a");
-  link.href = href;
-  link.rel = "noopener";
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
 }
 
 /** Opens the email in Outlook, then sets the status to Email Sent (whatever it was before). */

@@ -31,6 +31,7 @@ export const DIALOG = {
   addOnboarding: "addOnboarding",
   newOnboarding: "newOnboarding",
   onboardingImport: "onboardingImport",
+  onboardingEmail: "onboardingEmail",
   updateOnboarding: "updateOnboarding",
   capForm: "capForm",
   capsImport: "capsImport",
@@ -90,6 +91,8 @@ export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { ca
 /** Onboarding tab "Add store": choose one store or many from a spreadsheet. */
 export const openAddOnboarding = () => openDialog(DIALOG.addOnboarding);
 export const openOnboardingImport = () => openDialog(DIALOG.onboardingImport);
+/** Onboarding email message editor; previewId picks the record whose store is shown in the preview. */
+export const openOnboardingEmail = (previewId = null) => openDialog(DIALOG.onboardingEmail, { previewId });
 
 /** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
 export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });

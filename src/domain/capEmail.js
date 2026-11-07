@@ -124,9 +124,9 @@ export function fillTemplate(text, values, missing = new Set()) {
   });
 }
 
-/** Placeholders in the text that are not known fields. */
-export function unknownPlaceholders(text) {
-  const known = new Set(CAP_EMAIL_FIELDS.map(([name]) => name.toLowerCase()));
+/** Placeholders in the text that are not known fields (fields: [[name, description]], the CAP fields by default). */
+export function unknownPlaceholders(text, fields = CAP_EMAIL_FIELDS) {
+  const known = new Set(fields.map(([name]) => name.toLowerCase()));
   return [...new Set([...String(text || "").matchAll(PLACEHOLDER)].map((match) => match[1]).filter((name) => !known.has(name.toLowerCase())))];
 }
 
@@ -162,20 +162,34 @@ function ccFor(ctx, store, template, houston, to, owner) {
 }
 
 /**
- * The email for one CAP record: { to, cc, ccInfo, subject, body, href, houston, rajeev, missing: [field names with no value] }.
+ * Who gets an email about a store (shared by the CAP and onboarding emails), using the template's CC rules.
+ * owner = { email, name } of the franchisee. Returns { to, cc, ccInfo, team: { fbc, om }, houston, rajeev }.
  * rajeev = true when the store belongs to Rohit or Raghu Marwaha, so it goes to Rajeev with the owner in CC.
+ */
+export function recipientsFor(ctx, store, template, owner) {
+  const houston = isHoustonStore(ctx, store);
+  const rajeev = isRoutedToRajeev(store && franchiseeName(ctx, store.franchisee_id), owner.name);
+  const to = rajeev ? RAJEEV_EMAIL : owner.email;
+  const ccInfo = ccFor(ctx, store, template, houston, to, rajeev ? owner : null);
+  const team = { fbc: ccInfo.some((entry) => entry.why.includes("FBC")), om: ccInfo.some((entry) => entry.why.includes("OM")) };
+  return { to, cc: ccInfo.map((entry) => entry.email), ccInfo, team, houston, rajeev };
+}
+
+/** Fills the template for these values and recipients: { subject, body, href, missing }. */
+export function composeEmail(template, values, recipients) {
+  const missing = new Set();
+  const subject = fillTemplate(template.subject, values, missing).replace(/\s*\r?\n\s*/g, " ").trim();
+  const body = fillTemplate(template.body, values, missing);
+  const { to, cc } = recipients;
+  return { subject, body, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
+}
+
+/**
+ * The email for one CAP record: { to, cc, ccInfo, team, store, subject, body, href, houston, rajeev, missing: [field names with no value] }.
  */
 export function buildCapEmail(ctx, record, template) {
   const values = capEmailValues(ctx, record);
   const store = ctx.storeByNum.get(String(record.store_num));
-  const houston = isHoustonStore(ctx, store);
-  const rajeev = isRoutedToRajeev(store && franchiseeName(ctx, store.franchisee_id), values.Franchisee);
-  const to = rajeev ? RAJEEV_EMAIL : values.Email;
-  const ccInfo = ccFor(ctx, store, template, houston, to, rajeev ? { email: values.Email, name: values.Franchisee } : null);
-  const cc = ccInfo.map((entry) => entry.email);
-  const missing = new Set();
-  const subject = fillTemplate(template.subject, values, missing).replace(/\s*\r?\n\s*/g, " ").trim();
-  const body = fillTemplate(template.body, values, missing);
-  const team = { fbc: ccInfo.some((entry) => entry.why.includes("FBC")), om: ccInfo.some((entry) => entry.why.includes("OM")) };
-  return { to, cc, ccInfo, team, store: !!store, subject, body, houston, rajeev, missing: [...missing], href: to ? mailtoHref({ to, cc, subject, body }) : "" };
+  const recipients = recipientsFor(ctx, store, template, { email: values.Email, name: values.Franchisee });
+  return { ...recipients, store: !!store, ...composeEmail(template, values, recipients) };
 }
