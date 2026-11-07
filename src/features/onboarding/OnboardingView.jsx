@@ -2,24 +2,23 @@ import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
-import { DescPreview, EmptyState, InfoTip, ObPlatformTag, ObStatusBadge, StoreStatusIfClosed } from "../../components/ui/common.jsx";
+import { EmptyState, InfoTip, ObPlatformTag, ObStatusBadge, StoreStatusIfClosed } from "../../components/ui/common.jsx";
 import { clickableProps } from "../../components/ui/clickable.js";
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { OB_PLATFORMS, OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
 import { franchiseeName } from "../../domain/context.js";
-import { obHistory, obIsOpen, obPlatformName, obShortLabel, obStatusClass } from "../../domain/onboarding.js";
+import { obHistory, obIsOpen, obPlatformName, obShortLabel, obStatusClass, obStatusLabel } from "../../domain/onboarding.js";
 import { storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
 import { formatNumber, formatTimestamp } from "../../lib/format.js";
-import { oneLine, richHtml } from "../../lib/richText.js";
+import { oneLine } from "../../lib/richText.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openOnboardingDetails, openOnboardingHistory, openStore, openUpdateOnboarding } from "../../state/dialogs.js";
+import { openOnboardingHistory, openStore, openStoreOnboarding } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { clearObFilters, setObSort, toggleObCell, toggleObFilter, toggleObOnlyPlatform, useUiStore } from "../../state/uiStore.js";
-import { askDeleteOnboarding } from "./onboardingActions.js";
 import { sendOnboardingEmail } from "./onboardingEmailActions.js";
-import { filterOnboarding, progressModel } from "./onboardingSelectors.js";
+import { filterOnboarding, groupOnboardingByStore, onboardingFranchisees, progressModel } from "./onboardingSelectors.js";
 
 function StatusFilter({ icon, label, name, values }) {
   return <FilterDropdown icon={icon} label={label} value={values.map(obShortLabel).join(", ")} active={values.length > 0}>
@@ -30,18 +29,40 @@ function StatusFilter({ icon, label, name, values }) {
   </FilterDropdown>;
 }
 
+/** Franchisees with stores on the onboarding list, with a search box. Pick one or more. */
+function FranchiseeFilter({ values }) {
+  const ctx = useDataContext();
+  const [query, setQuery] = useState("");
+  const all = useMemo(() => onboardingFranchisees(ctx), [ctx]);
+  const q = query.trim().toLowerCase();
+  const shown = q ? all.filter((item) => item.name.toLowerCase().includes(q)) : all;
+  const names = values.map((id) => all.find((item) => item.id === id)?.name || ctx.frById.get(id)?.name || `#${id}`);
+  return <FilterDropdown icon="users" label="Franchisee" value={names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0] || ""} active={values.length > 0}>
+    <div className="fdd-search"><Icon name="search" /><input type="search" value={query} placeholder="Search franchisees…" aria-label="Search franchisees"
+      autoFocus onChange={(event) => setQuery(event.target.value)} /></div>
+    <FilterOption selected={!values.length} onClick={() => toggleObFilter("franchisees", "")}>All franchisees</FilterOption><div className="fdd-div" />
+    <div className="fdd-scroll">
+      {shown.map((item) => <FilterOption key={item.id} selected={values.includes(item.id)} checkable onClick={() => toggleObFilter("franchisees", item.id)}>
+        <span className="fdd-name">{item.name}</span><span className="fdd-cnt">{item.count}</span></FilterOption>)}
+      {!shown.length && <div className="fdd-note">No franchisee matches “{query}”</div>}
+    </div>
+    <div className="fdd-note">Only franchisees with stores on the onboarding list · pick one or more</div>
+  </FilterDropdown>;
+}
+
 function OnboardingFilters({ filter, anyFilter }) {
   return <div className="ifbar"><div className="grp fdd-grp">
     <FilterDropdown icon="layers" label="Platform" value={filter.platforms.map(obPlatformName).join(", ")} active={filter.platforms.length > 0}>
       <FilterOption selected={!filter.platforms.length} onClick={() => toggleObFilter("platforms", "")}>All platforms</FilterOption><div className="fdd-div" />
       {OB_PLATFORMS.map(([key, name]) => <FilterOption key={key} selected={filter.platforms.includes(key)} checkable onClick={() => toggleObFilter("platforms", key)}>{name}</FilterOption>)}
     </FilterDropdown>
+    <FranchiseeFilter values={filter.franchisees || []} />
     <StatusFilter icon="bike" label="3PD status" name="threePd" values={filter.threePd} />
     <StatusFilter icon="utensils" label="ezCater status" name="ezCater" values={filter.ezCater} />
     <FilterDropdown icon="arrow-down-up" label="Sort" value={filter.sort === "new" ? "Most recent" : "Oldest"}>
       {({ close }) => <>
-        <FilterOption selected={filter.sort === "new"} onClick={() => { setObSort("new"); close(); }}><Icon name="arrow-down-wide-narrow" />Most recent first</FilterOption>
-        <FilterOption selected={filter.sort === "old"} onClick={() => { setObSort("old"); close(); }}><Icon name="arrow-up-narrow-wide" />Oldest first</FilterOption>
+        <FilterOption selected={filter.sort === "new"} onClick={() => { setObSort("new"); close(); }}><Icon name="arrow-down-wide-narrow" />Latest activity first</FilterOption>
+        <FilterOption selected={filter.sort === "old"} onClick={() => { setObSort("old"); close(); }}><Icon name="arrow-up-narrow-wide" />Oldest started first</FilterOption>
       </>}
     </FilterDropdown>
   </div>
@@ -136,39 +157,40 @@ function PlatformCounts({ records, platforms }) {
   </div>;
 }
 
-function RecordTable({ ctx, records, platforms }) {
-  const { items, pagerProps } = usePaged("ob", records);
-  return <div className="card" style={{ overflowX: "auto" }}><table className="is-table ob-table"><thead><tr>
-    <th className="c-status">Status</th><th className="ob-updcol">Updates</th><th className="c-issue">Issue <PlatformCounts records={records} platforms={platforms} /></th><th className="c-store">Store Number</th><th className="hide-sm c-logged">Logged</th><th className="c-act">Actions</th>
+/** One row per store: its platforms with their status, the latest update, and the store's actions. */
+function StoreTable({ ctx, groups, records, platforms }) {
+  const { items, pagerProps } = usePaged("ob", groups);
+  return <div className="card" style={{ overflowX: "auto" }}><table className="is-table ob-table ob-stable"><thead><tr>
+    <th className="c-store">Store</th><th className="c-issue">Platforms <PlatformCounts records={records} platforms={platforms} /></th>
+    <th className="ob-updcol">Latest update</th><th className="hide-sm c-logged">Activity</th><th className="c-act">Actions</th>
   </tr></thead><tbody>
-    {items.map((record) => {
-      const store = ctx.storeByNum.get(String(record.store_num || ""));
-      const owner = franchiseeName(ctx, store ? store.franchisee_id : record.franchisee_id);
-      const size = record.group_id ? ctx.onboarding.filter((item) => item.group_id === record.group_id).length : 1;
-      const steps = obHistory(record).length;
-      return <tr key={record.id}>
-        <td className="c-status"><ObStatusBadge status={record.status} /></td>
-        <td className="ob-updcol"><div className="ob-upd">
-          <button type="button" className="upd-pill" data-tip={`View all updates (${steps} step${steps === 1 ? "" : "s"})`} onClick={() => openOnboardingHistory(record.id)}><Icon name="history" />{steps}</button>
-          <span className="ob-last">{record.last_update ? oneLine(record.last_update, 90) : <span className="muted">No updates yet</span>}</span>
-        </div></td>
-        <td className="c-issue"><div className="ic-top"><ObPlatformTag platform={record.platform} />
-          {size > 1 && <span className="mtag" title={`Created in one request with ${size - 1} other store/platform item${size > 2 ? "s" : ""}`}><Icon name="layers" />Request · {size}</span>}
-        </div>
-          <DescPreview html={record.details ? richHtml(record.details) : '<span class="muted">Onboarding request</span>'} onOpen={() => openOnboardingDetails(record.id)} />
-        </td>
+    {items.map((group) => {
+      const { store, latest } = group;
+      const owner = franchiseeName(ctx, group.franchiseeId);
+      const steps = group.records.reduce((sum, record) => sum + obHistory(record).length, 0);
+      const started = group.records.reduce((first, record) => (!first || String(record.created_at) < String(first) ? record.created_at : first), "");
+      return <tr key={group.num}>
         <td className="c-store"><button type="button" className="ob-snum" data-tip="Open store information"
-          onClick={() => (store ? openStore(store.id) : toast(`Store ${record.store_num} is not in the store list`, "err"))}>{record.store_num || ""}</button>
+          onClick={() => (store ? openStore(store.id) : toast(`Store ${group.num} is not in the store list`, "err"))}>{group.num || ""}</button>
           <div className="muted" style={{ fontSize: 11.5 }}>{owner || "—"}</div>
           {store && storeStatus(store) !== "Open" && <div style={{ marginTop: 3 }}><StoreStatusIfClosed status={storeStatus(store)} /></div>}
         </td>
-        <td className="hide-sm muted c-logged" style={{ fontSize: 12 }}>{formatTimestamp(record.created_at)}
-          {record.updated_at && record.updated_at !== record.created_at && <><br />upd. {formatTimestamp(record.updated_at)}</>}</td>
+        <td className="c-issue"><div className="ob-apps">
+          {group.records.map((record) => <button type="button" key={record.id} className="ob-app" data-tip={`${obPlatformName(record.platform)}: ${obStatusLabel(record.status)} — view its updates`}
+            onClick={() => openOnboardingHistory(record.id)}><ObPlatformTag platform={record.platform} /><ObStatusBadge status={record.status} /></button>)}
+        </div>
+          {group.open > 0 && <div className="muted ob-open">{group.open} of {group.records.length} still being onboarded</div>}</td>
+        <td className="ob-updcol"><div className="ob-upd">
+          <button type="button" className="upd-pill" data-tip={`View the latest ${obPlatformName(latest.platform)} updates (${steps} step${steps === 1 ? "" : "s"} across this store)`}
+            onClick={() => openOnboardingHistory(latest.id)}><Icon name="history" />{steps}</button>
+          <span className="ob-last">{latest.last_update ? <><b className="ob-lastp">{obPlatformName(latest.platform)}:</b> {oneLine(latest.last_update, 90)}</> : <span className="muted">No updates yet</span>}</span>
+        </div></td>
+        <td className="hide-sm muted c-logged" style={{ fontSize: 12 }}>Started {formatTimestamp(started)}
+          {group.lastAt && latest.updated_at && latest.updated_at !== latest.created_at && <><br />upd. {formatTimestamp(latest.updated_at)}</>}</td>
         <td className="c-act"><div className="row-acts">
-          <button type="button" className="iconbtn mini" data-tip="Update status / add progress" aria-label="Update" onClick={() => openUpdateOnboarding(record.id)}><Icon name="refresh-cw" /></button>
-          <button type="button" className="iconbtn mini" data-tip="Email the franchisee about onboarding (opens Outlook and adds “Email Sent” to the updates)" aria-label="Email"
-            onClick={() => sendOnboardingEmail(record.id)}><Icon name="mail" /></button>
-          <button type="button" className="iconbtn mini del" data-tip="Delete this store + platform record" aria-label="Delete" onClick={() => askDeleteOnboarding(record.id)}><Icon name="trash-2" /></button>
+          <button type="button" className="iconbtn mini" data-tip="Update this store's platforms, add progress or add platforms" aria-label={`Update store ${group.num}`} onClick={() => openStoreOnboarding(group.num)}><Icon name="refresh-cw" /></button>
+          <button type="button" className="iconbtn mini" data-tip="Email the franchisee about onboarding (opens Outlook and adds “Email Sent” to the updates)" aria-label={`Email store ${group.num}`}
+            onClick={() => sendOnboardingEmail(group.latest.id)}><Icon name="mail" /></button>
         </div></td>
       </tr>;
     })}
@@ -182,18 +204,19 @@ export default function OnboardingView() {
   const filter = useUiStore((state) => state.obFilter);
   const search = useUiStore((state) => state.search);
   const records = useMemo(() => filterOnboarding(ctx, filter, searchQuery(search)), [ctx, filter, search]);
+  const groups = useMemo(() => groupOnboardingByStore(ctx, records, filter, searchQuery(search)), [ctx, records, filter, search]);
   const model = useMemo(() => progressModel(ctx, filter), [ctx, filter]);
   const open = records.filter(obIsOpen).length;
-  useToolbarCount(ctx.onboardingReady ? `${formatNumber(records.length)} record${records.length !== 1 ? "s" : ""} · ${formatNumber(open)} open` : "");
+  useToolbarCount(ctx.onboardingReady ? `${formatNumber(groups.length)} store${groups.length !== 1 ? "s" : ""} · ${formatNumber(records.length)} platform${records.length !== 1 ? "s" : ""} · ${formatNumber(open)} open` : "");
 
   if (!ctx.onboardingReady) return <EmptyState icon="database" title="Onboarding needs a quick database update">Run migrate-onboarding.sql in the Supabase SQL Editor, then click Refresh. Your Concerns are not affected.</EmptyState>;
-  const anyFilter = !!(filter.platforms.length || filter.threePd.length || filter.ezCater.length || search.trim());
+  const anyFilter = !!(filter.platforms.length || filter.threePd.length || filter.ezCater.length || filter.franchisees?.length || search.trim());
   const progress = <div className="ob-prog"><ProgressMatrix model={model} /><ProgressChart model={model} /></div>;
 
   return <>
     <OnboardingFilters filter={filter} anyFilter={anyFilter} />
     {!ctx.onboarding.length ? <EmptyState icon="rocket" title="No onboarding yet">Click “Add store” to add one store, or many from a spreadsheet.</EmptyState>
       : !records.length ? <>{progress}<EmptyState icon="search-x" title="No onboarding matches">Try a different search or filter.</EmptyState></>
-        : <>{progress}<RecordTable ctx={ctx} records={records} platforms={filter.platforms} /></>}
+        : <>{progress}<StoreTable ctx={ctx} groups={groups} records={records} platforms={filter.platforms} /></>}
   </>;
 }

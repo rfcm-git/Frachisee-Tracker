@@ -121,3 +121,25 @@
   .obi-details{max-width:260px;font-size:12.5px;white-space:pre-wrap}
   @media (prefers-reduced-motion: reduce){ .ob-choice-btn:active{transform:none} }
   .is-table.ob-table th.c-act,.is-table.ob-table td.c-act{width:116px}
+  .ob-apps{display:flex;flex-wrap:wrap;gap:6px}
+  .ob-app{display:inline-flex;align-items:center;gap:5px;padding:3px 6px 3px 3px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:var(--font);transition:border-color var(--t-fast) ease,background var(--t-fast) ease}
+  .ob-app:hover,.ob-app:focus-visible{border-color:var(--lime);background:var(--lime-tint)}
+  .ob-open{font-size:11.5px;margin-top:5px}
+  .ob-lastp{font-weight:700;color:var(--ink)}
+  .sob-list{display:grid;gap:10px}
+  .sob-row{border:1px solid var(--line);border-radius:12px;padding:10px 12px;transition:border-color var(--t-fast) ease,background var(--t-fast) ease}
+  .sob-row.changed{border-color:var(--green);background:var(--lime-tint)}
+  .sob-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+  .sob-to{display:inline-flex;align-items:center;gap:5px}
+  .sob-to [data-lucide]{width:13px;height:13px}
+  .sob-acts{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+  .sob-last{font-size:12px;margin:-2px 0 8px}
+  .sob-notefor{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 2px;font-size:12.5px}
+  .ob-pick.sm{height:32px;padding:0 10px 0 8px}
+  .fdd-search{display:flex;align-items:center;gap:6px;padding:4px 8px 6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .fdd-search [data-lucide]{width:14px;height:14px;color:var(--ink-soft);flex:none}
+  .fdd-search input{border:none;outline:none;background:none;font:inherit;font-size:13px;width:100%;min-width:180px;color:var(--ink)}
+  .fdd-scroll{max-height:260px;overflow-y:auto}
+  .fdd-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+  .fdd-cnt{font-size:11px;color:var(--ink-soft);margin-left:8px}
+  .pmenu-add{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px}

@@ -33,6 +33,7 @@ export const DIALOG = {
   onboardingImport: "onboardingImport",
   onboardingEmail: "onboardingEmail",
   updateOnboarding: "updateOnboarding",
+  storeOnboarding: "storeOnboarding",
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
@@ -97,6 +98,8 @@ export const openOnboardingEmail = (previewId = null) => openDialog(DIALOG.onboa
 /** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
 export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
+/** Update all of one store's onboarding platforms at once. */
+export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboarding, { storeNum: String(storeNum) });
 
 /** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
 export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });

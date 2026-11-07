@@ -7,9 +7,16 @@ import { timeOf } from "../../lib/format.js";
 import { richToPlain } from "../../lib/richText.js";
 import { isObCellActive } from "../../state/uiStore.js";
 
-/** True when a record passes the platform / status filters and the search. */
+/** Franchisee of a record: from its store, or the saved id. */
+const recordFranchisee = (ctx, record) => {
+  const store = ctx.storeByNum.get(String(record.store_num || ""));
+  return store ? store.franchisee_id : record.franchisee_id;
+};
+
+/** True when a record passes the platform / status / franchisee filters and the search. */
 function passes(ctx, record, filter, sq) {
   if (filter.platforms.length && !filter.platforms.includes(record.platform)) return false;
+  if (filter.franchisees?.length && !filter.franchisees.includes(recordFranchisee(ctx, record))) return false;
   if (filter.threePd.length || filter.ezCater.length) {
     const core = OB_CORE.includes(record.platform);
     const ez = record.platform === "ez";
@@ -30,6 +37,45 @@ export function filterOnboarding(ctx, filter, sq) {
   return ctx.onboarding.filter((record) => obVisible(record) && passes(ctx, record, filter, sq))
     .sort((a, b) => (sq.q && sq.mode !== "fr" ? numRank(a.store_num, sq.q) - numRank(b.store_num, sq.q) : 0)
       || (filter.sort === "new" ? timeOf(b.created_at) - timeOf(a.created_at) : timeOf(a.created_at) - timeOf(b.created_at)));
+}
+
+/** Platform order used inside a store row. */
+const platformOrder = (key) => OB_PLATFORMS.findIndex(([value]) => value === key);
+const lastActivity = (record) => Math.max(timeOf(record.updated_at), timeOf(record.created_at));
+
+/**
+ * The filtered records grouped by store, one entry per store:
+ * { num, store, franchiseeId, records (in platform order), latest (most recently updated record), lastAt, startedAt, open }.
+ * Sorted like the record list: by store number when searching a number, else newest or oldest activity first.
+ */
+export function groupOnboardingByStore(ctx, records, filter, sq) {
+  const groups = new Map();
+  records.forEach((record) => {
+    const num = String(record.store_num || "");
+    if (!groups.has(num)) groups.set(num, []);
+    groups.get(num).push(record);
+  });
+  const list = [...groups.entries()].map(([num, items]) => {
+    const sorted = items.slice().sort((a, b) => platformOrder(a.platform) - platformOrder(b.platform));
+    const latest = items.slice().sort((a, b) => lastActivity(b) - lastActivity(a))[0];
+    return {
+      num, store: ctx.storeByNum.get(num) || null, franchiseeId: recordFranchisee(ctx, items[0]), records: sorted, latest,
+      lastAt: lastActivity(latest), startedAt: Math.min(...items.map((item) => timeOf(item.created_at))), open: items.filter(obIsOpen).length,
+    };
+  });
+  return list.sort((a, b) => (sq.q && sq.mode !== "fr" ? numRank(a.num, sq.q) - numRank(b.num, sq.q) : 0)
+    || (filter.sort === "new" ? b.lastAt - a.lastAt : a.startedAt - b.startedAt));
+}
+
+/** Franchisees that have stores on the onboarding list, by name, with their record count: [{ id, name, count }]. */
+export function onboardingFranchisees(ctx) {
+  const counts = new Map();
+  ctx.onboarding.filter(obVisible).forEach((record) => {
+    const id = recordFranchisee(ctx, record);
+    if (id != null) counts.set(id, (counts.get(id) || 0) + 1);
+  });
+  return [...counts.entries()].map(([id, count]) => ({ id, name: ctx.frById.get(id)?.name || `Franchisee ${id}`, count }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export const openOnboardingCount = (ctx) => ctx.onboarding.filter((record) => obVisible(record) && obIsOpen(record)).length;

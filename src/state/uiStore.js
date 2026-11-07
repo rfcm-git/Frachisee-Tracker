@@ -26,7 +26,7 @@ function savedIssueView() {
 }
 
 const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "new" });
-const defaultObFilter = () => ({ platforms: [], threePd: [], ezCater: [], sort: "new" });
+const defaultObFilter = () => ({ platforms: [], threePd: [], ezCater: [], franchisees: [], sort: "new" });
 
 /** CAPs sort keys: store number, status, date added, last updated. */
 export const CAP_SORT_KEYS = ["num", "status", "added", "updated", "due"];
@@ -102,6 +102,7 @@ function restoredState() {
       platforms: onlyValid(saved.obFilter.platforms, OB_PLATFORMS.map(([key]) => key)),
       threePd: onlyValid(saved.obFilter.threePd, OB_STATES),
       ezCater: onlyValid(saved.obFilter.ezCater, OB_STATES),
+      franchisees: Array.isArray(saved.obFilter.franchisees) ? saved.obFilter.franchisees.filter((id) => id != null && id !== "") : [],
       sort: saved.obFilter.sort === "old" ? "old" : "new",
     };
   }
@@ -187,7 +188,7 @@ export function openTabFromDashboard(tab) {
 
 /** Onboarding tab showing one store's records (platform and status filters cleared so none are hidden). */
 export function showStoreOnboarding(storeNum) {
-  set({ tab: "onboarding", search: `#${storeNum}`, obFilter: { ...get().obFilter, platforms: [], threePd: [], ezCater: [] }, ...resetPages("ob") });
+  set({ tab: "onboarding", search: `#${storeNum}`, obFilter: { ...get().obFilter, platforms: [], threePd: [], ezCater: [], franchisees: [] }, ...resetPages("ob") });
   window.scrollTo(0, 0);
 }
 

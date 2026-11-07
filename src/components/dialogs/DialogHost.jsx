@@ -26,6 +26,7 @@ import NewOnboardingDialog from "../../features/onboarding/NewOnboardingDialog.j
 import OnboardingImportDialog from "../../features/onboarding/OnboardingImportDialog.jsx";
 import OnboardingEmailDialog from "../../features/onboarding/OnboardingEmailDialog.jsx";
 import UpdateOnboardingDialog from "../../features/onboarding/UpdateOnboardingDialog.jsx";
+import StoreOnboardingDialog from "../../features/onboarding/StoreOnboardingDialog.jsx";
 import ReportBuilderDialog from "../../features/reports/ReportBuilderDialog.jsx";
 import LinksDialog from "../../features/settings/LinksDialog.jsx";
 import SettingsDialog from "../../features/settings/SettingsDialog.jsx";
@@ -63,6 +64,7 @@ const COMPONENTS = {
   [DIALOG.onboardingImport]: OnboardingImportDialog,
   [DIALOG.onboardingEmail]: OnboardingEmailDialog,
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
+  [DIALOG.storeOnboarding]: StoreOnboardingDialog,
   [DIALOG.capForm]: CapFormDialog,
   [DIALOG.capsImport]: CapsImportDialog,
   [DIALOG.capEmail]: CapEmailDialog,

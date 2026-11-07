@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import { CopyButton, StoreStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
-import { PLATFORMS, PLATFORMS_UI, PLATFORM_STATES } from "../../config/constants.js";
+import { OB_PLATFORMS, PLATFORMS, PLATFORMS_UI, PLATFORM_STATES } from "../../config/constants.js";
 import { contactsOf, emailOf, googleSearchUrl, platformColor, platformStatus, storeStatus } from "../../domain/records.js";
 import { staffForStore, staffOptions } from "../../domain/staff.js";
 import { telHref } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { closeAll, openStaffDetail } from "../../state/dialogs.js";
+import { toast } from "../../state/toastStore.js";
 import { showStoreOnboarding, toggleFrCard, useUiStore } from "../../state/uiStore.js";
 import { latestOnboarding } from "../onboarding/onboardingSelectors.js";
+import { createOnboarding } from "../onboarding/onboardingActions.js";
 import { obStatusLabel } from "../../domain/onboarding.js";
 import { saveStoreFields, setStorePlatform } from "./storeActions.js";
 
@@ -78,6 +80,19 @@ export default function StoreWindowLeft({ store }) {
   const menuPlatform = platformMenu ? PLATFORMS.find(([key]) => key === platformMenu) : null;
   /** Platforms on the onboarding list are changed in the Onboarding tab, so the change is recorded in the record's updates. */
   const menuRecord = menuPlatform ? latestOnboarding(ctx, store.num, menuPlatform[0]) : null;
+  /** Onboarding platforms (not Foodja) the store is not onboarded or exempted on can be added to the list from here. */
+  const menuOnboardable = !!menuPlatform && !menuRecord && OB_PLATFORMS.some(([key]) => key === menuPlatform[0])
+    && !["Onboarded", "Exempted"].includes(platformStatus(store, menuPlatform[0]));
+
+  const [adding, setAdding] = useState(false);
+  /** Adds this platform to the onboarding list (Work in Progress when the store already has it in progress, else Not enrolled). */
+  async function addToOnboarding(key) {
+    const status = platformStatus(store, key) === "Work in Progress" ? "Work in Progress" : "Not enrolled";
+    setAdding(true);
+    const created = await createOnboarding({ items: [{ num: String(store.num), platform: key, exempt: false }], status, details: "", quiet: true });
+    setAdding(false);
+    if (created) toast(`${PLATFORMS.find(([value]) => value === key)?.[1] || key} added to onboarding as ${status}`, "ok");
+  }
 
   function goToOnboarding() {
     setPlatformMenu(null);
@@ -154,7 +169,13 @@ export default function StoreWindowLeft({ store }) {
       </div> : <div className="pmenu"><div className="lbl">Set {menuPlatform[1]} status</div><div className="sbtns">
         {PLATFORM_STATES.map((value) => <button type="button" className="sbtn" key={value} onClick={() => choosePlatform(menuPlatform[0], value)}>
           <span className="d" style={{ background: platformColor(value) }} />{value}</button>)}
-      </div></div>)}
+      </div>
+        {ctx.onboardingReady && menuOnboardable && <div className="pmenu-add">
+          <span className="muted">Not on the onboarding list yet.</span>
+          <button type="button" className="btn sm outline round" disabled={adding} onClick={() => addToOnboarding(menuPlatform[0])}>
+            <Icon name="rocket" />{adding ? "Adding…" : "Add to onboarding"}</button>
+        </div>}
+      </div>)}
     </div></div>
 
     <div className="lc"><div className="lch"><Icon name="map" />Google Business Profile<EditButton onClick={() => startEdit("gbp")} /></div><div className="lcb">
