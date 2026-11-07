@@ -23,6 +23,7 @@ const HEADERS = {
   dd: ["doordash", "door dash", "dd"],
   gh: ["grubhub", "grub hub", "gh"],
   ez: ["ezcater", "ez cater", "ez"],
+  wm: ["walmart", "wal mart", "wm"],
   status: ["status", "onboarding status"],
   details: ["details", "notes", "note", "onboarding details", "comments"],
 };
@@ -57,7 +58,8 @@ export function readMark(value) {
 /* ---------- template ---------- */
 
 function instructionsSheet(XLSX) {
-  const example = (num, marks, status, details) => [num, ...marks, status, details];
+  /** marked = platform keys with a Y. */
+  const example = (num, marked, status, details) => [num, ...OB_PLATFORMS.map(([key]) => (marked.includes(key) ? "Y" : "")), status, details];
   const sheet = XLSX.utils.aoa_to_sheet([
     ["How to fill the Onboarding sheet"], [""],
     ["• One row = one store. Store Number is required and must be unique in the file. The store must already be in All Stores."],
@@ -70,10 +72,10 @@ function instructionsSheet(XLSX) {
     ["• Nothing is saved until you check the preview and click Import in the app."], [""],
     ["Example rows (do not paste these into the Onboarding sheet):"],
     OB_COLUMNS,
-    example("99901", ["Y", "Y", "", ""], "", "New owner wants Uber Eats and DoorDash"),
-    example("99902", ["", "", "Y", "Y"], "Work in Progress", "Sent the onboarding links by text"),
+    example("99901", ["ue", "dd"], "", "New owner wants Uber Eats and DoorDash"),
+    example("99902", ["gh", "wm"], "Work in Progress", "Sent the onboarding links by text"),
     [""],
-    ["Row 1: adds store 99901 on Uber Eats and DoorDash as Not enrolled. Row 2: adds store 99902 on Grubhub and ezCater as Work in Progress."],
+    ["Row 1: adds store 99901 on Uber Eats and DoorDash as Not enrolled. Row 2: adds store 99902 on Grubhub and Walmart as Work in Progress."],
   ]);
   sheet["!cols"] = COLUMN_WIDTHS.map((wch) => ({ wch }));
   return sheet;

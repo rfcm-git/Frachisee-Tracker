@@ -42,7 +42,7 @@ export const storesReport = {
   defSheets: ["summary", "stores", "byterr"],
   cols: [
     ["num", "Store #"], ["fr", "Franchisee"], ["status", "Store status"], ["addr", "Address"], ["city", "City"], ["state", "State"], ["zip", "ZIP"], ["terr", "Territory"], ["phone", "Store phone"],
-    ["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["core", "Core 3PD active (of 3)"], ["gbp", "GBP link"], ["fbc", "FBC"], ["fbcmail", "FBC email"], ["om", "OM"], ["ommail", "OM email"],
+    ["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["wm", "Walmart"], ["core", "Core 3PD onboarded (of 3)"], ["gbp", "GBP link"], ["fbc", "FBC"], ["fbcmail", "FBC email"], ["om", "OM"], ["ommail", "OM email"],
     ["issues", "Open concerns"], ["onb", "Open onboarding"], ["calls", "Calls"], ["lastcall", "Last call"], ["frcontact", "Franchisee email / phone"],
   ],
   defOff: ["zip", "fbcmail", "ommail", "frcontact", "lastcall"],
@@ -65,7 +65,7 @@ export const storesReport = {
         ["Stores without FBC", stores.filter((store) => !staffMember(ctx, store.fbc_id)).length], ["Stores without OM", stores.filter((store) => !staffMember(ctx, store.om_id)).length],
       ] }]);
     }
-    const widths = { num: 9, fr: 28, status: 16, addr: 30, city: 14, state: 6, zip: 8, terr: 9, phone: 15, ue: 12, dd: 12, gh: 12, ez: 12, core: 10, gbp: 30, fbc: 14, fbcmail: 26, om: 14, ommail: 26, issues: 9, onb: 9, calls: 7, lastcall: 17, frcontact: 32 };
+    const widths = { num: 9, fr: 28, status: 16, addr: 30, city: 14, state: 6, zip: 8, terr: 9, phone: 15, ue: 12, dd: 12, gh: 12, ez: 12, wm: 12, core: 10, gbp: 30, fbc: 14, fbcmail: 26, om: 14, ommail: 26, issues: 9, onb: 9, calls: 7, lastcall: 17, frcontact: 32 };
     if (state.sheets.includes("stores") && state.cols.length) {
       const columns = this.cols.filter(([key]) => state.cols.includes(key));
       const rows = [columns.map(([, label]) => label), ...stores.map((store) => {
@@ -76,7 +76,7 @@ export const storesReport = {
         const lastCall = calls.map((call) => call.call_at).sort().pop();
         const value = {
           num: store.num, fr: franchiseeName(ctx, store.franchisee_id), status: storeStatus(store), addr: store.address || "", city: store.city || "", state: store.state || "", zip: store.zip || "",
-          terr: primaryTerritory(store), phone: store.phone || "", ue: platformStatus(store, "ue"), dd: platformStatus(store, "dd"), gh: platformStatus(store, "gh"), ez: platformStatus(store, "ez"),
+          terr: primaryTerritory(store), phone: store.phone || "", ue: platformStatus(store, "ue"), dd: platformStatus(store, "dd"), gh: platformStatus(store, "gh"), ez: platformStatus(store, "ez"), wm: platformStatus(store, "wm"),
           core: coreActive(store), gbp: store.gbp || "", fbc: fbc ? fbc.name : "", fbcmail: fbc ? emailOf(fbc) : "", om: om ? om.name : "", ommail: om ? emailOf(om) : "",
           issues: storeOpenIssues(ctx, store.num), onb: openOnboardingFor(ctx, (record) => String(record.store_num) === String(store.num)),
           calls: calls.length, lastcall: lastCall ? h.date(lastCall) : "", frcontact: [...contacts.emails, ...contacts.phones].join(", "),
@@ -137,7 +137,7 @@ export const franchiseesReport = {
   sheets: [["summary", "Summary", "Totals"], ["frs", "Franchisees", "One row per franchisee"], ["stores", "Their stores", "One row per store, grouped by franchisee"]],
   defSheets: ["summary", "frs"],
   cols: [
-    ["name", "Franchisee"], ["terr", "Territories"], ["stores", "Stores"], ["open", "Open stores"], ["email", "Email"], ["phone", "Phone"], ["core", "Avg core 3PD"], ["gbp", "GBP linked"], ["ez", "ezCater active"],
+    ["name", "Franchisee"], ["terr", "Territories"], ["stores", "Stores"], ["open", "Open stores"], ["email", "Email"], ["phone", "Phone"], ["core", "Avg core 3PD"], ["gbp", "GBP linked"], ["ez", "ezCater onboarded"],
     ["issues", "Open concerns"], ["onb", "Open onboarding"], ["calls", "Calls"], ["lastcall", "Last call"], ["fu", "Open follow-ups"], ["fbc", "FBC(s)"], ["om", "OM(s)"],
   ],
   defOff: ["fbc", "om"],
@@ -179,12 +179,12 @@ export const franchiseesReport = {
       workbook.addSheet("Franchisees", rows, columns.map(([key]) => widths[key] || 12), { filter: true });
     }
     if (state.sheets.includes("stores")) {
-      const rows = [["Franchisee", "Store #", "Status", "City", "Territory", "Uber Eats", "DoorDash", "Grubhub", "ezCater", "GBP linked"]];
+      const rows = [["Franchisee", "Store #", "Status", "City", "Territory", "Uber Eats", "DoorDash", "Grubhub", "ezCater", "Walmart", "GBP linked"]];
       franchisees.forEach((franchisee) => storesOf(ctx, franchisee.id).slice().sort(compareStores).forEach((store) => rows.push([
         franchisee.name, store.num, storeStatus(store), store.city || "", primaryTerritory(store),
-        platformStatus(store, "ue"), platformStatus(store, "dd"), platformStatus(store, "gh"), platformStatus(store, "ez"), hasGbp(store) ? "Yes" : "No",
+        platformStatus(store, "ue"), platformStatus(store, "dd"), platformStatus(store, "gh"), platformStatus(store, "ez"), platformStatus(store, "wm"), hasGbp(store) ? "Yes" : "No",
       ])));
-      workbook.addSheet("Their stores", rows, [28, 9, 16, 14, 9, 12, 12, 12, 12, 10], { filter: true });
+      workbook.addSheet("Their stores", rows, [28, 9, 16, 14, 9, 12, 12, 12, 12, 12, 10], { filter: true });
     }
   },
 };

@@ -1,4 +1,4 @@
--- Onboarding and Delivery Platforms share one set of statuses:
+-- Onboarding and Delivery Platforms share one set of statuses, and Walmart (wm) is added as a platform:
 --   Not enrolled · Work in Progress · Onboarded · Exempted
 --
 --   Old store status        -> new        Old onboarding status        -> new
@@ -46,6 +46,25 @@ update public.onboarding set status = 'Work in Progress', updated_at = now() whe
 alter table public.onboarding add constraint onboarding_status_check
   check (status in ('Not enrolled', 'Work in Progress', 'Onboarded', 'Exempted'));
 
+-- 1b. Platforms: allow Walmart (wm). Any platform check is replaced with one that includes it (Foodja stays allowed).
+--     Only done when the table has a platform check; tables without one already accept wm.
+do $$
+declare c record; had_check boolean := false;
+begin
+  for c in
+    select conname from pg_constraint
+    where conrelid = 'public.onboarding'::regclass and contype = 'c'
+      and pg_get_constraintdef(oid) ilike '%platform%'
+  loop
+    execute format('alter table public.onboarding drop constraint %I', c.conname);
+    had_check := true;
+  end loop;
+  if had_check then
+    alter table public.onboarding add constraint onboarding_platform_check
+      check (platform in ('ue', 'dd', 'gh', 'ez', 'wm', 'fj'));
+  end if;
+end $$;
+
 -- 2. Store Delivery Platforms: Active -> Onboarded, Pending -> Not enrolled.
 --    The platforms column may be jsonb, json or text, so the value is cast back to whatever type it is.
 do $$
@@ -78,7 +97,7 @@ begin
   for r in
     select distinct on (o.store_num, o.platform) o.id, o.store_num::text as num, o.platform, o.status
     from public.onboarding o
-    where o.platform in ('ue', 'dd', 'gh', 'ez')
+    where o.platform in ('ue', 'dd', 'gh', 'ez', 'wm')
     order by o.store_num, o.platform, o.created_at desc
   loop
     select coalesce(nullif(s.platforms::text, '')::jsonb ->> r.platform, 'Not enrolled') into store_status

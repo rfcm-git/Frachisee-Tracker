@@ -22,7 +22,7 @@ const MAX_SHOWN = 300;
 async function downloadList(ctx, stores, title, territory) {
   let XLSX;
   try { XLSX = await loadXlsx(); } catch { toast("Excel tool didn't load", "err"); return; }
-  const rows = [["Store #", "Franchisee", "Status", "Address", "City", "State", "ZIP", "Territory", "Store phone", "Uber Eats", "DoorDash", "Grubhub", "ezCater", "GBP link", "FBC", "OM", "Open issues"]];
+  const rows = [["Store #", "Franchisee", "Status", "Address", "City", "State", "ZIP", "Territory", "Store phone", ...PLATFORMS_UI.map(([, name]) => name), "GBP link", "FBC", "OM", "Open issues"]];
   stores.forEach((store) => {
     const fbc = staffMember(ctx, store.fbc_id);
     const om = staffMember(ctx, store.om_id);
