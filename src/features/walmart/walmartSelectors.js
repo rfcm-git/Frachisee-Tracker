@@ -43,6 +43,26 @@ export function filterWalmart(ctx, filter, sq) {
       || sorter(a, b) || compareNumbers(a.record.store_num, b.record.store_num));
 }
 
+/**
+ * Franchisees with more than one store on the Walmart tab, as { id, name, rows (all their stores, by stage then store #), counts }.
+ * A franchisee is listed when any of their stores passes the search and filters.
+ */
+export function walmartOwnerGroups(ctx, filteredRows) {
+  const all = new Map();
+  walmartRows(ctx).forEach((row) => {
+    if (row.franchiseeId == null) return;
+    if (!all.has(row.franchiseeId)) all.set(row.franchiseeId, []);
+    all.get(row.franchiseeId).push(row);
+  });
+  const shown = new Set(filteredRows.map((row) => row.franchiseeId));
+  return [...all.entries()].filter(([id, rows]) => rows.length > 1 && shown.has(id)).map(([id, rows]) => {
+    const sorted = rows.slice().sort((a, b) => SORTERS.stage(a, b) || compareNumbers(a.record.store_num, b.record.store_num));
+    const counts = {};
+    sorted.forEach((row) => { counts[row.stage] = (counts[row.stage] || 0) + 1; });
+    return { id, name: rows[0].franchisee || `#${id}`, rows: sorted, counts };
+  }).sort((a, b) => b.rows.length - a.rows.length || a.name.localeCompare(b.name));
+}
+
 /** Franchisees with stores on the Walmart tab, by name, with their store count. */
 export function walmartFranchisees(ctx) {
   const counts = new Map();

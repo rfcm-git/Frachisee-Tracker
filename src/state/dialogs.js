@@ -38,6 +38,8 @@ export const DIALOG = {
   capsImport: "capsImport",
   capEmail: "capEmail",
   walmartImport: "walmartImport",
+  walmartAdd: "walmartAdd",
+  walmartUpdate: "walmartUpdate",
   scheduleConfirm: "scheduleConfirm",
   scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
@@ -111,6 +113,10 @@ export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null }
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
 /** Import Walmart's report into the Walmart tab. */
 export const openWalmartImport = () => openDialog(DIALOG.walmartImport);
+/** Add stores to the Walmart tab; storeNums preselects stores, franchiseeId opens that franchisee's store list. */
+export const openWalmartAdd = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.walmartAdd, { storeNums, franchiseeId });
+/** Change a store's Walmart stage, add a note, see its change log. */
+export const openWalmartUpdate = (recordId) => openDialog(DIALOG.walmartUpdate, { recordId });
 
 /** "Just this store" or "All of the franchisee's stores" before an email: { heading, one, all, note } (see EmailScopeDialog). */
 export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);

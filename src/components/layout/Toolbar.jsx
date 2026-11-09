@@ -4,7 +4,7 @@ import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartAdd, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
@@ -37,10 +37,10 @@ function primaryAction(tab) {
     openAddOnboarding();
   }];
   if (tab === "issues") return ["Log issue", () => openLogIssue(null)];
-  if (tab === "walmart") return ["Import Walmart report", () => {
+  if (tab === "walmart") return ["Add store", () => {
     if (!getContext().walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
-    openWalmartImport();
-  }, "upload"];
+    openWalmartAdd();
+  }];
   return null;
 }
 
@@ -86,6 +86,10 @@ export default function Toolbar() {
         </span>}
         <span className="count">{countText}</span>
         {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name={primary[2] || "plus"} /><span>{primary[0]}</span></button>}
+        {tab === "walmart" && <button type="button" className="btn outline round" title="Import Walmart's report — only Marwaha rows are read" onClick={() => {
+          if (!ctx.walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
+          openWalmartImport();
+        }}><Icon name="upload" />Import Walmart report</button>}
         {tab === "caps" && <button type="button" className="btn outline round" title="Add many stores from an Excel spreadsheet" onClick={() => {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapsImport();

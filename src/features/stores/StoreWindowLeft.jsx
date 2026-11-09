@@ -7,7 +7,7 @@ import { contactsOf, emailOf, googleSearchUrl, platformColor, platformStatus, st
 import { staffForStore, staffOptions } from "../../domain/staff.js";
 import { telHref } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { closeAll, openStaffDetail } from "../../state/dialogs.js";
+import { closeAll, openStaffDetail, openWalmartAdd } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { showStoreOnboarding, showWalmart, toggleFrCard, useUiStore } from "../../state/uiStore.js";
 import { latestOnboarding } from "../onboarding/onboardingSelectors.js";
@@ -177,6 +177,11 @@ export default function StoreWindowLeft({ store }) {
         {PLATFORM_STATES.map((value) => <button type="button" className="sbtn" key={value} onClick={() => choosePlatform(menuPlatform[0], value)}>
           <span className="d" style={{ background: platformColor(value) }} />{value}</button>)}
       </div>
+        {ctx.walmartReady && menuPlatform[0] === "wm" && <div className="pmenu-add">
+          <span className="muted">Not on the Walmart tab yet.</span>
+          <button type="button" className="btn sm outline round" onClick={() => { setPlatformMenu(null); openWalmartAdd({ storeNums: [String(store.num)] }); }}>
+            <Icon name="shopping-cart" />Add to Walmart</button>
+        </div>}
         {ctx.onboardingReady && menuOnboardable && <div className="pmenu-add">
           <span className="muted">Not on the onboarding list yet.</span>
           <button type="button" className="btn sm outline round" disabled={adding} onClick={() => addToOnboarding(menuPlatform[0])}>

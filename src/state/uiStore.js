@@ -56,6 +56,7 @@ function baseState() {
     obFilter: defaultObFilter(),
     capsFilter: defaultCapsFilter(),
     wmFilter: defaultWmFilter(),
+    wmView: "stores",
     callFilters: { ...DEFAULT_CALL_FILTERS },
     callSort: "desc",
     callView: "calls",
@@ -111,6 +112,7 @@ function restoredState() {
       sort: saved.obFilter.sort === "old" ? "old" : "new",
     };
   }
+  if (saved.wmView === "owners") state.wmView = "owners";
   if (saved.wmFilter && typeof saved.wmFilter === "object") {
     state.wmFilter = {
       stages: onlyValid(saved.wmFilter.stages, WM_STAGES),
@@ -348,6 +350,9 @@ export function toggleWmFranchisee(id) {
   patchWmFilter({ franchisees: id === "" ? [] : franchisees.includes(id) ? franchisees.filter((item) => item !== id) : [...franchisees, id] });
 }
 
+/** "stores" (one row per store) or "owners" (franchisees with more than one store). */
+export const setWmView = (wmView) => set({ wmView: wmView === "owners" ? "owners" : "stores", ...resetPages("wm") });
+
 export const setWmSort = (sort) => patchWmFilter({ sort: WM_SORTS.includes(sort) ? sort : "stage" });
 
 export const clearWmFilters = () => set({ wmFilter: { ...defaultWmFilter(), sort: get().wmFilter.sort }, search: "", ...resetPages("wm") });
@@ -424,7 +429,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, wmFilter: state.wmFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, wmFilter: state.wmFilter, wmView: state.wmView, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });
