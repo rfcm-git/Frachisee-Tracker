@@ -21,11 +21,25 @@ export const ISSUE_PLATFORMS = ["Uber Eats", "DoorDash", "Grubhub", "ezCater", "
 export const ISSUE_STATES = ["Pending", "Work in Progress", "Resolved"];
 export const ISSUE_STATUS_COLOR = { Pending: "var(--danger)", "Work in Progress": "var(--warn)", Resolved: "var(--ok)" };
 
-export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["wm", "Walmart"]];
+/** Platforms on the Onboarding tab. Walmart has its own tab (WM_STAGES); older Walmart onboarding records are kept but hidden. */
+export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"]];
 /** Platforms the onboarding "3PD status" filter applies to (ezCater has its own). */
-export const OB_CORE = ["ue", "dd", "gh", "wm"];
+export const OB_CORE = ["ue", "dd", "gh"];
 export const OB_STATES = ["Not enrolled", "Work in Progress", "Onboarded", "Exempted"];
 export const OB_STATUS_COLOR = { "Not enrolled": "var(--danger)", "Work in Progress": "var(--warn)", Onboarded: "var(--ok)", Exempted: "var(--idle)" };
+
+/** Walmart tab: Walmart Marketplace onboarding stages, in order. Account Created is done. */
+export const WM_STAGES = ["Awaiting App", "Payment Setup", "Account Created", "Exempted"];
+export const WM_STAGE_COLOR = { "Awaiting App": "var(--danger)", "Payment Setup": "var(--warn)", "Account Created": "var(--ok)", Exempted: "var(--idle)" };
+/** The store's Walmart status (Delivery Platforms) for each stage. */
+export const WM_STAGE_PLATFORM = { "Awaiting App": "Work in Progress", "Payment Setup": "Work in Progress", "Account Created": "Onboarded", Exempted: "Exempted" };
+/** What to do next at each stage. */
+export const WM_NEXT_STEP = {
+  "Awaiting App": "Contact the owner and get the Walmart Marketplace application submitted.",
+  "Payment Setup": "Follow up with the owner to finish payment setup.",
+  "Account Created": "Done — the store is onboarded on Walmart.",
+  Exempted: "No action needed.",
+};
 
 /** CAPs (Corrective Action Plan) monitoring: one record per store. New stores always start at the first status. */
 export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "Completed"];
@@ -55,10 +69,10 @@ export const PERIODS = [
 ];
 
 /** Paged lists: allowed and default page sizes. */
-export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100] };
-export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25 };
+export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100] };
+export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25, wm: 25 };
 
-export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "caps", "calls", "reports"];
+export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "walmart", "caps", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
@@ -68,6 +82,7 @@ export const PAGE_TITLES = {
   staff: ["FBC / OM", "Field consultants and operations managers"],
   issues: ["Issues", "Log, track and report 3PD issues"],
   onboarding: ["Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
+  walmart: ["Walmart", "Walmart Marketplace onboarding — who still needs to onboard and where each store is"],
   caps: ["CAP", "Corrective Action Plan — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
   reports: ["Reports", "Build any report — Excel or PDF, by date, territory, franchisee, store and category"],

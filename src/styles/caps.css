@@ -167,3 +167,21 @@
   .cem-why{padding:0 6px;border-radius:999px;font-size:10.5px;font-weight:700;background:var(--green-soft);color:var(--green-dark)}
   .cem-row b .cem-why{margin-left:8px;vertical-align:middle}
   .cem-miss-team{margin-top:5px;font-size:12px;color:#8a5600}
+
+/* ---------- Walmart tab ---------- */
+  .badge.wm-await{background:var(--danger-soft);color:#a12f23}
+  .badge.wm-pay{background:var(--warn-soft);color:#8a5600}
+  .badge.wm-done{background:var(--ok-soft);color:#146c3a}
+  .badge.wm-exempt{background:var(--idle-soft);color:var(--idle)}
+  .cap-cnt .wm-pct{font-size:11.5px;color:var(--ink-soft);font-weight:600}
+  .wm-stagecell{display:inline-flex;align-items:center;gap:6px}
+  .wm-mismatch{display:inline-flex;color:var(--warn);cursor:help}
+  .wm-mismatch svg{width:15px;height:15px}
+  .wm-next{font-size:12.5px;color:var(--ink-soft);max-width:340px}
+  .wm-res{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+  .wm-res .bk-ok,.wm-res .muted{display:inline-flex;align-items:center;gap:5px}
+  .wm-res svg{width:14px;height:14px}
+  .wm-sync{font-size:12px;color:#225f91}
+  .wm-warn{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#8a5600;font-weight:600}
+  .wm-read{margin:12px 0 8px}
+  .wm-table{max-height:340px}

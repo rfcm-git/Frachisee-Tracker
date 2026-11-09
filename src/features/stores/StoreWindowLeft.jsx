@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
-import { CopyButton, StoreStatusBadge } from "../../components/ui/common.jsx";
+import { CopyButton, StoreStatusBadge, WmStageBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { OB_PLATFORMS, PLATFORMS, PLATFORMS_UI, PLATFORM_STATES } from "../../config/constants.js";
 import { contactsOf, emailOf, googleSearchUrl, platformColor, platformStatus, storeStatus } from "../../domain/records.js";
@@ -9,8 +9,9 @@ import { telHref } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { closeAll, openStaffDetail } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { showStoreOnboarding, toggleFrCard, useUiStore } from "../../state/uiStore.js";
+import { showStoreOnboarding, showWalmart, toggleFrCard, useUiStore } from "../../state/uiStore.js";
 import { latestOnboarding } from "../onboarding/onboardingSelectors.js";
+import { findWalmart } from "../walmart/walmartSelectors.js";
 import { createOnboarding } from "../onboarding/onboardingActions.js";
 import { obStatusLabel } from "../../domain/onboarding.js";
 import { saveStoreFields, setStorePlatform } from "./storeActions.js";
@@ -80,6 +81,8 @@ export default function StoreWindowLeft({ store }) {
   const menuPlatform = platformMenu ? PLATFORMS.find(([key]) => key === platformMenu) : null;
   /** Platforms on the onboarding list are changed in the Onboarding tab, so the change is recorded in the record's updates. */
   const menuRecord = menuPlatform ? latestOnboarding(ctx, store.num, menuPlatform[0]) : null;
+  /** Walmart follows the store's stage on the Walmart tab. */
+  const menuWalmart = menuPlatform?.[0] === "wm" ? findWalmart(ctx, store.num) : null;
   /** Onboarding platforms (not Foodja) the store is not onboarded or exempted on can be added to the list from here. */
   const menuOnboardable = !!menuPlatform && !menuRecord && OB_PLATFORMS.some(([key]) => key === menuPlatform[0])
     && !["Onboarded", "Exempted"].includes(platformStatus(store, menuPlatform[0]));
@@ -162,7 +165,11 @@ export default function StoreWindowLeft({ store }) {
           onClick={() => { setEditing(null); setPlatformMenu(platformMenu === key ? null : key); }}>
           <span className="d" style={{ background: platformColor(status) }} />{name}</button>;
       })}</div>
-      {menuPlatform && (menuRecord ? <div className="pmenu pmenu-ob" role="status">
+      {menuPlatform && (menuWalmart ? <div className="pmenu pmenu-ob" role="status">
+        <div className="lbl"><Icon name="shopping-cart" />Walmart is on the Walmart tab · <WmStageBadge stage={menuWalmart.stage} /></div>
+        <p>Its status follows the stage there, so change the stage on the Walmart tab.</p>
+        <button type="button" className="btn sm round" onClick={() => { setPlatformMenu(null); closeAll(); showWalmart(store.num); }}><Icon name="arrow-right" />Open in Walmart</button>
+      </div> : menuRecord ? <div className="pmenu pmenu-ob" role="status">
         <div className="lbl"><Icon name="rocket" />{menuPlatform[1]} is on the onboarding list · {obStatusLabel(menuRecord.status)}</div>
         <p>Change its status in the Onboarding tab, so the change is saved in its updates.</p>
         <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in Onboarding</button>

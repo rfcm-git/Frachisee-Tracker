@@ -66,7 +66,7 @@ function OnboardingFilters({ filter, anyFilter }) {
       </>}
     </FilterDropdown>
   </div>
-    <InfoTip text="Platform narrows to the picked apps. 3PD status applies to Uber Eats, DoorDash, Grubhub and Walmart; ezCater status applies to ezCater. If you set a status filter, only those records show — set both to see both." />
+    <InfoTip text="Platform narrows to the picked apps. 3PD status applies to Uber Eats, DoorDash and Grubhub; ezCater status applies to ezCater. If you set a status filter, only those records show — set both to see both." />
     {anyFilter && <button type="button" className="btn link" onClick={clearObFilters} style={{ marginLeft: "auto" }}><Icon name="x" />Clear filters</button>}
   </div>;
 }

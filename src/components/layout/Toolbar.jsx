@@ -4,13 +4,14 @@ import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapEmail, openCapForm, openCapsImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
-const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "staff", "caps", "calls"];
+const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "walmart", "staff", "caps", "calls"];
 
 function searchPlaceholder(tab) {
+  if (tab === "walmart") return "Search Walmart: store #, franchisee, stage or notes…";
   if (tab === "caps") return "Search CAPs: store #, franchisee, email, phone or notes…";
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
@@ -36,6 +37,10 @@ function primaryAction(tab) {
     openAddOnboarding();
   }];
   if (tab === "issues") return ["Log issue", () => openLogIssue(null)];
+  if (tab === "walmart") return ["Import Walmart report", () => {
+    if (!getContext().walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
+    openWalmartImport();
+  }, "upload"];
   return null;
 }
 
@@ -80,7 +85,7 @@ export default function Toolbar() {
           <button type="button" className={`iconbtn${closedOnly ? " on-alt" : ""}`} title="Only closed or temporarily closed stores" aria-pressed={closedOnly} onClick={toggleClosedOnly}><Icon name="door-closed" /></button>
         </span>}
         <span className="count">{countText}</span>
-        {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name="plus" /><span>{primary[0]}</span></button>}
+        {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name={primary[2] || "plus"} /><span>{primary[0]}</span></button>}
         {tab === "caps" && <button type="button" className="btn outline round" title="Add many stores from an Excel spreadsheet" onClick={() => {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapsImport();

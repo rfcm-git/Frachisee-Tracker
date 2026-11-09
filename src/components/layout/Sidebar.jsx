@@ -2,6 +2,7 @@ import Icon from "../ui/Icon.jsx";
 import { hasOpenFollowUp } from "../../domain/calls.js";
 import { isIssueOpen } from "../../domain/issues.js";
 import { capsProgress, openCapsCount } from "../../features/caps/capsSelectors.js";
+import { openWalmartCount } from "../../features/walmart/walmartSelectors.js";
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openLinks, openSettings } from "../../state/dialogs.js";
@@ -35,6 +36,7 @@ export default function Sidebar() {
   const openOnboarding = openOnboardingCount(ctx);
   const openFollowUps = ctx.callLogs.filter(hasOpenFollowUp).length;
   const openCaps = openCapsCount(ctx);
+  const openWalmart = openWalmartCount(ctx);
   const overdueCaps = ctx.capsDueReady ? capsProgress(ctx).overdue : 0;
   const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
 
@@ -54,6 +56,7 @@ export default function Sidebar() {
         <TabButton tab="staff" active={tab === "staff"} icon="contact" label="FBC / OM" count={ctx.staff.length} />
         <TabButton tab="issues" active={tab === "issues"} icon="triangle-alert" label="Issues" count={openIssues} />
         <TabButton tab="onboarding" active={tab === "onboarding"} icon="rocket" label="Onboarding" count={openOnboarding} />
+        <TabButton tab="walmart" active={tab === "walmart"} icon="shopping-cart" label="Walmart" count={openWalmart || ""} countId="cnt-wm" countTip="Stores still at Awaiting App or Payment Setup" />
         <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAP" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
         <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />

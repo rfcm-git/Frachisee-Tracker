@@ -15,6 +15,7 @@ import ReportsTab from "../../features/reports/ReportsTab.jsx";
 import SearchView from "../../features/search/SearchView.jsx";
 import StaffDirectory from "../../features/staff/StaffDirectory.jsx";
 import StoresDirectory from "../../features/stores/StoresDirectory.jsx";
+import WalmartView from "../../features/walmart/WalmartView.jsx";
 
 function CurrentView() {
   const tab = useUiStore((state) => state.tab);
@@ -25,6 +26,7 @@ function CurrentView() {
     case "staff": return <StaffDirectory />;
     case "issues": return <ConcernsView />;
     case "onboarding": return <OnboardingView />;
+    case "walmart": return <WalmartView />;
     case "caps": return <CapsView />;
     case "calls": return <CallLogsView />;
     case "reports": return <ReportsTab />;

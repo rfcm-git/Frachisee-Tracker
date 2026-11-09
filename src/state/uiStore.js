@@ -3,13 +3,13 @@
  * Preferences are kept in localStorage; the current screen survives a browser refresh (sessionStorage).
  */
 import { create } from "zustand";
-import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS } from "../config/constants.js";
+import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS, WM_STAGES } from "../config/constants.js";
 import { CALL_VIEWS, DEFAULT_CALL_FILTERS } from "../domain/calls.js";
 import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
 
-const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, cl: 1, cap: 1 };
+const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, cl: 1, cap: 1, wm: 1 };
 
 function savedPageSizes() {
   const sizes = {};
@@ -34,6 +34,10 @@ const CAP_EMAIL_FILTERS = ["", "has", "none"];
 const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
 const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key: "added", dir: -1 } });
 
+/** Walmart sort: "stage" (Payment Setup, Awaiting App, Account Created, Exempted), "num" (store #), "updated" (latest first). */
+export const WM_SORTS = ["stage", "num", "updated"];
+const defaultWmFilter = () => ({ stages: [], franchisees: [], sort: "stage" });
+
 function baseState() {
   return {
     tab: "dashboard",
@@ -51,6 +55,7 @@ function baseState() {
     issueFilter: defaultIssueFilter(),
     obFilter: defaultObFilter(),
     capsFilter: defaultCapsFilter(),
+    wmFilter: defaultWmFilter(),
     callFilters: { ...DEFAULT_CALL_FILTERS },
     callSort: "desc",
     callView: "calls",
@@ -106,6 +111,13 @@ function restoredState() {
       sort: saved.obFilter.sort === "old" ? "old" : "new",
     };
   }
+  if (saved.wmFilter && typeof saved.wmFilter === "object") {
+    state.wmFilter = {
+      stages: onlyValid(saved.wmFilter.stages, WM_STAGES),
+      franchisees: Array.isArray(saved.wmFilter.franchisees) ? saved.wmFilter.franchisees.filter((id) => id != null && id !== "") : [],
+      sort: WM_SORTS.includes(saved.wmFilter.sort) ? saved.wmFilter.sort : "stage",
+    };
+  }
   if (saved.capsFilter && typeof saved.capsFilter === "object") {
     const sort = saved.capsFilter.sort || {};
     state.capsFilter = {
@@ -155,7 +167,7 @@ export function openFind(query) {
 }
 
 export function setSearch(search) {
-  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap") });
+  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap", "wm") });
 }
 
 export function setTerrFilter(terrFilter) {
@@ -314,6 +326,38 @@ export function showCaps(status = "", due = "") {
   window.scrollTo(0, 0);
 }
 
+/* ---------- Walmart ---------- */
+
+const patchWmFilter = (patch) => set({ wmFilter: { ...get().wmFilter, ...patch }, ...resetPages("wm") });
+
+/** Adds or removes a stage ("" clears). */
+export function toggleWmStage(stage) {
+  const { stages } = get().wmFilter;
+  patchWmFilter({ stages: !stage ? [] : stages.includes(stage) ? stages.filter((item) => item !== stage) : [...stages, stage] });
+}
+
+/** Shows only this stage; clicking the only shown stage again shows all. */
+export function toggleWmOnlyStage(stage) {
+  const { stages } = get().wmFilter;
+  patchWmFilter({ stages: !stage || (stages.length === 1 && stages[0] === stage) ? [] : [stage] });
+}
+
+/** Adds or removes a franchisee id ("" clears). */
+export function toggleWmFranchisee(id) {
+  const { franchisees } = get().wmFilter;
+  patchWmFilter({ franchisees: id === "" ? [] : franchisees.includes(id) ? franchisees.filter((item) => item !== id) : [...franchisees, id] });
+}
+
+export const setWmSort = (sort) => patchWmFilter({ sort: WM_SORTS.includes(sort) ? sort : "stage" });
+
+export const clearWmFilters = () => set({ wmFilter: { ...defaultWmFilter(), sort: get().wmFilter.sort }, search: "", ...resetPages("wm") });
+
+/** Opens the Walmart tab, optionally on one store. */
+export function showWalmart(storeNum = "") {
+  set({ tab: "walmart", search: storeNum ? `#${storeNum}` : "", wmFilter: { ...get().wmFilter, stages: [], franchisees: [] }, ...resetPages("wm") });
+  window.scrollTo(0, 0);
+}
+
 /* ---------- call logs ---------- */
 
 export function setCallFilter(key, value) {
@@ -380,7 +424,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, wmFilter: state.wmFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });

@@ -97,7 +97,7 @@ export function progressModel(ctx, filter) {
 
 /** Most recent onboarding record of a store + platform, or null. */
 export const latestOnboarding = (ctx, num, platform) => ctx.onboarding
-  .filter((record) => String(record.store_num) === String(num) && record.platform === platform)
+  .filter((record) => obVisible(record) && String(record.store_num) === String(num) && record.platform === platform)
   .sort((a, b) => timeOf(b.created_at) - timeOf(a.created_at))[0] || null;
 
 /** Status of a store on each supported platform: its Delivery Platforms status and its latest onboarding status ("" when none). */
