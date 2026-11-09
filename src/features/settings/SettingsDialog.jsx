@@ -12,6 +12,7 @@ import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
 import { isIntroDisabled, playIntro, setIntroDisabled } from "../../intro/settings.js";
+import ScheduleSettings from "../schedules/ScheduleSettings.jsx";
 
 const sectionStyle = { marginTop: 16, borderTop: "1px solid var(--line)", paddingTop: 15 };
 const labelStyle = { display: "block", fontSize: 12.5, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 7 };
@@ -103,8 +104,10 @@ export default function SettingsDialog() {
         : notification === "denied" ? <><span className="badge cl-o-nva">Blocked by the browser</span> <span className="muted">— allow notifications for this page in the browser’s site settings</span></>
           : notification === "unsupported" ? <><span className="badge cl-o-nva">Not supported here</span> <span className="muted">— in-app reminders still work</span></>
             : <button type="button" className="btn sm outline round" onClick={enableNotifications}><Icon name="bell" />Allow desktop notifications</button>}</div>
-      <div className="help">Reminders pop up in the app when a follow-up is due, while the app is open. Desktop notifications also show when this tab is in the background.</div>
+      <div className="help">Reminders pop up in the app when a follow-up or a scheduled task is due, while the app is open. Desktop notifications also show when this tab is in the background.</div>
     </div>
+
+    <ScheduleSettings sectionStyle={sectionStyle} labelStyle={labelStyle} />
 
     <div style={sectionStyle}>
       <label style={labelStyle}>Intro</label>

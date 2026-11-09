@@ -31,6 +31,8 @@ import StoreOnboardingDialog from "../../features/onboarding/StoreOnboardingDial
 import ReportBuilderDialog from "../../features/reports/ReportBuilderDialog.jsx";
 import LinksDialog from "../../features/settings/LinksDialog.jsx";
 import SettingsDialog from "../../features/settings/SettingsDialog.jsx";
+import ScheduleConfirmDialog from "../../features/schedules/ScheduleConfirmDialog.jsx";
+import ScheduleEditDialog from "../../features/schedules/ScheduleEditDialog.jsx";
 import StaffDetailDialog from "../../features/staff/StaffDetailDialog.jsx";
 import StaffFormDialog from "../../features/staff/StaffFormDialog.jsx";
 import AddNoteDialog from "../../features/stores/AddNoteDialog.jsx";
@@ -70,6 +72,8 @@ const COMPONENTS = {
   [DIALOG.capsImport]: CapsImportDialog,
   [DIALOG.emailScope]: EmailScopeDialog,
   [DIALOG.capEmail]: CapEmailDialog,
+  [DIALOG.scheduleConfirm]: ScheduleConfirmDialog,
+  [DIALOG.scheduleEdit]: ScheduleEditDialog,
   [DIALOG.dashList]: DashboardListDialog,
   [DIALOG.report]: ReportBuilderDialog,
   [DIALOG.confirm]: ConfirmDialog,

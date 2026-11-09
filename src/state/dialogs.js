@@ -37,6 +37,8 @@ export const DIALOG = {
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
+  scheduleConfirm: "scheduleConfirm",
+  scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
   dashList: "dashList",
   report: "report",
@@ -135,3 +137,8 @@ export const closeDialogs = closeDialogType;
 
 /** Closes every form, used before jumping to another screen. */
 export const closeAll = closeAllDialogs;
+
+/** Asks the user to confirm a scheduled task (e.g. the CAP list update) was done. occKey is the occurrence key. */
+export const openScheduleConfirm = (scheduleId, occKey) => openDialog(DIALOG.scheduleConfirm, { scheduleId, occKey });
+/** Edit a scheduled reminder (Settings). */
+export const openScheduleEdit = (scheduleId) => openDialog(DIALOG.scheduleEdit, { scheduleId });

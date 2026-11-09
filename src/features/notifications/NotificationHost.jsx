@@ -5,10 +5,12 @@ import {
   clearNotifications, deliverIncoming, markAllRead, markRead, markUnread, removeNotification,
   setNotifyPanelOpen, setNotifyPosition, useNotificationStore,
 } from "../../state/notificationStore.js";
-import { openCallDetails, openCapForm } from "../../state/dialogs.js";
+import { openCallDetails, openCapForm, openScheduleConfirm } from "../../state/dialogs.js";
 import { showCaps } from "../../state/uiStore.js";
 import { toast } from "../../state/toastStore.js";
 import { snoozeCallReminder } from "../calls/callReminders.js";
+import { confirmSchedule, openScheduleTarget, targetLabel } from "../schedules/scheduleActions.js";
+import { useScheduleStore } from "../../state/scheduleStore.js";
 
 const SIZE = 48;         // floating box, px
 const EDGE = 12;         // closest it may sit to the window edge
@@ -58,6 +60,23 @@ function openTarget(item) {
   if (item.target?.type === "call") openCallDetails(item.target.id);
   else if (item.target?.type === "cap") { showCaps(); openCapForm(item.target.id); }
   else if (item.target?.type === "caps") showCaps("", item.target.due);
+  else if (item.target?.type === "schedule") {
+    const { id, key, confirm, open } = item.target;
+    if (confirm && !useScheduleStore.getState().state[key]?.done) openScheduleConfirm(id, key);
+    else openScheduleTarget(open);
+  }
+}
+
+/** Confirm / open buttons on a scheduled reminder (records update, CAP list update). */
+function ScheduleActions({ item }) {
+  const { key, confirm, open } = item.target;
+  const done = useScheduleStore((s) => Boolean(s.state[key]?.done));
+  return <>
+    {confirm ? (done
+      ? <span className="nt-done"><Icon name="circle-check" />Confirmed</span>
+      : <button type="button" className="nt-link" onClick={() => confirmSchedule(key)}><Icon name="check" />Confirm done</button>) : null}
+    {open ? <button type="button" className="nt-link" onClick={() => { markRead(item.id); openScheduleTarget(open); }}><Icon name="arrow-right" />{targetLabel(open)}</button> : null}
+  </>;
 }
 
 function snoozeCall(item) {
@@ -83,6 +102,7 @@ function NotificationItem({ item, now }) {
           <button type="button" className="nt-link" onClick={() => openTarget(item)}><Icon name="phone" />Open call</button>
           <button type="button" className="nt-link" onClick={() => snoozeCall(item)}><Icon name="alarm-clock" />Snooze 15 min</button>
         </> : null}
+        {item.target?.type === "schedule" ? <ScheduleActions item={item} /> : null}
         {isCap ? <button type="button" className="nt-link" onClick={() => openTarget(item)}><Icon name="list-checks" />{item.target.type === "cap" ? "Open CAP" : "Open CAPs"}</button> : null}
       </div>
     </div>

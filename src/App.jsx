@@ -5,6 +5,7 @@ import ToastHost from "./components/ui/ToastHost.jsx";
 import TooltipHost from "./components/ui/TooltipHost.jsx";
 import CallReminderHost from "./features/calls/CallReminderHost.jsx";
 import CapsReminderHost from "./features/caps/CapsReminderHost.jsx";
+import ScheduleReminderHost from "./features/schedules/ScheduleReminderHost.jsx";
 import NotificationHost from "./features/notifications/NotificationHost.jsx";
 import { useIdleRefresh } from "./hooks/useIdleRefresh.js";
 import { useSearchShortcut } from "./hooks/useSearchShortcut.js";
@@ -24,6 +25,7 @@ export default function App() {
       <TooltipHost />
       <CallReminderHost />
       <CapsReminderHost />
+      <ScheduleReminderHost />
       <NotificationHost />
     </>
   );
