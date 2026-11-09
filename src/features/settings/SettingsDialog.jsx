@@ -7,7 +7,7 @@ import { errorTitle } from "../../lib/errors.js";
 import { hasDb } from "../../services/api.js";
 import { downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
-import { askPassword, confirmAction, openBulkImport, openBulkUpdate } from "../../state/dialogs.js";
+import { askPassword, confirmAction, openBulkUpdate, openStaffUpdate } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
@@ -120,12 +120,12 @@ export default function SettingsDialog() {
     </div>
 
     <div style={sectionStyle}>
-      <label style={labelStyle}>Franchisees &amp; stores</label>
+      <label style={labelStyle}>Update from spreadsheet</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <button type="button" className="btn ghost" onClick={() => { close(); openBulkImport(); }}><Icon name="file-spreadsheet" />Bulk add from spreadsheet</button>
-        <button type="button" className="btn ghost" onClick={() => { close(); openBulkUpdate(); }}><Icon name="database" />Update from spreadsheet</button>
+        <button type="button" className="btn ghost" onClick={() => { close(); openBulkUpdate(); }}><Icon name="database" />Franchisees &amp; stores</button>
+        <button type="button" className="btn ghost" onClick={() => { close(); openStaffUpdate(); }}><Icon name="users" />FBC / OM list</button>
       </div>
-      <div className="help">Bulk add creates new franchisees and stores. Update changes existing ones — contacts, store details and owner transfers — and can add new ones too. Save a backup first.</div>
+      <div className="help">Franchisees &amp; stores updates contacts, store details and owner transfers, and can add new ones. FBC / OM list updates the FBC / OM people (name, role, email) and who covers each store. Both show a preview first. Save a backup before you start.</div>
     </div>
 
     <div style={sectionStyle}>
