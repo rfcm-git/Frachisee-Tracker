@@ -21,8 +21,8 @@ export const DIALOG = {
   franchiseeForm: "franchiseeForm",
   franchiseeInfo: "franchiseeInfo",
   addStore: "addStore",
-  bulkImport: "bulkImport",
   bulkUpdate: "bulkUpdate",
+  staffUpdate: "staffUpdate",
   staffDetail: "staffDetail",
   staffForm: "staffForm",
   callLog: "callLog",
@@ -37,6 +37,8 @@ export const DIALOG = {
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
+  scheduleConfirm: "scheduleConfirm",
+  scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
   dashList: "dashList",
   report: "report",
@@ -79,8 +81,9 @@ export const openAddNote = (storeId) => openDialog(DIALOG.addNote, { storeId });
 export const openFranchiseeForm = (franchiseeId = null) => openDialog(DIALOG.franchiseeForm, { franchiseeId });
 export const openFranchiseeInfo = (franchiseeId, groupId = "") => openDialog(DIALOG.franchiseeInfo, { franchiseeId, groupId });
 export const openAddStore = (franchiseeId) => openDialog(DIALOG.addStore, { franchiseeId });
-export const openBulkImport = () => openDialog(DIALOG.bulkImport);
 export const openBulkUpdate = () => openDialog(DIALOG.bulkUpdate);
+/** Update the FBC / OM list and store assignments from a spreadsheet. */
+export const openStaffUpdate = () => openDialog(DIALOG.staffUpdate);
 
 export const openStaffDetail = (staffId) => openDialog(DIALOG.staffDetail, { staffId });
 export const openStaffForm = (staffId = null) => openDialog(DIALOG.staffForm, { staffId });
@@ -135,3 +138,8 @@ export const closeDialogs = closeDialogType;
 
 /** Closes every form, used before jumping to another screen. */
 export const closeAll = closeAllDialogs;
+
+/** Asks the user to confirm a scheduled task (e.g. the CAP list update) was done. occKey is the occurrence key. */
+export const openScheduleConfirm = (scheduleId, occKey) => openDialog(DIALOG.scheduleConfirm, { scheduleId, occKey });
+/** Edit a scheduled reminder (Settings). */
+export const openScheduleEdit = (scheduleId) => openDialog(DIALOG.scheduleEdit, { scheduleId });

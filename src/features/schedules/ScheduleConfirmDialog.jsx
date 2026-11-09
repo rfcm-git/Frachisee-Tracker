@@ -1,0 +1,37 @@
+import Icon from "../../components/ui/Icon.jsx";
+import Modal from "../../components/ui/Modal.jsx";
+import { useDialog } from "../../components/dialogs/dialogContext.js";
+import { formatClock, repeatSummary } from "../../domain/schedules.js";
+import { openScheduleEdit } from "../../state/dialogs.js";
+import { useScheduleStore } from "../../state/scheduleStore.js";
+import { confirmSchedule, openScheduleTarget, targetLabel } from "./scheduleActions.js";
+
+/** "Did you do it?" — shown when a scheduled reminder that needs confirming comes due. */
+export default function ScheduleConfirmDialog({ scheduleId, occKey }) {
+  const { close } = useDialog();
+  const schedule = useScheduleStore((s) => s.schedules.find((item) => item.id === scheduleId));
+  const entry = useScheduleStore((s) => s.state[occKey]);
+  if (!schedule) return null;
+
+  const time = occKey.split("|")[2];
+  const done = Boolean(entry?.done);
+  const later = schedule.repeatMin ? `Remind me in ${schedule.repeatMin} min` : "Not now";
+  const open = targetLabel(schedule.target);
+
+  return <Modal size="small" icon={schedule.icon || "calendar-clock"} title={schedule.name} subtitle={`Scheduled for ${formatClock(time)}`} role="alertdialog"
+    footer={done
+      ? <button type="button" className="btn" onClick={close} autoFocus>Close</button>
+      : <>
+        <button type="button" className="btn ghost" onClick={close}>{later}</button>
+        {open ? <button type="button" className="btn outline" onClick={() => { close(); openScheduleTarget(schedule.target); }}><Icon name="arrow-right" />{open}</button> : null}
+        <button type="button" className="btn" onClick={() => confirmSchedule(occKey)} autoFocus><Icon name="circle-check" />Yes, it's done</button>
+      </>}>
+    {done
+      ? <p className="hint sc-done"><Icon name="circle-check" />Already confirmed — nothing more to do.</p>
+      : <>
+        {schedule.message ? <p className="hint" style={{ marginTop: 0 }}>{schedule.message}</p> : null}
+        <div className="help">{repeatSummary(schedule)}. <button type="button" className="nt-link" style={{ padding: "0 2px" }}
+          onClick={() => { close(); openScheduleEdit(schedule.id); }}>Change this reminder</button></div>
+      </>}
+  </Modal>;
+}

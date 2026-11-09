@@ -7,11 +7,12 @@ import { errorTitle } from "../../lib/errors.js";
 import { hasDb } from "../../services/api.js";
 import { downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
-import { askPassword, confirmAction, openBulkImport, openBulkUpdate } from "../../state/dialogs.js";
+import { askPassword, confirmAction, openBulkUpdate, openStaffUpdate } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
 import { isIntroDisabled, playIntro, setIntroDisabled } from "../../intro/settings.js";
+import ScheduleSettings from "../schedules/ScheduleSettings.jsx";
 
 const sectionStyle = { marginTop: 16, borderTop: "1px solid var(--line)", paddingTop: 15 };
 const labelStyle = { display: "block", fontSize: 12.5, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 7 };
@@ -103,8 +104,10 @@ export default function SettingsDialog() {
         : notification === "denied" ? <><span className="badge cl-o-nva">Blocked by the browser</span> <span className="muted">— allow notifications for this page in the browser’s site settings</span></>
           : notification === "unsupported" ? <><span className="badge cl-o-nva">Not supported here</span> <span className="muted">— in-app reminders still work</span></>
             : <button type="button" className="btn sm outline round" onClick={enableNotifications}><Icon name="bell" />Allow desktop notifications</button>}</div>
-      <div className="help">Reminders pop up in the app when a follow-up is due, while the app is open. Desktop notifications also show when this tab is in the background.</div>
+      <div className="help">Reminders pop up in the app when a follow-up or a scheduled task is due, while the app is open. Desktop notifications also show when this tab is in the background.</div>
     </div>
+
+    <ScheduleSettings sectionStyle={sectionStyle} labelStyle={labelStyle} />
 
     <div style={sectionStyle}>
       <label style={labelStyle}>Intro</label>
@@ -117,12 +120,12 @@ export default function SettingsDialog() {
     </div>
 
     <div style={sectionStyle}>
-      <label style={labelStyle}>Franchisees &amp; stores</label>
+      <label style={labelStyle}>Update from spreadsheet</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <button type="button" className="btn ghost" onClick={() => { close(); openBulkImport(); }}><Icon name="file-spreadsheet" />Bulk add from spreadsheet</button>
-        <button type="button" className="btn ghost" onClick={() => { close(); openBulkUpdate(); }}><Icon name="database" />Update from spreadsheet</button>
+        <button type="button" className="btn ghost" onClick={() => { close(); openBulkUpdate(); }}><Icon name="database" />Franchisees &amp; stores</button>
+        <button type="button" className="btn ghost" onClick={() => { close(); openStaffUpdate(); }}><Icon name="users" />FBC / OM list</button>
       </div>
-      <div className="help">Bulk add creates new franchisees and stores. Update changes existing ones — contacts, store details and owner transfers — and can add new ones too. Save a backup first.</div>
+      <div className="help">Franchisees &amp; stores updates contacts, store details and owner transfers, and can add new ones. FBC / OM list updates the FBC / OM people (name, role, email) and who covers each store. Both show a preview first. Save a backup before you start.</div>
     </div>
 
     <div style={sectionStyle}>
