@@ -13,6 +13,7 @@ export const TABLES = {
   callLogs: "call_logs",
   caps: "caps",
   walmart: "walmart",
+  snapshots: "coverage_snapshots",
   settings: "app_settings",
 };
 
@@ -63,7 +64,7 @@ function isMissingTable(error) {
 export async function loadAllTables({ onProgress } = {}) {
   let done = 0;
   const tick = (promise) => promise.then((value) => {
-    onProgress?.(++done / 8);
+    onProgress?.(++done / 9);
     return value;
   });
   const fetchOptional = async (table) => {
@@ -74,7 +75,7 @@ export async function loadAllTables({ onProgress } = {}) {
       throw error;
     }
   };
-  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult, walmartResult] = await Promise.all([
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult, walmartResult, snapshotsResult] = await Promise.all([
     tick(fetchAll(TABLES.franchisees)),
     tick(fetchAll(TABLES.stores)),
     tick(fetchAll(TABLES.staff)),
@@ -83,11 +84,13 @@ export async function loadAllTables({ onProgress } = {}) {
     tick(fetchOptional(TABLES.callLogs)),
     tick(fetchOptional(TABLES.caps)),
     tick(fetchOptional(TABLES.walmart)),
+    tick(fetchOptional(TABLES.snapshots)),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: caps, ready: capsReady } = capsResult;
   const { rows: walmart, ready: walmartReady } = walmartResult;
+  const { rows: snapshots, ready: snapshotsReady } = snapshotsResult;
   const [capsDueReady, capsHistoryReady, lastImport, emailTemplate] = capsReady
     ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"),
       readSetting(CAPS_LAST_IMPORT_KEY).catch((error) => ({ error })), readSetting(CAPS_EMAIL_KEY).catch((error) => ({ error }))])
@@ -104,7 +107,7 @@ export async function loadAllTables({ onProgress } = {}) {
   // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
   const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */
