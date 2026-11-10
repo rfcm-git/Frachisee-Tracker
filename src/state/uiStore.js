@@ -34,11 +34,11 @@ const CAP_EMAIL_FILTERS = ["", "has", "none"];
 const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
 const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key: "added", dir: -1 } });
 
-/** Walmart sort: "stage" (Payment Setup, Awaiting App, Account Created, Exempted), "num" (store #), "updated" (latest first). */
-export const WM_SORTS = ["stage", "num", "updated"];
+/** Walmart sort keys: store number, stage (along the path), date emailed, date added, last updated. */
+export const WM_SORTS = ["num", "stage", "emailed", "added", "updated"];
 /** Walmart email filter: "" all, "none" not emailed yet, "sent" emailed (both only Awaiting App / Payment Setup). */
 export const WM_EMAIL_FILTERS = ["", "none", "sent"];
-const defaultWmFilter = () => ({ stages: [], franchisees: [], email: "", sort: "stage" });
+const defaultWmFilter = () => ({ stages: [], franchisees: [], email: "", sort: { key: "stage", dir: 1 } });
 
 function baseState() {
   return {
@@ -120,7 +120,7 @@ function restoredState() {
       stages: onlyValid(saved.wmFilter.stages, WM_STAGES),
       franchisees: Array.isArray(saved.wmFilter.franchisees) ? saved.wmFilter.franchisees.filter((id) => id != null && id !== "") : [],
       email: WM_EMAIL_FILTERS.includes(saved.wmFilter.email) ? saved.wmFilter.email : "",
-      sort: WM_SORTS.includes(saved.wmFilter.sort) ? saved.wmFilter.sort : "stage",
+      sort: WM_SORTS.includes(saved.wmFilter.sort?.key) ? { key: saved.wmFilter.sort.key, dir: saved.wmFilter.sort.dir === -1 ? -1 : 1 } : defaultWmFilter().sort,
     };
   }
   if (saved.capsFilter && typeof saved.capsFilter === "object") {
@@ -358,7 +358,13 @@ export const setWmView = (wmView) => set({ wmView: wmView === "owners" ? "owners
 
 export const setWmEmailFilter = (email) => patchWmFilter({ email: WM_EMAIL_FILTERS.includes(email) ? email : "" });
 
-export const setWmSort = (sort) => patchWmFilter({ sort: WM_SORTS.includes(sort) ? sort : "stage" });
+/** Sorts by a column; the same column again flips the order. Dates start newest first. */
+export function setWmSort(key, dir) {
+  if (!WM_SORTS.includes(key)) return;
+  const { sort } = get().wmFilter;
+  const next = dir === 1 || dir === -1 ? dir : sort.key === key ? -sort.dir : ["emailed", "added", "updated"].includes(key) ? -1 : 1;
+  patchWmFilter({ sort: { key, dir: next } });
+}
 
 export const clearWmFilters = () => set({ wmFilter: { ...defaultWmFilter(), sort: get().wmFilter.sort }, search: "", ...resetPages("wm") });
 

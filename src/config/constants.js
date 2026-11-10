@@ -32,13 +32,6 @@ export const OB_STATUS_COLOR = { "Not enrolled": "var(--danger)", "Work in Progr
 export const WM_STAGES = ["Awaiting App", "Payment Setup", "Account Created", "Exempted"];
 /** Amber = waiting on the owner, purple = in progress, green = done, grey = exempted (red is kept for errors). */
 export const WM_STAGE_COLOR = { "Awaiting App": "var(--warn)", "Payment Setup": "#7a4fc2", "Account Created": "var(--ok)", Exempted: "var(--idle)" };
-/** What each stage means, in a few words. */
-export const WM_STAGE_INFO = {
-  "Awaiting App": "Application not submitted yet",
-  "Payment Setup": "Application in · payment setup pending",
-  "Account Created": "Account created · onboarded",
-  Exempted: "Not joining Walmart Marketplace",
-};
 /** The store's Walmart status (Delivery Platforms) for each stage. */
 export const WM_STAGE_PLATFORM = { "Awaiting App": "Work in Progress", "Payment Setup": "Work in Progress", "Account Created": "Onboarded", Exempted: "Exempted" };
 /** What to do next at each stage. */

@@ -5,8 +5,8 @@ import { normalizeWmStage, wmHistory, wmIsOpen, wmSummary } from "../../domain/w
 import { timeOf } from "../../lib/format.js";
 import { compareNumbers } from "../../lib/text.js";
 
-/** Stage order of the "stage" sort: closest to done first among open stores, then done, then exempted. */
-const STAGE_SORT = ["Payment Setup", "Awaiting App", "Account Created", "Exempted"];
+/** Stage order of the stage sort: along the path, then exempted. */
+const STAGE_SORT = ["Awaiting App", "Payment Setup", "Account Created", "Exempted"];
 
 /** Each record with its store and franchisee (from the tracker's store records). */
 export function walmartRows(ctx) {
@@ -40,21 +40,24 @@ export function walmartFollowUp(ctx) {
 }
 
 const SORTERS = {
+  num: (a, b) => compareNumbers(a.record.store_num, b.record.store_num),
   stage: (a, b) => STAGE_SORT.indexOf(a.stage) - STAGE_SORT.indexOf(b.stage),
-  num: () => 0,
-  updated: (a, b) => timeOf(b.record.updated_at || b.record.created_at) - timeOf(a.record.updated_at || a.record.created_at),
+  emailed: (a, b) => timeOf(a.record.last_email_at) - timeOf(b.record.last_email_at),
+  added: (a, b) => timeOf(a.record.created_at) - timeOf(b.record.created_at),
+  updated: (a, b) => timeOf(a.record.updated_at || a.record.created_at) - timeOf(b.record.updated_at || b.record.created_at),
 };
 
 /** Rows that pass the search and filters, in the chosen order (ties by store number). */
 export function filterWalmart(ctx, filter, sq) {
-  const sorter = SORTERS[filter.sort] || SORTERS.stage;
+  const sort = filter.sort && typeof filter.sort === "object" ? filter.sort : { key: "stage", dir: 1 };
+  const sorter = SORTERS[sort.key] || SORTERS.stage;
   return walmartRows(ctx)
     .filter((row) => (!filter.stages.length || filter.stages.includes(row.stage))
       && (!filter.franchisees.length || filter.franchisees.includes(row.franchiseeId))
       && passesEmail(row, filter.email)
       && matchesSearch(row, sq))
     .sort((a, b) => (sq.q && sq.mode === "store" ? numRank(a.record.store_num, sq.q) - numRank(b.record.store_num, sq.q) : 0)
-      || sorter(a, b) || compareNumbers(a.record.store_num, b.record.store_num));
+      || sorter(a, b) * sort.dir || SORTERS.num(a, b));
 }
 
 /**
