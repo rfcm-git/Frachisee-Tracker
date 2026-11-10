@@ -112,3 +112,58 @@
   .dl-list{max-height:55vh;overflow:auto}
   #dbTip{position:fixed;z-index:400;max-width:300px;background:var(--green-dark);color:#fff;font-size:12.5px;line-height:1.4;padding:7px 10px;border-radius:8px;box-shadow:0 8px 22px rgba(0,60,25,.25);pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s}
   #dbTip.show{opacity:1;transform:none}
+
+/* ---------- Dashboard header: title, search, date range, territory ---------- */
+  .dh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;margin:0 0 16px}
+  .dh-t h2{margin:0;font-size:22px;line-height:1.2;color:var(--ink);letter-spacing:-.01em}
+  .dh-t span{display:block;margin-top:3px;font-size:12.5px;color:var(--ink-soft)}
+  .dh-ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .dh-search,.dh-pick{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 6px 0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-soft);
+    transition:border-color var(--t-fast) ease,box-shadow var(--t-fast) ease}
+  .dh-search:focus-within,.dh-pick:focus-within{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .dh-search [data-lucide],.dh-pick [data-lucide]{width:16px;height:16px;flex:none}
+  .dh-search input{border:none;outline:none;background:none;height:34px;width:230px;font:inherit;font-size:13.5px;color:var(--ink)}
+  .dh-pick select{border:none;outline:none;background:none;height:34px;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;padding-right:6px}
+  .dh-dates{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft)}
+  .dh-dates input{height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit;font-size:13px;color:var(--ink);background:var(--surface)}
+  @media(max-width:700px){ .dh-ctrl{width:100%} .dh-search{flex:1 1 100%} .dh-search input{width:100%} }
+
+/* ---------- KPI row: four cards on a 12-column grid (3 columns each) ---------- */
+  .dk-row{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-bottom:16px}
+  .dk-card{grid-column:span 3;display:flex;flex-direction:column;align-items:stretch;gap:8px;text-align:left;font:inherit;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+  @media(max-width:1180px){ .dk-card{grid-column:span 6} }
+  @media(max-width:640px){ .dk-card{grid-column:1/-1} }
+  .dk-click{cursor:pointer;transition:border-color var(--t-fast) ease,box-shadow var(--t-fast) ease,transform var(--t-fast) var(--ease-out)}
+  .dk-click:hover{border-color:var(--green);box-shadow:0 8px 22px rgba(0,80,30,.10)}
+  .dk-click:active{transform:translateY(1px)}
+  .dk-click:focus-visible{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .dk-lb{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+  .dk-go{width:15px!important;height:15px!important;opacity:0;transform:translateX(-4px);transition:opacity var(--t-fast) ease,transform var(--t-fast) var(--ease-out)}
+  .dk-click:hover .dk-go,.dk-click:focus-visible .dk-go{opacity:1;transform:none}
+  .dk-val{display:flex;align-items:baseline;gap:6px}
+  .dk-val b{font-size:34px;line-height:1;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .dk-val span{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .dk-card.warn .dk-val b{color:var(--danger)}
+  .dk-sub{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+  .dk-caps{display:flex;flex-wrap:wrap;gap:6px}
+  .dk-caps span{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--idle-soft);color:var(--ink-soft)}
+  .dk-caps svg{width:12px;height:12px}
+  .dk-caps .bad{background:var(--danger-soft);color:var(--danger)}
+  .dk-caps .warn{background:var(--warn-soft);color:#8a5600}
+  .dk-parts{display:flex;flex-direction:column;gap:5px}
+  .dk-part{display:grid;grid-template-columns:62px 1fr 38px;align-items:center;gap:8px;padding:2px 4px;margin:0 -4px;border:none;border-radius:6px;background:none;font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;text-align:left}
+  .dk-part:hover{background:var(--lime-tint)}
+  .dk-part:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .dk-part-l{font-weight:600}
+  .dk-part em{font-style:normal;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+  .dk-bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+  .dk-bar i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width var(--t-slow) var(--ease-out)}
+  .dk-trend{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft)}
+  .dk-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-weight:700;font-variant-numeric:tabular-nums}
+  .dk-chip svg{width:13px;height:13px}
+  .dk-trend.good .dk-chip{background:var(--ok-soft);color:#146c3a}
+  .dk-trend.bad .dk-chip{background:var(--danger-soft);color:var(--danger)}
+  .dk-trend.flat .dk-chip{background:var(--idle-soft);color:var(--ink-soft)}
+  .dk-trend.none{font-style:italic}
+  @media (prefers-reduced-motion: reduce){ .dk-click,.dk-go,.dk-bar i{transition:none} .dk-click:active{transform:none} }

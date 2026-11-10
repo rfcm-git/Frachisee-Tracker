@@ -71,6 +71,8 @@ function baseState() {
     callInsights: local.get(STORAGE_KEYS.callInsights) !== "0",
     staffRole: "all",
     dashTerritory: "",
+    /** Dashboard date range: preset "7d" | "30d" | "90d" | "month" | "year" | "custom" (from / to = "yyyy-mm-dd"). */
+    dashRange: { preset: "30d", from: "", to: "" },
     dashSort: { key: "stores", dir: -1 },
     sidebarCollapsed: local.get(STORAGE_KEYS.sidebar) === "1",
     /** The menu's Onboarding group (3PDs, ezCater, Walmart) is open. */
@@ -456,6 +458,7 @@ export function toggleCallInsights() {
 export const setStaffRole = (staffRole) => set({ staffRole });
 
 export const setDashTerritory = (dashTerritory) => set({ dashTerritory });
+export const setDashRange = (patch) => set({ dashRange: { ...get().dashRange, ...patch } });
 
 export function sortDashboard(key) {
   const { dashSort } = get();

@@ -3,23 +3,28 @@ import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { shortTime } from "../../lib/format.js";
 import { useDataContext, useDataStore } from "../../state/dataStore.js";
 import { useUiStore } from "../../state/uiStore.js";
-import { capsProgress } from "../caps/capsSelectors.js";
 import { buildDashboard } from "./dashboardModel.js";
-import { DashboardCaps, DashboardCoverage, DashboardGaps, DashboardHeader, DashboardIssueInsights, DashboardKpis, DashboardTerritoryTable } from "./DashboardSections.jsx";
+import { buildKpis } from "./dashboardKpis.js";
+import { rangeBounds } from "./dashboardRange.js";
+import { DashboardHeader, DashboardKpis } from "./DashboardTop.jsx";
+import { DashboardCoverage, DashboardGaps, DashboardIssueInsights, DashboardTerritoryTable } from "./DashboardSections.jsx";
 
 export default function DashboardView() {
   const ctx = useDataContext();
   const territory = useUiStore((state) => state.dashTerritory);
+  const range = useUiStore((state) => state.dashRange);
   const sort = useUiStore((state) => state.dashSort);
   const lastRefreshAt = useDataStore((state) => state.lastRefreshAt);
+  // The period is fixed to the day, so it only changes with the picker (or after midnight on a refresh).
+  const day = new Date().toDateString();
+  const bounds = useMemo(() => rangeBounds(range, new Date(day)), [range, day]);
+  const kpis = useMemo(() => buildKpis(ctx, territory, bounds), [ctx, territory, bounds]);
   const model = useMemo(() => buildDashboard(ctx, territory, sort), [ctx, territory, sort]);
-  const caps = useMemo(() => capsProgress(ctx, territory), [ctx, territory]);
   useToolbarCount("");
 
   return <>
-    <DashboardHeader territory={territory} territories={model.territories} refreshed={shortTime(lastRefreshAt || new Date())} />
-    <DashboardKpis items={model.kpis} />
-    {ctx.capsReady && <DashboardCaps summary={caps} territory={territory} showDue={ctx.capsDueReady} />}
+    <DashboardHeader territory={territory} territories={model.territories} range={range} bounds={bounds} refreshed={shortTime(lastRefreshAt || new Date())} />
+    <DashboardKpis kpis={kpis} prevLabel={bounds.prevLabel} />
     <DashboardCoverage coverage={model.coverage} donuts={model.donuts} />
     <DashboardGaps items={model.gaps} />
     <DashboardTerritoryTable rows={model.territoryRows} sort={sort} />
