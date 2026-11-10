@@ -14,6 +14,9 @@ import { useDataContext } from "../../state/dataStore.js";
 import { openStore, openWalmartAdd, openWalmartImport, openWalmartUpdate } from "../../state/dialogs.js";
 import { clearWmFilters, setWmSort, setWmView, toggleWmFranchisee, toggleWmOnlyStage, toggleWmStage, useUiStore } from "../../state/uiStore.js";
 import { askDeleteWalmart, updateWalmart } from "./walmartActions.js";
+import { sendWalmartEmail } from "./walmartEmailActions.js";
+import { wmCanEmail } from "../../domain/walmartEmail.js";
+import { emailOf } from "../../domain/records.js";
 import { filterWalmart, lastWalmartImport, walmartFranchisees, walmartOwnerGroups, walmartProgress } from "./walmartSelectors.js";
 
 const SORT_LABELS = { stage: "Stage · Payment Setup first", num: "Store # · low to high", updated: "Last updated · newest first" };
@@ -102,6 +105,15 @@ function StageSelect({ record, stage }) {
   </select>;
 }
 
+/** Opens the stage's email in Outlook. Only Awaiting App and Payment Setup; dimmed once the store was emailed (it asks first). */
+function EmailButton({ record, stage, email }) {
+  const sent = !!record.last_email_at;
+  const tip = !email ? "The franchisee has no email address — add one on the franchisee"
+    : sent ? `Emailed ${formatTimestamp(record.last_email_at)} — click to email again` : `Open the ${stage} email to ${email} in Outlook`;
+  return <button type="button" className={`iconbtn mini cap-mailbtn${!email ? " off" : sent ? " done" : " fresh"}`} aria-disabled={!email} data-tip={tip}
+    aria-label={`Email store ${record.store_num}`} onClick={() => sendWalmartEmail(record.id)}><Icon name={sent ? "mail-check" : "send"} /></button>;
+}
+
 /** Stores or franchisees view. */
 function ViewSwitch({ view, owners }) {
   return <div className="cl-count-mode cl-view wm-view" role="group" aria-label="Walmart view">
@@ -130,13 +142,16 @@ function OwnersTable({ groups }) {
   </div>;
 }
 
-function WalmartTable({ rows }) {
+const shortDay = (ts) => new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
+
+function WalmartTable({ ctx, rows }) {
   const { items, pagerProps } = usePaged("wm", rows);
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table wm-list"><thead><tr>
     <th className="c-snum">Store #</th><th>Franchisee</th><th>Stage</th><th className="hide-sm">Next step · latest note</th><th className="hide-sm">Last updated</th><th className="c-act">Actions</th>
   </tr></thead><tbody>
-    {items.map(({ record, store, franchisee, stage }) => {
+    {items.map(({ record, store, franchisee, franchiseeId, stage }) => {
       const expected = wmPlatformStatus(stage);
+      const ownerEmail = franchiseeId != null ? emailOf(ctx.frById.get(franchiseeId)) : "";
       const actual = store ? platformStatus(store, "wm") : expected;
       return <tr key={record.id}>
         <td className="c-snum">{store
@@ -146,7 +161,9 @@ function WalmartTable({ rows }) {
         <td>{franchisee || <span className="muted">—</span>}</td>
         <td><div className="wm-stagecell"><StageSelect key={`${record.id}-${record.updated_at}`} record={record} stage={stage} />
           {actual !== expected && <span className="wm-mismatch" data-tip={`The store's Walmart status is ${actual}; this stage means ${expected}. Changing the stage or the next import sets it to match.`}>
-            <Icon name="triangle-alert" /></span>}</div></td>
+            <Icon name="triangle-alert" /></span>}
+          {wmCanEmail(record) && <EmailButton record={record} stage={stage} email={ownerEmail} />}</div>
+          {record.last_email_at && <div className="wm-emailed" data-tip={formatTimestamp(record.last_email_at)}><Icon name="mail-check" />Emailed {shortDay(record.last_email_at)}</div>}</td>
         <td className="hide-sm wm-next">{WM_NEXT_STEP[stage]}{record.notes ? <span className="wm-note" data-tip={record.notes}>{record.notes}</span> : null}</td>
         <td className="hide-sm muted">{formatTimestamp(record.updated_at || record.created_at)}</td>
         <td className="c-act"><div className="row-acts">
@@ -185,6 +202,6 @@ export default function WalmartView() {
     <ViewSwitch view={view} owners={groups.length} />
     {view === "owners"
       ? (groups.length ? <OwnersTable groups={groups} /> : <EmptyState icon="users" title="No franchisee has more than one store here">{anyFilter ? "Try a different search or filter." : "Franchisees with two or more stores on the Walmart tab show up here."}</EmptyState>)
-      : rows.length ? <WalmartTable rows={rows} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
+      : rows.length ? <WalmartTable ctx={ctx} rows={rows} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
   </>;
 }

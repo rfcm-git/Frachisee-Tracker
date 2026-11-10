@@ -4,7 +4,7 @@ import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartAdd, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartAdd, openWalmartEmail, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
@@ -90,6 +90,10 @@ export default function Toolbar() {
           if (!ctx.walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
           openWalmartImport();
         }}><Icon name="upload" />Import Walmart report</button>}
+        {tab === "walmart" && <button type="button" className="btn outline round" title="Edit the Awaiting App and Payment Setup emails sent by the email button on each store" onClick={() => {
+          if (!ctx.walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
+          openWalmartEmail();
+        }}><Icon name="mail" />Email message</button>}
         {tab === "caps" && <button type="button" className="btn outline round" title="Add many stores from an Excel spreadsheet" onClick={() => {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapsImport();

@@ -203,3 +203,5 @@
   .wm-logchg{display:flex;align-items:center;gap:6px}
   .wm-logchg svg{width:13px;height:13px;color:var(--ink-soft)}
   .wm-lognote{white-space:pre-wrap}
+  .wm-emailed{display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:11.5px;color:var(--ink-soft)}
+  .wm-emailed svg{width:12px;height:12px;color:var(--ok)}

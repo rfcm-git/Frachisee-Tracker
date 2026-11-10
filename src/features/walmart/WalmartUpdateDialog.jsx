@@ -12,12 +12,15 @@ import { formatTimestamp } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openStore } from "../../state/dialogs.js";
 import { askDeleteWalmart, updateWalmart } from "./walmartActions.js";
+import { sendWalmartEmail } from "./walmartEmailActions.js";
+import { wmCanEmail } from "../../domain/walmartEmail.js";
 
 /** One change-log entry: added, stage change and/or note, and whether it came from an import. */
 function LogEntry({ entry }) {
   const by = entry.source === "import" ? " · by import" : "";
   return <li className={entry.kind === "created" ? "created" : ""}>
-    <div className="cap-log-t"><b>{entry.kind === "created" ? `Added${by}` : entry.to ? `Stage changed${by}` : "Note added"}</b><time>{formatTimestamp(entry.ts)}</time></div>
+    <div className="cap-log-t"><b>{entry.kind === "created" ? `Added${by}` : entry.kind === "email" ? "Email opened in Outlook" : entry.to ? `Stage changed${by}` : "Note added"}</b><time>{formatTimestamp(entry.ts)}</time></div>
+    {entry.kind === "email" && entry.stage && <div className="cap-log-c">{entry.stage} email</div>}
     {entry.kind === "created" && entry.stage && <div className="cap-log-c">Stage: <WmStageBadge stage={entry.stage} /></div>}
     {entry.to && <div className="cap-log-c wm-logchg"><WmStageBadge stage={entry.from} /><Icon name="arrow-right" /><WmStageBadge stage={entry.to} /></div>}
     {entry.note && <div className="cap-log-c wm-lognote">{entry.note}</div>}
@@ -56,7 +59,9 @@ export default function WalmartUpdateDialog({ recordId }) {
     <div className="cap-storeinfo wm-now" role="status">
       <span>Now <WmStageBadge stage={before} /></span>
       {store && <span className="muted">Store's Walmart status: {storeStatusNow}</span>}
+      {record.last_email_at && <span className="muted">Emailed {formatTimestamp(record.last_email_at)}</span>}
       {store && <button type="button" className="btn link" onClick={() => openStore(store.id)}><Icon name="store" />Store information</button>}
+      {wmCanEmail(record) && <button type="button" className="btn link" onClick={() => sendWalmartEmail(record.id)}><Icon name="mail" />Email the owner</button>}
     </div>
     <div className="field" style={{ marginBottom: 6 }}><label>Stage</label>
       <StatusButtons options={WM_STAGES} value={stage} onChange={(value) => { setStage(value); setBusy(true); }} label="Stage" /></div>

@@ -113,6 +113,7 @@ export const STORAGE_KEYS = {
   capLastImport: "ft2_cap_last_import",
   capEmail: "ft2_cap_email",
   obEmail: "ft2_ob_email",
+  wmEmail: "ft2_wm_email",
   notifications: "ft2_notifications",
   notifyPosition: "ft2_notify_pos",
   links: "ft2_links",

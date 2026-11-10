@@ -40,6 +40,7 @@ export const DIALOG = {
   walmartImport: "walmartImport",
   walmartAdd: "walmartAdd",
   walmartUpdate: "walmartUpdate",
+  walmartEmail: "walmartEmail",
   scheduleConfirm: "scheduleConfirm",
   scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
@@ -117,6 +118,8 @@ export const openWalmartImport = () => openDialog(DIALOG.walmartImport);
 export const openWalmartAdd = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.walmartAdd, { storeNums, franchiseeId });
 /** Change a store's Walmart stage, add a note, see its change log. */
 export const openWalmartUpdate = (recordId) => openDialog(DIALOG.walmartUpdate, { recordId });
+/** Walmart email message editor; previewId picks the store shown in the preview. */
+export const openWalmartEmail = (previewId = null) => openDialog(DIALOG.walmartEmail, { previewId });
 
 /** "Just this store" or "All of the franchisee's stores" before an email: { heading, one, all, note } (see EmailScopeDialog). */
 export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);
