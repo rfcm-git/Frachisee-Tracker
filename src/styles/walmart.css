@@ -57,3 +57,12 @@
     .wm-ogroup{flex-direction:column;gap:6px}
     .wm-ogroup-h{width:auto}
   }
+
+/* ---------- ezCater tab (same CAP layout; statuses use the onboarding colors) ---------- */
+  .cap-sel.ob-none{background:var(--danger-soft);color:var(--danger)}
+  .cap-sel.ob-wip{background:#efe8fa;color:#5b3699}
+  .cap-sel.ob-done{background:var(--ok-soft);color:#146c3a}
+  .cap-sel.ob-exempt{background:var(--idle-soft);color:var(--idle)}
+  .ez-upd{display:block;width:100%;padding:0;border:none;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .ez-upd:hover .cap-note{color:var(--green-dark);text-decoration:underline}
+  .ez-upd:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}

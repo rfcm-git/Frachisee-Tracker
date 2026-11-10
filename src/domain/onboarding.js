@@ -1,7 +1,7 @@
 /* Onboarding records: one row per store + platform. */
-import { OB_PLATFORMS, OB_STATES, PLATFORMS } from "../config/constants.js";
+import { OB_ALL_PLATFORMS, OB_STATES, PLATFORMS } from "../config/constants.js";
 
-export const obPlatformName = (key) => (OB_PLATFORMS.find(([value]) => value === key) || PLATFORMS.find(([value]) => value === key) || [key, key])[1];
+export const obPlatformName = (key) => (OB_ALL_PLATFORMS.find(([value]) => value === key) || PLATFORMS.find(([value]) => value === key) || [key, key])[1];
 
 /** Older records used Pending (now Not enrolled) and Email Sent/Text Message (now Work in Progress). History entries keep the old names. */
 const OLD_OB_STATUS = { Pending: "Not enrolled", "Email Sent/Text Message": "Work in Progress" };
@@ -27,6 +27,15 @@ export const obIsOpen = (record) => record.status !== "Onboarded" && record.stat
 
 /** Foodja and Walmart records are kept but not shown (Walmart has its own tab). */
 export const obVisible = (record) => record.platform !== "fj" && record.platform !== "wm";
+
+/** ezCater records have their own tab. */
+export const obIsEz = (record) => record?.platform === "ez";
+
+/** Records shown on the Onboarding tab (Uber Eats, DoorDash, Grubhub). */
+export const obOnTab = (record) => obVisible(record) && !obIsEz(record);
+
+/** Records of the ezCater tab. */
+export const obOnEzTab = (record) => obVisible(record) && obIsEz(record);
 
 export function obHistory(record) {
   try {

@@ -9,7 +9,7 @@ import { telHref } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { closeAll, openStaffDetail, openWalmartAdd } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
-import { showStoreOnboarding, showWalmart, toggleFrCard, useUiStore } from "../../state/uiStore.js";
+import { showEzCater, showStoreOnboarding, showWalmart, toggleFrCard, useUiStore } from "../../state/uiStore.js";
 import { latestOnboarding } from "../onboarding/onboardingSelectors.js";
 import { findWalmart } from "../walmart/walmartSelectors.js";
 import { createOnboarding } from "../onboarding/onboardingActions.js";
@@ -84,7 +84,7 @@ export default function StoreWindowLeft({ store }) {
   /** Walmart follows the store's stage on the Walmart tab. */
   const menuWalmart = menuPlatform?.[0] === "wm" ? findWalmart(ctx, store.num) : null;
   /** Onboarding platforms (not Foodja) the store is not onboarded or exempted on can be added to the list from here. */
-  const menuOnboardable = !!menuPlatform && !menuRecord && OB_PLATFORMS.some(([key]) => key === menuPlatform[0])
+  const menuOnboardable = !!menuPlatform && !menuRecord && (OB_PLATFORMS.some(([key]) => key === menuPlatform[0]) || menuPlatform[0] === "ez")
     && !["Onboarded", "Exempted"].includes(platformStatus(store, menuPlatform[0]));
 
   const [adding, setAdding] = useState(false);
@@ -94,13 +94,14 @@ export default function StoreWindowLeft({ store }) {
     setAdding(true);
     const created = await createOnboarding({ items: [{ num: String(store.num), platform: key, exempt: false }], status, details: "", quiet: true });
     setAdding(false);
-    if (created) toast(`${PLATFORMS.find(([value]) => value === key)?.[1] || key} added to onboarding as ${status}`, "ok");
+    if (created) toast(`${PLATFORMS.find(([value]) => value === key)?.[1] || key} added to ${key === "ez" ? "the ezCater tab" : "onboarding"} as ${status}`, "ok");
   }
 
   function goToOnboarding() {
     setPlatformMenu(null);
     closeAll();
-    showStoreOnboarding(store.num);
+    if (menuPlatform?.[0] === "ez") showEzCater(store.num);
+    else showStoreOnboarding(store.num);
   }
 
   return <>
@@ -170,9 +171,9 @@ export default function StoreWindowLeft({ store }) {
         <p>Its status follows the stage there, so change the stage on the Walmart tab.</p>
         <button type="button" className="btn sm round" onClick={() => { setPlatformMenu(null); closeAll(); showWalmart(store.num); }}><Icon name="arrow-right" />Open in Walmart</button>
       </div> : menuRecord ? <div className="pmenu pmenu-ob" role="status">
-        <div className="lbl"><Icon name="rocket" />{menuPlatform[1]} is on the onboarding list · {obStatusLabel(menuRecord.status)}</div>
-        <p>Change its status in the Onboarding tab, so the change is saved in its updates.</p>
-        <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in Onboarding</button>
+        <div className="lbl"><Icon name={menuPlatform[0] === "ez" ? "utensils" : "rocket"} />{menuPlatform[1]} is on the {menuPlatform[0] === "ez" ? "ezCater tab" : "onboarding list"} · {obStatusLabel(menuRecord.status)}</div>
+        <p>Change its status in the {menuPlatform[0] === "ez" ? "ezCater" : "Onboarding"} tab, so the change is saved in its updates.</p>
+        <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in {menuPlatform[0] === "ez" ? "ezCater" : "Onboarding"}</button>
       </div> : <div className="pmenu"><div className="lbl">Set {menuPlatform[1]} status</div><div className="sbtns">
         {PLATFORM_STATES.map((value) => <button type="button" className="sbtn" key={value} onClick={() => choosePlatform(menuPlatform[0], value)}>
           <span className="d" style={{ background: platformColor(value) }} />{value}</button>)}
@@ -183,9 +184,9 @@ export default function StoreWindowLeft({ store }) {
             <Icon name="shopping-cart" />Add to Walmart</button>
         </div>}
         {ctx.onboardingReady && menuOnboardable && <div className="pmenu-add">
-          <span className="muted">Not on the onboarding list yet.</span>
+          <span className="muted">Not on the {menuPlatform[0] === "ez" ? "ezCater tab" : "onboarding list"} yet.</span>
           <button type="button" className="btn sm outline round" disabled={adding} onClick={() => addToOnboarding(menuPlatform[0])}>
-            <Icon name="rocket" />{adding ? "Adding…" : "Add to onboarding"}</button>
+            <Icon name={menuPlatform[0] === "ez" ? "utensils" : "rocket"} />{adding ? "Adding…" : menuPlatform[0] === "ez" ? "Add to ezCater" : "Add to onboarding"}</button>
         </div>}
       </div>)}
     </div></div>

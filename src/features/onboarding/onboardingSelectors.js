@@ -1,6 +1,6 @@
 /* Onboarding tab: filtering and the progress table. */
 import { OB_CORE, OB_PLATFORMS, OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
-import { obIsOpen, obPlatformName, obVisible } from "../../domain/onboarding.js";
+import { obIsOpen, obOnTab, obPlatformName, obVisible } from "../../domain/onboarding.js";
 import { platformStatus } from "../../domain/records.js";
 import { franchiseeContactMatch, numRank, storeMatches } from "../../domain/search.js";
 import { timeOf } from "../../lib/format.js";
@@ -17,12 +17,7 @@ const recordFranchisee = (ctx, record) => {
 function passes(ctx, record, filter, sq) {
   if (filter.platforms.length && !filter.platforms.includes(record.platform)) return false;
   if (filter.franchisees?.length && !filter.franchisees.includes(recordFranchisee(ctx, record))) return false;
-  if (filter.threePd.length || filter.ezCater.length) {
-    const core = OB_CORE.includes(record.platform);
-    const ez = record.platform === "ez";
-    const statusOk = (core && filter.threePd.length && filter.threePd.includes(record.status)) || (ez && filter.ezCater.length && filter.ezCater.includes(record.status));
-    if (!statusOk) return false;
-  }
+  if (filter.threePd.length && !(OB_CORE.includes(record.platform) && filter.threePd.includes(record.status))) return false;
   if (!sq.q) return true;
   const store = ctx.storeByNum.get(String(record.store_num || ""));
   const franchiseeId = store ? store.franchisee_id : record.franchisee_id;
@@ -34,7 +29,7 @@ function passes(ctx, record, filter, sq) {
 }
 
 export function filterOnboarding(ctx, filter, sq) {
-  return ctx.onboarding.filter((record) => obVisible(record) && passes(ctx, record, filter, sq))
+  return ctx.onboarding.filter((record) => obOnTab(record) && passes(ctx, record, filter, sq))
     .sort((a, b) => (sq.q && sq.mode !== "fr" ? numRank(a.store_num, sq.q) - numRank(b.store_num, sq.q) : 0)
       || (filter.sort === "new" ? timeOf(b.created_at) - timeOf(a.created_at) : timeOf(a.created_at) - timeOf(b.created_at)));
 }
@@ -70,7 +65,7 @@ export function groupOnboardingByStore(ctx, records, filter, sq) {
 /** Franchisees that have stores on the onboarding list, by name, with their record count: [{ id, name, count }]. */
 export function onboardingFranchisees(ctx) {
   const counts = new Map();
-  ctx.onboarding.filter(obVisible).forEach((record) => {
+  ctx.onboarding.filter(obOnTab).forEach((record) => {
     const id = recordFranchisee(ctx, record);
     if (id != null) counts.set(id, (counts.get(id) || 0) + 1);
   });
@@ -78,11 +73,11 @@ export function onboardingFranchisees(ctx) {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export const openOnboardingCount = (ctx) => ctx.onboarding.filter((record) => obVisible(record) && obIsOpen(record)).length;
+export const openOnboardingCount = (ctx) => ctx.onboarding.filter((record) => obOnTab(record) && obIsOpen(record)).length;
 
 /** Progress by platform and status, always from all records (filters do not change it). */
 export function progressModel(ctx, filter) {
-  const rows = ctx.onboarding.filter(obVisible);
+  const rows = ctx.onboarding.filter(obOnTab);
   const totals = Object.fromEntries(OB_STATES.map((status) => [status, rows.filter((record) => record.status === status).length]));
   const platforms = OB_PLATFORMS.map(([key, name]) => {
     const entries = rows.filter((record) => record.platform === key);
@@ -101,9 +96,9 @@ export const latestOnboarding = (ctx, num, platform) => ctx.onboarding
   .sort((a, b) => timeOf(b.created_at) - timeOf(a.created_at))[0] || null;
 
 /** Status of a store on each supported platform: its Delivery Platforms status and its latest onboarding status ("" when none). */
-export function storePlatformStatuses(ctx, num) {
+export function storePlatformStatuses(ctx, num, keys = OB_PLATFORMS.map(([key]) => key)) {
   const store = ctx.storeByNum.get(String(num));
-  return OB_PLATFORMS.map(([key]) => ({
+  return keys.map((key) => ({
     key,
     delivery: store ? platformStatus(store, key) : "Not enrolled",
     onboarding: latestOnboarding(ctx, String(num), key)?.status || "",
@@ -120,12 +115,14 @@ export const hasPlatformStatus = (entry) => entry.delivery !== "Not enrolled";
  * Returns { make: [{ num, platform, exempt, status? (Onboarded when the store already is), current }], updates: [{ num, platform, record, status, text }], skip: [{ num, platform, record }],
  *   exempt, flagged (new items whose store already has a status there), stores (picked stores with their statuses) }.
  */
-export function planOnboarding(ctx, storeNums, platformKeys, { status = OB_STATES[0], details = "" } = {}) {
+export function planOnboarding(ctx, storeNums, platformKeys, { status = OB_STATES[0], details = "", onlyPicked = false } = {}) {
   const make = [];
   const updates = [];
   const skip = [];
   const hasDetails = !!richToPlain(details).trim();
-  const stores = storeNums.map((num) => ({ num, platforms: storePlatformStatuses(ctx, num) }));
+  // The Onboarding tab's platforms plus any picked one outside them (ezCater); onlyPicked shows just the picked ones.
+  const keys = onlyPicked ? platformKeys : [...new Set([...OB_PLATFORMS.map(([key]) => key), ...platformKeys])];
+  const stores = storeNums.map((num) => ({ num, platforms: storePlatformStatuses(ctx, num, keys) }));
   stores.forEach(({ num, platforms }) => platformKeys.forEach((platform) => {
     const record = latestOnboarding(ctx, num, platform);
     const current = platforms.find((entry) => entry.key === platform);

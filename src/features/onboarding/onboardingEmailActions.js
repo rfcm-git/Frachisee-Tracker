@@ -1,10 +1,10 @@
 /* Onboarding email: saving the template and opening a filled-in email in Outlook. */
 import { STORAGE_KEYS } from "../../config/constants.js";
 import { obHistory } from "../../domain/onboarding.js";
-import { OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obEmailSent, obEmailTemplate, obFranchiseeStores, targetsText } from "../../domain/onboardingEmail.js";
+import { DEFAULT_EZ_EMAIL, DEFAULT_OB_EMAIL, OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obEmailSent, obEmailTemplate, obFranchiseeStores, targetsText } from "../../domain/onboardingEmail.js";
 import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
 import { obPlatformName } from "../../domain/onboarding.js";
-import { ONBOARDING_EMAIL_KEY, writeSetting } from "../../services/api.js";
+import { EZCATER_EMAIL_KEY, ONBOARDING_EMAIL_KEY, writeSetting } from "../../services/api.js";
 import { openMailto } from "../../lib/mailto.js";
 import { local } from "../../lib/storage.js";
 import { getContext, updateData } from "../../state/dataStore.js";
@@ -13,25 +13,35 @@ import { toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
 import { updateOnboarding } from "./onboardingActions.js";
 
+/** The two onboarding emails: "ob" (Onboarding tab) and "ez" (ezCater tab). */
+const SCOPES = {
+  ob: { key: ONBOARDING_EMAIL_KEY, data: "onboardingEmail", storage: STORAGE_KEYS.obEmail, defaults: DEFAULT_OB_EMAIL },
+  ez: { key: EZCATER_EMAIL_KEY, data: "ezcaterEmail", storage: STORAGE_KEYS.ezEmail, defaults: DEFAULT_EZ_EMAIL },
+};
+/** Which email a record uses. */
+export const emailScopeOf = (record) => (record?.platform === "ez" ? "ez" : "ob");
+
 /** Saved template: shared with the team in app_settings, or on this computer when that table is not set up. null = never saved. */
-export function savedObEmail(ctx = getContext()) {
-  return ctx.onboardingEmail === undefined ? local.getJson(STORAGE_KEYS.obEmail, null) : ctx.onboardingEmail;
+export function savedObEmail(ctx = getContext(), scope = "ob") {
+  const { data, storage } = SCOPES[scope];
+  return ctx[data] === undefined ? local.getJson(storage, null) : ctx[data];
 }
 
 /** Template in use (the defaults until one is saved). */
-export const currentObEmail = (ctx = getContext()) => obEmailTemplate(savedObEmail(ctx));
+export const currentObEmail = (ctx = getContext(), scope = "ob") => obEmailTemplate(savedObEmail(ctx, scope), SCOPES[scope].defaults);
 
 /** Saves the template. Returns true when saved. */
-export async function saveObEmail(template) {
+export async function saveObEmail(template, scope = "ob") {
+  const { key, data, storage } = SCOPES[scope];
   const value = { ...template, updatedAt: new Date().toISOString() };
-  local.setJson(STORAGE_KEYS.obEmail, value);
-  if (getContext().onboardingEmail === undefined) {
+  local.setJson(storage, value);
+  if (getContext()[data] === undefined) {
     toast("Email template saved on this computer (the shared settings table is not set up)", "ok");
     return true;
   }
-  const error = await writeSetting(ONBOARDING_EMAIL_KEY, value);
+  const error = await writeSetting(key, value);
   if (error) { toastError(error); return false; }
-  updateData(() => ({ onboardingEmail: value }));
+  updateData(() => ({ [data]: value }));
   toast("Email template saved for the whole team", "ok");
   return true;
 }
@@ -62,9 +72,9 @@ export function sendOnboardingEmail(recordId) {
   const ctx = getContext();
   const record = ctx.onboarding.find((item) => item.id === recordId);
   if (!record) return;
-  if (savedObEmail(ctx) === null) {
+  if (savedObEmail(ctx, emailScopeOf(record)) === null) {
     toast("Set up the email message first, then click the email button again");
-    openOnboardingEmail(record.id);
+    openOnboardingEmail(record.id, emailScopeOf(record));
     return;
   }
   const stores = obFranchiseeStores(ctx, record);
@@ -81,7 +91,7 @@ export function sendOnboardingEmail(recordId) {
 
 function sendAllOnboardingEmail(record, stores) {
   const ctx = getContext();
-  const email = buildOnboardingEmailMulti(ctx, record, stores, currentObEmail(ctx));
+  const email = buildOnboardingEmailMulti(ctx, record, stores, currentObEmail(ctx, emailScopeOf(record)));
   if (!email.to) { toast(`Store ${record.store_num}'s franchisee has no email address — add one on the franchisee`, "err"); return; }
   openAndLog(email, record.store_num);
 }
@@ -89,7 +99,7 @@ function sendAllOnboardingEmail(record, stores) {
 /** Email about one store (asks first when it was already emailed or nothing is still being onboarded). */
 function sendOneOnboardingEmail(record) {
   const ctx = getContext();
-  const email = buildOnboardingEmail(ctx, record, currentObEmail(ctx));
+  const email = buildOnboardingEmail(ctx, record, currentObEmail(ctx, emailScopeOf(record)));
   if (!email.to) { toast(`Store ${record.store_num}'s franchisee has no email address — add one on the franchisee`, "err"); return; }
   const alreadySent = email.targets.some((target) => obEmailSent(target, obHistory(target)));
   const nothingOpen = email.targets.length === 1 && email.targets[0].id === record.id && (record.status === "Onboarded" || record.status === "Exempted");

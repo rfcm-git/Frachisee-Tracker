@@ -28,6 +28,9 @@ export const ONBOARDING_EMAIL_KEY = "onboarding_email_template";
 /** app_settings key of the Walmart email template. */
 export const WALMART_EMAIL_KEY = "walmart_email_template";
 
+/** app_settings key of the ezCater email template. */
+export const EZCATER_EMAIL_KEY = "ezcater_email_template";
+
 function db() {
   const client = getDb();
   if (!client) throw new Error("Not connected");
@@ -96,10 +99,12 @@ export async function loadAllTables({ onProgress } = {}) {
   // Onboarding email template: undefined when app_settings is not set up (kept on this computer instead).
   const obTemplate = onboardingReady ? await readSetting(ONBOARDING_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const onboardingEmail = obTemplate.error ? undefined : obTemplate.value || null;
+  const ezTemplate = onboardingReady ? await readSetting(EZCATER_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const ezcaterEmail = ezTemplate.error ? undefined : ezTemplate.value || null;
   // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
   const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail };
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

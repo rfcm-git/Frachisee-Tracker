@@ -50,7 +50,9 @@ export default function UpdateOnboardingDialog({ onboardingId }) {
   const [saving, setSaving] = useState(false);
   const editorRef = useRef(null);
   if (!record) return null;
-  const others = platformsNotOnList(ctx, record.store_num);
+  // ezCater has its own tab, so its records don't offer the Onboarding tab's other platforms.
+  const ez = record.platform === "ez";
+  const others = ez ? [] : platformsNotOnList(ctx, record.store_num);
 
   async function save() {
     const text = editorRef.current.getValue();
@@ -84,7 +86,7 @@ export default function UpdateOnboardingDialog({ onboardingId }) {
     <div className="field"><label>Progress update</label>
       <RichTextEditor ref={editorRef} placeholder="e.g. Sent the DoorDash onboarding link by text. Owner will sign today." minHeight={150} autoFocus onInput={() => setBusy(true)} /></div>
     <div className="help">The status is also set in the store's Delivery Platforms.</div>
-    <OtherPlatforms entries={others} picked={addPlatforms} onToggle={(key) => { setAddPlatforms(toggleIn(addPlatforms, key)); setBusy(true); }} />
+    {!ez && <OtherPlatforms entries={others} picked={addPlatforms} onToggle={(key) => { setAddPlatforms(toggleIn(addPlatforms, key)); setBusy(true); }} />}
     <div className="help"><button type="button" className="btn link" style={{ padding: 0 }} onClick={() => { close(); openOnboardingHistory(record.id); }}>
       <Icon name="history" />View all updates ({obHistory(record).length})</button></div>
   </Modal>;

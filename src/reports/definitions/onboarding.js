@@ -1,5 +1,5 @@
 /* Onboarding report (one row per store + platform). */
-import { OB_PLATFORMS, OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
+import { OB_ALL_PLATFORMS, OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
 import { obDays, obFranchiseeId, obHistory, obPlatformName, obVisible } from "../../domain/onboarding.js";
 import { platformStatus } from "../../domain/records.js";
 import { staffForStore } from "../../domain/staff.js";
@@ -52,7 +52,7 @@ export default {
   ],
   defOff: ["addr", "frcontact", "req"],
   chips: [
-    { key: "plat", label: "Platform", allLabel: "All platforms", options: OB_PLATFORMS, ok: (ctx, record, selected) => selected.includes(record.platform) },
+    { key: "plat", label: "Platform", allLabel: "All platforms", options: OB_ALL_PLATFORMS, ok: (ctx, record, selected) => selected.includes(record.platform) },
     { key: "status", label: "Status", allLabel: "All statuses", wide: true, options: OB_STATES.map((status) => [status, status, OB_STATUS_COLOR[status]]), ok: (ctx, record, selected) => selected.includes(record.status) },
   ],
   items: (ctx) => ctx.onboarding.filter(obVisible),
@@ -63,9 +63,9 @@ export default {
   storeExists: (ctx, num) => ctx.storeByNum.has(num) || ctx.onboarding.some((record) => String(record.store_num) === num),
   useTab(ctx, ui) {
     const filter = ui.obFilter;
-    const statuses = [...new Set([...filter.threePd, ...filter.ezCater])];
+    const statuses = filter.threePd;
     return {
-      chips: { plat: filter.platforms.length ? filter.platforms : OB_PLATFORMS.map(([key]) => key), status: statuses.length ? statuses : OB_STATES },
+      chips: { plat: filter.platforms.length ? filter.platforms : OB_ALL_PLATFORMS.map(([key]) => key), status: statuses.length ? statuses : OB_STATES },
       ...searchToReportFilters(ctx, ui.search),
     };
   },
@@ -74,7 +74,7 @@ export default {
   build(ctx, selected, state, workbook, h) {
     const records = selected.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at) || compareNumbers(a.store_num, b.store_num));
     const franchiseeOf = (record) => ctx.frById.get(obFranchiseeId(ctx, record));
-    const platforms = OB_PLATFORMS.filter(([key]) => (state.chips.plat || []).includes(key));
+    const platforms = OB_ALL_PLATFORMS.filter(([key]) => (state.chips.plat || []).includes(key));
 
     if (state.sheets.includes("summary")) {
       const [total, ...byStatus] = counts(records);
@@ -162,7 +162,7 @@ export default {
       });
     }
     if (state.sheets.includes("byplat")) {
-      const order = OB_PLATFORMS.map(([key]) => key);
+      const order = OB_ALL_PLATFORMS.map(([key]) => key);
       h.groupSheet(workbook, records, {
         title: "By platform", key: (record) => record.platform, head: (key) => [obPlatformName(key)],
         headers: ["Platform", ...COUNT_HEADERS, "Last activity"], widths: [14, 8, 10, 22, 11, 17], count: countWithLast,

@@ -101,10 +101,10 @@ export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { ca
 export const openAddOnboarding = () => openDialog(DIALOG.addOnboarding);
 export const openOnboardingImport = () => openDialog(DIALOG.onboardingImport);
 /** Onboarding email message editor; previewId picks the record whose store is shown in the preview. */
-export const openOnboardingEmail = (previewId = null) => openDialog(DIALOG.onboardingEmail, { previewId });
+export const openOnboardingEmail = (previewId = null, scope = "ob") => openDialog(DIALOG.onboardingEmail, { previewId, scope });
 
 /** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
-export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
+export const openNewOnboarding = ({ storeNums = [], franchiseeId = null, platforms = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId, platforms });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
 /** Update all of one store's onboarding platforms at once. */
 export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboarding, { storeNum: String(storeNum) });

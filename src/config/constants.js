@@ -21,8 +21,13 @@ export const ISSUE_PLATFORMS = ["Uber Eats", "DoorDash", "Grubhub", "ezCater", "
 export const ISSUE_STATES = ["Pending", "Work in Progress", "Resolved"];
 export const ISSUE_STATUS_COLOR = { Pending: "var(--danger)", "Work in Progress": "var(--warn)", Resolved: "var(--ok)" };
 
-/** Platforms on the Onboarding tab. Walmart has its own tab (WM_STAGES); older Walmart onboarding records are kept but hidden. */
-export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"]];
+/**
+ * Platforms on the Onboarding tab. ezCater records live in the same table but have their own tab;
+ * Walmart has its own tab and table (WM_STAGES), and its older onboarding records are kept but hidden.
+ */
+export const OB_PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"]];
+/** Every platform with onboarding records: the Onboarding tab's plus ezCater (reports, emails, names). */
+export const OB_ALL_PLATFORMS = [...OB_PLATFORMS, ["ez", "ezCater"]];
 /** Platforms the onboarding "3PD status" filter applies to (ezCater has its own). */
 export const OB_CORE = ["ue", "dd", "gh"];
 export const OB_STATES = ["Not enrolled", "Work in Progress", "Onboarded", "Exempted"];
@@ -70,10 +75,10 @@ export const PERIODS = [
 ];
 
 /** Paged lists: allowed and default page sizes. */
-export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100] };
-export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, cl: 25, cap: 25, wm: 25 };
+export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], ez: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100] };
+export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, ez: 25, cl: 25, cap: 25, wm: 25 };
 
-export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "walmart", "caps", "calls", "reports"];
+export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "ezcater", "walmart", "caps", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
@@ -82,7 +87,8 @@ export const PAGE_TITLES = {
   stores: ["All Stores", "Every store with platforms and status"],
   staff: ["FBC / OM", "Field consultants and operations managers"],
   issues: ["Issues", "Log, track and report 3PD issues"],
-  onboarding: ["Onboarding", "Track 3PD and ezCater onboarding for each store and platform"],
+  onboarding: ["Onboarding", "Track Uber Eats, DoorDash and Grubhub onboarding for each store and platform"],
+  ezcater: ["ezCater", "ezCater catering onboarding — who still needs to onboard and where each store is"],
   walmart: ["Walmart", "Walmart Marketplace onboarding — who still needs to onboard and where each store is"],
   caps: ["CAP", "Corrective Action Plan — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
@@ -115,6 +121,7 @@ export const STORAGE_KEYS = {
   capEmail: "ft2_cap_email",
   obEmail: "ft2_ob_email",
   wmEmail: "ft2_wm_email",
+  ezEmail: "ft2_ez_email",
   notifications: "ft2_notifications",
   notifyPosition: "ft2_notify_pos",
   links: "ft2_links",

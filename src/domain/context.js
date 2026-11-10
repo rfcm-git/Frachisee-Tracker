@@ -25,6 +25,8 @@ export const EMPTY_DATA = Object.freeze({
   capsEmail: null,
   /** Saved onboarding email template, null when never saved, undefined when app_settings is not set up. */
   onboardingEmail: null,
+  /** Saved ezCater email template, null when never saved, undefined when app_settings is not set up. */
+  ezcaterEmail: null,
   /** Saved Walmart email template, null when never saved, undefined when app_settings is not set up. */
   walmartEmail: null,
 });

@@ -6,9 +6,9 @@
  */
 import { franchiseeName } from "./context.js";
 import { composeEmail, recipientsFor } from "./capEmail.js";
-import { obIsOpen, obPlatformName, obStatusLabel, obVisible } from "./onboarding.js";
+import { obIsEz, obIsOpen, obPlatformName, obStatusLabel, obVisible } from "./onboarding.js";
 import { emailOf, territorySet } from "./records.js";
-import { OB_PLATFORMS } from "../config/constants.js";
+import { OB_ALL_PLATFORMS } from "../config/constants.js";
 
 /** Text of the update added when the email is opened in Outlook. */
 export const OB_EMAIL_NOTE = "Email Sent";
@@ -61,8 +61,37 @@ export const OB_EMAIL_FIELDS = [
   ["Phone", "Store phone"],
 ];
 
-/** Saved template merged over the defaults (older saves may miss fields). */
-export const obEmailTemplate = (saved) => ({ ...DEFAULT_OB_EMAIL, ...(saved && typeof saved === "object" ? saved : {}) });
+/** ezCater has its own tab and its own message. */
+export const DEFAULT_EZ_EMAIL = Object.freeze({
+  ...DEFAULT_OB_EMAIL,
+  subject: "ezCater catering · Store #{{Store #}}",
+  body: [
+    "Hi {{Franchisee}},",
+    "",
+    "We'd like to get store #{{Store #}} ({{Address}}, {{City}}) set up on ezCater so it can take catering orders.",
+    "",
+    "Please reply with a good time to go over the next steps, or let us know if you have any questions.",
+    "",
+    "Thank you,",
+  ].join("\n"),
+  multiSubject: "ezCater catering · {{Store count}} stores",
+  multiBody: [
+    "Hi {{Franchisee}},",
+    "",
+    "We'd like to get these stores set up on ezCater so they can take catering orders:",
+    "{{Stores}}",
+    "",
+    "Please reply with a good time to go over the next steps, or let us know if you have any questions.",
+    "",
+    "Thank you,",
+  ].join("\n"),
+});
+
+/** Saved template merged over the defaults (older saves may miss fields). defaults: DEFAULT_OB_EMAIL or DEFAULT_EZ_EMAIL. */
+export const obEmailTemplate = (saved, defaults = DEFAULT_OB_EMAIL) => ({ ...defaults, ...(saved && typeof saved === "object" ? saved : {}) });
+
+/** Same tab: ezCater records go together, and the Onboarding tab's platforms go together. */
+const sameTab = (a, b) => obIsEz(a) === obIsEz(b);
 
 /** ["Uber Eats", "DoorDash", "Grubhub"] -> "Uber Eats, DoorDash and Grubhub" */
 const joinNames = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names.join(""));
@@ -74,10 +103,10 @@ const joinNames = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", "
 export function obEmailTargets(ctx, record) {
   const latest = new Map();
   ctx.onboarding
-    .filter((item) => obVisible(item) && String(item.store_num) === String(record.store_num))
+    .filter((item) => obVisible(item) && sameTab(item, record) && String(item.store_num) === String(record.store_num))
     .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")))
     .forEach((item) => { if (!latest.has(item.platform)) latest.set(item.platform, item); });
-  const order = (item) => OB_PLATFORMS.findIndex(([key]) => key === item.platform);
+  const order = (item) => OB_ALL_PLATFORMS.findIndex(([key]) => key === item.platform);
   const open = [...latest.values()].filter(obIsOpen).sort((a, b) => order(a) - order(b));
   return open.length ? open : [record];
 }
@@ -122,11 +151,11 @@ export function buildOnboardingEmail(ctx, record, template) {
 export function obFranchiseeStores(ctx, record) {
   const store = ctx.storeByNum.get(String(record.store_num));
   if (!store || store.franchisee_id == null) return [{ num: String(record.store_num), targets: obEmailTargets(ctx, record) }];
-  const nums = new Set(ctx.onboarding.filter((item) => obVisible(item) && obIsOpen(item)).map((item) => String(item.store_num))
+  const nums = new Set(ctx.onboarding.filter((item) => obVisible(item) && sameTab(item, record) && obIsOpen(item)).map((item) => String(item.store_num))
     .filter((num) => ctx.storeByNum.get(num)?.franchisee_id === store.franchisee_id));
   nums.add(String(record.store_num));
   return [...nums].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((num) => {
-    const sample = num === String(record.store_num) ? record : ctx.onboarding.find((item) => String(item.store_num) === num && obVisible(item));
+    const sample = num === String(record.store_num) ? record : ctx.onboarding.find((item) => String(item.store_num) === num && obVisible(item) && sameTab(item, record) && obIsOpen(item));
     return { num, targets: obEmailTargets(ctx, sample) };
   });
 }
