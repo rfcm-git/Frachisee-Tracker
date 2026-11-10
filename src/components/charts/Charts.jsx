@@ -1,15 +1,7 @@
-/* Small SVG/CSS charts used on the dashboard and in Call Logs insights. */
+/* Small SVG/CSS charts used in Call Logs insights. */
 import Icon from "../ui/Icon.jsx";
-import { InfoTip } from "../ui/common.jsx";
 import { clickableProps } from "../ui/clickable.js";
 import { formatNumber, percent } from "../../lib/format.js";
-
-export function DashboardCard({ title, icon, tip, className = "", children }) {
-  return <section className={`db-card ${className}`}>
-    <header><Icon name={icon} /><h3>{title}</h3>{tip && <InfoTip text={tip} />}</header>
-    <div className="db-body">{children}</div>
-  </section>;
-}
 
 /** Props that make a chart part clickable when it has an action. */
 const actionProps = (act, onSelect) => (act && onSelect ? clickableProps(() => onSelect(act)) : {});
@@ -43,51 +35,6 @@ export function HorizontalBars({ rows, full = false, empty = "No data yet", live
       <b className="v">{value}</b>
     </div>;
   })}</div>;
-}
-
-/** Donut with a legend. segments: [{ label, value, color, tip, act }] */
-export function DonutChart({ segments, center, sub, onSelect }) {
-  const size = 150;
-  const thickness = 22;
-  const radius = (size - thickness) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const total = segments.reduce((sum, segment) => sum + segment.value, 0);
-  let offset = 0;
-  const arcs = total ? segments.filter((segment) => segment.value > 0).map((segment) => {
-    const length = (segment.value / total) * circumference;
-    const arc = { ...segment, length, offset };
-    offset += length;
-    return arc;
-  }) : [];
-  return <div className="db-donut">
-    <div className="db-dw">
-      <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        {arcs.length ? arcs.map((segment) => <circle key={segment.label} className="db-arc" cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={segment.color} strokeWidth={thickness}
-          strokeDasharray={`${segment.length} ${circumference - segment.length}`} strokeDashoffset={-segment.offset}
-          data-tip={`${segment.label}: ${formatNumber(segment.value)} (${percent(segment.value, total)}%)${segment.tip ? ` — ${segment.tip}` : ""}`}
-          style={segment.act && onSelect ? { cursor: "pointer" } : undefined} onClick={segment.act && onSelect ? () => onSelect(segment.act) : undefined} />)
-          : <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8eee3" strokeWidth={thickness} />}
-      </svg>
-      <div className="db-dc"><b>{center}</b><span>{sub}</span></div>
-    </div>
-    <div className="db-legend">{segments.map((segment) => <div key={segment.label} className={`db-lg${segment.act ? " click" : ""}`} data-tip={segment.tip || segment.label}
-      {...actionProps(segment.act, onSelect)}>
-      <span className="sw" style={{ background: segment.color }} /><span className="l">{segment.label}</span>
-      <b>{formatNumber(segment.value)}</b><span className="p">{percent(segment.value, total)}%</span>
-    </div>)}</div>
-  </div>;
-}
-
-/** Logged vs resolved per week. weeks: [{ label, logged, resolved }] */
-export function WeeklyColumns({ weeks }) {
-  const max = Math.max(1, ...weeks.map((week) => Math.max(week.logged, week.resolved)));
-  return <>
-    <div className="db-cols">{weeks.map((week) => <div key={week.label} className="db-col"><div className="bars">
-      <span className="b logged" style={{ height: `${(week.logged / max) * 100}%` }} data-tip={`Week of ${week.label} · Logged: ${week.logged}`} />
-      <span className="b resolved" style={{ height: `${(week.resolved / max) * 100}%` }} data-tip={`Week of ${week.label} · Resolved: ${week.resolved}`} />
-    </div><span className="x">{week.label}</span></div>)}</div>
-    <div className="db-key"><span><i style={{ background: "var(--green)" }} />Logged</span><span><i style={{ background: "var(--lime)" }} />Resolved</span></div>
-  </>;
 }
 
 /** Color key under a chart. items: [[color, label]] */

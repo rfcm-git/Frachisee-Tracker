@@ -227,3 +227,33 @@
   .ts-num b{font-size:18px;line-height:1;font-variant-numeric:tabular-nums}
   .ts-num span{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
   @media (prefers-reduced-motion: reduce){ .ic-tip{animation:none} .ts-row,.dc-toggle,.dc-link{transition:none} }
+
+/* ---------- Bottom row: Needs action today ---------- */
+  .na-card{margin-bottom:16px}
+  .na-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px 12px}
+  .na-chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);
+    font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color var(--t-fast) ease,background var(--t-fast) ease}
+  .na-chip svg{width:14px;height:14px;color:var(--ink-soft)}
+  .na-chip b{font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+  .na-chip:hover{border-color:var(--green)}
+  .na-chip.on{background:var(--green-soft);border-color:var(--green);color:var(--green-dark)}
+  .na-chip.on b,.na-chip.on svg{color:var(--green-dark)}
+  .na-chip.zero{opacity:.6}
+  .na-chip:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .na-table th button{display:inline-flex;align-items:center;gap:4px;padding:0;border:none;background:none;font:inherit;color:inherit;cursor:pointer}
+  .na-table th button svg{width:12px;height:12px;opacity:.35}
+  .na-table th button.on{color:var(--green-dark)} .na-table th button.on svg{opacity:1}
+  .na-table th button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}
+  .na-type{width:130px}
+  .na-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--idle-soft);color:var(--ink-soft);white-space:nowrap}
+  .na-badge svg{width:13px;height:13px}
+  .na-what{min-width:220px}
+  .na-what b{display:block;font-size:13.5px}
+  .na-what span{display:block;font-size:12px;color:var(--ink-soft);margin-top:1px}
+  .na-when{white-space:nowrap;font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  td.na-when svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+  td.na-when.critical{color:var(--danger);font-weight:700}
+  td.na-when.warning{color:#8a5600;font-weight:600}
+  .na-table .c-act{width:auto}
+  .na-go{white-space:nowrap}
+  @media (prefers-reduced-motion: reduce){ .na-chip{transition:none} }
