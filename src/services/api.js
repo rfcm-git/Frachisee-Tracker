@@ -20,6 +20,9 @@ export const TABLES = {
 /** app_settings key of the last CAP import. */
 export const CAPS_LAST_IMPORT_KEY = "caps_last_import";
 
+/** app_settings key of the scheduled-reminder state (which occurrences were reminded/confirmed, shared across devices). */
+export const SCHEDULE_STATE_KEY = "schedule_state";
+
 /** app_settings key of the CAP email template. */
 export const CAPS_EMAIL_KEY = "caps_email_template";
 

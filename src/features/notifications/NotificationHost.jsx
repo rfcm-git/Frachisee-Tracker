@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
-import { formatTimestamp, plural } from "../../lib/format.js";
+import { formatTimestamp, plural, shortTime } from "../../lib/format.js";
 import {
   clearNotifications, deliverIncoming, markAllRead, markRead, markUnread, removeNotification,
   setNotifyPanelOpen, setNotifyPosition, useNotificationStore,
@@ -70,10 +70,13 @@ function openTarget(item) {
 /** Confirm / open buttons on a scheduled reminder (records update, CAP list update). */
 function ScheduleActions({ item }) {
   const { key, confirm, open } = item.target;
-  const done = useScheduleStore((s) => Boolean(s.state[key]?.done));
+  const stateDone = useScheduleStore((s) => s.state[key]?.done || 0);
+  // Entries older than a few days are pruned from the schedule state, so the notification remembers its own confirmation.
+  const doneAt = stateDone || item.doneAt || 0;
+  const done = Boolean(doneAt || item.done);
   return <>
     {confirm ? (done
-      ? <span className="nt-done"><Icon name="circle-check" />Confirmed</span>
+      ? <span className="nt-done"><Icon name="circle-check" />Done{doneAt ? ` · ${shortTime(new Date(doneAt))}` : ""}</span>
       : <button type="button" className="nt-link" onClick={() => confirmSchedule(key)}><Icon name="check" />Confirm done</button>) : null}
     {open ? <button type="button" className="nt-link" onClick={() => { markRead(item.id); openScheduleTarget(open); }}><Icon name="arrow-right" />{targetLabel(open)}</button> : null}
   </>;

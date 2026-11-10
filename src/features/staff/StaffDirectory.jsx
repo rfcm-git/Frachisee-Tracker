@@ -36,7 +36,7 @@ function StaffCard({ person, role, counts }) {
         <div className="sf-roles">{rolesOf(person).map((item) => <span className="rl" key={item}>{item}</span>)}</div>
       </div>
     </div>
-    <div className="sf-mail">{email ? <><Icon name="mail" /><span>{email}</span></> : <span className="muted">No email</span>}</div>
+    <div className="sf-mail">{email ? <><Icon name="mail" /><a className="clink" href={`mailto:${email}`} onClick={(event) => event.stopPropagation()}>{email}</a></> : <span className="muted">No email</span>}</div>
     <div className="sf-stats"><span><b>{storeCount}</b> store{storeCount !== 1 ? "s" : ""} as {role}</span>
       {otherCount > 0 && <span className="muted">+{otherCount} as {role === "FBC" ? "OM" : "FBC"}</span>}
     </div>

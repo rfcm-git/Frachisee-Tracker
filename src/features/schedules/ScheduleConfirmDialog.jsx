@@ -2,6 +2,7 @@ import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { formatClock, repeatSummary } from "../../domain/schedules.js";
+import { shortTime } from "../../lib/format.js";
 import { openScheduleEdit } from "../../state/dialogs.js";
 import { useScheduleStore } from "../../state/scheduleStore.js";
 import { confirmSchedule, openScheduleTarget, targetLabel } from "./scheduleActions.js";
@@ -27,11 +28,20 @@ export default function ScheduleConfirmDialog({ scheduleId, occKey }) {
         <button type="button" className="btn" onClick={() => confirmSchedule(occKey)} autoFocus><Icon name="circle-check" />Yes, it's done</button>
       </>}>
     {done
-      ? <p className="hint sc-done"><Icon name="circle-check" />Already confirmed — nothing more to do.</p>
+      ? <div className="sc-ask-done" role="status">
+        <span className="sc-done-ic"><Icon name="check" /></span>
+        <div>
+          <b>Marked as done at {shortTime(new Date(entry.done))}</b>
+          <span>Saved to your notifications — it won't ask again, on any device.</span>
+        </div>
+      </div>
       : <>
-        {schedule.message ? <p className="hint" style={{ marginTop: 0 }}>{schedule.message}</p> : null}
-        <div className="help">{repeatSummary(schedule)}. <button type="button" className="nt-link" style={{ padding: "0 2px" }}
-          onClick={() => { close(); openScheduleEdit(schedule.id); }}>Change this reminder</button></div>
+        {schedule.message ? <p className="sc-ask-msg">{schedule.message}</p> : null}
+        <div className="sc-ask-meta">
+          <Icon name="repeat" />
+          <span>{repeatSummary(schedule)}. <button type="button" className="nt-link sc-ask-edit"
+            onClick={() => { close(); openScheduleEdit(schedule.id); }}>Change this reminder</button></span>
+        </div>
       </>}
   </Modal>;
 }

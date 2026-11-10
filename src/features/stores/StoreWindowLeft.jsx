@@ -138,7 +138,7 @@ export default function StoreWindowLeft({ store }) {
         <div className="line"><span className="k">Status</span><span className="v"><StoreStatusBadge status={storeStatus(store)} /></span></div>
         <div className="line"><span className="k">Address</span><span className="v">{store.address || "—"}</span></div>
         <div className="line"><span className="k">City / State</span><span className="v">{[store.city, store.state].filter(Boolean).join(", ")}{store.zip ? ` ${store.zip}` : ""}</span></div>
-        <div className="line"><span className="k">Store Phone Number</span><span className="v">{store.phone || <span className="muted">{"—"}</span>}</span>{store.phone && <CopyButton value={store.phone} />}</div>
+        <div className="line"><span className="k">Store Phone Number</span><span className="v">{store.phone ? <a href={telHref(store.phone)}>{store.phone}</a> : <span className="muted">{"—"}</span>}</span>{store.phone && <CopyButton value={store.phone} />}</div>
       </>}
     </div></div>
 

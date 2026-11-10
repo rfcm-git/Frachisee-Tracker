@@ -16,11 +16,16 @@ export function openScheduleTarget(target) {
   else if (target) { setTab(target); window.scrollTo(0, 0); }
 }
 
-/** Marks the reminder's notifications read; "done" also tags them as confirmed. */
-function settleNotifications(key) {
+/**
+ * Settles a confirmed reminder's notifications: the ones already in the box are marked done and read,
+ * and a card still waiting on screen moves straight into the box instead of disappearing.
+ */
+export function settleNotifications(key, doneAt = Date.now()) {
+  const ofKey = (item) => item.target?.type === "schedule" && item.target.key === key;
+  const settle = (item) => ({ ...item, read: true, done: true, doneAt, tone: "ok" });
   useNotificationStore.setState((s) => ({
-    items: s.items.map((item) => (item.target?.type === "schedule" && item.target.key === key ? { ...item, read: true, done: true } : item)),
-    incoming: s.incoming.filter((item) => !(item.target?.type === "schedule" && item.target.key === key)),
+    items: [...s.incoming.filter(ofKey).map(settle), ...s.items.map((item) => (ofKey(item) ? settle(item) : item))],
+    incoming: s.incoming.filter((item) => !ofKey(item)),
   }));
 }
 

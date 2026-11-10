@@ -32,8 +32,22 @@
   .sc-done{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:600}
   .sc-done svg{width:18px;height:18px}
 
-  .nt-done{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--ok);padding:3px 6px}
-  .nt-done svg{width:14px;height:14px}
+  /* Confirm dialog body */
+  .sc-ask-msg{margin:0 0 12px;font-size:14px;line-height:1.55;color:var(--ink)}
+  .sc-ask-meta{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--lime-tint);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+  .sc-ask-meta svg{width:15px;height:15px;flex:none;margin-top:2px;color:var(--lime-dark)}
+  .nt-link.sc-ask-edit{padding:0 2px;font-size:12.5px}
+  .sc-ask-done{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--ok-soft);border:1px solid #c6e5d2}
+  .sc-ask-done > div{display:flex;flex-direction:column;gap:2px}
+  .sc-ask-done b{font-size:14px;color:var(--ink)}
+  .sc-ask-done span{font-size:12.5px;color:var(--ink-soft)}
+  .sc-done-ic{width:38px;height:38px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;flex:none;animation:scDonePop var(--t-slow) var(--ease-out)}
+  .sc-done-ic svg{width:20px;height:20px}
+  @keyframes scDonePop{0%{transform:scale(.45);opacity:0}65%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+  @media(prefers-reduced-motion:reduce){ .sc-done-ic{animation:none} }
+
+  .nt-done{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ok);background:var(--ok-soft);border-radius:999px;padding:3px 9px}
+  .nt-done svg{width:13px;height:13px}
 
   @media(max-width:520px){
     .sc-row{flex-wrap:wrap}

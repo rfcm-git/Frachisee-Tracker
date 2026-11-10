@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { dueReminders, formatClock } from "../../domain/schedules.js";
+import { dueReminders, formatClock, startedOccurrences } from "../../domain/schedules.js";
+import { hasDb } from "../../services/api.js";
 import { findDialog, isAnyFormOpen, useDialogStore } from "../../state/dialogStore.js";
 import { DIALOG, openScheduleConfirm } from "../../state/dialogs.js";
 import { notify, useNotificationStore } from "../../state/notificationStore.js";
-import { isConfirmed, markReminded, useScheduleStore } from "../../state/scheduleStore.js";
-import { openScheduleTarget } from "./scheduleActions.js";
+import { isConfirmed, markReminded, pullScheduleState, useScheduleStore } from "../../state/scheduleStore.js";
+import { openScheduleTarget, settleNotifications } from "./scheduleActions.js";
 
 const CHECK_MS = 30_000;
 
@@ -50,11 +51,23 @@ export default function ScheduleReminderHost() {
   const schedules = useScheduleStore((s) => s.schedules);
 
   useEffect(() => {
-    const check = () => {
-      const due = dueReminders(schedules, useScheduleStore.getState().state, new Date());
-      markReminded(due.map((item) => item.key));
-      due.forEach(remind);
-      promptNext();
+    let checking = false;
+    const check = async () => {
+      // Reminders wait for the shared database, so a task confirmed on another device or browser is never re-asked.
+      if (checking || !hasDb()) return;
+      checking = true;
+      try {
+        const now = new Date();
+        const { state } = useScheduleStore.getState();
+        const pending = schedules.some((schedule) => startedOccurrences(schedule, now).some((occ) => !state[occ.key]?.done));
+        if (pending) (await pullScheduleState()).forEach((key) => settleNotifications(key));
+        const due = dueReminders(schedules, useScheduleStore.getState().state, new Date());
+        markReminded(due.map((item) => item.key));
+        due.forEach(remind);
+        promptNext();
+      } finally {
+        checking = false;
+      }
     };
     check();
     const timer = window.setInterval(check, CHECK_MS);

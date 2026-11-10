@@ -81,7 +81,7 @@ export default function FranchiseeDetail({ franchisee, sq }) {
             {pageStores.map(({ store, hit, openIssues }) => <div className={`store-line${hit ? " hit" : ""}`} key={store.id} {...clickableProps(() => openStore(store.id))}>
               <div className="idot-col"><OpenIssueDot count={openIssues} /></div><span className="num">{store.num || ""}</span>
               <div className="meta"><div className="a">{store.address || ""}<StoreStatusIfClosed status={storeStatus(store)} />{hit && <span className="hit-tag">Searched</span>}</div>
-                <div className="b">{[store.city, store.state].filter(Boolean).join(", ")}{store.phone && <> {"·"} {store.phone}</>}</div>
+                <div className="b">{[store.city, store.state].filter(Boolean).join(", ")}{store.phone && <> {"·"} <a className="clink" href={telHref(store.phone)} onClick={(event) => event.stopPropagation()}>{store.phone}</a></>}</div>
               </div>
               <PlatformChips store={store} />
               <button type="button" className="iconbtn mini rm" title="Remove store from franchisee" aria-label="Remove store" onClick={(event) => { event.stopPropagation(); askRemoveStore(store.id); }}><Icon name="trash-2" /></button>

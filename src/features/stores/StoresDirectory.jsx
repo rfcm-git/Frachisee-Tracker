@@ -8,6 +8,7 @@ import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { franchiseeName, storeOpenIssues } from "../../domain/context.js";
 import { storeStatus, territorySet } from "../../domain/records.js";
 import { freeTextQuery, storeInfoMatch } from "../../domain/search.js";
+import { telHref } from "../../lib/format.js";
 import { compareStores } from "../../lib/text.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openStore } from "../../state/dialogs.js";
@@ -47,7 +48,7 @@ export default function StoresDirectory() {
         {hint && <small className="mhint"><Icon name="search" />{hint}</small>}</td>
       <td>{franchiseeName(ctx, store.franchisee_id)}</td>
       <td className="hide-sm muted">{store.address || ""}<br />{[store.city, store.state].filter(Boolean).join(", ")}</td>
-      <td className="hide-sm muted">{store.phone || ""}</td>
+      <td className="hide-sm muted">{store.phone ? <a className="clink" href={telHref(store.phone)} onClick={(event) => event.stopPropagation()}>{store.phone}</a> : ""}</td>
       <td><PlatformChips store={store} /></td>
       <td style={{ textAlign: "right" }}><Icon name="chevron-right" /></td>
     </tr>)}
