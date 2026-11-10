@@ -10,7 +10,7 @@ import {
   IndentIncrease, Info, Keyboard, Lightbulb, Sparkles, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, MailCheck, Map as MapIcon, MapPin, MapPinned,
   Maximize2, MessageSquare, MessageSquareWarning, MousePointerClick, PanelLeftClose, PanelLeftOpen, Pencil, Phone, PhoneCall, PieChart, Plus,
   RefreshCw, Repeat, Rocket,
-  RotateCcw, Save, Search, SearchX, Send, Settings, Settings2, ShoppingCart, SlidersHorizontal, StickyNote, Store, Table2, Tag, Timer, Trash2, TriangleAlert, Unlock,
+  RotateCcw, Save, Search, SearchX, Send, Settings, Settings2, ShoppingCart, SlidersHorizontal, StickyNote, Store, Table2, Tag, Timer, Trash2, TrendingDown, TrendingUp, TriangleAlert, Minus, Unlock,
   Unplug, Upload, UserCog, UserPlus, UserRound, UserRoundPen, UserRoundPlus, UserX, Users, Utensils, X, Zap,
 } from "lucide-react";
 
@@ -121,6 +121,9 @@ export const ICONS = {
   tag: Tag,
   timer: Timer,
   "trash-2": Trash2,
+  "trending-down": TrendingDown,
+  "trending-up": TrendingUp,
+  minus: Minus,
   "triangle-alert": TriangleAlert,
   unlock: Unlock,
   unplug: Unplug,

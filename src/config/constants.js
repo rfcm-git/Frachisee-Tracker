@@ -75,8 +75,8 @@ export const PERIODS = [
 ];
 
 /** Paged lists: allowed and default page sizes. */
-export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], ez: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100] };
-export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, ez: 25, cl: 25, cap: 25, wm: 25 };
+export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], ez: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100], na: [10, 25, 50] };
+export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, ez: 25, cl: 25, cap: 25, wm: 25, na: 10 };
 
 export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "ezcater", "walmart", "caps", "calls", "reports"];
 

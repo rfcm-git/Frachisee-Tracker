@@ -9,7 +9,7 @@ import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
 
-const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, ez: 1, cl: 1, cap: 1, wm: 1 };
+const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, ez: 1, cl: 1, cap: 1, wm: 1, na: 1 };
 
 function savedPageSizes() {
   const sizes = {};
@@ -71,7 +71,8 @@ function baseState() {
     callInsights: local.get(STORAGE_KEYS.callInsights) !== "0",
     staffRole: "all",
     dashTerritory: "",
-    dashSort: { key: "stores", dir: -1 },
+    /** Dashboard date range: preset "7d" | "30d" | "90d" | "month" | "year" | "custom" (from / to = "yyyy-mm-dd"). */
+    dashRange: { preset: "30d", from: "", to: "" },
     sidebarCollapsed: local.get(STORAGE_KEYS.sidebar) === "1",
     /** The menu's Onboarding group (3PDs, ezCater, Walmart) is open. */
     navOnboardingOpen: local.get(STORAGE_KEYS.navOnboarding) !== "0",
@@ -456,11 +457,8 @@ export function toggleCallInsights() {
 export const setStaffRole = (staffRole) => set({ staffRole });
 
 export const setDashTerritory = (dashTerritory) => set({ dashTerritory });
+export const setDashRange = (patch) => set({ dashRange: { ...get().dashRange, ...patch } });
 
-export function sortDashboard(key) {
-  const { dashSort } = get();
-  set({ dashSort: dashSort.key === key ? { key, dir: -dashSort.dir } : { key, dir: key === "t" ? 1 : -1 } });
-}
 
 export const setCountText = (countText) => { if (get().countText !== countText) set({ countText }); };
 

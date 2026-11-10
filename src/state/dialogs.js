@@ -44,7 +44,6 @@ export const DIALOG = {
   scheduleConfirm: "scheduleConfirm",
   scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
-  dashList: "dashList",
   report: "report",
   confirm: "confirm",
   password: "password",
@@ -127,8 +126,6 @@ export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);
 /** CAP email message editor; previewCapId picks the store shown in the preview. */
 export const openCapEmail = (previewCapId = null) => openDialog(DIALOG.capEmail, { previewCapId });
 
-/** key: "core:0", "plat:ue:Onboarded", "gbp:no", "gap:nofbc", "status:Closed", … */
-export const openDashboardList = (key) => openDialog(DIALOG.dashList, { storeKey: key });
 
 /** Report builder. download = "xlsx" | "pdf" downloads right away with the preset, then closes. */
 export const openReport = (kind, preset = null, download = null) => openDialog(DIALOG.report, { kind, preset, download });

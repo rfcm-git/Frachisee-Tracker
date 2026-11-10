@@ -17,8 +17,8 @@ function normalizedObRow(record) {
 }
 
 export const EMPTY_DATA = Object.freeze({
-  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [], walmart: [],
-  onboardingReady: true, callLogsReady: true, capsReady: true, walmartReady: true, capsDueReady: true, capsHistoryReady: true,
+  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [], walmart: [], snapshots: [],
+  onboardingReady: true, callLogsReady: true, capsReady: true, walmartReady: true, snapshotsReady: true, capsDueReady: true, capsHistoryReady: true,
   /** Last CAP import: { at, file, added, completed, updated } or null. */
   capsLastImport: null,
   /** Saved CAP email template, null when never saved, undefined when app_settings is not set up. */

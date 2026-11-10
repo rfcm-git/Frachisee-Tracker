@@ -2,9 +2,10 @@
 import { errorTitle, friendlyError } from "../lib/errors.js";
 import { downloadBlob } from "../lib/browser.js";
 import { localDateInput, nowIso } from "../lib/format.js";
-import { TABLES, fetchAll, hasDb, loadAllTables, upsertRows } from "../services/api.js";
+import { TABLES, fetchAll, hasDb, insertRows, loadAllTables, upsertRows } from "../services/api.js";
+import { coverageSnapshot, dayKey } from "../domain/coverage.js";
 import { clearDb, createDb, getDb, getSavedCredentials, saveCredentials } from "../services/supabase.js";
-import { getContext, setAllData, setConnection, useDataStore } from "./dataStore.js";
+import { addRows, getContext, setAllData, setConnection, useDataStore } from "./dataStore.js";
 import { DIALOG, closeDialogs } from "./dialogs.js";
 import { toast } from "./toastStore.js";
 
@@ -17,6 +18,20 @@ function notifyDatabaseProblem(error) {
   if (lastDatabaseNotice === message) return;
   lastDatabaseNotice = message;
   toast(`Database problem: ${message}`, "err");
+}
+
+/**
+ * Saves today's coverage snapshot (Dashboard trends) once a day, the first time the data loads.
+ * Quietly does nothing when the table is not set up or a teammate saved it first.
+ */
+async function saveTodaySnapshot() {
+  const ctx = getContext();
+  const day = dayKey(new Date());
+  if (!ctx.snapshotsReady || !ctx.stores.length || ctx.snapshots.some((row) => String(row.day) === day)) return;
+  try {
+    const result = await insertRows(TABLES.snapshots, [{ day, data: coverageSnapshot(ctx) }]);
+    if (!result.error) addRows("snapshots", result.rows);
+  } catch { /* Trends simply start a day later. */ }
 }
 
 /** Reloads every table. silent = background refresh (keeps the screen as it is). */
@@ -37,6 +52,7 @@ export function loadAll({ silent = false } = {}) {
       lastDatabaseNotice = "";
       setConnection("ok", "Connected", "Connected");
       setPhase("ready", { error: null, lastRefreshAt: new Date() });
+      saveTodaySnapshot();
       return true;
     } catch (error) {
       setConnection("err", "Connection issue", errorTitle(error));

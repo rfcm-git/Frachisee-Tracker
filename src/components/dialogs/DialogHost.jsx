@@ -14,7 +14,6 @@ import CapEmailDialog from "../../features/caps/CapEmailDialog.jsx";
 import CallDetailsDialog from "../../features/calls/CallDetailsDialog.jsx";
 import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
 import CallFollowUpDialog from "../../features/calls/CallFollowUpDialog.jsx";
-import DashboardListDialog from "../../features/dashboard/DashboardListDialog.jsx";
 import BulkUpdateDialog from "../../features/franchisees/BulkUpdateDialog.jsx";
 import FranchiseeFormDialog from "../../features/franchisees/FranchiseeFormDialog.jsx";
 import FranchiseeInfoDialog from "../../features/franchisees/FranchiseeInfoDialog.jsx";
@@ -82,7 +81,6 @@ const COMPONENTS = {
   [DIALOG.capEmail]: CapEmailDialog,
   [DIALOG.scheduleConfirm]: ScheduleConfirmDialog,
   [DIALOG.scheduleEdit]: ScheduleEditDialog,
-  [DIALOG.dashList]: DashboardListDialog,
   [DIALOG.report]: ReportBuilderDialog,
   [DIALOG.confirm]: ConfirmDialog,
   [DIALOG.password]: PasswordDialog,
