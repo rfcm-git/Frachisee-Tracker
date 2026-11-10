@@ -26,6 +26,19 @@ function matchesSearch(row, sq) {
   return [row.franchisee, row.stage, row.record.notes].join(" ").toLowerCase().includes(sq.q);
 }
 
+/** "none": open stores not emailed yet; "sent": open stores already emailed. */
+function passesEmail(row, email) {
+  if (!email) return true;
+  if (!wmIsOpen(row.record)) return false;
+  return email === "sent" ? !!row.record.last_email_at : !row.record.last_email_at;
+}
+
+/** Open stores (Awaiting App / Payment Setup) and how many of them were never emailed. */
+export function walmartFollowUp(ctx) {
+  const open = ctx.walmart.filter(wmIsOpen);
+  return { open: open.length, notEmailed: open.filter((record) => !record.last_email_at).length };
+}
+
 const SORTERS = {
   stage: (a, b) => STAGE_SORT.indexOf(a.stage) - STAGE_SORT.indexOf(b.stage),
   num: () => 0,
@@ -38,6 +51,7 @@ export function filterWalmart(ctx, filter, sq) {
   return walmartRows(ctx)
     .filter((row) => (!filter.stages.length || filter.stages.includes(row.stage))
       && (!filter.franchisees.length || filter.franchisees.includes(row.franchiseeId))
+      && passesEmail(row, filter.email)
       && matchesSearch(row, sq))
     .sort((a, b) => (sq.q && sq.mode === "store" ? numRank(a.record.store_num, sq.q) - numRank(b.record.store_num, sq.q) : 0)
       || sorter(a, b) || compareNumbers(a.record.store_num, b.record.store_num));

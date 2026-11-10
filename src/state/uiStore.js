@@ -36,7 +36,9 @@ const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key
 
 /** Walmart sort: "stage" (Payment Setup, Awaiting App, Account Created, Exempted), "num" (store #), "updated" (latest first). */
 export const WM_SORTS = ["stage", "num", "updated"];
-const defaultWmFilter = () => ({ stages: [], franchisees: [], sort: "stage" });
+/** Walmart email filter: "" all, "none" not emailed yet, "sent" emailed (both only Awaiting App / Payment Setup). */
+export const WM_EMAIL_FILTERS = ["", "none", "sent"];
+const defaultWmFilter = () => ({ stages: [], franchisees: [], email: "", sort: "stage" });
 
 function baseState() {
   return {
@@ -117,6 +119,7 @@ function restoredState() {
     state.wmFilter = {
       stages: onlyValid(saved.wmFilter.stages, WM_STAGES),
       franchisees: Array.isArray(saved.wmFilter.franchisees) ? saved.wmFilter.franchisees.filter((id) => id != null && id !== "") : [],
+      email: WM_EMAIL_FILTERS.includes(saved.wmFilter.email) ? saved.wmFilter.email : "",
       sort: WM_SORTS.includes(saved.wmFilter.sort) ? saved.wmFilter.sort : "stage",
     };
   }
@@ -353,13 +356,15 @@ export function toggleWmFranchisee(id) {
 /** "stores" (one row per store) or "owners" (franchisees with more than one store). */
 export const setWmView = (wmView) => set({ wmView: wmView === "owners" ? "owners" : "stores", ...resetPages("wm") });
 
+export const setWmEmailFilter = (email) => patchWmFilter({ email: WM_EMAIL_FILTERS.includes(email) ? email : "" });
+
 export const setWmSort = (sort) => patchWmFilter({ sort: WM_SORTS.includes(sort) ? sort : "stage" });
 
 export const clearWmFilters = () => set({ wmFilter: { ...defaultWmFilter(), sort: get().wmFilter.sort }, search: "", ...resetPages("wm") });
 
 /** Opens the Walmart tab, optionally on one store. */
 export function showWalmart(storeNum = "") {
-  set({ tab: "walmart", search: storeNum ? `#${storeNum}` : "", wmFilter: { ...get().wmFilter, stages: [], franchisees: [] }, ...resetPages("wm") });
+  set({ tab: "walmart", search: storeNum ? `#${storeNum}` : "", wmFilter: { ...get().wmFilter, stages: [], franchisees: [], email: "" }, ...resetPages("wm") });
   window.scrollTo(0, 0);
 }
 
