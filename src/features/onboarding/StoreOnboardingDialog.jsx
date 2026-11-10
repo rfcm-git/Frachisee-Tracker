@@ -7,7 +7,7 @@ import { ObPlatformTag, ObStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { OB_PLATFORMS, OB_STATES } from "../../config/constants.js";
 import { franchiseeName } from "../../domain/context.js";
-import { obHistory, obIsOpen, obPlatformName, obVisible } from "../../domain/onboarding.js";
+import { obHistory, obIsOpen, obOnTab, obPlatformName } from "../../domain/onboarding.js";
 import { platformChipClass } from "../../domain/records.js";
 import { toggleIn } from "../../lib/lists.js";
 import { oneLine } from "../../lib/richText.js";
@@ -24,7 +24,7 @@ const order = (key) => OB_PLATFORMS.findIndex(([value]) => value === key);
 /** The store's latest record per platform, in platform order. */
 function storeRecords(ctx, storeNum) {
   const latest = new Map();
-  ctx.onboarding.filter((record) => obVisible(record) && String(record.store_num) === String(storeNum))
+  ctx.onboarding.filter((record) => obOnTab(record) && String(record.store_num) === String(storeNum))
     .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")))
     .forEach((record) => { if (!latest.has(record.platform)) latest.set(record.platform, record); });
   return [...latest.values()].sort((a, b) => order(a.platform) - order(b.platform));

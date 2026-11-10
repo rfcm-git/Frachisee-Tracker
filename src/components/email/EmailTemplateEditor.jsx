@@ -10,31 +10,42 @@ const CC_FIELDS = [
   ["ccOther", "CC for every other store", "Any store not in Houston"],
   ["ccAlways", "Always CC", "Added to every email"],
 ];
-const TEMPLATE_KEYS = ["subject", "body", "multiSubject", "multiBody", ...CC_FIELDS.map(([key]) => key)];
-/** Subject and message keys of each message. */
-const MESSAGE_KEYS = { one: { subject: "subject", body: "body" }, multi: { subject: "multiSubject", body: "multiBody" } };
-const pick = (template) => Object.fromEntries(TEMPLATE_KEYS.map((key) => [key, template[key] ?? ""]));
+const CC_KEYS = CC_FIELDS.map(([key]) => key);
+
+/**
+ * The messages being edited. Without `modes`, the one-store message (subject / body) and, with `multi`,
+ * the several-stores message (multiSubject / multiBody).
+ */
+function messageModes({ modes, fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, multi }) {
+  if (modes) return modes;
+  return [
+    { key: "one", label: "One store", icon: "store", keys: { subject: "subject", body: "body" }, fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText },
+    ...(multi ? [{ key: "multi", label: "Several stores", icon: "layers", multi: true, keys: { subject: "multiSubject", body: "multiBody" }, ...multi }] : []),
+  ];
+}
 
 /**
  * Editor for an email template (subject, message with {{placeholders}}, CC rules) with a live preview for one store.
- * Used by the CAP email and the onboarding email.
+ * Used by the CAP, onboarding and Walmart emails.
  *   fields: [[name, description]] placeholders offered as chips
  *   initial / defaults: templates ({ subject, body, ccHouston, ccOther, ccAlways })
  *   previewOptions: [{ id, label }]; buildPreview(values, id) -> email from recipientsFor + composeEmail
  *   multi: the several-stores message, { fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, help }
+ *   modes: instead of the above, any list of messages, each
+ *          { key, label, icon, multi (several stores), keys: { subject, body }, fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, help }
  *   onSave(values) -> Promise<boolean>
  */
-export default function EmailTemplateEditor({ title, subtitle, fields, initial, defaults, neverSaved, starterText, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, multi, onSave }) {
+export default function EmailTemplateEditor({ title, subtitle, fields, initial, defaults, neverSaved, starterText, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, multi, modes: modesProp, initialMode, onSave }) {
   const { close, setBusy } = useDialog();
+  const modes = messageModes({ modes: modesProp, fields, previewOptions, initialPreviewId, buildPreview, emptyPreviewText, multi });
+  const templateKeys = [...modes.flatMap((item) => [item.keys.subject, item.keys.body]), ...CC_KEYS];
+  const pick = (template) => Object.fromEntries(templateKeys.map((key) => [key, template[key] ?? ""]));
   const [values, setValues] = useState(() => pick(initial));
   const [saving, setSaving] = useState(false);
-  const [mode, setMode] = useState("one");
-  const [previewIds, setPreviewIds] = useState(() => ({
-    one: initialPreviewId ?? previewOptions[0]?.id ?? null,
-    multi: multi ? multi.initialPreviewId ?? multi.previewOptions[0]?.id ?? null : null,
-  }));
+  const [mode, setMode] = useState(() => (modes.some((item) => item.key === initialMode) ? initialMode : modes[0].key));
+  const [previewIds, setPreviewIds] = useState(() => Object.fromEntries(modes.map((item) => [item.key, item.initialPreviewId ?? item.previewOptions[0]?.id ?? null])));
   /** The message being edited: its keys, placeholders and preview. */
-  const view = mode === "multi" && multi ? { ...multi, keys: MESSAGE_KEYS.multi } : { fields, previewOptions, buildPreview, emptyPreviewText, keys: MESSAGE_KEYS.one };
+  const view = modes.find((item) => item.key === mode) || modes[0];
   const previewId = previewIds[mode];
   const setPreviewId = (id) => setPreviewIds((current) => ({ ...current, [mode]: id }));
   const subjectRef = useRef(null);
@@ -74,10 +85,11 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
   const tooLong = !!email?.href && email.href.length > MAILTO_SAFE_LENGTH;
 
   async function save() {
-    if (!values.subject.trim()) { setMode("one"); toast("Add a subject", "err"); return; }
-    if (!values.body.trim()) { setMode("one"); toast("Add a message", "err"); return; }
-    if (multi && !values.multiSubject.trim()) { setMode("multi"); toast("Add a subject for the several-stores message", "err"); return; }
-    if (multi && !values.multiBody.trim()) { setMode("multi"); toast("Add a message for the several-stores message", "err"); return; }
+    const label = (item) => (modes.length > 1 ? ` for the ${item.label} message` : "");
+    for (const item of modes) {
+      if (!values[item.keys.subject].trim()) { setMode(item.key); toast(`Add a subject${label(item)}`, "err"); return; }
+      if (!values[item.keys.body].trim()) { setMode(item.key); toast(`Add a message${label(item)}`, "err"); return; }
+    }
     if (anyCcBad) { toast("Fix the CC addresses marked in red", "err"); return; }
     setSaving(true);
     const ok = await onSave(values);
@@ -93,11 +105,11 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
     {neverSaved && <div className="cem-note" role="status"><Icon name="info" />{starterText}</div>}
     <div className="cem-grid">
       <div className="cem-edit">
-        {multi && <div className="cem-mode" role="tablist" aria-label="Which message">
-          {[["one", "One store", "store"], ["multi", "Several stores", "stores"]].map(([key, label, icon]) => <button type="button" key={key} role="tab" aria-selected={mode === key}
-            className={`cem-mode-btn${mode === key ? " on" : ""}`} onClick={() => setMode(key)}><Icon name={icon === "store" ? "store" : "layers"} />{label}</button>)}
+        {modes.length > 1 && <div className="cem-mode" role="tablist" aria-label="Which message">
+          {modes.map((item) => <button type="button" key={item.key} role="tab" aria-selected={mode === item.key}
+            className={`cem-mode-btn${mode === item.key ? " on" : ""}`} onClick={() => setMode(item.key)}><Icon name={item.icon || "mail"} />{item.label}</button>)}
         </div>}
-        {multi && mode === "multi" && <div className="cem-help" style={{ margin: "0 0 8px" }}>{multi.help}</div>}
+        {view.help && <div className="cem-help" style={{ margin: "0 0 8px" }}>{view.help}</div>}
         <div className="field"><label htmlFor="cem_subject">Subject</label>
           <input id="cem_subject" ref={subjectRef} value={values[subjectKey]} className={values[subjectKey].trim() ? "" : "bad"}
             onFocus={() => { lastField.current = "subject"; }} onChange={(event) => change(subjectKey, event.target.value)} /></div>
@@ -134,7 +146,7 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
               <span className="cem-addr" data-tip={entry.name || undefined}>{entry.email}</span>{entry.why.map((why) => <span key={why} className="cem-why">{why}</span>)}</li>)}</ul>
               : <span className="muted">Nobody</span>}
             {email.store && (!email.team.fbc || !email.team.om) && <div className="cem-miss-team">
-              {[!email.team.fbc && "FBC", !email.team.om && "OM"].filter(Boolean).join(" and ")} not set (or has no email) for {mode === "multi" ? "some of these stores" : "this store"}</div>}</div></div>
+              {[!email.team.fbc && "FBC", !email.team.om && "OM"].filter(Boolean).join(" and ")} not set (or has no email) for {view.multi ? "some of these stores" : "this store"}</div>}</div></div>
           <div className="cem-row"><span>Subject</span><b>{email.subject || <span className="cem-miss">Empty</span>}</b></div>
           <div className="cem-text">{email.body}</div>
         </div>}

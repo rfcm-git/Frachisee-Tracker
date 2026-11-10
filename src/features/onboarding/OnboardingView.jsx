@@ -57,8 +57,7 @@ function OnboardingFilters({ filter, anyFilter }) {
       {OB_PLATFORMS.map(([key, name]) => <FilterOption key={key} selected={filter.platforms.includes(key)} checkable onClick={() => toggleObFilter("platforms", key)}>{name}</FilterOption>)}
     </FilterDropdown>
     <FranchiseeFilter values={filter.franchisees || []} />
-    <StatusFilter icon="bike" label="3PD status" name="threePd" values={filter.threePd} />
-    <StatusFilter icon="utensils" label="ezCater status" name="ezCater" values={filter.ezCater} />
+    <StatusFilter icon="bike" label="Status" name="threePd" values={filter.threePd} />
     <FilterDropdown icon="arrow-down-up" label="Sort" value={filter.sort === "new" ? "Most recent" : "Oldest"}>
       {({ close }) => <>
         <FilterOption selected={filter.sort === "new"} onClick={() => { setObSort("new"); close(); }}><Icon name="arrow-down-wide-narrow" />Latest activity first</FilterOption>
@@ -66,7 +65,7 @@ function OnboardingFilters({ filter, anyFilter }) {
       </>}
     </FilterDropdown>
   </div>
-    <InfoTip text="Platform narrows to the picked apps. 3PD status applies to Uber Eats, DoorDash, Grubhub and Walmart; ezCater status applies to ezCater. If you set a status filter, only those records show — set both to see both." />
+    <InfoTip text="Platform narrows to the picked apps. Status shows only records with that status. ezCater and Walmart have their own tabs." />
     {anyFilter && <button type="button" className="btn link" onClick={clearObFilters} style={{ marginLeft: "auto" }}><Icon name="x" />Clear filters</button>}
   </div>;
 }
@@ -210,7 +209,7 @@ export default function OnboardingView() {
   useToolbarCount(ctx.onboardingReady ? `${formatNumber(groups.length)} store${groups.length !== 1 ? "s" : ""} · ${formatNumber(records.length)} platform${records.length !== 1 ? "s" : ""} · ${formatNumber(open)} open` : "");
 
   if (!ctx.onboardingReady) return <EmptyState icon="database" title="Onboarding needs a quick database update">Run migrate-onboarding.sql in the Supabase SQL Editor, then click Refresh. Your Concerns are not affected.</EmptyState>;
-  const anyFilter = !!(filter.platforms.length || filter.threePd.length || filter.ezCater.length || filter.franchisees?.length || search.trim());
+  const anyFilter = !!(filter.platforms.length || filter.threePd.length || filter.franchisees?.length || search.trim());
   const progress = <div className="ob-prog"><ProgressMatrix model={model} /><ProgressChart model={model} /></div>;
 
   return <>

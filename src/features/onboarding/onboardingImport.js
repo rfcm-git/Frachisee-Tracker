@@ -73,9 +73,9 @@ function instructionsSheet(XLSX) {
     ["Example rows (do not paste these into the Onboarding sheet):"],
     OB_COLUMNS,
     example("99901", ["ue", "dd"], "", "New owner wants Uber Eats and DoorDash"),
-    example("99902", ["gh", "wm"], "Work in Progress", "Sent the onboarding links by text"),
+    example("99902", ["gh", "ez"], "Work in Progress", "Sent the onboarding links by text"),
     [""],
-    ["Row 1: adds store 99901 on Uber Eats and DoorDash as Not enrolled. Row 2: adds store 99902 on Grubhub and Walmart as Work in Progress."],
+    ["Row 1: adds store 99901 on Uber Eats and DoorDash as Not enrolled. Row 2: adds store 99902 on Grubhub and ezCater as Work in Progress."],
   ]);
   sheet["!cols"] = COLUMN_WIDTHS.map((wch) => ({ wch }));
   return sheet;

@@ -97,10 +97,12 @@ async function removeStore(store) {
   const num = String(store.num);
   let error = await deleteWhere(TABLES.issues, "store_num", num);
   if (!error && getContext().onboardingReady) error = await deleteWhere(TABLES.onboarding, "store_num", num);
+  if (!error && getContext().walmartReady) error = await deleteWhere(TABLES.walmart, "store_num", num);
   if (!error) error = await deleteWhere(TABLES.stores, "id", store.id);
   if (error) { toastError(error); return; }
   updateData((data) => ({
     onboarding: data.onboarding.filter((record) => String(record.store_num) !== num),
+    walmart: data.walmart.filter((record) => String(record.store_num) !== num),
     issues: data.issues.filter((issue) => String(issue.store_num) !== num),
     stores: data.stores.filter((item) => item.id !== store.id),
   }));

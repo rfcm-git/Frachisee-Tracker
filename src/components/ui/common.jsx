@@ -7,6 +7,7 @@ import { capDueState, capDueText, capStatusClass, formatDueDate, normalizeCapSta
 import { issueStatusClass, shortStatus, statusCounts } from "../../domain/issues.js";
 import { obPlatformName, obStatusClass, obStatusLabel } from "../../domain/onboarding.js";
 import { platformChipClass, platformStatus, storeStatusClass } from "../../domain/records.js";
+import { normalizeWmStage, wmStageClass } from "../../domain/walmart.js";
 import { formatTimestamp } from "../../lib/format.js";
 
 export function CopyButton({ value, title = "Copy" }) {
@@ -82,6 +83,12 @@ export function ObStatusBadge({ status }) {
 export function CapStatusBadge({ status }) {
   const value = normalizeCapStatus(status);
   return <span className={`badge ${capStatusClass(value)}`}>{value}</span>;
+}
+
+/** Walmart Marketplace onboarding stage. */
+export function WmStageBadge({ stage }) {
+  const value = normalizeWmStage(stage);
+  return <span className={`badge ${wmStageClass(value)}`}>{value}</span>;
 }
 
 const CAP_DUE_ICONS = { overdue: "triangle-alert", today: "alarm-clock", soon: "calendar-clock", later: "calendar", done: "calendar-check" };

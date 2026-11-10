@@ -3,13 +3,13 @@
  * Preferences are kept in localStorage; the current screen survives a browser refresh (sessionStorage).
  */
 import { create } from "zustand";
-import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS } from "../config/constants.js";
+import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS, WM_STAGES } from "../config/constants.js";
 import { CALL_VIEWS, DEFAULT_CALL_FILTERS } from "../domain/calls.js";
 import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
 
-const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, cl: 1, cap: 1 };
+const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, ez: 1, cl: 1, cap: 1, wm: 1 };
 
 function savedPageSizes() {
   const sizes = {};
@@ -26,13 +26,24 @@ function savedIssueView() {
 }
 
 const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "new" });
-const defaultObFilter = () => ({ platforms: [], threePd: [], ezCater: [], franchisees: [], sort: "new" });
+const defaultObFilter = () => ({ platforms: [], threePd: [], franchisees: [], sort: "new" });
 
 /** CAPs sort keys: store number, status, date added, last updated. */
 export const CAP_SORT_KEYS = ["num", "status", "added", "updated", "due"];
 const CAP_EMAIL_FILTERS = ["", "has", "none"];
 const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
 const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key: "added", dir: -1 } });
+
+/** ezCater sort keys and email filter ("" all, "none" not emailed yet, "sent" emailed — open stores only). */
+export const EZ_SORTS = ["num", "status", "emailed", "added", "updated"];
+export const EZ_EMAIL_FILTERS = ["", "none", "sent"];
+const defaultEzFilter = () => ({ statuses: [], franchisees: [], email: "", sort: { key: "status", dir: 1 } });
+
+/** Walmart sort keys: store number, stage (along the path), date emailed, date added, last updated. */
+export const WM_SORTS = ["num", "stage", "emailed", "added", "updated"];
+/** Walmart email filter: "" all, "none" not emailed yet, "sent" emailed (both only Awaiting App / Payment Setup). */
+export const WM_EMAIL_FILTERS = ["", "none", "sent"];
+const defaultWmFilter = () => ({ stages: [], franchisees: [], email: "", sort: { key: "stage", dir: 1 } });
 
 function baseState() {
   return {
@@ -51,6 +62,9 @@ function baseState() {
     issueFilter: defaultIssueFilter(),
     obFilter: defaultObFilter(),
     capsFilter: defaultCapsFilter(),
+    wmFilter: defaultWmFilter(),
+    ezFilter: defaultEzFilter(),
+    wmView: "stores",
     callFilters: { ...DEFAULT_CALL_FILTERS },
     callSort: "desc",
     callView: "calls",
@@ -59,6 +73,8 @@ function baseState() {
     dashTerritory: "",
     dashSort: { key: "stores", dir: -1 },
     sidebarCollapsed: local.get(STORAGE_KEYS.sidebar) === "1",
+    /** The menu's Onboarding group (3PDs, ezCater, Walmart) is open. */
+    navOnboardingOpen: local.get(STORAGE_KEYS.navOnboarding) !== "0",
     sidebarExpandedSm: false,
     frCardOpen: local.get(STORAGE_KEYS.frCard) === "1",
     idleMinutes: savedIdleMinutes(),
@@ -101,9 +117,25 @@ function restoredState() {
     state.obFilter = {
       platforms: onlyValid(saved.obFilter.platforms, OB_PLATFORMS.map(([key]) => key)),
       threePd: onlyValid(saved.obFilter.threePd, OB_STATES),
-      ezCater: onlyValid(saved.obFilter.ezCater, OB_STATES),
       franchisees: Array.isArray(saved.obFilter.franchisees) ? saved.obFilter.franchisees.filter((id) => id != null && id !== "") : [],
       sort: saved.obFilter.sort === "old" ? "old" : "new",
+    };
+  }
+  if (saved.ezFilter && typeof saved.ezFilter === "object") {
+    state.ezFilter = {
+      statuses: onlyValid(saved.ezFilter.statuses, OB_STATES),
+      franchisees: Array.isArray(saved.ezFilter.franchisees) ? saved.ezFilter.franchisees.filter((id) => id != null && id !== "") : [],
+      email: EZ_EMAIL_FILTERS.includes(saved.ezFilter.email) ? saved.ezFilter.email : "",
+      sort: EZ_SORTS.includes(saved.ezFilter.sort?.key) ? { key: saved.ezFilter.sort.key, dir: saved.ezFilter.sort.dir === -1 ? -1 : 1 } : defaultEzFilter().sort,
+    };
+  }
+  if (saved.wmView === "owners") state.wmView = "owners";
+  if (saved.wmFilter && typeof saved.wmFilter === "object") {
+    state.wmFilter = {
+      stages: onlyValid(saved.wmFilter.stages, WM_STAGES),
+      franchisees: Array.isArray(saved.wmFilter.franchisees) ? saved.wmFilter.franchisees.filter((id) => id != null && id !== "") : [],
+      email: WM_EMAIL_FILTERS.includes(saved.wmFilter.email) ? saved.wmFilter.email : "",
+      sort: WM_SORTS.includes(saved.wmFilter.sort?.key) ? { key: saved.wmFilter.sort.key, dir: saved.wmFilter.sort.dir === -1 ? -1 : 1 } : defaultWmFilter().sort,
     };
   }
   if (saved.capsFilter && typeof saved.capsFilter === "object") {
@@ -155,7 +187,7 @@ export function openFind(query) {
 }
 
 export function setSearch(search) {
-  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap") });
+  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap", "wm", "ez") });
 }
 
 export function setTerrFilter(terrFilter) {
@@ -188,7 +220,7 @@ export function openTabFromDashboard(tab) {
 
 /** Onboarding tab showing one store's records (platform and status filters cleared so none are hidden). */
 export function showStoreOnboarding(storeNum) {
-  set({ tab: "onboarding", search: `#${storeNum}`, obFilter: { ...get().obFilter, platforms: [], threePd: [], ezCater: [], franchisees: [] }, ...resetPages("ob") });
+  set({ tab: "onboarding", search: `#${storeNum}`, obFilter: { ...get().obFilter, platforms: [], threePd: [], franchisees: [] }, ...resetPages("ob") });
   window.scrollTo(0, 0);
 }
 
@@ -261,17 +293,15 @@ export const clearObFilters = () => set({ obFilter: { ...defaultObFilter(), sort
 /** True when the progress table cell (platform + status) is the active filter. */
 export function isObCellActive(filter, platform, status) {
   if (filter.platforms.length !== 1 || filter.platforms[0] !== platform) return false;
-  return platform === "ez"
-    ? filter.ezCater.length === 1 && filter.ezCater[0] === status && !filter.threePd.length
-    : filter.threePd.length === 1 && filter.threePd[0] === status && !filter.ezCater.length;
+  return filter.threePd.length === 1 && filter.threePd[0] === status;
 }
 
 /** Click on a progress cell: filter to it, or clear when it is already the filter. */
 export function toggleObCell(platform, status) {
   const { obFilter } = get();
   const next = isObCellActive(obFilter, platform, status)
-    ? { ...obFilter, platforms: [], threePd: [], ezCater: [] }
-    : { ...obFilter, platforms: [platform], threePd: platform === "ez" ? [] : [status], ezCater: platform === "ez" ? [status] : [] };
+    ? { ...obFilter, platforms: [], threePd: [] }
+    : { ...obFilter, platforms: [platform], threePd: [status] };
   set({ obFilter: next, ...resetPages("ob") });
 }
 
@@ -311,6 +341,89 @@ export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter()
 /** Opens the CAP tab, optionally on one status or due date filter (dashboard and reminders). */
 export function showCaps(status = "", due = "") {
   set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
+  window.scrollTo(0, 0);
+}
+
+/* ---------- ezCater ---------- */
+
+const patchEzFilter = (patch) => set({ ezFilter: { ...get().ezFilter, ...patch }, ...resetPages("ez") });
+
+/** Adds or removes a status ("" clears). */
+export function toggleEzStatus(status) {
+  const { statuses } = get().ezFilter;
+  patchEzFilter({ statuses: !status ? [] : statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status] });
+}
+
+/** Shows only this status; clicking the only shown status again shows all. */
+export function toggleEzOnlyStatus(status) {
+  const { statuses } = get().ezFilter;
+  patchEzFilter({ statuses: !status || (statuses.length === 1 && statuses[0] === status) ? [] : [status] });
+}
+
+/** Adds or removes a franchisee id ("" clears). */
+export function toggleEzFranchisee(id) {
+  const { franchisees } = get().ezFilter;
+  patchEzFilter({ franchisees: id === "" ? [] : franchisees.includes(id) ? franchisees.filter((item) => item !== id) : [...franchisees, id] });
+}
+
+export const setEzEmailFilter = (email) => patchEzFilter({ email: EZ_EMAIL_FILTERS.includes(email) ? email : "" });
+
+/** Sorts by a column; the same column again flips the order. Dates start newest first. */
+export function setEzSort(key, dir) {
+  if (!EZ_SORTS.includes(key)) return;
+  const { sort } = get().ezFilter;
+  const next = dir === 1 || dir === -1 ? dir : sort.key === key ? -sort.dir : ["emailed", "added", "updated"].includes(key) ? -1 : 1;
+  patchEzFilter({ sort: { key, dir: next } });
+}
+
+export const clearEzFilters = () => set({ ezFilter: { ...defaultEzFilter(), sort: get().ezFilter.sort }, search: "", ...resetPages("ez") });
+
+/** Opens the ezCater tab, optionally on one store. */
+export function showEzCater(storeNum = "") {
+  set({ tab: "ezcater", search: storeNum ? `#${storeNum}` : "", ezFilter: { ...get().ezFilter, statuses: [], franchisees: [], email: "" }, ...resetPages("ez") });
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Walmart ---------- */
+
+const patchWmFilter = (patch) => set({ wmFilter: { ...get().wmFilter, ...patch }, ...resetPages("wm") });
+
+/** Adds or removes a stage ("" clears). */
+export function toggleWmStage(stage) {
+  const { stages } = get().wmFilter;
+  patchWmFilter({ stages: !stage ? [] : stages.includes(stage) ? stages.filter((item) => item !== stage) : [...stages, stage] });
+}
+
+/** Shows only this stage; clicking the only shown stage again shows all. */
+export function toggleWmOnlyStage(stage) {
+  const { stages } = get().wmFilter;
+  patchWmFilter({ stages: !stage || (stages.length === 1 && stages[0] === stage) ? [] : [stage] });
+}
+
+/** Adds or removes a franchisee id ("" clears). */
+export function toggleWmFranchisee(id) {
+  const { franchisees } = get().wmFilter;
+  patchWmFilter({ franchisees: id === "" ? [] : franchisees.includes(id) ? franchisees.filter((item) => item !== id) : [...franchisees, id] });
+}
+
+/** "stores" (one row per store) or "owners" (franchisees with more than one store). */
+export const setWmView = (wmView) => set({ wmView: wmView === "owners" ? "owners" : "stores", ...resetPages("wm") });
+
+export const setWmEmailFilter = (email) => patchWmFilter({ email: WM_EMAIL_FILTERS.includes(email) ? email : "" });
+
+/** Sorts by a column; the same column again flips the order. Dates start newest first. */
+export function setWmSort(key, dir) {
+  if (!WM_SORTS.includes(key)) return;
+  const { sort } = get().wmFilter;
+  const next = dir === 1 || dir === -1 ? dir : sort.key === key ? -sort.dir : ["emailed", "added", "updated"].includes(key) ? -1 : 1;
+  patchWmFilter({ sort: { key, dir: next } });
+}
+
+export const clearWmFilters = () => set({ wmFilter: { ...defaultWmFilter(), sort: get().wmFilter.sort }, search: "", ...resetPages("wm") });
+
+/** Opens the Walmart tab, optionally on one store. */
+export function showWalmart(storeNum = "") {
+  set({ tab: "walmart", search: storeNum ? `#${storeNum}` : "", wmFilter: { ...get().wmFilter, stages: [], franchisees: [], email: "" }, ...resetPages("wm") });
   window.scrollTo(0, 0);
 }
 
@@ -365,6 +478,13 @@ export function setIdleMinutes(value) {
   return idleMinutes;
 }
 
+/** Opens or closes the menu's Onboarding group; remembered on this computer. */
+export function setNavOnboardingOpen(open) {
+  if (get().navOnboardingOpen === open) return;
+  local.set(STORAGE_KEYS.navOnboarding, open ? "1" : "0");
+  set({ navOnboardingOpen: open });
+}
+
 export function toggleSidebar() {
   if (window.innerWidth <= 900) { set({ sidebarExpandedSm: !get().sidebarExpandedSm }); return; }
   const sidebarCollapsed = !get().sidebarCollapsed;
@@ -380,7 +500,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, wmFilter: state.wmFilter, wmView: state.wmView, ezFilter: state.ezFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });

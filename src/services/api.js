@@ -12,6 +12,7 @@ export const TABLES = {
   onboarding: "onboarding",
   callLogs: "call_logs",
   caps: "caps",
+  walmart: "walmart",
   settings: "app_settings",
 };
 
@@ -23,6 +24,12 @@ export const CAPS_EMAIL_KEY = "caps_email_template";
 
 /** app_settings key of the onboarding email template. */
 export const ONBOARDING_EMAIL_KEY = "onboarding_email_template";
+
+/** app_settings key of the Walmart email template. */
+export const WALMART_EMAIL_KEY = "walmart_email_template";
+
+/** app_settings key of the ezCater email template. */
+export const EZCATER_EMAIL_KEY = "ezcater_email_template";
 
 function db() {
   const client = getDb();
@@ -56,7 +63,7 @@ function isMissingTable(error) {
 export async function loadAllTables({ onProgress } = {}) {
   let done = 0;
   const tick = (promise) => promise.then((value) => {
-    onProgress?.(++done / 7);
+    onProgress?.(++done / 8);
     return value;
   });
   const fetchOptional = async (table) => {
@@ -67,7 +74,7 @@ export async function loadAllTables({ onProgress } = {}) {
       throw error;
     }
   };
-  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult] = await Promise.all([
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult, walmartResult] = await Promise.all([
     tick(fetchAll(TABLES.franchisees)),
     tick(fetchAll(TABLES.stores)),
     tick(fetchAll(TABLES.staff)),
@@ -75,10 +82,12 @@ export async function loadAllTables({ onProgress } = {}) {
     tick(fetchOptional(TABLES.onboarding)),
     tick(fetchOptional(TABLES.callLogs)),
     tick(fetchOptional(TABLES.caps)),
+    tick(fetchOptional(TABLES.walmart)),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: caps, ready: capsReady } = capsResult;
+  const { rows: walmart, ready: walmartReady } = walmartResult;
   const [capsDueReady, capsHistoryReady, lastImport, emailTemplate] = capsReady
     ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"),
       readSetting(CAPS_LAST_IMPORT_KEY).catch((error) => ({ error })), readSetting(CAPS_EMAIL_KEY).catch((error) => ({ error }))])
@@ -90,7 +99,12 @@ export async function loadAllTables({ onProgress } = {}) {
   // Onboarding email template: undefined when app_settings is not set up (kept on this computer instead).
   const obTemplate = onboardingReady ? await readSetting(ONBOARDING_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const onboardingEmail = obTemplate.error ? undefined : obTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail };
+  const ezTemplate = onboardingReady ? await readSetting(EZCATER_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const ezcaterEmail = ezTemplate.error ? undefined : ezTemplate.value || null;
+  // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
+  const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

@@ -37,6 +37,10 @@ export const DIALOG = {
   capForm: "capForm",
   capsImport: "capsImport",
   capEmail: "capEmail",
+  walmartImport: "walmartImport",
+  walmartAdd: "walmartAdd",
+  walmartUpdate: "walmartUpdate",
+  walmartEmail: "walmartEmail",
   scheduleConfirm: "scheduleConfirm",
   scheduleEdit: "scheduleEdit",
   emailScope: "emailScope",
@@ -97,10 +101,10 @@ export const openCallFollowUp = (callId) => openDialog(DIALOG.callFollowUp, { ca
 export const openAddOnboarding = () => openDialog(DIALOG.addOnboarding);
 export const openOnboardingImport = () => openDialog(DIALOG.onboardingImport);
 /** Onboarding email message editor; previewId picks the record whose store is shown in the preview. */
-export const openOnboardingEmail = (previewId = null) => openDialog(DIALOG.onboardingEmail, { previewId });
+export const openOnboardingEmail = (previewId = null, scope = "ob") => openDialog(DIALOG.onboardingEmail, { previewId, scope });
 
 /** Add a store to onboarding. storeNums preselects stores; franchiseeId opens that franchisee's store list. */
-export const openNewOnboarding = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId });
+export const openNewOnboarding = ({ storeNums = [], franchiseeId = null, platforms = null } = {}) => openDialog(DIALOG.newOnboarding, { storeNums, franchiseeId, platforms });
 export const openUpdateOnboarding = (onboardingId) => openDialog(DIALOG.updateOnboarding, { onboardingId });
 /** Update all of one store's onboarding platforms at once. */
 export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboarding, { storeNum: String(storeNum) });
@@ -108,6 +112,14 @@ export const openStoreOnboarding = (storeNum) => openDialog(DIALOG.storeOnboardi
 /** Add a store to the CAP list (capId null) or edit one. storeNum / franchiseeId preselect the store for a new one. */
 export const openCapForm = (capId = null, { storeNum = "", franchiseeId = null } = {}) => openDialog(DIALOG.capForm, { capId, storeNum, franchiseeId });
 export const openCapsImport = () => openDialog(DIALOG.capsImport);
+/** Import Walmart's report into the Walmart tab. */
+export const openWalmartImport = () => openDialog(DIALOG.walmartImport);
+/** Add stores to the Walmart tab; storeNums preselects stores, franchiseeId opens that franchisee's store list. */
+export const openWalmartAdd = ({ storeNums = [], franchiseeId = null } = {}) => openDialog(DIALOG.walmartAdd, { storeNums, franchiseeId });
+/** Change a store's Walmart stage, add a note, see its change log. */
+export const openWalmartUpdate = (recordId) => openDialog(DIALOG.walmartUpdate, { recordId });
+/** Walmart email message editor; previewId picks the store shown in the preview. */
+export const openWalmartEmail = (previewId = null) => openDialog(DIALOG.walmartEmail, { previewId });
 
 /** "Just this store" or "All of the franchisee's stores" before an email: { heading, one, all, note } (see EmailScopeDialog). */
 export const openEmailScope = (props) => openDialog(DIALOG.emailScope, props);

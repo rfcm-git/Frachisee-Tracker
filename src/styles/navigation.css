@@ -40,3 +40,25 @@
   .sst-open{background:var(--lime-soft);color:var(--lime-dark)}
 
   
+  /* Onboarding group in the menu: header + 3PDs, ezCater, Walmart */
+  .tab-group .tab-car{width:15px;height:15px;flex:none;opacity:.75;transition:transform var(--t-med) var(--ease-out)}
+  .nav-group.open .tab-group .tab-car{transform:rotate(180deg)}
+  .tab-group .tab-car{margin-left:auto}
+  .nav-sub{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--t-med) var(--ease-out)}
+  .nav-group.open .nav-sub{grid-template-rows:1fr}
+  .nav-sub-in{overflow:hidden;min-height:0;position:relative}
+  .nav-sub-in::before{content:"";position:absolute;left:21px;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,.22)}
+  .tab.tab-sub{height:38px;padding-left:34px;font-size:13.5px}
+  .tab.tab-sub .t-ic [data-lucide]{width:17px;height:17px}
+  .app.collapsed .tab-group .tab-car{display:none}
+  .app.collapsed .tab.tab-sub{padding-left:0;height:38px}
+  .app.collapsed .nav-sub-in::before{display:none}
+  .app.collapsed .nav-group.open .nav-sub-in{background:rgba(0,0,0,.12);border-radius:10px}
+  @media(max-width:900px){
+    .app:not(.expanded-sm) .tab-group .tab-car,.app:not(.expanded-sm) .nav-sub-in::before{display:none}
+    .app:not(.expanded-sm) .tab.tab-sub{padding-left:0}
+    .app:not(.expanded-sm) .nav-group.open .nav-sub-in{background:rgba(0,0,0,.12);border-radius:10px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nav-sub,.tab-group .tab-car{transition:none}
+  }

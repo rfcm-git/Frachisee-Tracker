@@ -1,0 +1,68 @@
+/* ---------- Walmart tab (built on the CAP tab's layout: progress strip, filters, table) ---------- */
+  /* Stage colors: amber = waiting on the owner, purple = in progress, green = done, grey = exempted. */
+  .wm-await{--st:#8a5600;--st-bg:var(--warn-soft);--st-line:#f2d39c;--st-dot:var(--warn)}
+  .wm-pay{--st:#5b3699;--st-bg:#efe8fa;--st-line:#d6c6f0;--st-dot:#7a4fc2}
+  .wm-done{--st:#146c3a;--st-bg:var(--ok-soft);--st-line:#b7e0c6;--st-dot:var(--ok)}
+  .wm-exempt{--st:var(--idle);--st-bg:var(--idle-soft);--st-line:#d3d9d4;--st-dot:var(--idle)}
+
+  /* Stage badge and the stage dropdown in the table (same shape as the CAP status) */
+  .badge.wm-await,.badge.wm-pay,.badge.wm-done,.badge.wm-exempt,
+  .cap-sel.wm-await,.cap-sel.wm-pay,.cap-sel.wm-done,.cap-sel.wm-exempt{background:var(--st-bg);color:var(--st)}
+  .wm-sel{min-width:142px}
+
+  /* Emailed column */
+  .badge.wm-sent{background:var(--ok-soft);color:#146c3a}
+  .badge.wm-unsent{background:var(--warn-soft);color:#8a5600}
+  .badge.wm-sent svg,.badge.wm-unsent svg{width:11px;height:11px;vertical-align:-1px;margin-right:3px}
+
+  .wm-mismatch{display:inline-flex;color:var(--warn);cursor:help}
+  .wm-mismatch svg{width:16px;height:16px}
+
+  /* Filters with the Stores / Franchisees switch on the right */
+  .wm-bar{justify-content:space-between}
+  .wm-bar .grp{flex:1}
+  .wm-view{margin:0}
+  .wm-view em{font-style:normal;font-weight:700;margin-left:2px}
+
+  /* Franchisees 2+ view: each owner's stores under their stage */
+  .wm-owners td{vertical-align:top}
+  .wm-oc{text-align:center;width:70px}
+  .wm-ogroup{display:flex;align-items:flex-start;gap:10px;padding:4px 0}
+  .wm-ogroup + .wm-ogroup{border-top:1px dashed var(--line);margin-top:4px;padding-top:8px}
+  .wm-ogroup-h{display:inline-flex;align-items:center;gap:6px;flex:none;width:170px;font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+  .wm-ostores{display:flex;flex-wrap:wrap;gap:5px}
+  .wm-ostore{display:inline-flex;align-items:center;border:1px solid var(--st-line);border-radius:7px;background:var(--surface);color:var(--ink);
+    height:26px;padding:0 8px;font:inherit;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer;
+    transition:border-color var(--t-fast) ease,box-shadow var(--t-fast) ease,background var(--t-fast) ease}
+  .wm-ostore:hover{background:var(--st-bg)}
+  .wm-ostore:focus-visible{border-color:var(--st-dot);outline:none;box-shadow:0 0 0 3px var(--st-line)}
+
+  /* Update and import dialogs */
+  .wm-now{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+  .wm-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto}
+  .wm-log li{border-left:3px solid var(--line);padding:2px 0 2px 10px}
+  .wm-log li.created{border-left-color:var(--green)}
+  .wm-logchg{display:flex;align-items:center;gap:6px}
+  .wm-logchg svg{width:13px;height:13px;color:var(--ink-soft)}
+  .wm-lognote{white-space:pre-wrap}
+  .wm-res{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+  .wm-res .bk-ok,.wm-res .muted{display:inline-flex;align-items:center;gap:5px}
+  .wm-res svg{width:14px;height:14px}
+  .wm-sync{font-size:12px;color:#225f91}
+  .wm-warn{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#8a5600;font-weight:600}
+  .wm-read{margin:12px 0 8px}
+  .wm-table{max-height:340px}
+
+  @media(max-width:640px){
+    .wm-ogroup{flex-direction:column;gap:6px}
+    .wm-ogroup-h{width:auto}
+  }
+
+/* ---------- ezCater tab (same CAP layout; statuses use the onboarding colors) ---------- */
+  .cap-sel.ob-none{background:var(--danger-soft);color:var(--danger)}
+  .cap-sel.ob-wip{background:#efe8fa;color:#5b3699}
+  .cap-sel.ob-done{background:var(--ok-soft);color:#146c3a}
+  .cap-sel.ob-exempt{background:var(--idle-soft);color:var(--idle)}
+  .ez-upd{display:block;width:100%;padding:0;border:none;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .ez-upd:hover .cap-note{color:var(--green-dark);text-decoration:underline}
+  .ez-upd:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}
