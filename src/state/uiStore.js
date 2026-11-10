@@ -73,6 +73,8 @@ function baseState() {
     dashTerritory: "",
     dashSort: { key: "stores", dir: -1 },
     sidebarCollapsed: local.get(STORAGE_KEYS.sidebar) === "1",
+    /** The menu's Onboarding group (3PDs, ezCater, Walmart) is open. */
+    navOnboardingOpen: local.get(STORAGE_KEYS.navOnboarding) !== "0",
     sidebarExpandedSm: false,
     frCardOpen: local.get(STORAGE_KEYS.frCard) === "1",
     idleMinutes: savedIdleMinutes(),
@@ -474,6 +476,13 @@ export function setIdleMinutes(value) {
   local.set(STORAGE_KEYS.idle, idleMinutes);
   set({ idleMinutes });
   return idleMinutes;
+}
+
+/** Opens or closes the menu's Onboarding group; remembered on this computer. */
+export function setNavOnboardingOpen(open) {
+  if (get().navOnboardingOpen === open) return;
+  local.set(STORAGE_KEYS.navOnboarding, open ? "1" : "0");
+  set({ navOnboardingOpen: open });
 }
 
 export function toggleSidebar() {

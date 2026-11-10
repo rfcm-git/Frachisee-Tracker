@@ -172,8 +172,8 @@ export default function StoreWindowLeft({ store }) {
         <button type="button" className="btn sm round" onClick={() => { setPlatformMenu(null); closeAll(); showWalmart(store.num); }}><Icon name="arrow-right" />Open in Walmart</button>
       </div> : menuRecord ? <div className="pmenu pmenu-ob" role="status">
         <div className="lbl"><Icon name={menuPlatform[0] === "ez" ? "utensils" : "rocket"} />{menuPlatform[1]} is on the {menuPlatform[0] === "ez" ? "ezCater tab" : "onboarding list"} · {obStatusLabel(menuRecord.status)}</div>
-        <p>Change its status in the {menuPlatform[0] === "ez" ? "ezCater" : "Onboarding"} tab, so the change is saved in its updates.</p>
-        <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in {menuPlatform[0] === "ez" ? "ezCater" : "Onboarding"}</button>
+        <p>Change its status in the {menuPlatform[0] === "ez" ? "ezCater" : "3PDs"} tab, so the change is saved in its updates.</p>
+        <button type="button" className="btn sm round" onClick={goToOnboarding}><Icon name="arrow-right" />Open in {menuPlatform[0] === "ez" ? "ezCater" : "3PDs"}</button>
       </div> : <div className="pmenu"><div className="lbl">Set {menuPlatform[1]} status</div><div className="sbtns">
         {PLATFORM_STATES.map((value) => <button type="button" className="sbtn" key={value} onClick={() => choosePlatform(menuPlatform[0], value)}>
           <span className="d" style={{ background: platformColor(value) }} />{value}</button>)}
