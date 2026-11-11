@@ -1,6 +1,6 @@
 /* Adding, updating, deleting and importing CAPs records. */
 import { CAP_STATES, STORAGE_KEYS } from "../../config/constants.js";
-import { CAPS_LAST_IMPORT_KEY, TABLES, deleteWhere, guardedUpdate, insertRows, mergeRowSave, writeSetting } from "../../services/api.js";
+import { CAPS_LAST_IMPORT_KEY, TABLES, deleteIn, deleteWhere, guardedUpdate, insertRows, mergeRowSave, writeSetting } from "../../services/api.js";
 import { addRows, getContext, removeRows, replaceRow, updateData } from "../../state/dataStore.js";
 import { local } from "../../lib/storage.js";
 import { confirmAction } from "../../state/dialogs.js";
@@ -95,6 +95,51 @@ export function askDeleteCap(recordId) {
       if (error) { toastError(error); return false; }
       removeRows("caps", (item) => item.id === recordId);
       toast(`Store ${record.store_num} removed from the CAP list`, "ok");
+      return true;
+    },
+  });
+}
+
+/** Changes the status of several records (after asking). Records already at that status are left alone. onDone() runs after saving. */
+export function askBulkCapStatus(records, status, onDone = () => {}) {
+  const todo = records.filter((record) => normalizeCapStatus(record.status) !== status);
+  if (!todo.length) { toast(records.length === 1 ? `Store ${records[0].store_num} is already ${status}` : `All ${records.length} selected stores are already ${status}`); return; }
+  const same = records.length - todo.length;
+  confirmAction({
+    title: "Change status?", okLabel: "Change status", busyLabel: "Saving…", icon: "refresh-cw", okClass: "btn",
+    text: `Change ${todo.length === 1 ? `store ${todo[0].store_num}` : `${todo.length} stores`} to ${status}?${same ? ` ${same} already ${same === 1 ? "is" : "are"} ${status} and stay${same === 1 ? "s" : ""} as ${same === 1 ? "it is" : "they are"}.` : ""}${status === "Completed" ? " Completed CAPs keep their due date." : ""}`,
+    onConfirm: async () => {
+      const failed = [];
+      for (const record of todo) {
+        const fresh = getContext().caps.find((item) => item.id === record.id);
+        if (!fresh || !(await updateCap(fresh, { status }, { quiet: true }))) failed.push(record.store_num);
+      }
+      const saved = todo.length - failed.length;
+      if (failed.length) toast(`${saved} changed to ${status} · not saved: store${failed.length === 1 ? "" : "s"} ${failed.join(", ")}`, "err");
+      else toast(`${saved === 1 ? `Store ${todo[0].store_num}` : `${saved} stores`} → ${status}`, "ok");
+      onDone();
+      return true;
+    },
+  });
+}
+
+/** Removes several records from the CAP list (after asking). onDone() runs after deleting. */
+export function askBulkDeleteCaps(records, onDone = () => {}) {
+  if (!records.length) return;
+  const one = records.length === 1;
+  confirmAction({
+    title: "Remove from the CAP list?", okLabel: one ? "Remove" : `Remove ${records.length}`, busyLabel: "Removing…",
+    text: `Remove ${one ? `store ${records[0].store_num}` : `${records.length} stores`} from the CAP list? Their status, notes and change log are deleted. This can't be undone. The stores themselves and their issues are not affected.`,
+    onConfirm: async () => {
+      const ids = records.map((record) => record.id);
+      for (const part of chunks(ids, 200)) {
+        const error = await deleteIn(TABLES.caps, "id", part);
+        if (error) { toastError(error); return false; }
+        const gone = new Set(part);
+        removeRows("caps", (item) => gone.has(item.id));
+      }
+      toast(one ? `Store ${records[0].store_num} removed from the CAP list` : `${records.length} stores removed from the CAP list`, "ok");
+      onDone();
       return true;
     },
   });

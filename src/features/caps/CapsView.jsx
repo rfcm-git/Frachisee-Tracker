@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
@@ -14,7 +14,7 @@ import { formatNumber, formatTimestamp, telHref, timeOf } from "../../lib/format
 import { useDataContext } from "../../state/dataStore.js";
 import { openCapForm, openCapsImport, openStore } from "../../state/dialogs.js";
 import { capStatusesAreDefault, clearCapsFilters, setCapDueFilter, setCapEmailFilter, setCapAssessmentFilter, sortCaps, toggleCapDueFilter, toggleCapOnlyStatus, toggleCapStatus, useUiStore } from "../../state/uiStore.js";
-import { askDeleteCap, lastCapsImport, updateCap } from "./capsActions.js";
+import { askBulkCapStatus, askBulkDeleteCaps, askDeleteCap, lastCapsImport, updateCap } from "./capsActions.js";
 import { sendCapEmail } from "./capEmailActions.js";
 import { capsProgress, filterCaps } from "./capsSelectors.js";
 
@@ -212,9 +212,38 @@ function ContactValue({ value, text = value, fromStore, href }) {
 /** "(714) 863-8900" never splits across lines; extra text such as "(Store)" can still wrap. */
 const keepPhoneTogether = (value) => String(value || "").replace(/\) (?=\d)/g, ")\u00a0").replace(/(\d)-(\d)/g, "$1\u2011$2");
 
-function CapsTable({ ctx, rows, sort, showDue, showAssessment }) {
+/** Clicks on these inside a row do their own thing and don't select the row. */
+const isControl = (target) => !!target.closest("button, a, select, input, textarea, label, [role='dialog']");
+
+/**
+ * Selection bar above the table: how many rows are selected, Select all / Clear, and the bulk actions
+ * (change status, delete). With nothing selected it explains how to select.
+ */
+function CapsSelectionBar({ total, selected, onSelectAll, onClear }) {
+  const count = selected.length;
+  return <div className={`cap-selbar${count ? " on" : ""}`} role="region" aria-label="Selected stores">
+    {count ? <b role="status">{formatNumber(count)} selected</b>
+      : <span className="muted"><Icon name="mouse-pointer-click" />Click rows to select them · Shift+click selects a range</span>}
+    {count < total && <button type="button" className="btn link" onClick={onSelectAll}><Icon name="check-check" />Select all {formatNumber(total)}</button>}
+    {count > 0 && <>
+      <button type="button" className="btn link" onClick={onClear}><Icon name="x" />Clear selection</button>
+      <div className="cap-selacts">
+        <label className="cap-selstatus"><span>Change status to</span>
+          <select value="" aria-label={`Change the status of ${count} selected store${count === 1 ? "" : "s"}`}
+            onChange={(event) => { if (event.target.value) askBulkCapStatus(selected, event.target.value, onClear); }}>
+            <option value="">Choose…</option>
+            {CAP_STATES.map((status) => <option key={status} value={status}>{status}</option>)}
+          </select></label>
+        <button type="button" className="btn sm danger round" onClick={() => askBulkDeleteCaps(selected, onClear)}>
+          <Icon name="trash-2" />Delete {formatNumber(count)}</button>
+      </div>
+    </>}
+  </div>;
+}
+
+function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick }) {
   const { items, pagerProps } = usePaged("cap", rows);
-  return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table"><thead><tr>
+  return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table" role="grid" aria-multiselectable="true"><thead><tr>
     <SortHeader sortKey="num" sort={sort} className="c-snum">Store #</SortHeader>
     {showAssessment && <SortHeader sortKey="aid" sort={sort} className="cap-aid">Assessment ID</SortHeader>}
     <th>Franchisee</th><th className="hide-sm">Email Address</th><th className="hide-sm cap-phone">Phone Number</th>
@@ -227,7 +256,18 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment }) {
   </tr></thead><tbody>
     {items.map(({ record, contact }) => {
       const store = ctx.storeByNum.get(String(record.store_num));
-      return <tr key={record.id}>
+      const on = picked.has(record.id);
+      return <tr key={record.id} className={on ? "cap-selrow" : ""} aria-selected={on} tabIndex={0}
+        onMouseDown={(event) => { if (event.shiftKey && !isControl(event.target)) event.preventDefault(); }}
+        onClick={(event) => {
+          if (isControl(event.target) || String(window.getSelection?.() || "")) return;
+          onPick(record.id, event.shiftKey);
+        }}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget || (event.key !== " " && event.key !== "Enter")) return;
+          event.preventDefault();
+          onPick(record.id, event.shiftKey);
+        }}>
         <td className="c-snum">{store
           ? <button type="button" className="ob-snum" data-tip="Open store information" onClick={() => openStore(store.id)}>{record.store_num}</button>
           : <span className="cap-nostore" data-tip="Not in the store list">{record.store_num}</span>}
@@ -266,6 +306,29 @@ export default function CapsView() {
     return filterCaps(ctx, shown, searchQuery(search));
   }, [ctx, filter, search]);
   const summary = useMemo(() => capsProgress(ctx), [ctx]);
+  // Selected record ids. Only rows in the current list count, so filtering never acts on hidden rows.
+  const [picked, setPicked] = useState(() => new Set());
+  const lastPicked = useRef(null);
+  const selected = useMemo(() => rows.filter((row) => picked.has(row.record.id)).map((row) => row.record), [rows, picked]);
+  const shownPicked = useMemo(() => new Set(selected.map((record) => record.id)), [selected]);
+  /** Click toggles one row; Shift+click sets every row between the last clicked one and this one. */
+  function pickRow(id, range) {
+    const ids = rows.map((row) => row.record.id);
+    const from = range && lastPicked.current != null ? ids.indexOf(lastPicked.current) : -1;
+    const to = ids.indexOf(id);
+    setPicked((current) => {
+      const next = new Set([...current].filter((item) => ids.includes(item)));
+      if (from >= 0 && to >= 0) {
+        const turnOn = !current.has(id);
+        ids.slice(Math.min(from, to), Math.max(from, to) + 1).forEach((item) => (turnOn ? next.add(item) : next.delete(item)));
+      } else if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    lastPicked.current = id;
+  }
+  const clearPicked = () => { setPicked(new Set()); lastPicked.current = null; };
+  const pickAll = () => setPicked(new Set(rows.map((row) => row.record.id)));
   useToolbarCount(ctx.capsReady ? `${formatNumber(rows.length)} store${rows.length !== 1 ? "s" : ""} · ${formatNumber(summary.completed)} completed` : "");
 
   if (!ctx.capsReady) return <EmptyState icon="database" title="The CAP tab needs a quick database update">Run migrate-caps.sql in the Supabase SQL Editor, then click Refresh. Other tabs are not affected.</EmptyState>;
@@ -289,6 +352,7 @@ export default function CapsView() {
     <CapsFilters filter={filter} anyFilter={anyFilter} showDue={showDue} showAssessment={showAssessment} />
     {outside > 0 && <div className="cap-outside" role="status"><Icon name="info" />
       {outside === 1 ? "1 store matches" : `${formatNumber(outside)} stores match`} your search by store #{showAssessment ? " or Assessment ID" : ""} but {outside === 1 ? "is" : "are"} hidden by the filters — shown anyway.</div>}
-    {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} showAssessment={showAssessment} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
+    {rows.length > 0 && <CapsSelectionBar total={rows.length} selected={selected} onSelectAll={pickAll} onClear={clearPicked} />}
+    {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} showAssessment={showAssessment} picked={shownPicked} onPick={pickRow} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
   </>;
 }
