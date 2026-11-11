@@ -181,7 +181,7 @@ const resetPages = (...which) => ({ pages: { ...get().pages, ...Object.fromEntri
 /* ---------- navigation ---------- */
 
 export function setTab(tab) {
-  set({ tab, search: "", ...resetPages("fr", "st") });
+  set({ tab, search: "", ...resetPages("fr", "st"), ...(isDrawerWidth() ? { sidebarExpandedSm: false } : {}) });
 }
 
 /* ---------- Search tab ---------- */
@@ -492,6 +492,12 @@ export function setNavOnboardingOpen(open) {
   local.set(STORAGE_KEYS.navOnboarding, open ? "1" : "0");
   set({ navOnboardingOpen: open });
 }
+
+/** Phones: the side menu is a drawer. Close it (after picking a tab, tapping outside or Escape). */
+export const closeSidebarSm = () => { if (get().sidebarExpandedSm) set({ sidebarExpandedSm: false }); };
+
+/** Drawer mode: phone widths, where the side menu slides in over the page. */
+export const isDrawerWidth = () => typeof window !== "undefined" && window.innerWidth <= 600;
 
 export function toggleSidebar() {
   if (window.innerWidth <= 900) { set({ sidebarExpandedSm: !get().sidebarExpandedSm }); return; }

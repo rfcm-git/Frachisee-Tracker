@@ -60,3 +60,25 @@
     .db-kpis .db-kpi .ic{width:32px;height:32px;border-radius:10px}
     .db-kpis .db-kpi .ic [data-lucide]{width:17px;height:17px}
   }
+
+  /*
+   * Phones: the side menu becomes a drawer. The icon rail is gone so the page uses the full width;
+   * the ☰ button in the top bar slides the full menu in over the page (ease-out in, ease-in out).
+   */
+  .mb-menu,.sb-scrim{display:none}
+  @media(max-width:600px){
+    .mb-menu{display:grid;place-items:center;width:42px;height:42px;flex:none;margin-left:-6px;border:1px solid var(--line);border-radius:10px;
+      background:var(--surface);color:var(--green-dark);cursor:pointer}
+    .mb-menu:focus-visible{outline:none;box-shadow:var(--ring);border-color:var(--green)}
+    .mainbar{gap:10px}
+    .app .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:70;width:min(280px,84vw)!important;height:100dvh;
+      transform:translateX(-102%);transition:transform var(--t-med) var(--ease-in);visibility:hidden}
+    .app.expanded-sm .sidebar{transform:none;transition-timing-function:var(--ease-out);visibility:visible;box-shadow:12px 0 32px rgba(0,40,15,.28)}
+    .app .sidebar{transition-property:transform,visibility}
+    .sb-scrim{display:block;position:fixed;inset:0;z-index:65;background:rgba(19,32,26,.42);animation:scrimIn var(--t-med) var(--ease-out)}
+    /* inside the drawer: full labels, badges in their normal place */
+    .app.expanded-sm .sb-name{display:flex}
+    .app.expanded-sm .t-lb,.app.expanded-sm .sb-label{display:block}
+  }
+  @keyframes scrimIn{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion: reduce){ .app .sidebar{transition:none!important} .sb-scrim{animation:none} }
