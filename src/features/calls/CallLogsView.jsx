@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
+import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
 import { KpiCard } from "../../components/charts/Charts.jsx";
 import { CallOutcomeBadge, EmptyState, FollowUpBadge } from "../../components/ui/common.jsx";
 import { clickableProps } from "../../components/ui/clickable.js";
@@ -27,30 +28,44 @@ function DraftInput({ value, onCommit, ...rest }) {
     onBlur={() => onCommit(draft.trim())} onKeyDown={(event) => { if (event.key === "Enter") onCommit(draft.trim()); }} {...rest} />;
 }
 
+/** Date choices in menu order (a list, so "30" doesn't jump to the top like a number key would). */
+const RANGES = [["all", "All time"], ["today", "Today"], ["week", "This week"], ["month", "This month"], ["30", "Last 30 days"], ["custom", "Date range"]];
+const rangeLabel = (value) => RANGES.find(([key]) => key === String(value))?.[1] || "";
+const OUTCOME_EXTRA = [["__none", "Outcome not set"], ["__fu_open", "Follow-up still open"], ["__fu_done", "Follow-up done"]];
+const outcomeLabel = (value) => OUTCOME_EXTRA.find(([key]) => key === value)?.[1] || value;
+
+/** Date, franchisee, store and outcome filters, in the same rounded style as the other tabs. */
 function CallFilters({ ctx, filters, anyFilter }) {
   const stores = useMemo(() => [...new Set(ctx.callLogs.map((call) => call.store_num).filter(Boolean))].sort(compareNumbers), [ctx.callLogs]);
+  const pick = (key, value, close) => { setCallFilter(key, value); close(); };
   return <div className="ifbar cl-filters" role="search" aria-label="Call log filters">
     <datalist id="cl_frlist">{ctx.franchisees.map((franchisee) => franchisee.name).filter(Boolean).map((name) => <option key={name} value={name} />)}</datalist>
     <datalist id="cl_stlist">{stores.map((num) => <option key={num} value={num} />)}</datalist>
-    <label className="cl-fl"><span><Icon name="calendar" />Date</span>
-      <select value={filters.range} onChange={(event) => setCallFilter("range", event.target.value)}>
-        <option value="all">All time</option><option value="today">Today</option><option value="week">This week</option>
-        <option value="month">This month</option><option value="30">Last 30 days</option><option value="custom">Date range…</option>
-      </select></label>
-    {filters.range === "custom" && <>
-      <label className="cl-fl"><span>From</span><input type="date" value={filters.from} onChange={(event) => setCallFilter("from", event.target.value)} /></label>
-      <label className="cl-fl"><span>To</span><input type="date" value={filters.to} onChange={(event) => setCallFilter("to", event.target.value)} /></label>
-    </>}
-    <label className="cl-fl"><span><Icon name="user-round" />Franchisee</span>
-      <DraftInput key={filters.fr} list="cl_frlist" placeholder="Any franchisee" value={filters.fr} onCommit={(value) => setCallFilter("fr", value)} /></label>
-    <label className="cl-fl"><span><Icon name="store" />Store #</span>
-      <DraftInput key={filters.store} list="cl_stlist" placeholder="Any" style={{ width: 110 }} value={filters.store} onCommit={(value) => setCallFilter("store", value)} /></label>
-    <label className="cl-fl"><span><Icon name="list-checks" />Outcome</span>
-      <select value={filters.outcome} onChange={(event) => setCallFilter("outcome", event.target.value)}>
-        <option value="">Any outcome</option>
-        {CALL_OUTCOMES.map((outcome) => <option key={outcome} value={outcome}>{outcome}</option>)}
-        <option value="__none">Outcome not set</option><option value="__fu_open">Follow-up still open</option><option value="__fu_done">Follow-up done</option>
-      </select></label>
+    <div className="grp fdd-grp">
+      <FilterDropdown icon="calendar" label="Date" value={filters.range !== "all" ? rangeLabel(filters.range) : ""} active={filters.range !== "all"}>
+        {({ close }) => RANGES.map(([value, label]) => <FilterOption key={value} selected={String(filters.range) === value}
+          onClick={() => pick("range", value, close)}>{value === "custom" ? "Date range…" : label}</FilterOption>)}
+      </FilterDropdown>
+      {filters.range === "custom" && <>
+        <label className="cl-pill"><span className="cl-pill-lb">From</span>
+          <input type="date" aria-label="From date" value={filters.from} onChange={(event) => setCallFilter("from", event.target.value)} /></label>
+        <label className="cl-pill"><span className="cl-pill-lb">To</span>
+          <input type="date" aria-label="To date" value={filters.to} onChange={(event) => setCallFilter("to", event.target.value)} /></label>
+      </>}
+      <label className={`cl-pill${filters.fr ? " active" : ""}`}><Icon name="user-round" />
+        <DraftInput key={filters.fr} list="cl_frlist" placeholder="Franchisee" aria-label="Filter by franchisee" value={filters.fr} onCommit={(value) => setCallFilter("fr", value)} /></label>
+      <label className={`cl-pill cl-pill-sm${filters.store ? " active" : ""}`}><Icon name="store" />
+        <DraftInput key={filters.store} list="cl_stlist" placeholder="Store #" aria-label="Filter by store number" value={filters.store} onCommit={(value) => setCallFilter("store", value)} /></label>
+      <FilterDropdown icon="list-checks" label="Outcome" value={filters.outcome ? outcomeLabel(filters.outcome) : ""} active={!!filters.outcome}>
+        {({ close }) => <>
+          <FilterOption selected={!filters.outcome} onClick={() => pick("outcome", "", close)}>Any outcome</FilterOption>
+          <div className="fdd-div" />
+          {CALL_OUTCOMES.map((outcome) => <FilterOption key={outcome} selected={filters.outcome === outcome} onClick={() => pick("outcome", outcome, close)}>{outcome}</FilterOption>)}
+          <div className="fdd-div" />
+          {OUTCOME_EXTRA.map(([value, label]) => <FilterOption key={value} selected={filters.outcome === value} onClick={() => pick("outcome", value, close)}>{label}</FilterOption>)}
+        </>}
+      </FilterDropdown>
+    </div>
     {anyFilter && <button type="button" className="btn link" onClick={resetCallFilters} style={{ marginLeft: "auto" }}><Icon name="rotate-ccw" />Reset filters</button>}
   </div>;
 }
