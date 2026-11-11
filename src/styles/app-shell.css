@@ -122,6 +122,27 @@
   .iss-big span{font-size:11px;font-weight:600}
   .iss-info{flex:1;min-width:180px}
   .fdd-grp{display:flex;gap:8px;flex-wrap:wrap}
+  /* Action menu (components/ui/MenuButton.jsx): placed on the screen so tables never clip it */
+  .mnu{position:relative;display:inline-flex}
+  .mnu .car{width:14px;height:14px;transition:transform var(--t-fast) var(--ease-out)}
+  .mnu.open .car{transform:rotate(180deg)}
+  .mnu-menu{position:fixed;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(19,32,26,.18);padding:6px;
+    animation:fadeDown var(--t-fast) var(--ease-out);text-align:left;font-weight:400}
+  .mnu-item{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;border:none;background:none;border-radius:8px;padding:8px 10px;
+    font-family:var(--font);font-size:13px;color:var(--ink);cursor:pointer;text-align:left}
+  .mnu-item:hover,.mnu-item:focus-visible{background:var(--lime-tint);outline:none}
+  .mnu-item:focus-visible{box-shadow:inset 0 0 0 2px var(--green)}
+  .mnu-item [data-lucide]{width:16px;height:16px;flex:none;color:var(--ink-soft)}
+  .mnu-item .d{width:9px;height:9px;border-radius:50%;flex:none}
+  .mnu-item.danger,.mnu-item.danger [data-lucide]{color:var(--danger)}
+  .mnu-item.danger:hover,.mnu-item.danger:focus-visible{background:var(--danger-soft)}
+  .mnu-item:disabled{opacity:.5;cursor:default}
+  .mnu-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .mnu-txt b{font-weight:700}
+  .mnu-txt small{font-size:11.5px;color:var(--ink-soft);white-space:normal}
+  .mnu-head{padding:6px 10px 4px;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em}
+  .mnu-note{padding:6px 10px 8px;font-size:12.5px;color:var(--ink-soft);white-space:normal;line-height:1.4}
+  .mnu-div{height:1px;background:var(--line);margin:4px 6px}
   .rte{border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden}
   .rte:focus-within{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
   .rte-bar{display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--line);background:var(--lime-tint)}

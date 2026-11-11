@@ -3,6 +3,7 @@ import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
+import MenuButton, { MenuItem } from "../../components/ui/MenuButton.jsx";
 import { CapDueBadge, EmptyState, InfoTip, StoreStatusIfClosed } from "../../components/ui/common.jsx";
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
@@ -170,14 +171,18 @@ function CapsFilters({ filter, anyFilter, showDue, showAssessment }) {
 function StatusSelect({ record }) {
   const [saving, setSaving] = useState(false);
   const status = normalizeCapStatus(record.status);
-  return <select className={`cap-sel ${capStatusClass(status)}`} value={status} disabled={saving} aria-label={`Status of store ${record.store_num}`}
-    onChange={async (event) => {
-      setSaving(true);
-      await updateCap(record, { status: event.target.value });
-      setSaving(false);
-    }}>
-    {CAP_STATES.map((value) => <option key={value} value={value}>{value}</option>)}
-  </select>;
+  return <span className={`cap-pill ${capStatusClass(status)}${saving ? " busy" : ""}`}>
+    <span className="d" style={{ background: CAP_STATUS_COLOR[status] }} aria-hidden="true" />
+    <select className="cap-sel" value={status} disabled={saving} aria-label={`Status of store ${record.store_num}`} aria-busy={saving}
+      onChange={async (event) => {
+        setSaving(true);
+        await updateCap(record, { status: event.target.value });
+        setSaving(false);
+      }}>
+      {CAP_STATES.map((value) => <option key={value} value={value}>{value}</option>)}
+    </select>
+    <Icon name="chevron-down" className="car" />
+  </span>;
 }
 
 /** Opens the store's CAP email in Outlook and sets Email Sent. Dimmed once the store is past No Action Yet (it asks first). */
@@ -196,10 +201,11 @@ function SortButton({ sortKey, sort, children }) {
     <Icon name={on ? (sort.dir < 0 ? "arrow-down" : "arrow-up") : "arrow-down-up"} /></button>;
 }
 
-function SortHeader({ sortKey, sort, className = "", children }) {
+function SortHeader({ sortKey, sort, className = "", extra = null, children }) {
   const on = sort.key === sortKey;
+  const button = <SortButton sortKey={sortKey} sort={sort}>{children}</SortButton>;
   return <th className={`cap-sort${on ? " on" : ""}${className ? ` ${className}` : ""}`} aria-sort={on ? (sort.dir < 0 ? "descending" : "ascending") : undefined}>
-    <SortButton sortKey={sortKey} sort={sort}>{children}</SortButton></th>;
+    {extra ? <div className="cap-th">{button}{extra}</div> : button}</th>;
 }
 
 /** Contact value; muted with a tip when it comes from the store records. */
@@ -215,44 +221,61 @@ const keepPhoneTogether = (value) => String(value || "").replace(/\) (?=\d)/g, "
 /** Clicks on these inside a row do their own thing and don't select the row. */
 const isControl = (target) => !!target.closest("button, a, select, input, textarea, label, [role='dialog']");
 
-/**
- * Selection bar above the table: how many rows are selected, Select all / Clear, and the bulk actions
- * (change status, delete). With nothing selected it explains how to select.
- */
-function CapsSelectionBar({ total, selected, onSelectAll, onClear }) {
-  const count = selected.length;
-  return <div className={`cap-selbar${count ? " on" : ""}`} role="region" aria-label="Selected stores">
-    {count ? <b role="status">{formatNumber(count)} selected</b>
-      : <span className="muted"><Icon name="mouse-pointer-click" />Click rows to select them · Shift+click selects a range</span>}
-    {count < total && <button type="button" className="btn link" onClick={onSelectAll}><Icon name="check-check" />Select all {formatNumber(total)}</button>}
-    {count > 0 && <>
-      <button type="button" className="btn link" onClick={onClear}><Icon name="x" />Clear selection</button>
-      <div className="cap-selacts">
-        <label className="cap-selstatus"><span>Change status to</span>
-          <select value="" aria-label={`Change the status of ${count} selected store${count === 1 ? "" : "s"}`}
-            onChange={(event) => { if (event.target.value) askBulkCapStatus(selected, event.target.value, onClear); }}>
-            <option value="">Choose…</option>
-            {CAP_STATES.map((status) => <option key={status} value={status}>{status}</option>)}
-          </select></label>
-        <button type="button" className="btn sm danger round" onClick={() => askBulkDeleteCaps(selected, onClear)}>
-          <Icon name="trash-2" />Delete {formatNumber(count)}</button>
-      </div>
-    </>}
-  </div>;
+const plural = (count, word) => `${formatNumber(count)} ${word}${count === 1 ? "" : "s"}`;
+
+/** Shown in a selection menu while nothing is selected. */
+function NothingSelected({ total, onSelectAll }) {
+  return <>
+    <div className="mnu-note">No stores selected yet. Click rows in the list to select them — Shift+click selects a range.</div>
+    <MenuItem onSelect={onSelectAll}><Icon name="check-check" />Select all {formatNumber(total)}</MenuItem>
+  </>;
 }
 
-function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick }) {
+/** Icon beside the Status column title: changes the status of the selected stores. */
+function BulkStatusMenu({ selected, total, onSelectAll, onDone }) {
+  const count = selected.length;
+  return <MenuButton align="right" className={`cap-hbtn${count ? " on" : ""}`} trigger={<Icon name="refresh-cw" />}
+    label={count ? `Change the status of ${plural(count, "selected store")}` : "Change the status of selected stores"}
+    tip={count ? `Change the status of ${plural(count, "selected store")}` : "Change the status of selected stores"}>
+    {count ? <>
+      <div className="mnu-head">Change {plural(count, "selected store")} to</div>
+      {CAP_STATES.map((status) => <MenuItem key={status} onSelect={() => askBulkCapStatus(selected, status, onDone)}>
+        <span className="d" style={{ background: CAP_STATUS_COLOR[status] }} />{status}</MenuItem>)}
+    </> : <NothingSelected total={total} onSelectAll={onSelectAll} />}
+  </MenuButton>;
+}
+
+/** Icon beside the Actions column title: select all, clear, or delete the selected stores. Shows how many are selected. */
+function SelectionMenu({ selected, total, onSelectAll, onClear }) {
+  const count = selected.length;
+  return <MenuButton align="right" className={`cap-hbtn${count ? " on" : ""}`}
+    trigger={<><Icon name="check-check" />{count > 0 && <span className="cap-hcount">{count > 99 ? "99+" : count}</span>}</>}
+    label={count ? `${plural(count, "store")} selected — selection options` : "Select stores"}
+    tip={count ? `${plural(count, "store")} selected` : "Select stores"}>
+    {count ? <>
+      <div className="mnu-head">{plural(count, "store")} selected</div>
+      {count < total && <MenuItem onSelect={onSelectAll}><Icon name="check-check" />Select all {formatNumber(total)}</MenuItem>}
+      <MenuItem onSelect={onClear}><Icon name="x" />Clear selection</MenuItem>
+      <div className="mnu-div" />
+      <MenuItem danger onSelect={() => askBulkDeleteCaps(selected, onClear)}><Icon name="trash-2" />Delete {plural(count, "selected store")}</MenuItem>
+    </> : <NothingSelected total={total} onSelectAll={onSelectAll} />}
+  </MenuButton>;
+}
+
+function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, selected, onSelectAll, onClear }) {
   const { items, pagerProps } = usePaged("cap", rows);
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table" role="grid" aria-multiselectable="true"><thead><tr>
     <SortHeader sortKey="num" sort={sort} className="c-snum">Store #</SortHeader>
     {showAssessment && <SortHeader sortKey="aid" sort={sort} className="cap-aid">Assessment ID</SortHeader>}
     <th>Franchisee</th><th className="hide-sm">Email Address</th><th className="hide-sm cap-phone">Phone Number</th>
-    <SortHeader sortKey="status" sort={sort} className="cap-statuscol">Status</SortHeader>
+    <SortHeader sortKey="status" sort={sort} className="cap-statuscol"
+      extra={<BulkStatusMenu selected={selected} total={rows.length} onSelectAll={onSelectAll} onDone={onClear} />}>Status</SortHeader>
     {showDue && <SortHeader sortKey="due" sort={sort} className="cap-duecol">Due Date</SortHeader>}
     <th className="hide-sm cap-notes">Notes</th>
     <th className="cap-sort cap-sort2 hide-sm cap-date"><SortButton sortKey="added" sort={sort}>Date Added</SortButton>
       <SortButton sortKey="updated" sort={sort}>Last Updated</SortButton></th>
-    <th className="c-act">Actions</th>
+    <th className="c-act"><div className="cap-th">Actions
+      <SelectionMenu selected={selected} total={rows.length} onSelectAll={onSelectAll} onClear={onClear} /></div></th>
   </tr></thead><tbody>
     {items.map(({ record, contact }) => {
       const store = ctx.storeByNum.get(String(record.store_num));
@@ -329,7 +352,7 @@ export default function CapsView() {
   }
   const clearPicked = () => { setPicked(new Set()); lastPicked.current = null; };
   const pickAll = () => setPicked(new Set(rows.map((row) => row.record.id)));
-  useToolbarCount(ctx.capsReady ? `${formatNumber(rows.length)} store${rows.length !== 1 ? "s" : ""} · ${formatNumber(summary.completed)} completed` : "");
+  useToolbarCount(ctx.capsReady ? `${formatNumber(rows.length)} store${rows.length !== 1 ? "s" : ""} · ${formatNumber(summary.completed)} completed${selected.length ? ` · ${formatNumber(selected.length)} selected` : ""}` : "");
 
   if (!ctx.capsReady) return <EmptyState icon="database" title="The CAP tab needs a quick database update">Run migrate-caps.sql in the Supabase SQL Editor, then click Refresh. Other tabs are not affected.</EmptyState>;
   if (!ctx.caps.length) {
@@ -352,7 +375,8 @@ export default function CapsView() {
     <CapsFilters filter={filter} anyFilter={anyFilter} showDue={showDue} showAssessment={showAssessment} />
     {outside > 0 && <div className="cap-outside" role="status"><Icon name="info" />
       {outside === 1 ? "1 store matches" : `${formatNumber(outside)} stores match`} your search by store #{showAssessment ? " or Assessment ID" : ""} but {outside === 1 ? "is" : "are"} hidden by the filters — shown anyway.</div>}
-    {rows.length > 0 && <CapsSelectionBar total={rows.length} selected={selected} onSelectAll={pickAll} onClear={clearPicked} />}
-    {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} showAssessment={showAssessment} picked={shownPicked} onPick={pickRow} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
+    <div className="cap-sr" role="status" aria-live="polite">{selected.length ? `${plural(selected.length, "store")} selected` : ""}</div>
+    {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} showAssessment={showAssessment} picked={shownPicked} onPick={pickRow}
+      selected={selected} onSelectAll={pickAll} onClear={clearPicked} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
   </>;
 }

@@ -1,9 +1,9 @@
   /* ---------- CAP (Corrective Action Plan) ---------- */
-  .badge.cap-none,.cap-sel.cap-none{background:var(--danger-soft);color:#a12f23}
-  .badge.cap-sent,.cap-sel.cap-sent{background:#e3effa;color:#225f91}
-  .badge.cap-wip,.cap-sel.cap-wip{background:var(--warn-soft);color:#8a5600}
-  .badge.cap-review,.cap-sel.cap-review{background:#efe8fb;color:#5a3a9e}
-  .badge.cap-done,.cap-sel.cap-done{background:var(--ok-soft);color:#146c3a}
+  .badge.cap-none,.cap-pill.cap-none{background:var(--danger-soft);color:#a12f23}
+  .badge.cap-sent,.cap-pill.cap-sent{background:#e3effa;color:#225f91}
+  .badge.cap-wip,.cap-pill.cap-wip{background:var(--warn-soft);color:#8a5600}
+  .badge.cap-review,.cap-pill.cap-review{background:#efe8fb;color:#5a3a9e}
+  .badge.cap-done,.cap-pill.cap-done{background:var(--ok-soft);color:#146c3a}
 
   /* Compact progress strip (one line on wide screens) */
   .cap-prog{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 10px;box-shadow:var(--shadow)}
@@ -40,10 +40,6 @@
   .cap-fromstore{color:var(--ink-soft)}
   .cap-table a{color:inherit;text-decoration:none} .cap-table a:hover{color:var(--green-dark);text-decoration:underline}
   .cap-nostore{font-weight:700;color:var(--ink-soft)}
-  .cap-sel{height:28px;border:none;border-radius:999px;padding:0 8px 0 10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer}
-  .cap-sel:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
-  .cap-sel:disabled{opacity:.6;cursor:progress}
-  .cap-sel option{background:var(--surface);color:var(--ink)}
 
   /* Add / edit and import dialogs */
   .cap-storeinfo{font-size:12.5px;min-height:20px;margin-bottom:12px;color:var(--ink)}
@@ -62,19 +58,40 @@
   .cap-frcol{width:64px;text-align:center}
   .cap-frcheck tr.cap-frok td{background:var(--ok-soft);transition:background-color .2s ease-out}
   .cap-frfile{display:block;font-size:11.5px;color:#8a5600}
-  /* Row selection (click to highlight) and the bulk-action bar */
+  /* Status picker in each row: a colored pill with a dot and a chevron */
+  .cap-pill{position:relative;display:inline-flex;align-items:center;height:32px;border-radius:999px;transition:box-shadow var(--t-fast) var(--ease-out),opacity var(--t-fast) ease}
+  .cap-pill:hover{box-shadow:0 0 0 1px currentColor}
+  .cap-pill:focus-within{outline:3px solid var(--yellow);outline-offset:1px}
+  .cap-pill.busy{opacity:.6}
+  .cap-pill .d{position:absolute;left:11px;width:8px;height:8px;border-radius:50%;pointer-events:none}
+  .cap-pill .car{position:absolute;right:9px;width:14px;height:14px;pointer-events:none}
+  .cap-sel{appearance:none;-webkit-appearance:none;height:32px;min-width:136px;border:none;border-radius:999px;background:transparent;color:inherit;
+    padding:0 30px 0 25px;font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer}
+  .cap-sel:focus{outline:none}
+  .cap-sel:disabled{cursor:progress}
+  .cap-sel option{background:var(--surface);color:var(--ink);font-weight:500}
+
+  /* Column titles with a selection icon (Status, Actions) */
+  .cap-th{display:flex;align-items:center;gap:6px}
+  .c-act .cap-th{justify-content:flex-end}
+  .cap-hbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid transparent;border-radius:8px;
+    background:none;color:var(--ink-soft);cursor:pointer;transition:background var(--t-fast) ease,color var(--t-fast) ease,border-color var(--t-fast) ease}
+  .cap-hbtn [data-lucide]{width:16px;height:16px}
+  .cap-hbtn:hover{background:var(--lime-tint);border-color:var(--line);color:var(--ink)}
+  .cap-hbtn:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .cap-hbtn.on{background:var(--green-soft);border-color:var(--green);color:var(--green-dark)}
+  .mnu.open .cap-hbtn{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .cap-hcount{position:absolute;top:-7px;right:-8px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--green);color:#fff;
+    font-size:10.5px;font-weight:800;line-height:18px;text-align:center}
+  .cap-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* Row selection (click to highlight) */
   .cap-table tbody tr{cursor:pointer}
   .cap-table tbody tr td{transition:background-color .15s ease-out}
   .cap-table tbody tr:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
   .cap-table tbody tr:hover td{background:var(--lime-tint)}
   .cap-table tbody tr.cap-selrow td{background:var(--lime-soft)}
   .cap-table tbody tr.cap-selrow td:first-child{box-shadow:inset 4px 0 0 var(--green)}
-  .cap-selbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:44px;margin:0 0 8px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:13px}
-  .cap-selbar.on{border-color:var(--green);background:var(--lime-soft)}
-  .cap-selbar [data-lucide]{width:15px;height:15px;vertical-align:-3px;margin-right:4px}
-  .cap-selacts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
-  .cap-selstatus{display:inline-flex;align-items:center;gap:6px;font-weight:600}
-  .cap-selstatus select{min-height:34px}
   .cap-err{color:var(--danger)} .cap-storeinfo .cap-err [data-lucide]{color:var(--danger)}
   .cap-src{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:10.5px;font-weight:600;vertical-align:1px}
   .cap-src [data-lucide]{width:11px;height:11px}

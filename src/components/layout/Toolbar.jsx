@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import MenuButton, { MenuItem } from "../ui/MenuButton.jsx";
 import Icon from "../ui/Icon.jsx";
 import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
@@ -25,10 +26,6 @@ function searchPlaceholder(tab) {
 /** "Log issue", "Add store" (onboarding), "Add FBC / OM" or "Log call", depending on the tab. */
 function primaryAction(tab) {
   if (tab === "staff") return ["Add FBC / OM", () => openStaffForm(null)];
-  if (tab === "caps") return ["Add store", () => {
-    if (!getContext().capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
-    openCapForm();
-  }];
   if (tab === "calls") return ["Log call", () => {
     if (!getContext().callLogsReady) { toast("Run migrate-call-logs.sql first", "err"); return; }
     openCallLog(null);
@@ -64,6 +61,20 @@ function TerritoryFilter() {
   </select>;
 }
 
+/** CAP tab: one "Add stores" button that opens a menu — add one store, or import a spreadsheet. */
+function CapsAddMenu({ ready }) {
+  const guard = (open) => () => {
+    if (!ready) { toast("Run migrate-caps.sql first", "err"); return; }
+    open();
+  };
+  return <MenuButton trigger={<><Icon name="plus" /><span>Add stores</span><Icon name="chevron-down" className="car" /></>}>
+    <MenuItem onSelect={guard(() => openCapForm())}><Icon name="plus" />
+      <span className="mnu-txt"><b>Add a store</b><small>Pick one store and fill in its details</small></span></MenuItem>
+    <MenuItem onSelect={guard(openCapsImport)}><Icon name="file-spreadsheet" />
+      <span className="mnu-txt"><b>Import spreadsheet</b><small>Add or update many stores from Excel</small></span></MenuItem>
+  </MenuButton>;
+}
+
 export default function Toolbar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
@@ -91,6 +102,7 @@ export default function Toolbar() {
         </span>}
         <span className="count">{countText}</span>
         {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name={primary[2] || "plus"} /><span>{primary[0]}</span></button>}
+        {tab === "caps" && <CapsAddMenu ready={ctx.capsReady} />}
         {tab === "ezcater" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each ezCater store" onClick={() => {
           if (!ctx.onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
           openOnboardingEmail(null, "ez");
@@ -103,10 +115,6 @@ export default function Toolbar() {
           if (!ctx.walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
           openWalmartEmail();
         }}><Icon name="mail" />Email message</button>}
-        {tab === "caps" && <button type="button" className="btn outline round" title="Add many stores from an Excel spreadsheet" onClick={() => {
-          if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
-          openCapsImport();
-        }}><Icon name="upload" />Import spreadsheet</button>}
         {tab === "caps" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each store" onClick={() => {
           if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
           openCapEmail();
