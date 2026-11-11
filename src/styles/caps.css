@@ -55,6 +55,13 @@
   .cap-aid{font-variant-numeric:tabular-nums;white-space:nowrap}
   .cap-outside{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:12.5px;color:var(--ink-soft)}
   .cap-outside [data-lucide]{width:14px;height:14px;flex:none}
+  .cap-frcheck{background:var(--warn-soft);color:#5c3b00}
+  .cap-frbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+  .cap-frall{display:inline-flex;align-items:center;gap:8px;min-height:32px;font-weight:700;cursor:pointer}
+  .cap-frall input,.cap-frcol input{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
+  .cap-frcol{width:64px;text-align:center}
+  .cap-frcheck tr.cap-frok td{background:var(--ok-soft);transition:background-color .2s ease-out}
+  .cap-frfile{display:block;font-size:11.5px;color:#8a5600}
   .cap-err{color:var(--danger)} .cap-storeinfo .cap-err [data-lucide]{color:var(--danger)}
   .cap-src{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:10.5px;font-weight:600;vertical-align:1px}
   .cap-src [data-lucide]{width:11px;height:11px}

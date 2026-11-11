@@ -241,7 +241,8 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment }) {
           <EmailButton record={record} email={contact.email} /></div></td>
         {showDue && <td className="cap-duecol">{record.due_date
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
-          : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}
+          : normalizeCapStatus(record.status) === "Completed" ? <span className="muted">—</span>
+            : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}
         <td className="hide-sm cap-notes">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
         <AddedUpdatedCell record={record} historyReady={ctx.capsHistoryReady} />
         <td className="c-act"><div className="row-acts">

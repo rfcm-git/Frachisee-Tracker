@@ -6,7 +6,7 @@ import { local } from "../../lib/storage.js";
 import { confirmAction } from "../../state/dialogs.js";
 import { saveSucceeded, toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
-import { capChanges, capHistoryField, cleanAssessmentId, contactToSave, findCapByAssessment, storeContactDefaults } from "../../domain/caps.js";
+import { capChanges, capHistoryField, normalizeCapStatus, cleanAssessmentId, contactToSave, findCapByAssessment, storeContactDefaults } from "../../domain/caps.js";
 import { nowIso } from "../../lib/format.js";
 import { cleanStoreNumber } from "../../lib/text.js";
 
@@ -68,7 +68,8 @@ export async function updateCap(record, { name, email, phone, status, notes, due
   if (name !== undefined || email !== undefined || phone !== undefined) Object.assign(fields, contactFields(ctx, record.store_num, { name, email, phone }));
   if (status !== undefined) fields.status = status;
   if (notes !== undefined) fields.notes = String(notes || "").trim();
-  if (dueDate !== undefined) Object.assign(fields, dueField(ctx, dueDate));
+  // Completed CAPs keep their due date (also when this save completes it).
+  if (dueDate !== undefined && (fields.status ?? normalizeCapStatus(record.status)) !== "Completed") Object.assign(fields, dueField(ctx, dueDate));
   const changes = capChanges(record, fields);
   if (!changes.length) {
     if (!quiet) toast("No changes to save");

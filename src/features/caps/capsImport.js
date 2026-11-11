@@ -1,6 +1,7 @@
 /*
  * CAP spreadsheet: template, export of the current list, reading and checking rows.
- * Store Number, Assessment ID, Status and an optional Due Date are read: franchisee, email and phone always come from the store records.
+ * Store Number, Franchisee, Assessment ID, Status and an optional Due Date are read. Email and phone always come from the store records.
+ * The Franchisee in the file is only a check: when it doesn't match the store's franchisee in our records, the row waits for the user's approval.
  * A store is "already in the CAP list" when its Assessment ID or its store number is. Assessment IDs are unique: one never moves to another store.
  * Status "Not Started" (or blank) adds a store that is not in the CAP list yet, at No Action Yet; stores already in the list keep their status.
  * Status "In Progress" / "In Review" adds the store at that status, or changes a store already in the list to it.
@@ -9,21 +10,23 @@
  */
 import { CAP_STATES } from "../../config/constants.js";
 import { capContact, capDueDate, capAssessmentId, cleanAssessmentId, findCapByAssessment, formatDueDate, normalizeCapStatus, sameAssessmentId, storeContactDefaults } from "../../domain/caps.js";
+import { franchiseeName } from "../../domain/context.js";
 import { localDateInput, pad2 } from "../../lib/format.js";
 import { cleanStoreNumber, compareNumbers } from "../../lib/text.js";
 import { loadXlsx } from "../../lib/xlsx.js";
 
 /** Columns read on import. */
-export const CAP_COLUMNS = ["Store Number", "Assessment ID", "Status", "Due Date"];
-const COLUMN_WIDTHS = [14, 14, 14, 14];
+export const CAP_COLUMNS = ["Store Number", "Franchisee", "Assessment ID", "Status", "Due Date"];
+const COLUMN_WIDTHS = [14, 30, 14, 14, 14];
 /** The "Current list" export adds these for reading only — they are ignored on import. */
-const EXPORT_COLUMNS = [...CAP_COLUMNS, "Status in App", "Franchisee", "Email Address", "Phone Number", "Notes"];
-const EXPORT_WIDTHS = [...COLUMN_WIDTHS, 16, 30, 32, 18, 50];
+const EXPORT_COLUMNS = [...CAP_COLUMNS, "Status in App", "Email Address", "Phone Number", "Notes"];
+const EXPORT_WIDTHS = [...COLUMN_WIDTHS, 16, 32, 18, 50];
 const SHEET_NAME = "CAPs";
 
 /** Field of each column, with the header spellings accepted for it. Other columns are ignored. */
 const HEADERS = {
   num: ["store number", "store #", "store", "store no", "store num"],
+  fr: ["franchisee", "franchisee name", "franchise owner", "owner", "owner name"],
   aid: ["assessment id", "assessmentid", "assessment #", "assessment no", "assessment number", "assessment"],
   status: ["status", "cap status"],
   due: ["due date", "submission due date", "due", "deadline"],
@@ -87,7 +90,9 @@ function instructionsSheet(XLSX) {
     ["• Assessment ID is the store's assessment ID. It is used to check whether the store is already in the CAP list, so fill it in whenever you have it."],
     ["    Each Assessment ID must be unique: it can't be repeated in the file or belong to a different store in the CAP list (those rows are skipped)."],
     ["    A store already in the CAP list without an Assessment ID gets the one in the file."],
-    ["• Franchisee, Email Address and Phone Number are filled in automatically from the store records — don't add them."],
+    ["• Franchisee is the franchisee's name. It is checked against the franchisee of that store number in our records."],
+    ["    If it is blank or doesn't match, the row waits in the app until you approve it (one by one or Select all). Unapproved rows are not imported."],
+    ["• Email Address and Phone Number are filled in automatically from the store records — don't add them."],
     ["• Status is Not Started, In Progress, In Review or Closed:"],
     ["    Not Started — adds the store to the CAP list at No Action Yet. If the store is already in the list, its status is left as it is (not added again)."],
     ["    In Progress / In Review — adds the store at that status, or changes a store already in the list to it."],
@@ -100,9 +105,9 @@ function instructionsSheet(XLSX) {
     ["• Nothing is saved until you check the preview and click Import in the app."], [""],
     ["Example rows (do not paste these into the CAPs sheet):"],
     CAP_COLUMNS,
-    ["99901", "A-1001", "Not Started", ""],
-    ["99902", "A-1002", "In Review", "11/15/2026"],
-    ["99903", "A-1003", "Closed", ""],
+    ["99901", "Jane Doe", "A-1001", "Not Started", ""],
+    ["99902", "Jane Doe", "A-1002", "In Review", "11/15/2026"],
+    ["99903", "John Smith", "A-1003", "Closed", ""],
     [""],
     ["Row 1: adds store 99901 at No Action Yet with no due date. Row 2: adds store 99902 at In Review, due Nov 15, 2026 (or changes it to In Review if it is already in the list)."],
     ["Row 3: store 99903 is added at Completed — or, if it (or Assessment ID A-1003) is already in the CAP list, it is changed to Completed."],
@@ -131,16 +136,16 @@ export async function downloadCapsTemplate() {
 }
 
 /**
- * Every CAP record with its Assessment ID, status, franchisee, email, phone and notes. The file Status matches the app
+ * Every CAP record with its franchisee, Assessment ID, status, email, phone and notes. The file Status matches the app
  * (Closed for Completed, In Progress, In Review, else Not Started), so importing the file back changes nothing.
- * Only Store Number, Assessment ID, Status and Due Date are read back on import.
+ * Only Store Number, Franchisee, Assessment ID, Status and Due Date are read back on import.
  */
 export async function downloadCapsList(ctx) {
   const rows = ctx.caps.slice().sort((a, b) => compareNumbers(a.store_num, b.store_num)).map((record) => {
     const contact = capContact(ctx, record);
     const status = normalizeCapStatus(record.status);
     const fileStatus = FILE_STATUS_LABELS[APP_TO_FILE[status] || "notStarted"];
-    return [record.store_num, capAssessmentId(record), fileStatus, capDueDate(record), status, contact.name, contact.email, contact.phone, record.notes || ""];
+    return [record.store_num, contact.name, capAssessmentId(record), fileStatus, capDueDate(record), status, contact.email, contact.phone, record.notes || ""];
   });
   writeWorkbook(await loadXlsx(), EXPORT_COLUMNS, EXPORT_WIDTHS, rows, `cap-list-${localDateInput()}.xlsx`);
 }
@@ -176,7 +181,9 @@ export async function readCapsFile(file) {
 /**
  * Checks every row against the store list and the saved records, without saving.
  * Each row: { row, num, aid, fileStatus, ok, kind, reason, msg, shown, save (new record),
- *             existingId, patch + changes (always saved), duePatch + dueChange (saved only when allowed) }.
+ *             existingId, patch + changes (always saved), duePatch + dueChange (saved only when allowed),
+ *             frFile, frRecord, frIssue ("" | "missing" | "differs"), needsApproval }.
+ * needsApproval: a row that would save something but whose Franchisee is blank or doesn't match our records; it is only imported once approved.
  * kind: "add" (not in the CAP list) | "existing" (already in the list, found by Assessment ID or store number).
  * changes / dueChange: { field, label, before, after }.
  * reason (skipped rows): "missing" | "repeat" | "repeatAid" | "badStatus" | "notFound" (not in the store database)
@@ -224,7 +231,7 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
       return out;
     }
     return planExisting(ctx, out, existing, values, withDue, skip);
-  });
+  }).map((out, index) => (out.ok ? checkFranchisee(ctx, out, parsed.rows[index].values) : out));
 
   const ok = rows.filter((row) => row.ok);
   const skipped = rows.filter((row) => !row.ok);
@@ -243,10 +250,49 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
     /** Existing rows with a different due date in the file: saved only when allowed. */
     updates: existing.filter((row) => row.dueChange),
     unchanged: existing.filter((row) => !row.changes.length && !row.dueChange),
+    /** Rows waiting for approval: the Franchisee in the file is blank or doesn't match our records. */
+    frFlags: ok.filter((row) => row.needsApproval),
     notFound: skipped.filter((row) => row.reason === "notFound"),
     aidConflicts: skipped.filter((row) => row.reason === "aidTaken" || row.reason === "aidDiffers" || row.reason === "repeatAid"),
     problems: skipped.filter((row) => !["notFound", "aidTaken", "aidDiffers", "repeatAid"].includes(row.reason)),
     skipped,
+  };
+}
+
+/** "Marwaha, Rohit" -> "marwaha rohit": lower case, words only, sorted, so word order and punctuation don't matter. */
+const nameKey = (value) => String(value || "").toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean).sort().join(" ");
+
+/** True when two franchisee names are the same person (ignoring case, punctuation and word order). */
+export const sameFranchiseeName = (a, b) => !!nameKey(a) && nameKey(a) === nameKey(b);
+
+/**
+ * Compares the Franchisee in the file with the store's franchisee in our records (or the name saved on the CAP).
+ * Only rows that would save something need approval; rows with nothing to change are left alone.
+ */
+function checkFranchisee(ctx, out, values) {
+  const store = ctx.storeByNum.get(out.num);
+  const record = out.existingId != null ? ctx.caps.find((item) => item.id === out.existingId) : null;
+  const fromStore = store ? franchiseeName(ctx, store.franchisee_id) : "";
+  const saved = record ? capContact(ctx, record).name : "";
+  out.frFile = String(values.fr || "").replace(/\s+/g, " ").trim();
+  out.frRecord = fromStore || saved;
+  out.frIssue = !out.frFile ? "missing" : sameFranchiseeName(out.frFile, fromStore) || sameFranchiseeName(out.frFile, saved) ? "" : "differs";
+  const savesSomething = out.kind === "add" || out.changes.length > 0 || !!out.dueChange;
+  out.needsApproval = !!out.frIssue && savesSomething;
+  return out;
+}
+
+/**
+ * Keeps only what may be saved: rows waiting for approval are dropped unless their row number is in approved (a Set).
+ * waiting: flagged rows not approved yet.
+ */
+export function approvedPlan(plan, approved) {
+  const keep = (row) => !row.needsApproval || approved.has(row.row);
+  const pick = (list) => list.filter(keep);
+  return {
+    ...plan, adds: pick(plan.adds), existing: pick(plan.existing), changed: pick(plan.changed), closes: pick(plan.closes),
+    statusChanges: pick(plan.statusChanges), assessmentFills: pick(plan.assessmentFills), updates: pick(plan.updates),
+    waiting: plan.frFlags.filter((row) => !approved.has(row.row)),
   };
 }
 
@@ -257,8 +303,9 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
 function planExisting(ctx, out, existing, values, withDue, skip) {
   const before = normalizeCapStatus(existing.status);
   const beforeDue = capDueDate(existing);
-  const closing = out.fileStatus === "closed";
-  const due = withDue && !closing ? readDueDate(values.due) : "";
+  // Completed CAPs keep their due date: none for Closed rows, or for a store that stays Completed.
+  const completedAfter = out.fileStatus === "closed" || (out.fileStatus === "notStarted" && before === "Completed");
+  const due = withDue && !completedAfter ? readDueDate(values.due) : "";
   if (due === null) return skip("badDate", `Due Date "${values.due}" is not a date — use month/day/year, e.g. 11/15/2026`);
   Object.assign(out, { ok: true, kind: "existing", existingId: existing.id });
 
@@ -276,8 +323,14 @@ function planExisting(ctx, out, existing, values, withDue, skip) {
     out.dueChange = { field: "due_date", label: "Due Date", before: beforeDue ? formatDueDate(beforeDue) : "—", after: formatDueDate(due) };
   }
 
-  const parts = ["Already in the CAP list", ...out.changes.map((change) => (change.field === "status" ? `${change.before} → ${change.after}` : `Assessment ID ${change.after} added`))];
-  if (!out.changes.length) parts.push(out.fileStatus === "notStarted" ? "not added again" : "no changes");
+  // Matched on both Assessment ID and store # (a different ID was already skipped), or on the store # alone.
+  const match = out.aid && capAssessmentId(existing) ? "same Assessment ID and store #" : "same store #";
+  const parts = [`Already in the CAP list (${match})`, ...out.changes.map((change) => (change.field === "status" ? `${change.before} → ${change.after}` : `Assessment ID ${change.after} added`))];
+  // Not Started never moves a store back: e.g. Email Sent stays, since the franchisee was already emailed.
+  if (out.fileStatus === "notStarted" && before !== CAP_STATES[0]) {
+    parts.push(before === "Email Sent" ? "Email Sent kept — franchisee already emailed" : `${before} kept`);
+  }
+  if (!out.changes.length && !(out.fileStatus === "notStarted" && before !== CAP_STATES[0])) parts.push(out.fileStatus === "notStarted" ? "not added again" : "no changes");
   if (out.dueChange) parts.push("due date differs");
   out.msg = parts.join(" · ");
   const current = capContact(ctx, existing);

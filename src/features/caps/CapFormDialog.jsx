@@ -38,6 +38,8 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
   const [dueDate, setDueDate] = useState(() => capDueDate(record));
   const [assessmentId, setAssessmentId] = useState(() => capAssessmentId(record));
   const [saving, setSaving] = useState(false);
+  /** Completed CAPs keep their due date. */
+  const dueLocked = editing && status === "Completed";
   const lookupRef = useRef(null);
   if (capId != null && !record) return null;
 
@@ -83,7 +85,7 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
     const contact = { name: values.name.trim(), email: values.email.trim(), phone: values.phone.trim() ? phone10(values.phone) : "" };
     const assessment = ctx.capsAssessmentReady ? { assessmentId } : {};
     setSaving(true);
-    const ok = editing ? await updateCap(record, { ...contact, ...assessment, status, notes, dueDate }) : await createCap({ num: storeNum, ...contact, ...assessment, notes, dueDate });
+    const ok = editing ? await updateCap(record, { ...contact, ...assessment, status, notes, ...(dueLocked ? {} : { dueDate }) }) : await createCap({ num: storeNum, ...contact, ...assessment, notes, dueDate });
     setSaving(false);
     if (ok) close();
   }
@@ -127,17 +129,20 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
       <button type="button" className="btn link" style={{ padding: 0 }} onClick={useStoreRecords}><Icon name="rotate-ccw" />Use store records</button></div>}
 
     <div className="field" style={{ marginBottom: 12 }}><label>Status</label>
-      {editing ? <StatusButtons options={CAP_STATES} value={status} onChange={(value) => { setStatus(value); setBusy(true); }} label="Status" />
+      {editing ? <StatusButtons options={CAP_STATES} value={status} label="Status"
+        onChange={(value) => { setStatus(value); if (value === "Completed") setDueDate(capDueDate(record)); setBusy(true); }} />
         : <div className="cap-newstatus"><CapStatusBadge status={CAP_STATES[0]} /><span className="muted">New stores always start at {CAP_STATES[0]}. Change it from the list once you act on it.</span></div>}
     </div>
     {ctx.capsDueReady && <div className="field" style={{ marginBottom: 12 }}><label htmlFor="cap_due">Submission Due Date <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
       <div className="cap-due-row">
-        <input id="cap_due" type="date" value={dueDate} onChange={(event) => { setDueDate(event.target.value); setBusy(true); }} />
-        {DUE_SHORTCUTS.map((days) => <button type="button" key={days} className="btn sm outline round" data-tip={`Set the due date ${days} days from today`}
+        <input id="cap_due" type="date" value={dueDate} disabled={dueLocked} aria-describedby={dueLocked ? "cap_due_lock" : undefined}
+          onChange={(event) => { setDueDate(event.target.value); setBusy(true); }} />
+        {!dueLocked && DUE_SHORTCUTS.map((days) => <button type="button" key={days} className="btn sm outline round" data-tip={`Set the due date ${days} days from today`}
           onClick={() => { setDueDate(localDateInput(addDays(new Date(), days))); setBusy(true); }}>+{days} days</button>)}
-        {dueDate && <button type="button" className="btn link" onClick={() => { setDueDate(""); setBusy(true); }}><Icon name="x" />Clear</button>}
+        {!dueLocked && dueDate && <button type="button" className="btn link" onClick={() => { setDueDate(""); setBusy(true); }}><Icon name="x" />Clear</button>}
       </div>
-      {dueDate && <div className="help" style={{ marginTop: 6 }}><CapDueBadge record={{ due_date: dueDate, status }} /> You'll get a reminder {CAP_DUE_SOON_DAYS} days before, on the day, and if it is overdue.</div>}
+      {dueLocked ? <div id="cap_due_lock" className="help" style={{ marginTop: 6 }}><Icon name="lock" /> This CAP is Completed, so its due date can't be changed. Change the status first to edit it.</div>
+        : dueDate && <div className="help" style={{ marginTop: 6 }}><CapDueBadge record={{ due_date: dueDate, status }} /> You'll get a reminder {CAP_DUE_SOON_DAYS} days before, on the day, and if it is overdue.</div>}
     </div>}
     <div className="field"><label htmlFor="cap_notes">Notes</label>
       <textarea id="cap_notes" className="cl-ta" value={notes} placeholder="Updates, follow-ups or remarks" onChange={(event) => { setNotes(event.target.value); setBusy(true); }} /></div>
