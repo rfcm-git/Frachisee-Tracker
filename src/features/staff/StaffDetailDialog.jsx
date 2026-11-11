@@ -72,7 +72,7 @@ export default function StaffDetailDialog({ staffId }) {
         return <div className="store-line" key={store.id} {...clickableProps(() => { close(); openStore(store.id); })}>
           <div className="idot-col"><OpenIssueDot count={storeOpenIssues(ctx, store.num)} /></div><span className="num">{store.num}</span>
           <div className="meta"><div className="a">{franchiseeName(ctx, store.franchisee_id) || "—"} <StoreStatusIfClosed status={storeStatus(store)} /></div><div className="b">{location}</div></div>
-          <span className="sd-tags">{store.fbc_id === person.id && <span className="rl">FBC</span>}{store.om_id === person.id && <span className="rl">OM</span>}</span>
+          <span className="sd-tags">{store.fbc_id === person.id && <span className="rl rl-fbc">FBC</span>}{store.om_id === person.id && <span className="rl">OM</span>}</span>
           <Icon name="chevron-right" className="muted" />
         </div>;
       })}</div> : <p className="muted" style={{ margin: "8px 0" }}>{all.length ? "No stores match." : "No stores assigned yet."}</p>}

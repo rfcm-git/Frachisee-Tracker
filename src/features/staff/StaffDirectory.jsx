@@ -33,7 +33,7 @@ function StaffCard({ person, role, counts }) {
       <span className="sf-av">{(person.name || "?").slice(0, 1).toUpperCase()}</span>
       <div style={{ minWidth: 0, flex: 1 }}>
         <h3>{person.name}</h3>
-        <div className="sf-roles">{rolesOf(person).map((item) => <span className="rl" key={item}>{item}</span>)}</div>
+        <div className="sf-roles">{rolesOf(person).map((item) => <span className={`rl rl-${item.toLowerCase()}`} key={item}>{item}</span>)}</div>
       </div>
     </div>
     <div className="sf-mail">{email ? <><Icon name="mail" /><a className="clink" href={`mailto:${email}`} onClick={(event) => event.stopPropagation()}>{email}</a></> : <span className="muted">No email</span>}</div>

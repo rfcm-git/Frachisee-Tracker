@@ -21,8 +21,8 @@ function QuickReport({ quick }) {
   const run = async (format) => { setBusy(true); await runQuickReport(quick, format); setBusy(false); };
   return <div className="rt-q"><span className="rt-qic"><Icon name={quick.icon} /></span>
     <span className="rt-qt">{quick.title}<small>{typeTitle}</small></span>
-    <button type="button" className="iconbtn" data-tip="Download as Excel" aria-label={`${quick.title} as Excel`} disabled={busy} onClick={() => run("xlsx")}><Icon name="file-spreadsheet" /></button>
-    <button type="button" className="iconbtn" data-tip="Download as PDF" aria-label={`${quick.title} as PDF`} disabled={busy} onClick={() => run("pdf")}><Icon name="file-text" /></button>
+    <button type="button" className="btn sm outline round rp-dl" aria-label={`${quick.title} as Excel`} disabled={busy} onClick={() => run("xlsx")}><Icon name="file-spreadsheet" />Excel</button>
+    <button type="button" className="btn sm outline round rp-dl" aria-label={`${quick.title} as PDF`} disabled={busy} onClick={() => run("pdf")}><Icon name="file-text" />PDF</button>
     <button type="button" className="btn link" data-tip="Open the builder with these choices" onClick={() => openReport(quick.kind, quick.preset)}>Customize</button>
   </div>;
 }

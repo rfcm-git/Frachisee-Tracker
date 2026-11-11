@@ -82,3 +82,14 @@
   }
   @keyframes scrimIn{from{opacity:0}to{opacity:1}}
   @media (prefers-reduced-motion: reduce){ .app .sidebar{transition:none!important} .sb-scrim{animation:none} }
+
+  /* FBC / OM: FBC badges in blue so the two roles read apart at a glance (OM stays yellow) */
+  .rl.rl-fbc,.pcard .rl.rl-fbc{color:#225f91;background:#e3effa}
+
+  /* Reports: labelled Excel / PDF download buttons */
+  .rp-dl{height:30px;padding:0 10px;font-size:12px;gap:5px}
+  .rp-dl [data-lucide]{width:14px;height:14px}
+
+  /* Franchisees: the empty detail panel fills the column and stays in view while the list scrolls */
+  .card:has(> .fr-detail-placeholder){position:sticky;top:80px;border-style:dashed;background:rgba(255,255,255,.7)}
+  .fr-detail-placeholder{min-height:min(520px,calc(100vh - 240px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
