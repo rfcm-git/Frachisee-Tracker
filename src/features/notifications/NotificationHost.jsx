@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import { formatTimestamp, plural, shortTime } from "../../lib/format.js";
 import {
-  clearNotifications, deliverIncoming, markAllRead, markRead, markUnread, removeNotification,
+  clearNotifications, deliverIncoming, deliverAllIncoming, markAllRead, markRead, markUnread, removeNotification,
   setNotifyPanelOpen, setNotifyPosition, useNotificationStore,
 } from "../../state/notificationStore.js";
 import { openCallDetails, openCapForm, openScheduleConfirm } from "../../state/dialogs.js";
@@ -17,6 +17,21 @@ const EDGE = 12;         // closest it may sit to the window edge
 const SHOW_MS = 3000;    // how long a new card stays up
 const QUEUED_SHOW_MS = 1600;
 const DROP_MS = 650;
+/** More waiting cards than this show as one summary card instead of one after another. */
+const BURST = 3;
+
+/** One card standing in for a burst of notifications: "12 new reminders" + the most common kinds. */
+function burstItem(incoming) {
+  const counts = new Map();
+  incoming.forEach((item) => counts.set(item.title, (counts.get(item.title) || 0) + 1));
+  const kinds = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const shown = kinds.slice(0, 3).map(([title, count]) => (count > 1 ? `${title} ×${count}` : title)).join(" · ");
+  const tone = incoming.some((item) => item.tone === "err") ? "err" : incoming.some((item) => item.tone === "warn") ? "warn" : "";
+  return {
+    id: "burst", title: `${incoming.length} new reminders`, icon: "bell-ring", tone,
+    subtitle: kinds.length > 3 ? `${shown} · and more` : shown, body: "Open the bell to see them all.",
+  };
+}
 
 const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -220,7 +235,8 @@ export default function NotificationHost() {
 
   const pos = dragPos || clampPosition(storedPos);
   const unread = items.reduce((count, item) => count + (item.read ? 0 : 1), 0);
-  const current = incoming[0];
+  const burst = incoming.length > BURST;
+  const current = burst ? burstItem(incoming) : incoming[0];
 
   useEffect(() => {
     const onResize = () => setViewport((n) => n + 1);
@@ -228,10 +244,10 @@ export default function NotificationHost() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // With the panel open the new item shows there straight away.
+  // With the panel open new items show there straight away.
   useEffect(() => {
-    if (panelOpen && current) deliverIncoming();
-  }, [panelOpen, current]);
+    if (panelOpen && incoming.length) deliverAllIncoming();
+  }, [panelOpen, incoming.length]);
 
   useEffect(() => {
     if (!panelOpen) return undefined;
@@ -251,7 +267,7 @@ export default function NotificationHost() {
   }, [panelOpen]);
 
   function landed() {
-    deliverIncoming();
+    if (burst) deliverAllIncoming(); else deliverIncoming();
     setCaught((n) => n + 1);
   }
 
@@ -309,7 +325,7 @@ export default function NotificationHost() {
     </button>
     {panelOpen ? <NotificationPanel pos={pos} items={items} unread={unread} panelRef={panelRef} onClose={() => setNotifyPanelOpen(false)} /> : null}
     {current && !panelOpen && !dragPos
-      ? <IncomingCard key={current.id} item={current} pos={pos} queued={incoming.length > 1} boxRef={boxRef} onLanded={landed} />
+      ? <IncomingCard key={current.id} item={current} pos={pos} queued={!burst && incoming.length > 1} boxRef={boxRef} onLanded={landed} />
       : null}
   </>;
 }

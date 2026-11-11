@@ -46,6 +46,14 @@ export function deliverIncoming() {
   });
 }
 
+/** Moves every waiting card into the box at once (a burst shown as one summary card). Newest ends up first. */
+export function deliverAllIncoming() {
+  useNotificationStore.setState((state) => {
+    if (!state.incoming.length) return state;
+    return { incoming: [], items: [...state.incoming.slice().reverse(), ...state.items].slice(0, MAX_ITEMS) };
+  });
+}
+
 const updateItems = (fn) => useNotificationStore.setState((state) => ({ items: fn(state.items) }));
 
 export const markRead = (id) => updateItems((items) => items.map((item) => (item.id === id && !item.read ? { ...item, read: true } : item)));

@@ -18,6 +18,13 @@
   .nt-card.warn{border-left-color:var(--yellow)} .nt-card.err{border-left-color:var(--danger)} .nt-card.ok{border-left-color:var(--ok)}
   .nt-timer{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--lime);transform-origin:left;animation:ntTimer linear forwards}
   .nt-card.warn .nt-timer{background:var(--yellow)}
+  /* Keep the card compact: one line of body text; on phones no body text and a narrower card */
+  .nt-card .nt-body{-webkit-line-clamp:1}
+  @media(max-width:600px){
+    .nt-card{width:min(280px,calc(100vw - 96px));padding:10px 6px 12px 10px;gap:8px}
+    .nt-card .nt-body{display:none}
+    .nt-card .nt-ic{width:28px;height:28px}
+  }
   @keyframes ntIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
   @keyframes ntTimer{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
