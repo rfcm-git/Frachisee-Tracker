@@ -24,7 +24,7 @@ export default function FranchiseesView() {
 
   const list = useMemo(() => filterFranchisees(ctx, { sq, terrFilter, issuesOnly }), [ctx, sq, terrFilter, issuesOnly]);
   const { items, pagerProps } = usePaged("fr", list);
-  useToolbarCount(`${list.length} of ${ctx.franchisees.length}`);
+  useToolbarCount(`${list.length.toLocaleString()} of ${ctx.franchisees.length.toLocaleString()}`);
 
   const selected = list.some((entry) => entry.franchisee.id === selectedFr) ? ctx.frById.get(selectedFr) : null;
 

@@ -78,7 +78,7 @@ function CallTable({ ctx, calls, sort }) {
     <table className="cl-table"><thead><tr>
       <th className="sortable on" onClick={toggleCallSort} data-tip={`Date and time of the latest update. Click to sort ${sort === "desc" ? "oldest" : "newest"} first`} aria-sort={sort === "desc" ? "descending" : "ascending"}>
         Date and Time<Icon name={sort === "desc" ? "arrow-down" : "arrow-up"} /></th>
-      <th>Franchisee Name</th><th>Store Number</th><th>Reason for Call</th><th>Result of Call</th><th className="c-act">Actions</th>
+      <th>Franchisee</th><th>Store #</th><th>Reason for call</th><th>Result of call</th><th className="c-act">Actions</th>
     </tr></thead><tbody>
       {items.map((call) => {
         const lastActivity = callLastActivity(call);

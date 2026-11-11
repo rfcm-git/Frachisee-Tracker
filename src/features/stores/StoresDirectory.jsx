@@ -35,7 +35,7 @@ export default function StoresDirectory() {
   const closedOnly = useUiStore((state) => state.closedOnly);
   const list = useMemo(() => filterStores(ctx, { sq: freeTextQuery(search), terrFilter, issuesOnly, closedOnly }), [ctx, search, terrFilter, issuesOnly, closedOnly]);
   const { items, pagerProps } = usePaged("st", list);
-  useToolbarCount(`${list.length} of ${ctx.stores.length}`);
+  useToolbarCount(`${list.length.toLocaleString()} of ${ctx.stores.length.toLocaleString()}`);
 
   if (!list.length) return <EmptyState icon="store" title="No stores match">Try a different search, territory, or filter.</EmptyState>;
 
@@ -48,7 +48,7 @@ export default function StoresDirectory() {
         {hint && <small className="mhint"><Icon name="search" />{hint}</small>}</td>
       <td>{franchiseeName(ctx, store.franchisee_id)}</td>
       <td className="hide-sm muted">{store.address || ""}<br />{[store.city, store.state].filter(Boolean).join(", ")}</td>
-      <td className="hide-sm muted">{store.phone ? <a className="clink" href={telHref(store.phone)} onClick={(event) => event.stopPropagation()}>{store.phone}</a> : ""}</td>
+      <td className="hide-sm muted">{store.phone ? <a className="clink" href={telHref(store.phone)} onClick={(event) => event.stopPropagation()}>{store.phone}</a> : "—"}</td>
       <td><PlatformChips store={store} /></td>
       <td style={{ textAlign: "right" }}><Icon name="chevron-right" /></td>
     </tr>)}

@@ -62,7 +62,8 @@ function coverageKpi(ctx, nums, range, territory) {
   const past = snapshotCounts(snapshotOn(ctx.snapshots, range.start), territory);
   return {
     key: "coverage", label: "3PD coverage", value: `${value.toFixed(1)}%`,
-    sub: `Uber Eats ${share("ue")}% · DoorDash ${share("dd")}% · Grubhub ${share("gh")}%`,
+    // Non-breaking spaces keep each "Grubhub 2%" together when the line wraps.
+    sub: `Uber\u00a0Eats\u00a0${share("ue")}% · DoorDash\u00a0${share("dd")}% · Grubhub\u00a0${share("gh")}%`,
     trend: past ? trendOf(value, corePercent(past), { kind: "pts" }) : null,
     noTrend: ctx.snapshotsReady ? "Trend starts as daily history builds up" : "Run migrate-coverage-snapshots.sql for trends",
     tip: `Onboarded Uber Eats, DoorDash and Grubhub slots across ${counts.open.toLocaleString()} open stores (${counts.all3.toLocaleString()} on all three).`,

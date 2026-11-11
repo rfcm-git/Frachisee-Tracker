@@ -13,7 +13,7 @@ import { setNavOnboardingOpen, setTab, toggleSidebar, useUiStore } from "../../s
 function TabButton({ tab, active, icon, label, count, countId, countTip, kbd, sub = false }) {
   return <button type="button" className={`tab${sub ? " tab-sub" : ""}${active ? " active" : ""}`} title={kbd ? `${label} (${kbd} or Ctrl+K)` : label} aria-current={active ? "page" : undefined} onClick={() => setTab(tab)}>
     <span className="t-ic"><Icon name={icon} /></span><span className="t-lb">{label}</span>
-    {count !== undefined && (count !== "" || !countId) && <span className="badge-num" id={countId} data-tip={countTip}>{count}</span>}
+    {count !== undefined && (count !== "" || !countId) && <span className="badge-num" id={countId} data-tip={countTip}>{typeof count === "number" ? count.toLocaleString() : count}</span>}
     {kbd && <kbd className="t-kbd" aria-hidden="true">{kbd}</kbd>}
   </button>;
 }

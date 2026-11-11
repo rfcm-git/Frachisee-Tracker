@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import ContactCell from "../../components/ui/ContactCell.jsx";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
@@ -12,7 +13,7 @@ import { platformStatus, storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
 import { normalizeWmStage, wmHistory, wmPlatformStatus, wmStageClass } from "../../domain/walmart.js";
 import { wmCanEmail } from "../../domain/walmartEmail.js";
-import { formatNumber, formatTimestamp, telHref, timeOf } from "../../lib/format.js";
+import { formatNumber, formatTimestamp, timeOf } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openStore, openWalmartAdd, openWalmartImport, openWalmartUpdate } from "../../state/dialogs.js";
 import {
@@ -179,7 +180,6 @@ function SortHeader({ sortKey, sort, className = "", children }) {
 }
 
 /** "(714) 863-8900" never splits across lines. */
-const keepPhoneTogether = (value) => String(value || "").replace(/\) (?=\d)/g, ") ").replace(/(\d)-(\d)/g, "$1‑$2");
 
 /** Change-log entries of a record, newest first, for the Date Added / Last Updated cell. */
 function logEntries(record) {
@@ -202,10 +202,10 @@ function WalmartTable({ ctx, rows, sort }) {
   const { items, pagerProps } = usePaged("wm", rows);
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table wm-table-list"><thead><tr>
     <SortHeader sortKey="num" sort={sort} className="c-snum">Store #</SortHeader>
-    <th>Franchisee</th><th className="hide-sm">Email Address</th><th className="hide-sm cap-phone">Phone Number</th>
+    <th className="cap-fr">Franchisee</th><th className="hide-sm cap-contact">Contact</th>
     <SortHeader sortKey="stage" sort={sort} className="cap-statuscol">Stage</SortHeader>
     <SortHeader sortKey="emailed" sort={sort} className="cap-duecol">Emailed</SortHeader>
-    <th className="hide-sm cap-notes">Notes</th>
+    <th className="cap-notescol">Notes</th>
     <th className="cap-sort cap-sort2 hide-sm cap-date"><SortButton sortKey="added" sort={sort}>Date Added</SortButton>
       <SortButton sortKey="updated" sort={sort}>Last Updated</SortButton></th>
     <th className="c-act">Actions</th>
@@ -219,9 +219,8 @@ function WalmartTable({ ctx, rows, sort }) {
           ? <button type="button" className="ob-snum" data-tip="Open store information" onClick={() => openStore(store.id)}>{record.store_num}</button>
           : <span className="cap-nostore" data-tip="Not in the store list">{record.store_num}</span>}
           {store && storeStatus(store) !== "Open" && <div style={{ marginTop: 3 }}><StoreStatusIfClosed status={storeStatus(store)} /></div>}</td>
-        <td>{contact.name || <span className="muted">—</span>}</td>
-        <td className="hide-sm cap-email">{contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : <span className="muted">—</span>}</td>
-        <td className="hide-sm cap-phone">{contact.phone ? <a href={telHref(contact.phone)}>{keepPhoneTogether(contact.phone)}</a> : <span className="muted">—</span>}</td>
+        <td className="cap-fr"><div className="cap-clamp" data-tip={contact.name || undefined}>{contact.name || <span className="muted">—</span>}</div></td>
+        <ContactCell email={contact.email} phone={contact.phone} />
         <td className="cap-statuscol"><div className="cap-statuswrap"><StageSelect key={`${record.id}-${record.updated_at}`} record={record} stage={stage} />
           {wmCanEmail(record) && <EmailButton record={record} stage={stage} email={contact.email} />}
           {actual !== expected && <span className="wm-mismatch" role="img" aria-label={`Store's Walmart status is ${actual}`}
@@ -229,10 +228,12 @@ function WalmartTable({ ctx, rows, sort }) {
         <td className="cap-duecol">{!wmCanEmail(record) ? <span className="muted">—</span>
           : record.last_email_at ? <div className="cap-due-cell"><span>{shortDay(record.last_email_at)}</span><span className="badge wm-sent"><Icon name="mail-check" />Emailed</span></div>
             : <span className="badge wm-unsent"><Icon name="mail" />Not emailed</span>}</td>
-        <td className="hide-sm cap-notes">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
+        <td className="cap-notescol">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
         <ChangeLogCell createdAt={record.created_at} updatedAt={record.updated_at} heading={`Change log · Store ${record.store_num}`}
           label={`Store ${record.store_num}: change log`} entries={logEntries(record)} />
         <td className="c-act"><div className="row-acts">
+          {record.notes && <button type="button" className="iconbtn mini cap-notebtn" data-tip={`Notes: ${record.notes}`} aria-label={`Notes for store ${record.store_num}: ${record.notes}`}
+            onClick={() => openWalmartUpdate(record.id)}><Icon name="sticky-note" /></button>}
           <button type="button" className="iconbtn mini" data-tip="Change the stage, add a note, see the change log" aria-label={`Edit store ${record.store_num}`} onClick={() => openWalmartUpdate(record.id)}><Icon name="pencil" /></button>
           <button type="button" className="iconbtn mini del" data-tip="Remove from the Walmart tab" aria-label={`Remove store ${record.store_num}`} onClick={() => askDeleteWalmart(record.id)}><Icon name="trash-2" /></button>
         </div></td>

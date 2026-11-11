@@ -24,7 +24,7 @@
   .cl-kpis{margin-bottom:10px}
   .cl-inswrap{display:flex;justify-content:flex-end;margin:-4px 0 8px}
   .cl-insbtn{height:auto;padding:2px 0}
-  .cl-ins{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:14px}
+  .cl-ins{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:14px;align-items:start}
   @media(max-width:1000px){.cl-ins{grid-template-columns:1fr}}
   .cl-in{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);min-width:0}
   .cl-mini{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);margin-top:10px}
@@ -40,7 +40,9 @@
   .cl-count-mode button{border:1px solid var(--line);border-radius:7px;background:#fff;padding:4px 9px;font:600 12px var(--font);color:var(--ink-soft);cursor:pointer}
   .cl-count-mode button[aria-pressed=true]{border-color:var(--green);background:var(--lime-tint);color:var(--green-dark)}
   .cl-count-mode button:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
-  .cl-count-list{max-height:220px;overflow-y:auto}
+  /* Scrolling list: a soft fade at the bottom shows there is more to scroll */
+  .cl-count-list{max-height:220px;overflow-y:auto;overscroll-behavior:contain;
+    -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 28px),transparent);padding-bottom:16px}
   .cl-viewbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin:0 0 10px}
   .cl-view{margin:0}
   .cl-view button{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;font-size:12.5px}

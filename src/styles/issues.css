@@ -14,6 +14,8 @@
     color:var(--green-dark);font-family:var(--font);font-size:13.5px;font-weight:700;cursor:pointer;transition:border-color .15s}
   .ob-snum:hover,.ob-snum:focus-visible{border-color:var(--green);background:transparent;outline:none}
   .ob-updcol{min-width:200px;max-width:280px}
+  /* 3PDs: room for the franchisee name under the store # (2 lines instead of 3-4) */
+  .ob-stable th.c-store,.ob-stable td.c-store{width:170px;min-width:160px}
   .ob-upd{display:flex;align-items:flex-start;gap:8px}
   .ob-last{font-size:12.5px;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .ob-det{font-size:13px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}

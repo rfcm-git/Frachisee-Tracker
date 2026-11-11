@@ -504,11 +504,12 @@
   .idot-col .idot{margin:0}
 
   .plat{display:flex;gap:4px;flex-wrap:wrap}
-  .chip{font-size:11px;padding:1px 6px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft)}
-  .chip.on{background:var(--ok-soft);color:var(--ok);border-color:transparent}
-  .chip.pend{background:var(--warn-soft);color:var(--warn);border-color:transparent}
-  .chip.off{background:var(--danger-soft);color:var(--danger);border-color:transparent}
-  .chip.exempt{background:var(--idle-soft);color:var(--idle);border-color:transparent}
+  /* Platform tags (UE, DD, GH, EZ, WM): dark text on a soft tint so they pass 4.5:1 contrast */
+  .chip{font-size:11px;font-weight:600;letter-spacing:.02em;padding:1px 6px;border-radius:6px;border:1px solid var(--line);color:var(--ink-soft);cursor:default}
+  .chip.on{background:var(--ok-soft);color:#146c3a;border-color:transparent}
+  .chip.pend{background:var(--warn-soft);color:#8a5600;border-color:transparent}
+  .chip.off{background:var(--danger-soft);color:#a12f23;border-color:transparent}
+  .chip.exempt{background:var(--idle-soft);color:#3f4a43;border-color:transparent}
   .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--lime-soft);color:var(--lime-dark);font-weight:600}
 
   .state{padding:52px 24px;text-align:center;color:var(--ink-soft)}

@@ -10,7 +10,7 @@ export function DashboardHeader({ territory, territories, range, bounds, refresh
   return <div className="dh">
     <div className="dh-t">
       <h2>{territory ? `Territory ${territory}` : "All territories"}</h2>
-      <span>{bounds.label} vs {bounds.prevLabel} · updated {refreshed}</span>
+      <span>{bounds.label} vs {bounds.prevLabel} · <span style={{ whiteSpace: "nowrap" }}>updated {refreshed}</span></span>
     </div>
     <div className="dh-ctrl">
       <form className="dh-search" role="search" onSubmit={(event) => { event.preventDefault(); openFind(query.trim() || undefined); }}>

@@ -72,7 +72,7 @@ export function StoreStatusIfClosed({ status }) {
 export function PlatformChips({ store }) {
   return <div className="plat">{PLATFORMS_UI.map(([key, name]) => {
     const status = platformStatus(store, key);
-    return <span key={key} className={`chip ${platformChipClass(status)}`} title={`${name}: ${status}`}>{PLATFORM_SHORT[key]}</span>;
+    return <span key={key} className={`chip ${platformChipClass(status)}`} data-tip={`${name}: ${status}`} aria-label={`${name}: ${status}`}>{PLATFORM_SHORT[key]}</span>;
   })}</div>;
 }
 

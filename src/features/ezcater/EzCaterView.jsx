@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import ContactCell from "../../components/ui/ContactCell.jsx";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
@@ -12,7 +13,7 @@ import { obHistory, obIsOpen, obStatusClass, obStatusLabel } from "../../domain/
 import { OB_EMAIL_NOTE } from "../../domain/onboardingEmail.js";
 import { platformStatus, storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
-import { formatNumber, formatTimestamp, telHref, timeOf } from "../../lib/format.js";
+import { formatNumber, formatTimestamp, timeOf } from "../../lib/format.js";
 import { oneLine } from "../../lib/richText.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openNewOnboarding, openOnboardingHistory, openStore, openUpdateOnboarding } from "../../state/dialogs.js";
@@ -167,7 +168,6 @@ function SortHeader({ sortKey, sort, className = "", children }) {
 }
 
 /** "(714) 863-8900" never splits across lines. */
-const keepPhoneTogether = (value) => String(value || "").replace(/\) (?=\d)/g, ") ").replace(/(\d)-(\d)/g, "$1‑$2");
 
 /** Change-log entries of a record, newest first, for the Date Added / Last Updated cell. */
 function logEntries(record) {
@@ -190,10 +190,10 @@ function EzTable({ ctx, rows, sort }) {
   const { items, pagerProps } = usePaged("ez", rows);
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table"><thead><tr>
     <SortHeader sortKey="num" sort={sort} className="c-snum">Store #</SortHeader>
-    <th>Franchisee</th><th className="hide-sm">Email Address</th><th className="hide-sm cap-phone">Phone Number</th>
+    <th className="cap-fr">Franchisee</th><th className="hide-sm cap-contact">Contact</th>
     <SortHeader sortKey="status" sort={sort} className="cap-statuscol">Status</SortHeader>
     <SortHeader sortKey="emailed" sort={sort} className="cap-duecol">Emailed</SortHeader>
-    <th className="hide-sm cap-notes">Latest update</th>
+    <th className="hide-sm cap-notes ez-updcol">Latest update</th>
     <th className="cap-sort cap-sort2 hide-sm cap-date"><SortButton sortKey="added" sort={sort}>Date Added</SortButton>
       <SortButton sortKey="updated" sort={sort}>Last Updated</SortButton></th>
     <th className="c-act">Actions</th>
@@ -207,9 +207,8 @@ function EzTable({ ctx, rows, sort }) {
           ? <button type="button" className="ob-snum" data-tip="Open store information" onClick={() => openStore(store.id)}>{record.store_num}</button>
           : <span className="cap-nostore" data-tip="Not in the store list">{record.store_num}</span>}
           {store && storeStatus(store) !== "Open" && <div style={{ marginTop: 3 }}><StoreStatusIfClosed status={storeStatus(store)} /></div>}</td>
-        <td>{contact.name || <span className="muted">—</span>}</td>
-        <td className="hide-sm cap-email">{contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : <span className="muted">—</span>}</td>
-        <td className="hide-sm cap-phone">{contact.phone ? <a href={telHref(contact.phone)}>{keepPhoneTogether(contact.phone)}</a> : <span className="muted">—</span>}</td>
+        <td className="cap-fr"><div className="cap-clamp" data-tip={contact.name || undefined}>{contact.name || <span className="muted">—</span>}</div></td>
+        <ContactCell email={contact.email} phone={contact.phone} />
         <td className="cap-statuscol"><div className="cap-statuswrap"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} />
           {open && <EmailButton record={record} emailedAt={emailedAt} email={contact.email} />}
           {storeEz !== record.status && <span className="wm-mismatch" role="img" aria-label={`Store's ezCater status is ${storeEz}`}
@@ -217,7 +216,7 @@ function EzTable({ ctx, rows, sort }) {
         <td className="cap-duecol">{!open ? <span className="muted">—</span>
           : emailedAt ? <div className="cap-due-cell"><span>{shortDay(emailedAt)}</span><span className="badge wm-sent"><Icon name="mail-check" />Emailed</span></div>
             : <span className="badge wm-unsent"><Icon name="mail" />Not emailed</span>}</td>
-        <td className="hide-sm cap-notes">{record.last_update
+        <td className="hide-sm cap-notes ez-updcol">{record.last_update
           ? <button type="button" className="ez-upd" data-tip="See all updates" onClick={() => openOnboardingHistory(record.id)}><span className="cap-note">{oneLine(record.last_update, 160)}</span></button>
           : <span className="muted">—</span>}</td>
         <ChangeLogCell createdAt={record.created_at} updatedAt={record.updated_at} heading={`ezCater · Store ${record.store_num}`}

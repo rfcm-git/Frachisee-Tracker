@@ -21,7 +21,7 @@ export default function CallCountsTable({ rows, calls, by }) {
 
   return <div className="card" style={{ overflowX: "auto" }}>
     <table className="cl-table cl-counts"><thead><tr>
-      {isStore ? <><th>Store Number</th><th>Franchisee Name</th></> : <><th>Franchisee Name</th><th className="num" data-tip="Different stores these calls were about">Stores</th></>}
+      {isStore ? <><th>Store #</th><th>Franchisee</th></> : <><th>Franchisee</th><th className="num" data-tip="Different stores these calls were about">Stores</th></>}
       <th className="num">Calls</th><th className="num" data-tip="Outcome Answered, Requested more info or Completed">Answered</th>
       <th className="num" data-tip="Calls marked “Needs follow-up” that are not done yet">Follow-ups open</th><th>Last call</th>
     </tr></thead><tbody>
