@@ -37,3 +37,26 @@
 
   /* Toolbar: Refresh shows only its icon on narrower screens so the buttons stay on one line */
   @media(max-width:1480px){ .tb-refresh{padding-left:11px;padding-right:11px} .tb-refresh .tb-lbl{display:none} }
+
+  /*
+   * Phones (under 600px)
+   * - Toolbar: secondary buttons show only their icon (the label stays for screen readers; title gives a tooltip),
+   *   so they share one row with the main action instead of stacking one per row.
+   * - Tables keep a readable width and scroll sideways inside their card instead of squeezing every column.
+   */
+  @media(max-width:600px){
+    .toolbar{gap:6px}
+    .toolbar .search-wrap{flex:1 1 100%;min-width:0}
+    .toolbar .btn:not(.outline):not(.ghost){padding-left:14px;padding-right:14px}
+    .toolbar .mnu .btn .car{display:none}
+    .toolbar .btn.outline,.toolbar .tb-refresh{font-size:0;gap:0;width:40px;height:40px;padding:0;justify-content:center;flex:none}
+    .toolbar .btn.outline [data-lucide],.toolbar .tb-refresh [data-lucide]{width:18px;height:18px}
+    .card:has(> table){overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .card > table{min-width:600px}
+    .plat{flex-wrap:nowrap}
+    /* Summary cards (Call Logs and similar): two per row, icon above the number */
+    .db-kpis{gap:8px}
+    .db-kpis .db-kpi{flex:1 1 calc(50% - 4px);flex-direction:column;gap:8px;padding:12px}
+    .db-kpis .db-kpi .ic{width:32px;height:32px;border-radius:10px}
+    .db-kpis .db-kpi .ic [data-lucide]{width:17px;height:17px}
+  }

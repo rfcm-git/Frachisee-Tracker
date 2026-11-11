@@ -123,7 +123,7 @@ export default function Toolbar() {
           if (!ctx.onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
           openOnboardingEmail();
         }}><Icon name="mail" />Email message</button>}
-        {tab === "issues" && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
+        {tab === "issues" && <button type="button" className="btn outline round" title="Log one issue for several stores at once" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
         {(tab === "issues" || tab === "onboarding" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost tb-refresh" aria-label="Refresh" data-tip="Reload the latest data" onClick={() => loadAll()}><Icon name="refresh-cw" /><span className="tb-lbl">Refresh</span></button>
       </div>}
