@@ -30,7 +30,7 @@ export const capAssessmentId = (record) => cleanAssessmentId(record?.assessment_
 /** Assessment IDs match without upper/lower case. Blank never matches. */
 export const sameAssessmentId = (a, b) => !!cleanAssessmentId(a) && cleanAssessmentId(a).toLowerCase() === cleanAssessmentId(b).toLowerCase();
 
-/** The CAP record that already uses a Assessment ID, or null. exceptId skips the record being edited. */
+/** The CAP record that already uses an Assessment ID, or null. exceptId skips the record being edited. */
 export const findCapByAssessment = (ctx, assessmentId, exceptId = null) =>
   (cleanAssessmentId(assessmentId) ? ctx.caps.find((record) => record.id !== exceptId && sameAssessmentId(record.assessment_id, assessmentId)) || null : null);
 

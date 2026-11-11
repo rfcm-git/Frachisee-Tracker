@@ -17,7 +17,6 @@ const plural = (count, word, many = `${word}s`) => `${count} ${count !== 1 ? man
 /** Result of the store check for one row: new, already in the list (with or without changes), not in the database or the list, or another problem. */
 function CheckTag({ row }) {
   if (row.reason === "notFound") return <span className="cap-tag bad"><Icon name="circle-x" />Not in database</span>;
-  if (row.reason === "notInList") return <span className="cap-tag bad"><Icon name="circle-x" />Not in CAP list</span>;
   if (row.reason === "aidTaken" || row.reason === "aidDiffers" || row.reason === "repeatAid") return <span className="cap-tag bad"><Icon name="clipboard-list" />Assessment ID conflict</span>;
   if (!row.ok) return <span className="cap-tag bad"><Icon name="circle-alert" />Problem</span>;
   if (row.kind === "existing") return row.changes.length ? <span className="cap-tag ok"><Icon name="refresh-cw" />To update</span>
@@ -35,7 +34,7 @@ const StoreNums = ({ rows }) => <div className="cap-nums">{rows.slice(0, 40).map
 /**
  * Import stores into the CAP list from a spreadsheet, with a preview first.
  * A store is already in the list when its Assessment ID or store number is. Not Started / In Progress / In Review rows add new stores;
- * In Progress / In Review / Closed rows change the status of stores in the list. Due dates of existing stores only change when allowed.
+ * Closed rows add the store at Completed. In Progress / In Review / Closed rows change the status of stores in the list. Due dates of existing stores only change when allowed.
  */
 export default function CapsImportDialog() {
   const ctx = useDataContext();
@@ -62,9 +61,9 @@ export default function CapsImportDialog() {
       setBusy(true);
       const checked = planCapsImport(getContext(), result);
       const notes = [checked.changed.length && `${plural(checked.changed.length, "store")} to update`, checked.existing.length && `${plural(checked.existing.length, "store")} already in the CAP list`,
-        checked.notFound.length && `${plural(checked.notFound.length, "store")} not in the database`, checked.notInList.length && `${plural(checked.notInList.length, "Closed store")} not in the CAP list`,
+        checked.notFound.length && `${plural(checked.notFound.length, "store")} not in the database`,
         checked.aidConflicts.length && `${plural(checked.aidConflicts.length, "Assessment ID conflict")}`].filter(Boolean);
-      const bad = checked.notFound.length || checked.notInList.length || checked.aidConflicts.length;
+      const bad = checked.notFound.length || checked.aidConflicts.length;
       if (notes.length) toast(`Checked: ${notes.join(" · ")} — see the preview`, bad ? "err" : "ok");
     } catch {
       xlsxFailed();
@@ -122,7 +121,7 @@ export default function CapsImportDialog() {
       <div className="bk-step"><h4><span className="n">1</span>Get the template</h4>
         <p>Fill in Store Number{showAid ? ", Assessment ID" : ""} and Status.{showAid ? <> The <b>Assessment ID</b> is checked first to tell whether the store is already in the CAP list — each one must be unique.</> : null}
           {" "}<b>Not Started</b> adds the store at No Action Yet (stores already in the list keep their status). <b>In Progress</b> / <b>In Review</b> add the store at that status or change it.
-          {" "}<b>Closed</b> marks a store already in the list <b>Completed</b>. A blank Status counts as Not Started. Due Date is optional.</p>
+          {" "}<b>Closed</b> adds the store at <b>Completed</b>, or marks a store already in the list Completed. A blank Status counts as Not Started. Due Date is optional.</p>
         <div className="bk-cols">{CAP_COLUMNS.filter((column) => showAid || column !== "Assessment ID").map((column) => <span key={column} className={column === "Store Number" ? "req" : ""}>{column}</span>)}</div>
         <div className="bu-btns">
           <button type="button" className="btn sm round" onClick={() => downloadCapsTemplate().catch(xlsxFailed)}><Icon name="file-spreadsheet" />Download template</button>
@@ -152,7 +151,6 @@ export default function CapsImportDialog() {
         <div className={`s${plan.changed.length ? " ok" : ""}`}><b>{plan.changed.length}</b>In list · to update</div>
         <div className={`s${plan.unchanged.length ? " warn" : ""}`}><b>{plan.unchanged.length}</b>Already in list · no change</div>
         <div className={`s${plan.notFound.length ? " bad" : ""}`}><b>{plan.notFound.length}</b>Not in database</div>
-        <div className={`s${plan.notInList.length ? " bad" : ""}`}><b>{plan.notInList.length}</b>Closed · not in CAP list</div>
         {showAid && <div className={`s${plan.aidConflicts.length ? " bad" : ""}`}><b>{plan.aidConflicts.length}</b>Assessment ID conflicts</div>}
         <div className={`s${plan.problems.length ? " bad" : ""}`}><b>{plan.problems.length}</b>Other problems</div>
       </div>
@@ -162,13 +160,8 @@ export default function CapsImportDialog() {
         <StoreNums rows={plan.notFound} />
       </div></div>}
 
-      {plan.notInList.length > 0 && <div className="warnbox show cap-check bad"><Icon name="circle-x" /><div>
-        <b>{plural(plan.notInList.length, "store")} marked Closed {plan.notInList.length === 1 ? "is" : "are"} not in the CAP list</b>, so there is nothing to complete. They will be skipped.
-        <StoreNums rows={plan.notInList} />
-      </div></div>}
-
       {plan.aidConflicts.length > 0 && <div className="warnbox show cap-check bad"><Icon name="clipboard-list" /><div>
-        <b>{plural(plan.aidConflicts.length, "row")} {plan.aidConflicts.length === 1 ? "has" : "have"} a Assessment ID conflict</b> and will be skipped. A Assessment ID can't be repeated in the file
+        <b>{plural(plan.aidConflicts.length, "row")} {plan.aidConflicts.length === 1 ? "has" : "have"} an Assessment ID conflict</b> and will be skipped. An Assessment ID can't be repeated in the file
         or belong to a different store in the CAP list. Fix the file, or the Assessment ID in the CAP list, and upload again.
         <ul>{plan.aidConflicts.slice(0, 10).map((row) => <li key={row.row}>Row {row.row}: {row.msg}</li>)}</ul>
         {plan.aidConflicts.length > 10 && <>…and {plan.aidConflicts.length - 10} more (see the rows below).</>}

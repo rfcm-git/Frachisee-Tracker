@@ -4,7 +4,7 @@
  * A store is "already in the CAP list" when its Assessment ID or its store number is. Assessment IDs are unique: one never moves to another store.
  * Status "Not Started" (or blank) adds a store that is not in the CAP list yet, at No Action Yet; stores already in the list keep their status.
  * Status "In Progress" / "In Review" adds the store at that status, or changes a store already in the list to it.
- * Status "Closed" marks a store already in the CAP list Completed.
+ * Status "Closed" adds the store at Completed, or marks a store already in the CAP list Completed.
  * Nothing is saved here — the import dialog shows the plan first, then capsActions.runCapsImport saves it.
  */
 import { CAP_STATES } from "../../config/constants.js";
@@ -86,15 +86,15 @@ function instructionsSheet(XLSX) {
     ["• One row = one store. Store Number is required on every row and must be unique in the file."],
     ["• Assessment ID is the store's assessment ID. It is used to check whether the store is already in the CAP list, so fill it in whenever you have it."],
     ["    Each Assessment ID must be unique: it can't be repeated in the file or belong to a different store in the CAP list (those rows are skipped)."],
-    ["    A store already in the CAP list without a Assessment ID gets the one in the file."],
+    ["    A store already in the CAP list without an Assessment ID gets the one in the file."],
     ["• Franchisee, Email Address and Phone Number are filled in automatically from the store records — don't add them."],
     ["• Status is Not Started, In Progress, In Review or Closed:"],
     ["    Not Started — adds the store to the CAP list at No Action Yet. If the store is already in the list, its status is left as it is (not added again)."],
     ["    In Progress / In Review — adds the store at that status, or changes a store already in the list to it."],
-    ["    Closed — the store's CAP is done: a store already in the CAP list is changed to Completed. Closed stores that are not in the list are skipped."],
+    ["    Closed — the store's CAP is done: it is added at Completed, or a store already in the CAP list is changed to Completed."],
     ["• A blank Status counts as Not Started."],
     ["• New stores must already be in the store list (All Stores). Rows for unknown stores are skipped."],
-    ["• Due Date is optional: the CAP submission due date, e.g. 11/15/2026 (month/day/year) or 2026-11-15. Reminders are sent as it gets close. It is not used for Closed rows."],
+    ["• Due Date is optional: the CAP submission due date, e.g. 11/15/2026 (month/day/year) or 2026-11-15. Reminders are sent as it gets close. For stores already in the CAP list it is not used on Closed rows."],
     ["• Stores already in the CAP list only get a new due date if you tick \"Update the due date of stores already in the CAP list\"."],
     ["• Notes are added in the app, not in the file. Other columns are ignored."],
     ["• Nothing is saved until you check the preview and click Import in the app."], [""],
@@ -105,7 +105,7 @@ function instructionsSheet(XLSX) {
     ["99903", "A-1003", "Closed", ""],
     [""],
     ["Row 1: adds store 99901 at No Action Yet with no due date. Row 2: adds store 99902 at In Review, due Nov 15, 2026 (or changes it to In Review if it is already in the list)."],
-    ["Row 3: store 99903 (or Assessment ID A-1003) is already in the CAP list and is changed to Completed."],
+    ["Row 3: store 99903 is added at Completed — or, if it (or Assessment ID A-1003) is already in the CAP list, it is changed to Completed."],
   ]);
   sheet["!cols"] = COLUMN_WIDTHS.map((wch) => ({ wch }));
   return sheet;
@@ -180,7 +180,7 @@ export async function readCapsFile(file) {
  * kind: "add" (not in the CAP list) | "existing" (already in the list, found by Assessment ID or store number).
  * changes / dueChange: { field, label, before, after }.
  * reason (skipped rows): "missing" | "repeat" | "repeatAid" | "badStatus" | "notFound" (not in the store database)
- *   | "notInList" (Closed, not in the CAP list) | "badDate" | "aidTaken" (the Assessment ID belongs to another store) | "aidDiffers".
+ *   | "badDate" | "aidTaken" (the Assessment ID belongs to another store) | "aidDiffers".
  * New records save no franchisee, email or phone, so they always show the store records.
  * withDue / withAid: the database has the due_date / assessment_id column.
  */
@@ -200,7 +200,7 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
     out.fileStatus = readFileStatus(values.status);
     if (!out.fileStatus) return skip("badStatus", `Status "${values.status}" is not known — use Not Started, In Progress, In Review or Closed`);
 
-    // Already in the CAP list: by Assessment ID first, then by store number. A Assessment ID never moves to another store.
+    // Already in the CAP list: by Assessment ID first, then by store number. An Assessment ID never moves to another store.
     const byAssessment = findCapByAssessment(ctx, out.aid);
     if (byAssessment && String(byAssessment.store_num) !== out.num) {
       return skip("aidTaken", `Assessment ID ${out.aid} already belongs to store ${byAssessment.store_num} in the CAP list`);
@@ -212,7 +212,6 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
     }
 
     if (!existing) {
-      if (out.fileStatus === "closed") return skip("notInList", `Closed, but store ${out.num} is not in the CAP list — nothing to complete`);
       const defaults = storeContactDefaults(ctx, out.num);
       if (!defaults.found) return skip("notFound", `Store ${out.num} is not in the database`);
       const due = withDue ? readDueDate(values.due) : "";
@@ -236,7 +235,7 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
     rows,
     adds: ok.filter((row) => row.kind === "add"),
     existing,
-    /** Existing rows saved on Import (status change and/or a Assessment ID filled in). */
+    /** Existing rows saved on Import (status change and/or an Assessment ID filled in). */
     changed,
     closes: changed.filter((row) => statusTo(row) === "Completed"),
     statusChanges: changed.filter((row) => statusTo(row) && statusTo(row) !== "Completed"),
@@ -245,9 +244,8 @@ export function planCapsImport(ctx, parsed, withDue = ctx.capsDueReady, withAid 
     updates: existing.filter((row) => row.dueChange),
     unchanged: existing.filter((row) => !row.changes.length && !row.dueChange),
     notFound: skipped.filter((row) => row.reason === "notFound"),
-    notInList: skipped.filter((row) => row.reason === "notInList"),
     aidConflicts: skipped.filter((row) => row.reason === "aidTaken" || row.reason === "aidDiffers" || row.reason === "repeatAid"),
-    problems: skipped.filter((row) => !["notFound", "notInList", "aidTaken", "aidDiffers", "repeatAid"].includes(row.reason)),
+    problems: skipped.filter((row) => !["notFound", "aidTaken", "aidDiffers", "repeatAid"].includes(row.reason)),
     skipped,
   };
 }

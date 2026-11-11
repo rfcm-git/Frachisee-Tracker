@@ -53,6 +53,8 @@
   .cap-warn{color:#8a5600} .cap-storeinfo .cap-warn [data-lucide]{color:var(--warn)}
   .field .cap-err{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px}
   .cap-aid{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .cap-outside{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:12.5px;color:var(--ink-soft)}
+  .cap-outside [data-lucide]{width:14px;height:14px;flex:none}
   .cap-err{color:var(--danger)} .cap-storeinfo .cap-err [data-lucide]{color:var(--danger)}
   .cap-src{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:10.5px;font-weight:600;vertical-align:1px}
   .cap-src [data-lucide]{width:11px;height:11px}

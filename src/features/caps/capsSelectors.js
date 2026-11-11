@@ -21,6 +21,19 @@ function matchesSearch(row, sq) {
   return sq.phoneLike && digitsOnly(contact.phone).includes(sq.d);
 }
 
+/**
+ * Search by store # or Assessment ID finds a CAP even when the filters hide it (e.g. a Completed one):
+ * the whole number / ID, or its start once 3 or more characters are typed.
+ */
+function matchesIdPastFilters(row, sq) {
+  if (!sq.q || sq.mode === "fr") return false;
+  const hit = (value) => {
+    const text = String(value || "").toLowerCase();
+    return !!text && (text === sq.q || (sq.q.length >= 3 && text.startsWith(sq.q)));
+  };
+  return hit(row.record.store_num) || (sq.mode !== "store" && hit(capAssessmentId(row.record)));
+}
+
 /** Due date filter: "overdue", "today", "week" (due today through the next 7 days), "none" (no due date). Completed CAPs only match "none". */
 function passesDue(record, due, now) {
   if (!due) return true;
@@ -53,12 +66,20 @@ const SORTERS = {
 const missingDueLast = (a, b) => (!a.record.due_date) - (!b.record.due_date);
 const missingAssessmentLast = (a, b) => (!capAssessmentId(a.record)) - (!capAssessmentId(b.record));
 
-/** Rows that pass the search and filters, in the chosen order (ties by store number). */
+/**
+ * Rows that pass the search and filters, in the chosen order (ties by store number).
+ * A store # or Assessment ID search also brings rows the filters hide; those get outsideFilters: true.
+ */
 export function filterCaps(ctx, filter, sq, now = new Date()) {
   const sorter = SORTERS[filter.sort.key] || SORTERS.added;
   const missingLast = filter.sort.key === "due" ? missingDueLast : filter.sort.key === "aid" ? missingAssessmentLast : null;
   return capRows(ctx)
-    .filter((row) => passesFilters(row, filter, now) && matchesSearch(row, sq))
+    .filter((row) => {
+      if (passesFilters(row, filter, now)) return matchesSearch(row, sq);
+      if (!matchesIdPastFilters(row, sq)) return false;
+      row.outsideFilters = true;
+      return true;
+    })
     .sort((a, b) => (missingLast && missingLast(a, b)) || sorter(a, b) * filter.sort.dir || SORTERS.num(a, b));
 }
 

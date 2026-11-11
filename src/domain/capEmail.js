@@ -5,7 +5,7 @@
  * Stores owned by Rohit or Raghu Marwaha go to Rajeev instead, with the owner moved to CC.
  */
 import { franchiseeName } from "./context.js";
-import { capContact, formatDueDate, normalizeCapStatus } from "./caps.js";
+import { capAssessmentId, capContact, formatDueDate, normalizeCapStatus } from "./caps.js";
 import { emailOf, territorySet } from "./records.js";
 import { staffForStore } from "./staff.js";
 import { isEmail } from "../lib/text.js";
@@ -48,7 +48,7 @@ export const DEFAULT_CAP_EMAIL = Object.freeze({
 /** Placeholders of the several-stores message. */
 export const CAP_EMAIL_MULTI_FIELDS = [
   ["Franchisee", "Franchisee name"],
-  ["Stores", "One line per store: number, address and due date"],
+  ["Stores", "One line per store: number, Assessment ID, address and due date"],
   ["Store count", "Number of stores in the email"],
   ["Email", "Franchisee email"],
 ];
@@ -57,6 +57,7 @@ export const CAP_EMAIL_MULTI_FIELDS = [
 export const CAP_EMAIL_FIELDS = [
   ["Franchisee", "Franchisee name"],
   ["Store #", "Store number"],
+  ["Assessment ID", "CAP Assessment ID"],
   ["Due Date", "Submission due date"],
   ["Address", "Store street address"],
   ["City", "Store city"],
@@ -120,6 +121,7 @@ export function capEmailValues(ctx, record) {
   return {
     "Franchisee": contact.name || (store ? franchiseeName(ctx, store.franchisee_id) : ""),
     "Store #": String(record.store_num || ""),
+    "Assessment ID": capAssessmentId(record),
     "Due Date": formatDueDate(record.due_date),
     "Address": store?.address || "",
     "City": store?.city || "",
@@ -224,12 +226,13 @@ export function buildCapEmail(ctx, record, template) {
   return { ...recipients, store: !!store, ...composeEmail(template, values, recipients) };
 }
 
-/** "• Store #100 · 1 Main St, Austin · due Nov 15, 2026" */
+/** "• Store #100 · Assessment ID A-1001 · 1 Main St, Austin · due Nov 15, 2026" */
 function capStoreLine(ctx, record) {
   const store = ctx.storeByNum.get(String(record.store_num));
   const place = [store?.address, store?.city].filter(Boolean).join(", ");
   const due = formatDueDate(record.due_date);
-  return `• Store #${record.store_num}${place ? ` · ${place}` : ""}${due ? ` · due ${due}` : ""}`;
+  const assessment = capAssessmentId(record);
+  return `• Store #${record.store_num}${assessment ? ` · Assessment ID ${assessment}` : ""}${place ? ` · ${place}` : ""}${due ? ` · due ${due}` : ""}`;
 }
 
 /** Other stores of the same franchisee in the CAP list that are not Completed (none when the store has no franchisee). */

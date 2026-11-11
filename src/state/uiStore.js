@@ -33,7 +33,12 @@ export const CAP_SORT_KEYS = ["num", "aid", "status", "added", "updated", "due"]
 const CAP_EMAIL_FILTERS = ["", "has", "none"];
 const CAP_ASSESSMENT_FILTERS = ["", "has", "none"];
 const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
-const defaultCapsFilter = () => ({ statuses: [], email: "", assessment: "", due: "", sort: { key: "added", dir: -1 } });
+/** Statuses checked by default: everything but Completed (the user can check it). */
+export const CAP_DEFAULT_STATUSES = CAP_STATES.filter((status) => status !== "Completed");
+/** True when the status filter is the default one. */
+export const capStatusesAreDefault = (statuses) => statuses.length === CAP_DEFAULT_STATUSES.length && CAP_DEFAULT_STATUSES.every((status) => statuses.includes(status));
+/** v: 2 = saved after Completed became unchecked by default; older saves start from the default. */
+const defaultCapsFilter = () => ({ v: 2, statuses: [...CAP_DEFAULT_STATUSES], email: "", assessment: "", due: "", sort: { key: "added", dir: -1 } });
 
 /** ezCater sort keys and email filter ("" all, "none" not emailed yet, "sent" emailed — open stores only). */
 export const EZ_SORTS = ["num", "status", "emailed", "added", "updated"];
@@ -143,7 +148,8 @@ function restoredState() {
   if (saved.capsFilter && typeof saved.capsFilter === "object") {
     const sort = saved.capsFilter.sort || {};
     state.capsFilter = {
-      statuses: onlyValid(saved.capsFilter.statuses, CAP_STATES),
+      v: 2,
+      statuses: saved.capsFilter.v === 2 ? onlyValid(saved.capsFilter.statuses, CAP_STATES) : [...CAP_DEFAULT_STATUSES],
       email: CAP_EMAIL_FILTERS.includes(saved.capsFilter.email) ? saved.capsFilter.email : "",
       assessment: CAP_ASSESSMENT_FILTERS.includes(saved.capsFilter.assessment) ? saved.capsFilter.assessment : "",
       due: CAP_DUE_FILTERS.includes(saved.capsFilter.due) ? saved.capsFilter.due : "",
@@ -318,10 +324,10 @@ export function toggleCapStatus(status) {
   patchCapsFilter({ statuses: !status ? [] : statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status] });
 }
 
-/** Shows only one status, or all again when it was the only one shown. */
+/** Shows only one status, or the default statuses again when it was the only one shown. */
 export function toggleCapOnlyStatus(status) {
   const { statuses } = get().capsFilter;
-  patchCapsFilter({ statuses: !status || (statuses.length === 1 && statuses[0] === status) ? [] : [status] });
+  patchCapsFilter({ statuses: !status || (statuses.length === 1 && statuses[0] === status) ? [...CAP_DEFAULT_STATUSES] : [status] });
 }
 
 export const setCapEmailFilter = (email) => patchCapsFilter({ email: CAP_EMAIL_FILTERS.includes(email) ? email : "" });
@@ -345,7 +351,7 @@ export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter()
 
 /** Opens the CAP tab, optionally on one status or due date filter (dashboard and reminders). */
 export function showCaps(status = "", due = "") {
-  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", assessment: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
+  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [...CAP_DEFAULT_STATUSES], email: "", assessment: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
   window.scrollTo(0, 0);
 }
 

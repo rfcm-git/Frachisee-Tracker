@@ -13,7 +13,7 @@ import { searchQuery } from "../../domain/search.js";
 import { formatNumber, formatTimestamp, telHref, timeOf } from "../../lib/format.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { openCapForm, openCapsImport, openStore } from "../../state/dialogs.js";
-import { clearCapsFilters, setCapDueFilter, setCapEmailFilter, setCapAssessmentFilter, sortCaps, toggleCapDueFilter, toggleCapOnlyStatus, toggleCapStatus, useUiStore } from "../../state/uiStore.js";
+import { capStatusesAreDefault, clearCapsFilters, setCapDueFilter, setCapEmailFilter, setCapAssessmentFilter, sortCaps, toggleCapDueFilter, toggleCapOnlyStatus, toggleCapStatus, useUiStore } from "../../state/uiStore.js";
 import { askDeleteCap, lastCapsImport, updateCap } from "./capsActions.js";
 import { sendCapEmail } from "./capEmailActions.js";
 import { capsProgress, filterCaps } from "./capsSelectors.js";
@@ -47,6 +47,12 @@ function AddedUpdatedCell({ record, historyReady }) {
     footer={historyReady ? null : "Run migrate-caps-history.sql to keep a full log of every change."} />;
 }
 
+/** Status filter button text: "All but Completed" (the default), "All statuses", or the picked ones. */
+function statusText(statuses) {
+  if (!statuses.length) return "All statuses";
+  return capStatusesAreDefault(statuses) ? "All but Completed" : statuses.join(", ");
+}
+
 /** "Store Number ↑" etc. */
 function sortText(sort) {
   if (sort.key === "added" || sort.key === "updated") return `${SORT_LABELS[sort.key]} · ${sort.dir < 0 ? "newest" : "oldest"}`;
@@ -64,7 +70,7 @@ export function CapsProgress({ summary, statuses = [], due = "", showDue = true,
     {CAP_STATES.map((status) => {
       const on = statuses.length === 1 && statuses[0] === status;
       return <button type="button" key={status} className={`cap-cnt${on ? " on" : ""}${summary.counts[status] ? "" : " zero"}`} aria-pressed={on}
-        data-tip={`${status}: ${summary.counts[status]}${on ? " — click again to show all" : " — click to show only these"}`} onClick={() => onStatus(status)}>
+        data-tip={`${status}: ${summary.counts[status]}${on ? " — click again to go back" : " — click to show only these"}`} onClick={() => onStatus(status)}>
         <span className="d" style={{ background: CAP_STATUS_COLOR[status] }} /><b>{formatNumber(summary.counts[status])}</b>{status}</button>;
     })}
     {showDue && <>
@@ -105,12 +111,12 @@ function CapsFilters({ filter, anyFilter, showDue, showAssessment }) {
   const sortOption = (key, dir, icon, label, close) => <FilterOption key={`${key}${dir}`} selected={sort.key === key && sort.dir === dir}
     onClick={() => { sortCaps(key, dir); close(); }}><Icon name={icon} />{label}</FilterOption>;
   return <div className="ifbar"><div className="grp fdd-grp">
-    <FilterDropdown icon="filter" label="Status" value={filter.statuses.join(", ")} active={filter.statuses.length > 0}>
+    <FilterDropdown icon="filter" label="Status" value={statusText(filter.statuses)} active={!capStatusesAreDefault(filter.statuses)}>
       <FilterOption selected={!filter.statuses.length} onClick={() => toggleCapStatus("")}><span className="d" style={{ background: "var(--line)" }} />All statuses</FilterOption>
       <div className="fdd-div" />
       {CAP_STATES.map((status) => <FilterOption key={status} selected={filter.statuses.includes(status)} checkable onClick={() => toggleCapStatus(status)}>
         <span className="d" style={{ background: CAP_STATUS_COLOR[status] }} />{status}</FilterOption>)}
-      <div className="fdd-note">Pick one or more</div>
+      <div className="fdd-note">Pick one or more. Completed is unchecked at first — check it to see completed CAPs.</div>
     </FilterDropdown>
     <FilterDropdown icon="mail" label="Email" value={EMAIL_LABELS[filter.email] || ""} active={!!filter.email}>
       {({ close }) => <>
@@ -122,7 +128,7 @@ function CapsFilters({ filter, anyFilter, showDue, showAssessment }) {
     {showAssessment && <FilterDropdown icon="map-pin" label="Assessment ID" value={ASSESSMENT_LABELS[filter.assessment] || ""} active={!!filter.assessment}>
       {({ close }) => <>
         <FilterOption selected={!filter.assessment} onClick={() => { setCapAssessmentFilter(""); close(); }}>All stores</FilterOption>
-        <FilterOption selected={filter.assessment === "has"} onClick={() => { setCapAssessmentFilter("has"); close(); }}>Has a Assessment ID</FilterOption>
+        <FilterOption selected={filter.assessment === "has"} onClick={() => { setCapAssessmentFilter("has"); close(); }}>Has an Assessment ID</FilterOption>
         <FilterOption selected={filter.assessment === "none"} onClick={() => { setCapAssessmentFilter("none"); close(); }}>No Assessment ID</FilterOption>
       </>}
     </FilterDropdown>}
@@ -155,7 +161,7 @@ function CapsFilters({ filter, anyFilter, showDue, showAssessment }) {
       </>}
     </FilterDropdown>
   </div>
-    <InfoTip text={`Filters and sorting work together with the search box. Search by store # (#123), franchisee (@name)${showAssessment ? ", Assessment ID" : ""}, email, phone, status or notes. You can also click a column title to sort.`} />
+    <InfoTip text={`Filters and sorting work together with the search box. Search by store # (#123), franchisee (@name)${showAssessment ? ", Assessment ID" : ""}, email, phone, status or notes. A store #${showAssessment ? " or Assessment ID" : ""} search also finds CAPs the filters hide. You can also click a column title to sort.`} />
     {anyFilter && <button type="button" className="btn link" onClick={clearCapsFilters} style={{ marginLeft: "auto" }}><Icon name="x" />Clear filters</button>}
   </div>;
 }
@@ -270,7 +276,8 @@ export default function CapsView() {
   }
   const showDue = ctx.capsDueReady;
   const showAssessment = ctx.capsAssessmentReady;
-  const anyFilter = !!(filter.statuses.length || filter.email || (showAssessment && filter.assessment) || (showDue && filter.due) || search.trim());
+  const outside = rows.filter((row) => row.outsideFilters).length;
+  const anyFilter = !!(!capStatusesAreDefault(filter.statuses) || filter.email || (showAssessment && filter.assessment) || (showDue && filter.due) || search.trim());
   return <>
     {!showDue && <div className="warnbox show cap-migrate"><Icon name="database" /><div>
       <b>Submission due dates need a quick database update.</b> Run <code>migrate-caps-due-date.sql</code> in the Supabase SQL Editor, then click Refresh. Everything else in the CAP list works as before.</div></div>}
@@ -279,6 +286,8 @@ export default function CapsView() {
     <CapsProgress summary={summary} statuses={filter.statuses} due={filter.due} showDue={showDue} />
     <CapsLastImport ctx={ctx} />
     <CapsFilters filter={filter} anyFilter={anyFilter} showDue={showDue} showAssessment={showAssessment} />
+    {outside > 0 && <div className="cap-outside" role="status"><Icon name="info" />
+      {outside === 1 ? "1 store matches" : `${formatNumber(outside)} stores match`} your search by store #{showAssessment ? " or Assessment ID" : ""} but {outside === 1 ? "is" : "are"} hidden by the filters — shown anyway.</div>}
     {rows.length ? <CapsTable ctx={ctx} rows={rows} sort={filter.sort} showDue={showDue} showAssessment={showAssessment} /> : <EmptyState icon="search-x" title="No stores match">Try a different search or filter.</EmptyState>}
   </>;
 }
