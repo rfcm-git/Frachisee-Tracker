@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import PreviewPicker from "./PreviewPicker.jsx";
 import Icon from "../ui/Icon.jsx";
 import Modal from "../ui/Modal.jsx";
 import { useDialog } from "../dialogs/dialogContext.js";
@@ -105,7 +106,7 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
     {neverSaved && <div className="cem-note" role="status"><Icon name="info" />{starterText}</div>}
     <div className="cem-grid">
       <div className="cem-edit">
-        {modes.length > 1 && <div className="cem-mode" role="tablist" aria-label="Which message">
+        {modes.length > 1 && <div className={`cem-mode${modes.length > 3 ? " cem-mode-grid" : ""}`} role="tablist" aria-label="Which message">
           {modes.map((item) => <button type="button" key={item.key} role="tab" aria-selected={mode === item.key}
             className={`cem-mode-btn${mode === item.key ? " on" : ""}`} onClick={() => setMode(item.key)}><Icon name={item.icon || "mail"} />{item.label}</button>)}
         </div>}
@@ -135,9 +136,8 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
 
       <div className="cem-prev" aria-live="polite">
         <div className="field"><label htmlFor="cem_store">Preview for</label>
-          {view.previewOptions.length ? <select id="cem_store" value={previewId ?? ""} onChange={(event) => setPreviewId(view.previewOptions.find((option) => String(option.id) === event.target.value)?.id ?? null)}>
-            {view.previewOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-          </select> : <div className="muted">{view.emptyPreviewText}</div>}</div>
+          {view.previewOptions.length ? <PreviewPicker id="cem_store" options={view.previewOptions} value={previewId} onChange={setPreviewId} />
+            : <div className="muted">{view.emptyPreviewText}</div>}</div>
         {email && <div className="cem-mail">
           <div className="cem-row"><span>To</span><b>{email.to || <span className="cem-miss">No email address on file</span>}{email.rajeev && <span className="cem-why">Marwaha store · owner in CC</span>}</b></div>
           <div className="cem-row"><span>CC</span><div>

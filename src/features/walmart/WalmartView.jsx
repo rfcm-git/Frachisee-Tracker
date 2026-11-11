@@ -59,10 +59,16 @@ function WalmartProgress({ summary, followUp, stages, email }) {
   </div>;
 }
 
+/**
+ * Last Updated of a record: its last change or its last email, whichever is later.
+ * Emails now also stamp updated_at; this covers stores emailed before that.
+ */
+const wmLastUpdated = (record) => (timeOf(record.last_email_at) > timeOf(record.updated_at || record.created_at) ? record.last_email_at : record.updated_at || record.created_at);
+
 /** When the list was last imported and last changed by anyone. */
 function WalmartMeta({ ctx }) {
   const imported = lastWalmartImport(ctx);
-  const lastChange = ctx.walmart.reduce((latest, record) => Math.max(latest, timeOf(record.updated_at || record.created_at)), 0);
+  const lastChange = ctx.walmart.reduce((latest, record) => Math.max(latest, timeOf(wmLastUpdated(record))), 0);
   return <div className="cap-meta">
     <span data-tip={imported ? `Imported ${formatTimestamp(imported)}` : "Walmart's report has not been imported yet"}>
       <Icon name="upload" />Last import: <b>{imported ? formatTimestamp(imported) : "never"}</b></span>
@@ -162,7 +168,7 @@ function StageSelect({ record, stage }) {
 function EmailButton({ record, stage, email }) {
   const sent = !!record.last_email_at;
   const tip = !email ? "The franchisee has no email address — add one on the franchisee"
-    : sent ? `Emailed ${formatTimestamp(record.last_email_at)} — click to email again` : `Open the ${stage} email to ${email} in Outlook`;
+    : sent ? `Emailed ${formatTimestamp(record.last_email_at)} — click to open the email in Outlook again` : `Open the ${stage} email to ${email} in Outlook`;
   return <button type="button" className={`iconbtn mini cap-mailbtn${!email ? " off" : sent ? " done" : " fresh"}`} aria-disabled={!email} data-tip={tip}
     aria-label={`Email store ${record.store_num}`} onClick={() => sendWalmartEmail(record.id)}><Icon name={sent ? "mail-check" : "send"} /></button>;
 }
@@ -229,7 +235,7 @@ function WalmartTable({ ctx, rows, sort }) {
           : record.last_email_at ? <div className="cap-due-cell"><span>{shortDay(record.last_email_at)}</span><span className="badge wm-sent"><Icon name="mail-check" />Emailed</span></div>
             : <span className="badge wm-unsent"><Icon name="mail" />Not emailed</span>}</td>
         <td className="cap-notescol">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
-        <ChangeLogCell createdAt={record.created_at} updatedAt={record.updated_at} heading={`Change log · Store ${record.store_num}`}
+        <ChangeLogCell createdAt={record.created_at} updatedAt={wmLastUpdated(record)} heading={`Change log · Store ${record.store_num}`}
           label={`Store ${record.store_num}: change log`} entries={logEntries(record)} />
         <td className="c-act"><div className="row-acts">
           {record.notes && <button type="button" className="iconbtn mini cap-notebtn" data-tip={`Notes: ${record.notes}`} aria-label={`Notes for store ${record.store_num}: ${record.notes}`}

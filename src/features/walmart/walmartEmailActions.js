@@ -35,26 +35,29 @@ export async function saveWmEmail(template) {
   return true;
 }
 
-/** Stamps "emailed" on each record and logs it. Returns how many were saved. */
+/** Within this time after sending, the email button reopens Outlook without asking (e.g. Outlook was closed by mistake). */
+const REOPEN_MS = 30 * 60 * 1000;
+
+/** Stamps "emailed" (and Last Updated) on each record and logs it. Returns how many were saved. */
 async function markEmailed(records) {
   let marked = 0;
   for (const record of records) {
     const result = await mergeRowSave(TABLES.walmart, record.id, (fresh) => {
       const ts = nowIso();
-      return { last_email_at: ts, history: [...wmHistory(fresh), { ts, kind: "email", stage: normalizeWmStage(fresh.stage) }] };
+      return { last_email_at: ts, updated_at: ts, history: [...wmHistory(fresh), { ts, kind: "email", stage: normalizeWmStage(fresh.stage) }] };
     });
     if (result.row) { replaceRow("walmart", result.row); marked += 1; }
   }
   return marked;
 }
 
-/** Opens Outlook, then stamps the date emailed on every store the email is about. */
-async function openAndMark(email) {
+/** Opens Outlook, then stamps the date emailed on every store the email is about. reopened: the quick "open it again" case. */
+async function openAndMark(email, reopened = false) {
   openMailto(email.href);
   const label = email.records.length > 1 ? `${email.records.length} stores` : `store ${email.records[0].store_num}`;
   const long = email.href.length > MAILTO_SAFE_LENGTH ? " · the email is long, check Outlook kept all of it" : "";
   const marked = await markEmailed(email.records);
-  if (marked === email.records.length) toast(`Outlook opened for ${label} — press Send there${long}`, long ? "err" : "ok");
+  if (marked === email.records.length) toast(`${reopened ? "Outlook reopened" : "Outlook opened"} for ${label} — press Send there${long}`, long ? "err" : "ok");
   else toast(`Outlook opened for ${label}, but the email date was only saved on ${marked} of ${email.records.length} stores`, "err");
 }
 
@@ -66,6 +69,8 @@ function sendOne(record) {
   const email = buildWalmartEmail(ctx, record, currentWmEmail(ctx));
   if (!email.to) { noEmail(record); return; }
   if (!record.last_email_at) { openAndMark(email); return; }
+  // Emailed a moment ago: most likely Outlook was closed by mistake, so open it again straight away.
+  if (Date.now() - new Date(record.last_email_at).getTime() < REOPEN_MS) { openAndMark(email, true); return; }
   confirmAction({
     title: "Email again?", icon: "mail", okClass: "btn", okLabel: "Open in Outlook",
     text: `Store ${record.store_num} was already emailed on ${formatTimestamp(record.last_email_at)}. Open another ${normalizeWmStage(record.stage)} email in Outlook?`,

@@ -93,3 +93,34 @@
   /* Franchisees: the empty detail panel fills the column and stays in view while the list scrolls */
   .card:has(> .fr-detail-placeholder){position:sticky;top:80px;border-style:dashed;background:rgba(255,255,255,.7)}
   .fr-detail-placeholder{min-height:min(520px,calc(100vh - 240px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+
+  /* Email editors: message tabs. With 4 messages (e.g. Walmart) they sit in a 2 × 2 grid so labels stay on one line. */
+  .cem-mode{flex-wrap:wrap;margin-bottom:14px}
+  .cem-mode-grid{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .cem-mode-grid .cem-mode-btn{justify-content:flex-start;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .cem-mode-btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--green)}
+  .cem-mode-btn.on{box-shadow:inset 0 0 0 1px var(--lime)}
+
+  /* Email editors: "Preview for" store picker (components/email/PreviewPicker.jsx) */
+  .pp{position:relative}
+  .pp-btn{display:flex;align-items:center;gap:8px;width:100%;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);
+    font-family:var(--font);font-size:14px;color:var(--ink);cursor:pointer;text-align:left;transition:border-color var(--t-fast) ease,box-shadow var(--t-fast) ease}
+  .pp-btn:hover{border-color:var(--green)}
+  .pp-btn:focus-visible,.pp.open .pp-btn{outline:none;border-color:var(--green);box-shadow:var(--ring)}
+  .pp-val{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pp-btn .car{width:16px;height:16px;color:var(--ink-soft);flex:none;transition:transform var(--t-fast) var(--ease-out)}
+  .pp.open .pp-btn .car{transform:rotate(180deg)}
+  .pp-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-pop);
+    box-shadow:var(--shadow-pop);padding:6px;animation:fadeDown var(--t-fast) var(--ease-out)}
+  .pp-search{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;margin-bottom:4px;border:1px solid var(--line);border-radius:8px;color:var(--ink-soft)}
+  .pp-search:focus-within{border-color:var(--green)}
+  .pp-search [data-lucide]{width:15px;height:15px;flex:none}
+  .pp-search input{flex:1;min-width:0;border:none;outline:none;background:none;font-family:var(--font);font-size:13.5px;color:var(--ink)}
+  .pp-list{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto;overscroll-behavior:contain}
+  .pp-list li{display:flex;align-items:center;gap:8px;min-height:36px;padding:7px 10px;border-radius:7px;font-size:13.5px;color:var(--ink);cursor:pointer}
+  .pp-list li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pp-list li.act{background:var(--lime-tint)}
+  .pp-list li.on{color:var(--green-dark);font-weight:600}
+  .pp-list li [data-lucide]{width:15px;height:15px;color:var(--green);flex:none}
+  .pp-empty{padding:12px 10px;font-size:13px;color:var(--ink-soft)}
+  @media (prefers-reduced-motion: reduce){ .pp-panel{animation:none} .pp-btn .car{transition:none} }

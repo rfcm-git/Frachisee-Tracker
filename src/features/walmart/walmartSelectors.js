@@ -39,12 +39,15 @@ export function walmartFollowUp(ctx) {
   return { open: open.length, notEmailed: open.filter((record) => !record.last_email_at).length };
 }
 
+/** Last change or last email, whichever is later (sorting by Last Updated). */
+const lastTouch = (record) => Math.max(timeOf(record.updated_at || record.created_at), timeOf(record.last_email_at));
+
 const SORTERS = {
   num: (a, b) => compareNumbers(a.record.store_num, b.record.store_num),
   stage: (a, b) => STAGE_SORT.indexOf(a.stage) - STAGE_SORT.indexOf(b.stage),
   emailed: (a, b) => timeOf(a.record.last_email_at) - timeOf(b.record.last_email_at),
   added: (a, b) => timeOf(a.record.created_at) - timeOf(b.record.created_at),
-  updated: (a, b) => timeOf(a.record.updated_at || a.record.created_at) - timeOf(b.record.updated_at || b.record.created_at),
+  updated: (a, b) => lastTouch(a.record) - lastTouch(b.record),
 };
 
 /** Rows that pass the search and filters, in the chosen order (ties by store number). */
