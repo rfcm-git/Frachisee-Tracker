@@ -6,7 +6,7 @@ import { StatusButtons } from "../../components/ui/Choices.jsx";
 import { CapDueBadge, CapStatusBadge } from "../../components/ui/common.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { CAP_DUE_SOON_DAYS, CAP_STATES } from "../../config/constants.js";
-import { capContact, capDueDate, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
+import { capContact, capDueDate, capAssessmentId, cleanAssessmentId, findCapByAssessment, normalizeCapStatus, storeContactDefaults } from "../../domain/caps.js";
 import { addDays, formatPhone, formatTimestamp, localDateInput, phone10 } from "../../lib/format.js";
 import { cleanStoreNumber, isEmail } from "../../lib/text.js";
 import { useDataContext } from "../../state/dataStore.js";
@@ -36,6 +36,7 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
   const [status, setStatus] = useState(() => (record ? normalizeCapStatus(record.status) : CAP_STATES[0]));
   const [notes, setNotes] = useState(() => record?.notes || "");
   const [dueDate, setDueDate] = useState(() => capDueDate(record));
+  const [assessmentId, setAssessmentId] = useState(() => capAssessmentId(record));
   const [saving, setSaving] = useState(false);
   const lookupRef = useRef(null);
   if (capId != null && !record) return null;
@@ -46,6 +47,7 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
   const duplicate = !editing && storeNum ? findCap(ctx, storeNum) : null;
   const emailBad = !!values.email.trim() && !isEmail(values.email.trim());
   const phoneBad = !!values.phone.trim() && !phone10(values.phone);
+  const assessmentOwner = ctx.capsAssessmentReady ? findCapByAssessment(ctx, assessmentId, record?.id ?? null) : null;
 
   function changeNum(value) {
     setNum(value);
@@ -77,9 +79,11 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
     if (duplicate) { toast(`Store ${storeNum} is already in the CAP list`, "err"); return; }
     if (emailBad) { toast("Email address is not valid", "err"); return; }
     if (phoneBad) { toast("Phone number must be 10 digits", "err"); return; }
+    if (assessmentOwner) { toast(`Assessment ID ${cleanAssessmentId(assessmentId)} is already used by store ${assessmentOwner.store_num}`, "err"); return; }
     const contact = { name: values.name.trim(), email: values.email.trim(), phone: values.phone.trim() ? phone10(values.phone) : "" };
+    const assessment = ctx.capsAssessmentReady ? { assessmentId } : {};
     setSaving(true);
-    const ok = editing ? await updateCap(record, { ...contact, status, notes, dueDate }) : await createCap({ num: storeNum, ...contact, notes, dueDate });
+    const ok = editing ? await updateCap(record, { ...contact, ...assessment, status, notes, dueDate }) : await createCap({ num: storeNum, ...contact, ...assessment, notes, dueDate });
     setSaving(false);
     if (ok) close();
   }
@@ -92,7 +96,7 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
     subtitle={editing ? `Added ${formatTimestamp(record.created_at)}${record.updated_at && record.updated_at !== record.created_at ? ` · last updated ${formatTimestamp(record.updated_at)}` : ""}` : "Contact details are filled from the store records — change them if needed"}
     modalStyle={{ maxWidth: 620 }}
     footer={<><button type="button" className="btn ghost" onClick={close}>Cancel</button>
-      <button type="button" className="btn" disabled={saving || !!duplicate} onClick={save}><Icon name="save" />{saving ? "Saving…" : editing ? "Save changes" : "Add store"}</button></>}>
+      <button type="button" className="btn" disabled={saving || !!duplicate || !!assessmentOwner} onClick={save}><Icon name="save" />{saving ? "Saving…" : editing ? "Save changes" : "Add store"}</button></>}>
     <div className="field" style={{ marginBottom: 6 }}><label htmlFor="cap_num">{editing ? "Store Number" : "Store — type a store # or a franchisee name"}</label>
       {editing ? <input id="cap_num" value={num} disabled autoComplete="off" />
         : <StoreLookup ref={lookupRef} inputId="cap_num" value={target} allowUnknown lockFranchisee={franchiseeId != null} invalid={!!duplicate}
@@ -104,6 +108,12 @@ export default function CapFormDialog({ capId = null, storeNum: presetNum = "", 
           : store ? <span><Icon name="store" />Store {storeNum}{defaults.name ? ` · ${defaults.name}` : ""}{store.city ? ` · ${store.city}${store.state ? `, ${store.state}` : ""}` : ""}</span>
             : <span className="cap-warn"><Icon name="triangle-alert" />Store {storeNum} is not in the store list. You can still add it — fill in the contact details.</span>}
     </div>
+
+    {ctx.capsAssessmentReady && <div className="field" style={{ marginBottom: 12 }}><label htmlFor="cap_aid">Assessment ID <span className="muted" style={{ fontWeight: 400 }}>(optional · must be unique)</span></label>
+      <input id="cap_aid" value={assessmentId} className={assessmentOwner ? "bad" : ""} placeholder="e.g. 12345" autoComplete="off" aria-invalid={!!assessmentOwner}
+        aria-describedby={assessmentOwner ? "cap_aid_err" : undefined} onChange={(event) => { setAssessmentId(event.target.value); setBusy(true); }} />
+      {assessmentOwner && <div id="cap_aid_err" className="cap-err" role="alert" style={{ marginTop: 6 }}><Icon name="circle-alert" />Already used by store {assessmentOwner.store_num} in the CAP list.
+        <button type="button" className="btn link" onClick={() => { close(); openCapForm(assessmentOwner.id); }}>Open it</button></div>}</div>}
 
     <div className="field" style={{ marginBottom: 12 }}><label htmlFor="cap_name">Franchisee {fieldHint("name")}</label>
       <input id="cap_name" value={values.name} placeholder="Franchisee name" onChange={(event) => changeField("name", event.target.value)} /></div>

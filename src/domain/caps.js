@@ -11,12 +11,28 @@ import { cleanStoreNumber } from "../lib/text.js";
 
 const DAY = 864e5;
 
-export const capStatusClass = (status) => (status === "Completed" ? "cap-done" : status === "In Progress" ? "cap-wip" : status === "Email Sent" ? "cap-sent" : "cap-none");
+const STATUS_CLASS = { Completed: "cap-done", "In Review": "cap-review", "In Progress": "cap-wip", "Email Sent": "cap-sent" };
+export const capStatusClass = (status) => STATUS_CLASS[status] || "cap-none";
 
 /** Known status, or the starting status for anything else. */
 export const normalizeCapStatus = (status) => (CAP_STATES.includes(status) ? status : CAP_STATES[0]);
 
 export const capIsOpen = (record) => normalizeCapStatus(record.status) !== "Completed";
+
+/* ---------- Assessment ID ---------- */
+
+/** Assessment ID as saved: trimmed, inner spaces collapsed ("" when blank). */
+export const cleanAssessmentId = (value) => String(value ?? "").replace(/\s+/g, " ").trim();
+
+/** Assessment ID of a record ("" when none). */
+export const capAssessmentId = (record) => cleanAssessmentId(record?.assessment_id);
+
+/** Assessment IDs match without upper/lower case. Blank never matches. */
+export const sameAssessmentId = (a, b) => !!cleanAssessmentId(a) && cleanAssessmentId(a).toLowerCase() === cleanAssessmentId(b).toLowerCase();
+
+/** The CAP record that already uses a Assessment ID, or null. exceptId skips the record being edited. */
+export const findCapByAssessment = (ctx, assessmentId, exceptId = null) =>
+  (cleanAssessmentId(assessmentId) ? ctx.caps.find((record) => record.id !== exceptId && sameAssessmentId(record.assessment_id, assessmentId)) || null : null);
 
 /** Name, email and phone of a store from the store records ("" when unknown). */
 export function storeContactDefaults(ctx, num) {
@@ -103,7 +119,7 @@ export function capsSummary(records, now = new Date()) {
 /* ---------- change log ---------- */
 
 /** Field labels in the change log, in display order. */
-export const CAP_LOG_FIELDS = [["status", "Status"], ["due_date", "Due date"], ["store_name", "Franchisee"], ["email", "Email"], ["phone", "Phone"], ["notes", "Notes"]];
+export const CAP_LOG_FIELDS = [["status", "Status"], ["assessment_id", "Assessment ID"], ["due_date", "Due date"], ["store_name", "Franchisee"], ["email", "Email"], ["phone", "Phone"], ["notes", "Notes"]];
 
 function storedCapHistory(record) {
   try {

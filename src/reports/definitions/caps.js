@@ -1,6 +1,6 @@
 /* CAPs (Corrective Action Plan) report: one row per store. */
 import { CAP_DUE_SOON_DAYS, CAP_STATES, CAP_STATUS_COLOR } from "../../config/constants.js";
-import { capContact, capDueDate, capDueDays, capDueState, capDueText, capIsOpen, normalizeCapStatus } from "../../domain/caps.js";
+import { capContact, capDueDate, capDueDays, capDueState, capDueText, capIsOpen, capAssessmentId, normalizeCapStatus } from "../../domain/caps.js";
 import { staffForStore } from "../../domain/staff.js";
 import { timeOf } from "../../lib/format.js";
 import { compareNumbers } from "../../lib/text.js";
@@ -8,7 +8,7 @@ import { storeInTerritory } from "../reportEngine.js";
 import { reportMonth } from "../reportDates.js";
 import { average, distinct, names, percentText, searchToReportFilters } from "./shared.js";
 
-const COLUMN_WIDTHS = { store: 10, fr: 28, terr: 10, addr: 30, city: 14, state: 7, email: 30, phone: 16, status: 15, due: 12, duestate: 20, added: 17, updated: 17, days: 12, notes: 50, fbc: 20, om: 20 };
+const COLUMN_WIDTHS = { store: 10, aid: 14, fr: 28, terr: 10, addr: 30, city: 14, state: 7, email: 30, phone: 16, status: 15, due: 12, duestate: 20, added: 17, updated: 17, days: 12, notes: 50, fbc: 20, om: 20 };
 const COUNT_HEADERS = ["Total", ...CAP_STATES, "Overdue", "Due soon"];
 const DAY = 864e5;
 
@@ -67,7 +67,7 @@ export default {
   ],
   defSheets: ["summary", "caps", "due", "byfr", "bystatus"],
   cols: [
-    ["store", "Store #"], ["fr", "Franchisee"], ["terr", "Territory"], ["addr", "Store address"], ["city", "City"], ["state", "State"],
+    ["store", "Store #"], ["aid", "Assessment ID"], ["fr", "Franchisee"], ["terr", "Territory"], ["addr", "Store address"], ["city", "City"], ["state", "State"],
     ["email", "Email address"], ["phone", "Phone number"], ["status", "Status"], ["due", "Submission due date"], ["duestate", "Due status"],
     ["added", "Date added"], ["updated", "Last updated"], ["days", "Days open / days to complete"], ["notes", "Notes"], ["om", "OM"], ["fbc", "FBC"],
   ],
@@ -79,6 +79,8 @@ export default {
       ok: (ctx, record, selected) => selected.includes(capDueState(record)) },
     { key: "email", label: "Email", allLabel: "With or without email", options: [["has", "Has email"], ["none", "No email"]],
       ok: (ctx, record, selected) => selected.includes(capContact(ctx, record).email ? "has" : "none") },
+    { key: "assessment", label: "Assessment ID", allLabel: "With or without Assessment ID", options: [["has", "Has Assessment ID"], ["none", "No Assessment ID"]],
+      ok: (ctx, record, selected) => selected.includes(capAssessmentId(record) ? "has" : "none") },
   ],
   items: (ctx) => ctx.caps,
   dateOf: (record) => record.created_at,
@@ -94,6 +96,7 @@ export default {
         status: filter.statuses.length ? filter.statuses : CAP_STATES,
         due: TAB_DUE[filter.due] || DUE_OPTIONS.map(([key]) => key),
         email: filter.email ? [filter.email] : ["has", "none"],
+        assessment: filter.assessment ? [filter.assessment] : ["has", "none"],
       },
       ...searchToReportFilters(ctx, ui.search),
     };
@@ -132,7 +135,7 @@ export default {
         const contact = capContact(ctx, record);
         const team = staffForStore(ctx, store);
         const value = {
-          store: record.store_num || "", fr: contact.name, terr: store?.territory || "", addr: store?.address || "", city: store?.city || "", state: store?.state || "",
+          store: record.store_num || "", aid: capAssessmentId(record), fr: contact.name, terr: store?.territory || "", addr: store?.address || "", city: store?.city || "", state: store?.state || "",
           email: contact.email, phone: contact.phone, status: normalizeCapStatus(record.status),
           due: capDueDate(record), duestate: capIsOpen(record) ? capDueText(record) : capDueDate(record) ? "Completed" : "",
           added: h.date(record.created_at), updated: h.date(record.updated_at || record.created_at), days: capDays(record),
@@ -146,12 +149,12 @@ export default {
     if (state.sheets.includes("due")) {
       const due = records.filter((record) => ["overdue", "today", "soon"].includes(capDueState(record)))
         .sort((a, b) => capDueDays(a) - capDueDays(b) || compareNumbers(a.store_num, b.store_num));
-      const rows = [["Store #", "Franchisee", "Email address", "Phone number", "Status", "Submission due date", "Due status", "Notes"]];
+      const rows = [["Store #", "Assessment ID", "Franchisee", "Email address", "Phone number", "Status", "Submission due date", "Due status", "Notes"]];
       due.forEach((record) => {
         const contact = capContact(ctx, record);
-        rows.push([record.store_num || "", contact.name, contact.email, contact.phone, normalizeCapStatus(record.status), capDueDate(record), capDueText(record), record.notes || ""]);
+        rows.push([record.store_num || "", capAssessmentId(record), contact.name, contact.email, contact.phone, normalizeCapStatus(record.status), capDueDate(record), capDueText(record), record.notes || ""]);
       });
-      workbook.addSheet("Overdue & due soon", rows, [10, 28, 30, 16, 15, 12, 20, 50], { filter: true });
+      workbook.addSheet("Overdue & due soon", rows, [10, 14, 28, 30, 16, 15, 12, 20, 50], { filter: true });
     }
 
     const countWithLast = (items) => [...counts(items), h.date(lastOf(items))];
@@ -159,7 +162,7 @@ export default {
       h.groupSheet(workbook, records, {
         title: "By franchisee", key: (record) => capFranchiseeId(ctx, record),
         head: (id, items) => { const franchisee = ctx.frById.get(id); return [franchisee ? franchisee.name : "Not in store records", franchisee ? franchisee.territory || "" : "", percentText(items.filter((record) => !capIsOpen(record)).length, items.length)]; },
-        headers: ["Franchisee", "Territory", "Completion", ...COUNT_HEADERS, "Last activity"], widths: [30, 10, 11, 8, 14, 11, 11, 11, 9, 9, 17], count: countWithLast,
+        headers: ["Franchisee", "Territory", "Completion", ...COUNT_HEADERS, "Last activity"], widths: [30, 10, 11, 8, 14, 11, 11, 11, 11, 9, 9, 17], count: countWithLast,
       });
     }
     if (state.sheets.includes("bystatus")) {
@@ -175,7 +178,7 @@ export default {
     if (state.sheets.includes("bymonth")) {
       h.groupSheet(workbook, records, {
         title: "By month", key: (record) => reportMonth(record.created_at, h.tz), head: (month) => [month],
-        headers: ["Month added", ...COUNT_HEADERS, "Last activity"], widths: [14, 8, 14, 11, 11, 11, 9, 9, 17], count: countWithLast, sort: (a, b) => a[0].localeCompare(b[0]),
+        headers: ["Month added", ...COUNT_HEADERS, "Last activity"], widths: [14, 8, 14, 11, 11, 11, 11, 9, 9, 17], count: countWithLast, sort: (a, b) => a[0].localeCompare(b[0]),
       });
     }
   },

@@ -206,10 +206,11 @@ export async function restoreBackup(backup) {
   // CAPs: one record per store number, so the backup's record replaces the saved one for that store.
   if (getContext().capsReady && backup.caps.length) {
     // Without the due_date column (migration not run yet), backups that have it restore without it.
-    const { capsDueReady, capsHistoryReady } = getContext();
-    const rows = backup.caps.map(({ id: _id, due_date: dueDate, history, ...rest }) => ({
+    const { capsDueReady, capsHistoryReady, capsAssessmentReady } = getContext();
+    const rows = backup.caps.map(({ id: _id, due_date: dueDate, history, assessment_id: assessmentId, ...rest }) => ({
       ...rest,
       ...(capsDueReady ? { due_date: dueDate ?? null } : {}),
+      ...(capsAssessmentReady ? { assessment_id: assessmentId ?? "" } : {}),
       ...(capsHistoryReady ? { history: Array.isArray(history) ? history : [] } : {}),
     }));
     for (const part of chunks(rows, 300)) { const error = await upsertRows(TABLES.caps, part, "store_num"); if (error) throw error; }

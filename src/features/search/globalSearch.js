@@ -9,7 +9,7 @@
  * Without a prefix every field is searched. Records also match through their store and franchisee,
  * so "city:Fresno" finds the stores in Fresno and their issues, CAPs and calls.
  */
-import { capContact, capDueText, capIsOpen, normalizeCapStatus } from "../../domain/caps.js";
+import { capContact, capDueText, capIsOpen, capAssessmentId, normalizeCapStatus } from "../../domain/caps.js";
 import { callFranchiseeName } from "../../domain/calls.js";
 import { franchiseeName, storeOpenIssues, storesOf } from "../../domain/context.js";
 import { isIssueOpen, issueFranchiseeId, issueNumber, normalizeIssueStatus } from "../../domain/issues.js";
@@ -140,10 +140,10 @@ export function buildSearchIndex(ctx) {
     const store = ctx.storeByNum.get(String(record.store_num));
     entries.push({
       cat: "caps", key: `cap-${record.id}`, id: record.id, title: `CAP · Store ${record.store_num}`,
-      sub: [contact.name, capIsOpen(record) ? capDueText(record) : "", record.notes].filter(Boolean).join(" · "),
+      sub: [capAssessmentId(record) ? `Assessment ID ${capAssessmentId(record)}` : "", contact.name, capIsOpen(record) ? capDueText(record) : "", record.notes].filter(Boolean).join(" · "),
       status: { text: status, tone: status === "Completed" ? "ok" : status === "No Action Yet" ? "bad" : "warn" },
       storeNum: String(record.store_num || ""), frId: store?.franchisee_id,
-      fields: [["email", "Email", contact.email], ["phone", "Phone", contact.phone], ["text", "Notes", record.notes], ["text", "Status", status]],
+      fields: [["text", "Assessment ID", capAssessmentId(record)], ["email", "Email", contact.email], ["phone", "Phone", contact.phone], ["text", "Notes", record.notes], ["text", "Status", status]],
       sortKey: record.store_num, open: { type: "cap", id: record.id },
     });
   });

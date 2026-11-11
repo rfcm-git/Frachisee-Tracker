@@ -28,11 +28,12 @@ function savedIssueView() {
 const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "new" });
 const defaultObFilter = () => ({ platforms: [], threePd: [], franchisees: [], sort: "new" });
 
-/** CAPs sort keys: store number, status, date added, last updated. */
-export const CAP_SORT_KEYS = ["num", "status", "added", "updated", "due"];
+/** CAPs sort keys: store number, Assessment ID, status, date added, last updated, due date. */
+export const CAP_SORT_KEYS = ["num", "aid", "status", "added", "updated", "due"];
 const CAP_EMAIL_FILTERS = ["", "has", "none"];
+const CAP_ASSESSMENT_FILTERS = ["", "has", "none"];
 const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
-const defaultCapsFilter = () => ({ statuses: [], email: "", due: "", sort: { key: "added", dir: -1 } });
+const defaultCapsFilter = () => ({ statuses: [], email: "", assessment: "", due: "", sort: { key: "added", dir: -1 } });
 
 /** ezCater sort keys and email filter ("" all, "none" not emailed yet, "sent" emailed — open stores only). */
 export const EZ_SORTS = ["num", "status", "emailed", "added", "updated"];
@@ -144,6 +145,7 @@ function restoredState() {
     state.capsFilter = {
       statuses: onlyValid(saved.capsFilter.statuses, CAP_STATES),
       email: CAP_EMAIL_FILTERS.includes(saved.capsFilter.email) ? saved.capsFilter.email : "",
+      assessment: CAP_ASSESSMENT_FILTERS.includes(saved.capsFilter.assessment) ? saved.capsFilter.assessment : "",
       due: CAP_DUE_FILTERS.includes(saved.capsFilter.due) ? saved.capsFilter.due : "",
       sort: CAP_SORT_KEYS.includes(sort.key) ? { key: sort.key, dir: sort.dir === 1 ? 1 : -1 } : defaultCapsFilter().sort,
     };
@@ -324,6 +326,8 @@ export function toggleCapOnlyStatus(status) {
 
 export const setCapEmailFilter = (email) => patchCapsFilter({ email: CAP_EMAIL_FILTERS.includes(email) ? email : "" });
 
+export const setCapAssessmentFilter = (assessment) => patchCapsFilter({ assessment: CAP_ASSESSMENT_FILTERS.includes(assessment) ? assessment : "" });
+
 export const setCapDueFilter = (due) => patchCapsFilter({ due: CAP_DUE_FILTERS.includes(due) ? due : "" });
 
 /** Progress-strip chips: the same due filter again shows all. */
@@ -341,7 +345,7 @@ export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter()
 
 /** Opens the CAP tab, optionally on one status or due date filter (dashboard and reminders). */
 export function showCaps(status = "", due = "") {
-  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
+  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [], email: "", assessment: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
   window.scrollTo(0, 0);
 }
 

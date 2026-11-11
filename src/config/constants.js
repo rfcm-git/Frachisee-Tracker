@@ -48,8 +48,8 @@ export const WM_NEXT_STEP = {
 };
 
 /** CAPs (Corrective Action Plan) monitoring: one record per store. New stores always start at the first status. */
-export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "Completed"];
-export const CAP_STATUS_COLOR = { "No Action Yet": "var(--danger)", "Email Sent": "#2f7fbf", "In Progress": "var(--warn)", Completed: "var(--ok)" };
+export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "In Review", "Completed"];
+export const CAP_STATUS_COLOR = { "No Action Yet": "var(--danger)", "Email Sent": "#2f7fbf", "In Progress": "var(--warn)", "In Review": "#7a55c7", Completed: "var(--ok)" };
 /** A CAP counts as "due soon" (and gets a reminder) this many days before its submission due date. */
 export const CAP_DUE_SOON_DAYS = 3;
 

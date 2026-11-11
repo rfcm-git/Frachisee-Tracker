@@ -94,10 +94,10 @@ export async function loadAllTables({ onProgress } = {}) {
   const { rows: caps, ready: capsReady } = capsResult;
   const { rows: walmart, ready: walmartReady } = walmartResult;
   const { rows: snapshots, ready: snapshotsReady } = snapshotsResult;
-  const [capsDueReady, capsHistoryReady, lastImport, emailTemplate] = capsReady
-    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"),
+  const [capsDueReady, capsHistoryReady, capsAssessmentReady, lastImport, emailTemplate] = capsReady
+    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"), hasColumn(TABLES.caps, "assessment_id"),
       readSetting(CAPS_LAST_IMPORT_KEY).catch((error) => ({ error })), readSetting(CAPS_EMAIL_KEY).catch((error) => ({ error }))])
-    : [false, false, { value: null }, { value: null }];
+    : [false, false, false, { value: null }, { value: null }];
   // lastImport.error: app_settings is not set up; the CAP tab then shows the import saved on this computer.
   const capsLastImport = lastImport.error ? undefined : lastImport.value || null;
   // Same for the email template: undefined means it is kept on this computer instead.
@@ -110,7 +110,7 @@ export async function loadAllTables({ onProgress } = {}) {
   // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
   const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
+  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsAssessmentReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */
