@@ -271,6 +271,7 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, s
     <SortHeader sortKey="status" sort={sort} className="cap-statuscol"
       extra={<BulkStatusMenu selected={selected} total={rows.length} onSelectAll={onSelectAll} onDone={onClear} />}>Status</SortHeader>
     {showDue && <SortHeader sortKey="due" sort={sort} className="cap-duecol">Due Date</SortHeader>}
+    <th className="cap-notescol">Notes</th>
     <th className="cap-sort cap-sort2 hide-sm cap-date"><SortButton sortKey="added" sort={sort}>Date Added</SortButton>
       <SortButton sortKey="updated" sort={sort}>Last Updated</SortButton></th>
     <th className="c-act"><div className="cap-th">Actions
@@ -309,6 +310,7 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, s
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
           : normalizeCapStatus(record.status) === "Completed" ? <span className="muted">—</span>
             : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}
+        <td className="cap-notescol">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
         <AddedUpdatedCell record={record} historyReady={ctx.capsHistoryReady} />
         <td className="c-act"><div className="row-acts">
           {record.notes && <button type="button" className="iconbtn mini cap-notebtn" data-tip={`Notes: ${record.notes}`} aria-label={`Notes for store ${record.store_num}: ${record.notes}`}

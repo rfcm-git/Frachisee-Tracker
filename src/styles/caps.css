@@ -56,6 +56,9 @@
   .cap-notes{min-width:140px;max-width:210px}
   .cap-note{font-size:12.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
   .cap-fromstore{color:var(--ink-soft)}
+  /* Notes: a column on wide screens (1600px+), a note icon in Actions below that so the table still fits */
+  .cap-notescol{display:none;min-width:150px;max-width:220px}
+  @media(min-width:1600px){ .cap-notescol{display:table-cell} .cap-notebtn{display:none} }
   .cap-notebtn{color:var(--yellow-dark);background:var(--yellow-soft);border-color:#ecd98a}
   .cap-notebtn:hover{background:#ffeaa3}
   .cap-table a{color:inherit;text-decoration:none} .cap-table a:hover{color:var(--green-dark);text-decoration:underline}
