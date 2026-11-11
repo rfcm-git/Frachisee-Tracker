@@ -92,7 +92,8 @@
   /* Reduced motion: no drifting or sliding; state changes still show, without movement */
   @media (prefers-reduced-motion: reduce){
     .sb-glow,.sb-dots,.sb-wave{animation:none}
-    #view > *,.overlay.show,.overlay.show > .modal,.tab.active::before,.spick-sug.show,.sst-menu,.pmenu,.mnu-menu,.slk-card{animation:none}
+    #view > *,.overlay.show,.overlay.show > .modal,.tab.active::before,.spick-sug.show,.sst-menu,.pmenu,.mnu-menu,.fdd-menu,.slk-card{animation:none}
+    select,.fdd-btn,.fdd-opt,.cbox{transition:none}
     .mnu .car{transition:none}
     .tab:hover .t-ic,.qlog-btn:hover,.qlog-btn:hover .qi,.qlog-btn:active,
     .btn:active:not(:disabled),.iconbtn:active:not(:disabled),.mchip:active,.ob-pick:active,.sbtn:active,.pbtn:active{transform:none}

@@ -1,0 +1,36 @@
+  /*
+   * Form controls shared by every tab. Loaded after the feature styles so one look wins everywhere.
+   * Every native dropdown (<select>) gets the same chevron, hover, focus ring and disabled state.
+   * The CAP status pill (.cap-sel) draws its own.
+   */
+  select:not(.cap-sel){
+    appearance:none;-webkit-appearance:none;
+    background-image:var(--chevron);background-repeat:no-repeat;background-position:right 10px center;background-size:16px 16px;
+    padding-right:34px;cursor:pointer;text-overflow:ellipsis;
+    transition:border-color var(--t-fast) ease,box-shadow var(--t-fast) ease,background-color var(--t-fast) ease}
+  select:not(.cap-sel):hover:not(:disabled){border-color:var(--green)}
+  select:not(.cap-sel):focus-visible{outline:none;border-color:var(--green);box-shadow:var(--ring)}
+  select:disabled{opacity:.55;cursor:not-allowed}
+  select option{color:var(--ink);background-color:var(--surface)}
+  .pager .pg-size select{padding-right:30px;background-position:right 8px center}
+
+  /* Dashboard pickers: the pill around the select shows the border and the focus ring */
+  .db-filter select,.dh-pick select{padding-right:26px;background-position:right 4px center}
+  .db-filter select:focus-visible,.dh-pick select:focus-visible{box-shadow:none}
+
+  /* Popups share one surface */
+  .fdd-menu,.sst-menu,.mnu-menu{border-radius:var(--radius-pop);box-shadow:var(--shadow-pop)}
+  .spick-sug{box-shadow:var(--shadow-pop)}
+
+  /* Filter dropdowns (components/ui/FilterMenu.jsx) */
+  .fdd-btn{transition:border-color var(--t-fast) ease,background-color var(--t-fast) ease,box-shadow var(--t-fast) ease}
+  .fdd-btn:focus-visible{outline:none;border-color:var(--green);box-shadow:var(--ring)}
+  .fdd.open .fdd-btn{box-shadow:var(--ring)}
+  .fdd-menu{min-width:240px;max-width:min(360px,calc(100vw - 16px));max-height:min(70vh,440px);overflow:auto;overscroll-behavior:contain;
+    animation:fadeDown var(--t-fast) var(--ease-out)}
+  .fdd-opt{min-height:38px;transition:background-color var(--t-fast) ease}
+  .fdd-opt:focus-visible{outline:none;background:var(--lime-tint);box-shadow:inset 0 0 0 2px var(--green)}
+  .fdd-opt.fdd-ck:hover .cbox:not(.on){border-color:var(--green)}
+  .cbox{transition:background-color var(--t-fast) ease,border-color var(--t-fast) ease}
+  .fdd-note{white-space:normal;line-height:1.4;padding:6px 10px 4px}
+  .fdd-div{margin:4px 2px}

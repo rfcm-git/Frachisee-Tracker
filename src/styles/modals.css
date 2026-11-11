@@ -30,7 +30,7 @@
   .c-edit-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:9px;background:var(--surface)}
   .c-edit-row .cico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--green-soft);color:var(--green-dark);flex:none}
   .c-edit-row .cico [data-lucide]{width:16px;height:16px}
-  .c-edit-row select.ctype{width:92px;flex:none;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--font);font-size:13px;background:var(--surface)}
+  .c-edit-row select.ctype{width:104px;flex:none;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 30px 0 10px;font-family:var(--font);font-size:13px;background-color:var(--surface)}
   .c-edit-row input.cval{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 11px;font-family:var(--font);font-size:14px}
 
   
