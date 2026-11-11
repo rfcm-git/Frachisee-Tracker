@@ -14,7 +14,7 @@ const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "ezcater",
 function searchPlaceholder(tab) {
   if (tab === "ezcater") return "Search ezCater: store #, franchisee, status or updates…";
   if (tab === "walmart") return "Search Walmart: store #, franchisee, stage or notes…";
-  if (tab === "caps") return "Search CAPs: store #, franchisee, email, phone or notes…";
+  if (tab === "caps") return "Search store #, Assessment ID, franchisee…";
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
   if (tab === "onboarding") return "Search onboarding: store #, platform, notes, city…";
@@ -125,7 +125,7 @@ export default function Toolbar() {
         }}><Icon name="mail" />Email message</button>}
         {tab === "issues" && <button type="button" className="btn outline round" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
         {(tab === "issues" || tab === "onboarding" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}
-        <button type="button" className="btn ghost" onClick={() => loadAll()}><Icon name="refresh-cw" />Refresh</button>
+        <button type="button" className="btn ghost tb-refresh" aria-label="Refresh" data-tip="Reload the latest data" onClick={() => loadAll()}><Icon name="refresh-cw" /><span className="tb-lbl">Refresh</span></button>
       </div>}
       {(tab === "franchisees" || tab === "stores") && <div className={`hintbar hintbar-scope${prefixTyped ? " moved" : ""}`}>
         <span><Icon name={prefixTyped ? "triangle-alert" : "info"} />{prefixTyped ? <>“{search.trim()[0]}” searches moved to the Search tab — here the box searches {tab === "franchisees" ? "franchisee" : "store"} details as plain text.</>

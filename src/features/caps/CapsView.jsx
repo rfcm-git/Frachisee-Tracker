@@ -208,10 +208,10 @@ function SortHeader({ sortKey, sort, className = "", extra = null, children }) {
     {extra ? <div className="cap-th">{button}{extra}</div> : button}</th>;
 }
 
-/** Contact value; muted with a tip when it comes from the store records. */
-function ContactValue({ value, text = value, fromStore, href }) {
-  if (!value) return <span className="muted">—</span>;
-  return <span className={fromStore ? "cap-fromstore" : ""} data-tip={fromStore ? "From the store records" : "Saved on this CAP record"}>
+/** Contact value; muted when it comes from the store records. The tip shows the full value (long emails are cut with "…") and where it comes from. */
+function ContactValue({ value, text = value, fromStore, href, empty = "—" }) {
+  if (!value) return <span className="muted">{empty}</span>;
+  return <span className={fromStore ? "cap-fromstore" : ""} data-tip={`${value} · ${fromStore ? "from the store records" : "saved on this CAP record"}`}>
     {href ? <a href={href} onClick={(event) => event.stopPropagation()}>{text}</a> : text}</span>;
 }
 
@@ -267,11 +267,10 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, s
   return <div className="card" style={{ overflowX: "auto" }}><table className="is-table cap-table" role="grid" aria-multiselectable="true"><thead><tr>
     <SortHeader sortKey="num" sort={sort} className="c-snum">Store #</SortHeader>
     {showAssessment && <SortHeader sortKey="aid" sort={sort} className="cap-aid">Assessment ID</SortHeader>}
-    <th>Franchisee</th><th className="hide-sm">Email Address</th><th className="hide-sm cap-phone">Phone Number</th>
+    <th className="cap-fr">Franchisee</th><th className="hide-sm cap-contact">Contact</th>
     <SortHeader sortKey="status" sort={sort} className="cap-statuscol"
       extra={<BulkStatusMenu selected={selected} total={rows.length} onSelectAll={onSelectAll} onDone={onClear} />}>Status</SortHeader>
     {showDue && <SortHeader sortKey="due" sort={sort} className="cap-duecol">Due Date</SortHeader>}
-    <th className="hide-sm cap-notes">Notes</th>
     <th className="cap-sort cap-sort2 hide-sm cap-date"><SortButton sortKey="added" sort={sort}>Date Added</SortButton>
       <SortButton sortKey="updated" sort={sort}>Last Updated</SortButton></th>
     <th className="c-act"><div className="cap-th">Actions
@@ -297,18 +296,23 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, s
           {store && storeStatus(store) !== "Open" && <div style={{ marginTop: 3 }}><StoreStatusIfClosed status={storeStatus(store)} /></div>}</td>
         {showAssessment && <td className="cap-aid">{capAssessmentId(record) || <button type="button" className="btn link cap-setdue" data-tip="Add the Assessment ID"
           aria-label={`Add the Assessment ID of store ${record.store_num}`} onClick={() => openCapForm(record.id)}><Icon name="plus" />Add</button>}</td>}
-        <td><ContactValue value={contact.name} fromStore={contact.fromStore.name} /></td>
-        <td className="hide-sm cap-email"><ContactValue value={contact.email} fromStore={contact.fromStore.email} href={contact.email ? `mailto:${contact.email}` : ""} /></td>
-        <td className="hide-sm cap-phone"><ContactValue value={contact.phone} text={keepPhoneTogether(contact.phone)} fromStore={contact.fromStore.phone} href={contact.phone ? telHref(contact.phone) : ""} /></td>
+        <td className="cap-fr"><div className="cap-clamp"><ContactValue value={contact.name} fromStore={contact.fromStore.name} /></div></td>
+        <td className="hide-sm cap-contact">
+          <div className="cap-cline"><Icon name="mail" /><ContactValue value={contact.email} fromStore={contact.fromStore.email} empty="No email"
+            href={contact.email ? `mailto:${contact.email}` : ""} /></div>
+          <div className="cap-cline"><Icon name="phone" /><ContactValue value={contact.phone} text={keepPhoneTogether(contact.phone)} fromStore={contact.fromStore.phone} empty="No phone"
+            href={contact.phone ? telHref(contact.phone) : ""} /></div>
+        </td>
         <td className="cap-statuscol"><div className="cap-statuswrap"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} />
           <EmailButton record={record} email={contact.email} /></div></td>
         {showDue && <td className="cap-duecol">{record.due_date
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
           : normalizeCapStatus(record.status) === "Completed" ? <span className="muted">—</span>
             : <button type="button" className="btn link cap-setdue" data-tip="Set a submission due date" onClick={() => openCapForm(record.id)}><Icon name="calendar" />Set</button>}</td>}
-        <td className="hide-sm cap-notes">{record.notes ? <span className="cap-note" data-tip={record.notes}>{record.notes}</span> : <span className="muted">—</span>}</td>
         <AddedUpdatedCell record={record} historyReady={ctx.capsHistoryReady} />
         <td className="c-act"><div className="row-acts">
+          {record.notes && <button type="button" className="iconbtn mini cap-notebtn" data-tip={`Notes: ${record.notes}`} aria-label={`Notes for store ${record.store_num}: ${record.notes}`}
+            onClick={() => openCapForm(record.id)}><Icon name="sticky-note" /></button>}
           <button type="button" className="iconbtn mini" data-tip="Edit details, status and notes" aria-label="Edit" onClick={() => openCapForm(record.id)}><Icon name="pencil" /></button>
           <button type="button" className="iconbtn mini del" data-tip="Remove from the CAP list" aria-label="Remove" onClick={() => askDeleteCap(record.id)}><Icon name="trash-2" /></button>
         </div></td>

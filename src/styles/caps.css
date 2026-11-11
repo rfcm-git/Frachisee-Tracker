@@ -32,12 +32,32 @@
   .cap-upd{font-size:11.5px;margin-top:2px}
   .cap-table th.cap-sort button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:4px}
   .cap-statuscol{width:176px;white-space:nowrap}
-  .cap-phone{min-width:120px}
-  .cap-email{overflow-wrap:anywhere;min-width:170px}
+  /* Columns sized so the whole table fits a 1366–1440px screen */
+  .cap-table th.c-snum,.cap-table td.c-snum{width:76px}
+  .cap-table thead th,.cap-table tbody td{padding-left:10px;padding-right:10px}
+  .cap-table thead th:first-child,.cap-table tbody td:first-child{padding-left:16px}
+  .cap-fr{min-width:140px;max-width:200px}
+  .cap-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35}
+  .cap-contact{min-width:180px;max-width:220px}
+  @media(max-width:1400px){
+    .cap-table thead th,.cap-table tbody td{padding-left:7px;padding-right:7px}
+    .cap-table thead th:first-child,.cap-table tbody td:first-child{padding-left:12px}
+    .cap-contact{min-width:160px;max-width:178px}
+    .cap-fr{min-width:120px;max-width:156px}
+    .cap-sel{min-width:120px;padding-right:26px;font-size:12px}
+    .cap-statuscol{width:auto}
+  }
+  .cap-cline{display:flex;align-items:center;gap:6px;min-width:0;font-size:13px;line-height:1.5}
+  .cap-cline + .cap-cline{margin-top:2px}
+  .cap-cline > [data-lucide]{width:13px;height:13px;flex:none;color:var(--ink-soft);opacity:.75}
+  .cap-cline > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cap-cline > span.muted{font-size:12px}
   .cap-date{white-space:nowrap;font-size:12px}
   .cap-notes{min-width:140px;max-width:210px}
   .cap-note{font-size:12.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
   .cap-fromstore{color:var(--ink-soft)}
+  .cap-notebtn{color:var(--yellow-dark);background:var(--yellow-soft);border-color:#ecd98a}
+  .cap-notebtn:hover{background:#ffeaa3}
   .cap-table a{color:inherit;text-decoration:none} .cap-table a:hover{color:var(--green-dark);text-decoration:underline}
   .cap-nostore{font-weight:700;color:var(--ink-soft)}
 

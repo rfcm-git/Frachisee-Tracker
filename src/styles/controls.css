@@ -34,3 +34,6 @@
   .cbox{transition:background-color var(--t-fast) ease,border-color var(--t-fast) ease}
   .fdd-note{white-space:normal;line-height:1.4;padding:6px 10px 4px}
   .fdd-div{margin:4px 2px}
+
+  /* Toolbar: Refresh shows only its icon on narrower screens so the buttons stay on one line */
+  @media(max-width:1480px){ .tb-refresh{padding-left:11px;padding-right:11px} .tb-refresh .tb-lbl{display:none} }
