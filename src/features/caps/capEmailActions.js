@@ -81,13 +81,15 @@ export function sendCapEmail(recordId) {
     openCapEmail(record.id);
     return;
   }
-  const records = capFranchiseeRecords(ctx, record);
+  // Stores with CAP emails turned off are listed too, so the user sees they're left out.
+  const records = capFranchiseeRecords(ctx, record, { includeExempt: true });
   if (records.length < 2) { sendOneCapEmail(record); return; }
   openEmailScope({
     heading: `Email about store ${record.store_num}`,
     one: { title: `Just store #${record.store_num}`, text: `Uses the one-store message. Status → ${CAP_EMAIL_STATUS}.`, run: () => sendOneCapEmail(record) },
-    all: { title: `All ${records.length} stores of this franchisee`, text: `One email using the several-stores message. Each store's status → ${CAP_EMAIL_STATUS}.`,
-      lines: records.map(capLine), run: () => sendAllCapEmail(record, records) },
+    all: { title: "Several stores of this franchisee", text: `One email using the several-stores message. Each store's status → ${CAP_EMAIL_STATUS}.`,
+      items: records.map((item) => ({ key: String(item.store_num), label: capLine(item), exempt: isEmailExempt(ctx, item.store_num, "cap"), clicked: item.id === record.id })),
+      run: (keys) => sendAllCapEmail(record, records.filter((item) => keys.includes(String(item.store_num)))) },
     note: "Completed stores are left out.",
   });
 }

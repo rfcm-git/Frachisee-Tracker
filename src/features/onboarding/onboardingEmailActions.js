@@ -82,14 +82,17 @@ export function sendOnboardingEmail(recordId) {
     openOnboardingEmail(record.id, emailScopeOf(record));
     return;
   }
-  const stores = obFranchiseeStores(ctx, record);
+  // Stores with these emails turned off are listed too, so the user sees they're left out.
+  const kind = emailScopeOf(record);
+  const stores = obFranchiseeStores(ctx, record, { includeExempt: true });
   if (stores.length < 2) { sendOneOnboardingEmail(record); return; }
   const platforms = (group) => group.targets.map((item) => obPlatformName(item.platform)).join(", ");
   openEmailScope({
     heading: `Email about store ${record.store_num}`,
     one: { title: `Just store #${record.store_num}`, text: `Uses the one-store message. “${OB_EMAIL_NOTE}” is added to its open platforms.`, run: () => sendOneOnboardingEmail(record) },
-    all: { title: `All ${stores.length} stores of this franchisee`, text: `One email using the several-stores message. “${OB_EMAIL_NOTE}” is added to every open platform.`,
-      lines: stores.map((group) => `Store #${group.num} · ${platforms(group)}`), run: () => sendAllOnboardingEmail(record, stores) },
+    all: { title: "Several stores of this franchisee", text: `One email using the several-stores message. “${OB_EMAIL_NOTE}” is added to every open platform.`,
+      items: stores.map((group) => ({ key: group.num, label: `Store #${group.num} · ${platforms(group)}`, exempt: isEmailExempt(ctx, group.num, kind), clicked: group.num === String(record.store_num) })),
+      run: (keys) => sendAllOnboardingEmail(record, stores.filter((group) => keys.includes(group.num))) },
     note: "Only stores with platforms still being onboarded (Not enrolled or Work in Progress) are included. Not enrolled becomes Work in Progress.",
   });
 }

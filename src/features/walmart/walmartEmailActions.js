@@ -102,14 +102,16 @@ export function sendWalmartEmail(recordId) {
     openWalmartEmail(record.id);
     return;
   }
-  const records = wmFranchiseeRecords(ctx, record);
+  // Stores with Walmart emails turned off are listed too, so the user sees they're left out.
+  const records = wmFranchiseeRecords(ctx, record, { includeExempt: true });
   if (records.length < 2) { sendOne(record); return; }
   const line = (item) => `Store #${item.store_num}${item.last_email_at ? ` · emailed ${formatTimestamp(item.last_email_at)}` : " · not emailed yet"}`;
   openEmailScope({
     heading: `${stage} email · store ${record.store_num}`,
     one: { title: `Just store #${record.store_num}`, text: `Uses the ${stage} one-store message.`, run: () => sendOne(record) },
-    all: { title: `All ${records.length} of this franchisee's stores at ${stage}`, text: `One email using the ${stage} several-stores message.`,
-      lines: records.map(line), run: () => sendAll(record, records) },
+    all: { title: `Several of this franchisee's stores at ${stage}`, text: `One email using the ${stage} several-stores message.`,
+      items: records.map((item) => ({ key: String(item.store_num), label: line(item), exempt: isEmailExempt(ctx, item.store_num, "wm"), clicked: item.id === record.id })),
+      run: (keys) => sendAll(record, records.filter((item) => keys.includes(String(item.store_num)))) },
     note: `Only the franchisee's stores at ${stage} are included — stores at other stages get their own message.`,
   });
 }

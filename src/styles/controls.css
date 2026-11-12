@@ -161,3 +161,27 @@
   .dr-warn{color:#a12f23;font-weight:600;font-size:12.5px}
   .dr-foot{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--ink-soft)}
   .dr-foot [data-lucide]{width:14px;height:14px;flex:none}
+
+  /* Email blocked: the exempt icon shakes when clicked (no shake with reduced motion) */
+  .cap-mailbtn.exempt.shake{animation:exemptShake .4s var(--ease-out)}
+  @keyframes exemptShake{0%,100%{transform:none}20%{transform:translateX(-4px) rotate(-6deg)}40%{transform:translateX(4px) rotate(5deg)}60%{transform:translateX(-3px) rotate(-3deg)}80%{transform:translateX(2px)}}
+  @media (prefers-reduced-motion: reduce){ .cap-mailbtn.exempt.shake{animation:none} }
+
+  /* Email scope window: "several stores" checklist */
+  .scope-all{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+  .scope-all-h{display:flex;gap:12px;align-items:flex-start}
+  .scope-pick{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
+  .scope-pick label{display:flex;align-items:center;gap:10px;min-height:36px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px}
+  .scope-pick li.on label{border-color:var(--green);background:var(--lime-tint)}
+  .scope-pick li.exempt label{background:var(--danger-soft);border-color:#efc2bc;cursor:not-allowed;color:var(--ink-soft)}
+  .scope-pick input{width:17px;height:17px;flex:none;accent-color:var(--green)}
+  .scope-pick input:disabled{cursor:not-allowed}
+  .scope-pick-lb{flex:1;min-width:0}
+  .scope-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--green-soft);color:var(--green-dark);white-space:nowrap}
+  .scope-tag.off{background:#fff;color:#a12f23;border:1px solid #efc2bc}
+  .scope-tag [data-lucide]{width:12px;height:12px}
+  .scope-warn{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:#a12f23}
+  .scope-warn [data-lucide]{width:14px;height:14px;flex:none}
+  .scope-tools{display:flex;align-items:center;gap:4px 12px;margin-top:10px;font-size:12.5px}
+  .scope-tools .muted{margin-right:auto}
+  .scope-tools .btn.link{padding:2px 4px;font-size:12.5px}

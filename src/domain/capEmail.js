@@ -237,13 +237,13 @@ function capStoreLine(ctx, record) {
 }
 
 /** Other stores of the same franchisee in the CAP list that are not Completed (none when the store has no franchisee). */
-export function capFranchiseeRecords(ctx, record) {
+export function capFranchiseeRecords(ctx, record, { includeExempt = false } = {}) {
   const store = ctx.storeByNum.get(String(record.store_num));
   if (!store || store.franchisee_id == null) return [record];
   const records = ctx.caps.filter((item) => {
     const itemStore = ctx.storeByNum.get(String(item.store_num));
     return itemStore && itemStore.franchisee_id === store.franchisee_id
-      && (item.id === record.id || (normalizeCapStatus(item.status) !== "Completed" && !isEmailExempt(ctx, item.store_num, "cap")));
+      && (item.id === record.id || (normalizeCapStatus(item.status) !== "Completed" && (includeExempt || !isEmailExempt(ctx, item.store_num, "cap"))));
   });
   return records.sort((a, b) => String(a.store_num).localeCompare(String(b.store_num), undefined, { numeric: true }));
 }
