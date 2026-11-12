@@ -176,7 +176,7 @@ function obStoreLine(ctx, { num, targets }) {
 export function buildOnboardingEmailMulti(ctx, record, storeGroups, template) {
   const values = obEmailValues(ctx, record, obEmailTargets(ctx, record));
   const stores = storeGroups.map((group) => ctx.storeByNum.get(group.num)).filter(Boolean);
-  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee }, { multi: true });
+  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee });
   const multiValues = { "Franchisee": values.Franchisee, "Stores": storeGroups.map((group) => obStoreLine(ctx, group)).join("\n"), "Store count": String(storeGroups.length), "Email": values.Email };
   return { ...recipients, store: stores.length > 0, stores: storeGroups, targets: storeGroups.flatMap((group) => group.targets), ...composeEmail(template, multiValues, recipients, true) };
 }

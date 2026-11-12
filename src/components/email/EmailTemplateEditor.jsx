@@ -126,8 +126,7 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
         <div className="cem-help">Your Outlook signature is added by Outlook. The email is plain text — bold, links and pictures are not kept.</div>
 
         <fieldset className="cem-cc"><legend>CC</legend>
-          <div className="cem-help" style={{ margin: "0 0 8px" }}>One-store emails CC the store's <b>FBC</b> and <b>OM</b> from the staff list. Several-stores emails leave them out;
-            when any of the stores is in Houston they always CC <b>Moises</b> and <b>Christophe</b>. Anyone listed twice is added once.</div>
+          <div className="cem-help" style={{ margin: "0 0 8px" }}>The store's <b>FBC</b> and <b>OM</b> are always CC'd from the staff list. Anyone listed twice is added once.</div>
           {CC_FIELDS.map(([key, label, hint]) => <div className="field" key={key}><label htmlFor={`cem_${key}`}>{label} <span className="cem-sub">· {hint}</span></label>
             <input id={`cem_${key}`} value={values[key]} className={ccBad[key].length ? "bad" : ""} placeholder="name@email.com, name@email.com"
               aria-invalid={ccBad[key].length > 0} onChange={(event) => change(key, event.target.value)} />
@@ -146,7 +145,7 @@ export default function EmailTemplateEditor({ title, subtitle, fields, initial, 
             {email.ccInfo.length ? <ul className="cem-cclist">{email.ccInfo.map((entry) => <li key={entry.email}>
               <span className="cem-addr" data-tip={entry.name || undefined}>{entry.email}</span>{entry.why.map((why) => <span key={why} className="cem-why">{why}</span>)}</li>)}</ul>
               : <span className="muted">Nobody</span>}
-            {email.store && email.teamCc !== false && (!email.team.fbc || !email.team.om) && <div className="cem-miss-team">
+            {email.store && (!email.team.fbc || !email.team.om) && <div className="cem-miss-team">
               {[!email.team.fbc && "FBC", !email.team.om && "OM"].filter(Boolean).join(" and ")} not set (or has no email) for {view.multi ? "some of these stores" : "this store"}</div>}</div></div>
           <div className="cem-row"><span>Subject</span><b>{email.subject || <span className="cem-miss">Empty</span>}</b></div>
           <div className="cem-text">{email.body}</div>
