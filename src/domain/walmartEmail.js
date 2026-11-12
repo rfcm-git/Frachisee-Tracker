@@ -152,7 +152,7 @@ function storeLine(ctx, record) {
 export function buildWalmartEmailMulti(ctx, record, records, template) {
   const values = wmEmailValues(ctx, record);
   const stores = records.map((item) => ctx.storeByNum.get(String(item.store_num))).filter(Boolean);
-  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee });
+  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee }, { multi: true });
   const multiValues = { "Franchisee": values.Franchisee, "Stores": records.map((item) => storeLine(ctx, item)).join("\n"), "Store count": String(records.length), "Email": values.Email };
   return { ...recipients, store: stores.length > 0, records, ...composeEmail(stageTemplate(template, values.Stage), multiValues, recipients, true) };
 }

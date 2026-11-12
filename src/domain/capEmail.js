@@ -1,7 +1,8 @@
 /*
  * CAP email: the shared template, its {{placeholders}}, who is CC'd and the Outlook (mailto:) link.
  * Houston stores (territory 540, or a Houston, TX address) CC Christophe; every other store CCs Aziza.
- * The store's FBC and OM are always CC'd too. Each address is listed once (e.g. when Aziza is also the OM).
+ * One-store emails also CC the store's FBC and OM. Several-stores emails leave the FBC and OM out, and when any of
+ * the stores is in Houston they always CC Moises and Christophe. Each address is listed once (e.g. when Aziza is also the OM).
  * Stores owned by Rohit or Raghu Marwaha go to Rajeev instead, with the owner moved to CC.
  */
 import { franchiseeName } from "./context.js";
@@ -86,6 +87,16 @@ export function emailList(text) {
 /** Parts of a CC box that are not valid email addresses. */
 export const badEmails = (text) => String(text || "").split(/[;,\s]+/).map((part) => part.trim()).filter((part) => part && !isEmail(part));
 
+/** Several-stores emails with a Houston store always CC these two. Moises's address comes from the FBC / OM list when he is there. */
+const HOUSTON_MULTI_CC = [["Moises", "moises.z@marwahagroup.com"], ["Christophe", "christophe@marwahagroup.com"]];
+
+function houstonMultiCc(ctx) {
+  return HOUSTON_MULTI_CC.map(([name, fallback]) => {
+    const person = (ctx.staff || []).find((item) => String(item.name || "").trim().toLowerCase().split(/\s+/)[0] === name.toLowerCase());
+    return { name, email: emailList(emailOf(person))[0] || fallback };
+  });
+}
+
 /** Owners whose CAP emails go to Rajeev; the owner is CC'd instead. Each entry is the words of the name. */
 const RAJEEV_EMAIL = "rajeev@marwahagroup.com";
 const ROUTED_TO_RAJEEV = [["rohit", "marwaha"], ["raghu", "marwaha"]];
@@ -165,8 +176,9 @@ export function mailtoHref({ to, cc = [], subject = "", body = "" }) {
 /**
  * CC of one store, each address once: [{ email, why: ["Owner", "FBC", "OM", "Houston", "Other territory", "Always"], name }].
  * The recipient (to) is never CC'd on their own email. owner = { email, name } when the owner is moved from To to CC.
+ * multi: an email about several stores — no FBC / OM, and Moises + Christophe when any store is in Houston.
  */
-function ccFor(ctx, stores, template, to, owner) {
+function ccFor(ctx, stores, template, to, owner, multi = false) {
   const byEmail = new Map();
   const add = (email, why, name = "") => {
     const key = email.toLowerCase();
@@ -177,12 +189,15 @@ function ccFor(ctx, stores, template, to, owner) {
     byEmail.set(key, entry);
   };
   if (owner) emailList(owner.email).forEach((email) => add(email, "Owner", owner.name));
-  stores.forEach((store) => {
-    const team = staffForStore(ctx, store);
-    [["FBC", team.fbc[0]], ["OM", team.om[0]]].forEach(([role, person]) => emailList(emailOf(person)).forEach((email) => add(email, role, person.name || "")));
-  });
+  if (!multi) {
+    stores.forEach((store) => {
+      const team = staffForStore(ctx, store);
+      [["FBC", team.fbc[0]], ["OM", team.om[0]]].forEach(([role, person]) => emailList(emailOf(person)).forEach((email) => add(email, role, person.name || "")));
+    });
+  }
   // Houston stores CC the Houston list, the others CC the other-territory list (both when the email mixes them).
   const houston = stores.map((store) => isHoustonStore(ctx, store));
+  if (multi && houston.some(Boolean)) houstonMultiCc(ctx).forEach((person) => add(person.email, "Houston", person.name));
   if (houston.some(Boolean)) emailList(template.ccHouston).forEach((email) => add(email, "Houston"));
   if (!stores.length || houston.some((value) => !value)) emailList(template.ccOther).forEach((email) => add(email, "Other territory"));
   emailList(template.ccAlways).forEach((email) => add(email, "Always"));
@@ -194,17 +209,18 @@ function ccFor(ctx, stores, template, to, owner) {
  * storeOrStores: a store row, or a list of them. owner = { email, name } of the franchisee.
  * Returns { to, cc, ccInfo, team: { fbc, om } (every store has one), houston (any store in Houston), mixed (Houston and other stores), rajeev }.
  * rajeev = true when the stores belong to Rohit or Raghu Marwaha, so it goes to Rajeev with the owner in CC.
+ * multi = true for several-stores emails (see ccFor); teamCc in the result is false then.
  */
-export function recipientsFor(ctx, storeOrStores, template, owner) {
+export function recipientsFor(ctx, storeOrStores, template, owner, { multi = false } = {}) {
   const stores = (Array.isArray(storeOrStores) ? storeOrStores : [storeOrStores]).filter(Boolean);
   const houstonFlags = stores.map((store) => isHoustonStore(ctx, store));
   const first = stores[0];
   const rajeev = isRoutedToRajeev(first && franchiseeName(ctx, first.franchisee_id), owner.name);
   const to = rajeev ? RAJEEV_EMAIL : owner.email;
-  const ccInfo = ccFor(ctx, stores, template, to, rajeev ? owner : null);
+  const ccInfo = ccFor(ctx, stores, template, to, rajeev ? owner : null, multi);
   const has = (role) => stores.length > 0 && stores.every((store) => emailList(emailOf(staffForStore(ctx, store)[role][0])).length > 0);
   const team = { fbc: has("fbc"), om: has("om") };
-  return { to, cc: ccInfo.map((entry) => entry.email), ccInfo, team, houston: houstonFlags.some(Boolean), mixed: houstonFlags.some(Boolean) && houstonFlags.some((value) => !value), rajeev };
+  return { to, cc: ccInfo.map((entry) => entry.email), ccInfo, team, teamCc: !multi, houston: houstonFlags.some(Boolean), mixed: houstonFlags.some(Boolean) && houstonFlags.some((value) => !value), rajeev };
 }
 
 /** Fills the template (its several-stores message when multi) for these values and recipients: { subject, body, href, missing }. */
@@ -254,7 +270,7 @@ export function capFranchiseeRecords(ctx, record) {
 export function buildCapEmailMulti(ctx, record, records, template) {
   const values = capEmailValues(ctx, record);
   const stores = records.map((item) => ctx.storeByNum.get(String(item.store_num))).filter(Boolean);
-  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee });
+  const recipients = recipientsFor(ctx, stores, template, { email: values.Email, name: values.Franchisee }, { multi: true });
   const multiValues = { "Franchisee": values.Franchisee, "Stores": records.map((item) => capStoreLine(ctx, item)).join("\n"), "Store count": String(records.length), "Email": values.Email };
   return { ...recipients, store: stores.length > 0, records, ...composeEmail(template, multiValues, recipients, true) };
 }
