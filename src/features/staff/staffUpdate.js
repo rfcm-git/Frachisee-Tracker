@@ -2,9 +2,11 @@
  * Update the FBC / OM list from a spreadsheet:
  *   Staff sheet  — Name, Role, Email: adds people and changes their role, email or name.
  *   Stores sheet — Store #, FBC, OM: changes who covers each store.
- * Either sheet may be uploaded alone. Blank cells leave saved values unchanged. Nobody is deleted.
+ * Either sheet may be uploaded alone. Blank cells leave saved values unchanged.
+ * Nobody is deleted unless the user turns on "Also delete" and ticks people in the preview:
+ * with a Staff sheet, people who are on neither sheet are offered for deletion (plan.removable).
  */
-import { TABLES, insertWithNextIds, mergeRowSave } from "../../services/api.js";
+import { TABLES, deleteWhere, insertWithNextIds, mergeRowSave, updateWhere } from "../../services/api.js";
 import { contactsOf, emailOf, rolesOf } from "../../domain/records.js";
 import { localDateInput } from "../../lib/format.js";
 import { compareNumbers, isEmail, normalizeName } from "../../lib/text.js";
@@ -261,7 +263,31 @@ export function planStaffUpdate(ctx, parsed) {
     }
   });
 
-  return { staffResults, storeResults, newStaff: newStaff.map((entry) => ({ ...entry, role: roleText(entry.roles) })), staffUpdates, storeUpdates };
+  return { staffResults, storeResults, newStaff: newStaff.map((entry) => ({ ...entry, role: roleText(entry.roles) })), staffUpdates, storeUpdates,
+    removable: removableStaff(ctx, parsed, entries, storeUpdates, byEmail, byName) };
+}
+
+/**
+ * FBC / OM not in the file, offered for deletion: only when a Staff sheet was uploaded, and only people on neither sheet.
+ * Anyone named or emailed on any Staff row counts as in the file, even when that row was skipped for a mistake.
+ * Each: { key, id, name, role, email, stores (stores they would still cover after this update) }.
+ */
+function removableStaff(ctx, parsed, entries, storeUpdates, byEmail, byName) {
+  if (!parsed.staffRows.length) return [];
+  const kept = new Set([...entries.values()].filter((entry) => entry.existing).map((entry) => entry.existing.id));
+  parsed.staffRows.forEach(({ values }) => {
+    const email = String(values.email || "").trim().toLowerCase();
+    const match = (email && byEmail.get(email)) || byName.get(normalizeName(String(values.name || "").replace(/\s+/g, " ").trim()));
+    if (match) kept.add(match.id);
+  });
+  const moved = new Map(storeUpdates.map((update) => [update.storeId, update.set]));
+  return ctx.staff.filter((person) => !kept.has(person.id)).map((person) => {
+    const stores = ctx.stores.filter((store) => {
+      const set = moved.get(store.id) || {};
+      return (store.fbc_id === person.id && !("fbc_id" in set)) || (store.om_id === person.id && !("om_id" in set));
+    }).length;
+    return { key: `staff:${person.id}`, id: person.id, name: person.name || "", role: person.role || "", email: String(emailOf(person) || ""), stores };
+  }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /* ---------- saving ---------- */
@@ -275,14 +301,15 @@ const chunks = (list, size) => {
 const withEmail = (contacts, email) => [...contacts.filter((contact) => contact.type !== "email"), ...(email ? [{ type: "email", value: email }] : [])];
 
 /**
- * Saves the plan. onProgress(done, total) is called as it goes.
- * Returns { counts: { newStaff, staff, stores }, failures: [text], error }.
+ * Saves the plan, then deletes the people in deleteIds (picked in the preview from plan.removable):
+ * their stores are set to "Not assigned" first. onProgress(done, total) is called as it goes.
+ * Returns { counts: { newStaff, staff, stores, deleted }, failures: [text], error }.
  */
-export async function runStaffUpdate(plan, onProgress = () => {}) {
-  const counts = { newStaff: 0, staff: 0, stores: 0 };
+export async function runStaffUpdate(plan, onProgress = () => {}, deleteIds = []) {
+  const counts = { newStaff: 0, staff: 0, stores: 0, deleted: 0 };
   const failures = [];
   const idByKey = {};
-  const total = plan.newStaff.length + plan.staffUpdates.length + plan.storeUpdates.length;
+  const total = plan.newStaff.length + plan.staffUpdates.length + plan.storeUpdates.length + deleteIds.length;
   let done = 0;
   const step = (amount = 1) => { done += amount; onProgress(done, total); };
   const failText = (result) => (result.error ? result.error.message || "error" : result.gone ? "was deleted by a teammate" : "kept changing — try again");
@@ -323,6 +350,23 @@ export async function runStaffUpdate(plan, onProgress = () => {}) {
         else failures.push(`Store ${update.num}: ${failText(result)}`);
         step();
       }));
+    }
+
+    // Deletes last, after every update. Unassign the person from their stores, then delete them.
+    const names = new Map((plan.removable || []).map((item) => [item.id, item.name]));
+    for (const id of deleteIds) {
+      const name = names.get(id) || `FBC / OM #${id}`;
+      let failed = false;
+      for (const column of ["fbc_id", "om_id"]) {
+        const error = await updateWhere(TABLES.stores, column, id, { [column]: null });
+        if (error) { failures.push(`${name}: couldn't unassign from stores (${error.message || "error"})`); failed = true; break; }
+      }
+      if (!failed) {
+        const error = await deleteWhere(TABLES.staff, "id", id);
+        if (error) failures.push(`${name}: not deleted (${error.message || "error"})`);
+        else counts.deleted += 1;
+      }
+      step();
     }
     return { counts, failures };
   } catch (error) {

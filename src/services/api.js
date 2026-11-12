@@ -185,6 +185,12 @@ export async function deleteWhere(table, column, value) {
   return error || null;
 }
 
+/** Sets patch on every row where column = value. Returns the error or null. */
+export async function updateWhere(table, column, value, patch) {
+  const { error } = await db().from(table).update(patch).eq(column, value);
+  return error || null;
+}
+
 export async function deleteIn(table, column, values) {
   const { error } = await db().from(table).delete().in(column, values);
   return error || null;

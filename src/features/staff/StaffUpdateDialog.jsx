@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import DeleteReview from "../../components/ui/DeleteReview.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
 import { downloadBackup, loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { confirmAction } from "../../state/dialogs.js";
+import { askPassword, confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { STAFF_COLUMNS, downloadStaffData, downloadStaffTemplate, planStaffUpdate, readStaffFile, runStaffUpdate } from "./staffUpdate.js";
 
@@ -34,12 +35,22 @@ export default function StaffUpdateDialog() {
   const [progress, setProgress] = useState(null);
   const [failures, setFailures] = useState([]);
   const plan = useMemo(() => (parsed ? planStaffUpdate(ctx, parsed) : null), [ctx, parsed]);
+  /** "Also delete people not in this file": off until turned on; then the ticked people (keys) are deleted. */
+  const [delOn, setDelOn] = useState(false);
+  const [delSel, setDelSel] = useState(() => new Set());
+  const deleteIds = plan && delOn ? plan.removable.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
+  function turnDelete(on) {
+    setDelOn(on);
+    setDelSel(on && plan ? new Set(plan.removable.map((item) => item.key)) : new Set());
+  }
 
   async function chooseFile(file) {
     setFileName(file.name);
     setParsed(null);
     setError("");
     setFailures([]);
+    setDelOn(false);
+    setDelSel(new Set());
     try {
       const result = await readStaffFile(file);
       if (result.error) { setError(result.error); return; }
@@ -52,14 +63,17 @@ export default function StaffUpdateDialog() {
 
   async function save() {
     const current = planStaffUpdate(getContext(), parsed);
+    // Only people still missing from the file are deleted (in case the data changed since the preview).
+    const stillRemovable = new Set(current.removable.map((item) => item.id));
     setProgress({ done: 0, total: 1 });
-    const result = await runStaffUpdate(current, (done, total) => setProgress({ done, total }));
+    const result = await runStaffUpdate(current, (done, total) => setProgress({ done, total }), deleteIds.filter((id) => stillRemovable.has(id)));
     setProgress(null);
     const { counts } = result;
     const summary = [
       counts.newStaff && `${plural(counts.newStaff, "FBC / OM")} added`,
       counts.staff && `${plural(counts.staff, "FBC / OM")} updated`,
       counts.stores && `${plural(counts.stores, "store")} reassigned`,
+      counts.deleted && `${plural(counts.deleted, "FBC / OM")} deleted`,
     ].filter(Boolean).join(" · ") || "Nothing was changed";
     await loadAll();
     if (result.error || result.failures.length) {
@@ -77,27 +91,31 @@ export default function StaffUpdateDialog() {
       plan.newStaff.length && `add ${plural(plan.newStaff.length, "FBC / OM")}`,
       plan.staffUpdates.length && `update ${plural(plan.staffUpdates.length, "FBC / OM")}`,
       plan.storeUpdates.length && `change the FBC / OM of ${plural(plan.storeUpdates.length, "store")}`,
+      deleteIds.length && `DELETE ${plural(deleteIds.length, "FBC / OM")} not in the file (their stores will show "Not assigned")`,
     ].filter(Boolean);
-    confirmAction({
-      title: "Update the database?", okLabel: "Update", busyLabel: "Updating…", icon: "database", okClass: "btn",
+    const confirm = () => confirmAction({
+      title: deleteIds.length ? "Update and delete?" : "Update the database?", okLabel: deleteIds.length ? "Update and delete" : "Update", busyLabel: "Updating…",
+      icon: deleteIds.length ? "trash-2" : "database", okClass: deleteIds.length ? "btn danger" : "btn",
       text: `This will ${parts.join(", ")}. It can't be undone from the app — download a backup first if you're unsure.`,
       onConfirm: save,
     });
+    // Deleting needs the admin password, like deleting by hand.
+    if (deleteIds.length) askPassword(`Password to delete ${plural(deleteIds.length, "FBC / OM")}`, confirm); else confirm();
   }
 
   const skipped = plan ? [...plan.staffResults, ...plan.storeResults].filter((row) => !row.ok).length : 0;
-  const changeCount = plan ? plan.newStaff.length + plan.staffUpdates.length + plan.storeUpdates.length : 0;
+  const changeCount = plan ? plan.newStaff.length + plan.staffUpdates.length + plan.storeUpdates.length + deleteIds.length : 0;
   const saving = !!progress;
   const sortRows = (rows) => rows.slice().sort((a, b) => (a.ok - b.ok) || (a.row - b.row));
 
   return <Modal icon="users" title="Update FBC / OM list" subtitle="Upload a spreadsheet to update FBC / OM people and who covers each store" modalStyle={{ maxWidth: 920 }}
     onEscape={saving ? false : undefined}
     footer={<><button type="button" className="btn ghost" disabled={saving} onClick={close}>{failures.length ? "Close" : "Cancel"}</button>
-      <button type="button" className="btn" disabled={!changeCount || saving} onClick={askSave}><Icon name="database" />
-        <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}` : "Update"}</span></button></>}>
+      <button type="button" className={`btn${deleteIds.length ? " danger" : ""}`} disabled={!changeCount || saving} onClick={askSave}><Icon name={deleteIds.length ? "trash-2" : "database"} />
+        <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}${deleteIds.length ? ` (${deleteIds.length} deleted)` : ""}` : "Update"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the spreadsheet</h4>
-        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged; nobody is deleted.</p>
+        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged. Nobody is deleted unless you choose to in the preview.</p>
         <div className="bk-cols"><span className="req">Staff:</span>{STAFF_COLUMNS.map((column) => <span key={column}>{column}</span>)}</div>
         <div className="bk-cols"><span className="req">Stores:</span><span>Store #</span><span>FBC</span><span>OM</span></div>
         <div className="bu-btns">
@@ -129,7 +147,15 @@ export default function StaffUpdateDialog() {
         <div className={`s${plan.staffUpdates.length ? " ok" : ""}`}><b>{plan.staffUpdates.length}</b>FBC / OM updated</div>
         <div className={`s${plan.storeUpdates.length ? " ok" : ""}`}><b>{plan.storeUpdates.length}</b>Stores reassigned</div>
         <div className={`s${skipped ? " bad" : ""}`}><b>{skipped}</b>Rows skipped</div>
+        {plan.removable.length > 0 && <div className={`s${deleteIds.length ? " bad" : ""}`}><b>{deleteIds.length}</b>To delete</div>}
       </div>
+
+      <DeleteReview noun="FBC / OM" nounPl="FBCs / OMs" disabled={saving} enabled={delOn} onEnabled={turnDelete} selected={delSel} setSelected={setDelSel}
+        note="people on neither sheet of this file"
+        items={plan.removable.map((item) => ({
+          key: item.key, title: item.name || "(no name)", sub: [item.role, item.email].filter(Boolean).join(" · "),
+          warn: item.stores ? `${plural(item.stores, "store")} will show "Not assigned"` : "",
+        }))} />
 
       {(plan.newStaff.length > 0 || plan.staffUpdates.length > 0) && <>
         <div className="bu-h">FBC / OM changes</div>

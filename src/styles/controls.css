@@ -142,3 +142,21 @@
     display:inline-grid;place-items:center}
   .cap-mailbtn.exempt{color:#a12f23;background:var(--danger-soft);border-color:#efc2bc;opacity:1}
   .cap-mailbtn.exempt:hover{border-color:var(--danger)}
+
+  /* "Also delete what is not in this file" (components/ui/DeleteReview.jsx) */
+  .dr-box{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+  .dr-box > [data-lucide]{color:var(--ink-soft)}
+  .dr-box.on{background:var(--danger-soft);border-color:#efc2bc}
+  .dr-box.on > [data-lucide]{color:var(--danger)}
+  .dr-opt{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:13.5px;line-height:1.4}
+  .dr-opt input,.dr-all input,.dr-col input{width:17px;height:17px;flex:none;margin-top:1px;accent-color:var(--danger);cursor:pointer}
+  .dr-note{color:var(--ink-soft)}
+  .dr-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px}
+  .dr-all{display:inline-flex;align-items:center;gap:8px;min-height:30px;font-weight:700;cursor:pointer}
+  .dr-table{margin-top:8px;max-height:280px;background:var(--surface)}
+  .dr-col{width:64px;text-align:center}
+  .dr-table tr.dr-on td{background:#fff5f4}
+  .dr-sub{font-size:12px}
+  .dr-warn{color:#a12f23;font-weight:600;font-size:12.5px}
+  .dr-foot{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--ink-soft)}
+  .dr-foot [data-lucide]{width:14px;height:14px;flex:none}
