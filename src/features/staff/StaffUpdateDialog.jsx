@@ -35,22 +35,16 @@ export default function StaffUpdateDialog() {
   const [progress, setProgress] = useState(null);
   const [failures, setFailures] = useState([]);
   const plan = useMemo(() => (parsed ? planStaffUpdate(ctx, parsed) : null), [ctx, parsed]);
-  /** "Also delete people not in this file": off until turned on; then the ticked people (keys) are deleted. */
-  const [delOn, setDelOn] = useState(false);
-  const [delSel, setDelSel] = useState(() => new Set());
-  const deleteIds = plan && delOn ? plan.removable.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
-  function turnDelete(on) {
-    setDelOn(on);
-    setDelSel(on && plan ? new Set(plan.removable.map((item) => item.key)) : new Set());
-  }
+  /** People not in the file are deleted (the file is the source of truth); kept = the ones the user unticked. */
+  const [kept, setKept] = useState(() => new Set());
+  const deleteIds = plan ? plan.removable.filter((item) => !kept.has(item.key)).map((item) => item.id) : [];
 
   async function chooseFile(file) {
     setFileName(file.name);
     setParsed(null);
     setError("");
     setFailures([]);
-    setDelOn(false);
-    setDelSel(new Set());
+    setKept(new Set());
     try {
       const result = await readStaffFile(file);
       if (result.error) { setError(result.error); return; }
@@ -115,7 +109,7 @@ export default function StaffUpdateDialog() {
         <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}${deleteIds.length ? ` (${deleteIds.length} deleted)` : ""}` : "Update"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the spreadsheet</h4>
-        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged. Nobody is deleted unless you choose to in the preview.</p>
+        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged. With a Staff sheet, FBC / OM who aren't in the file are deleted to match it — you see the list first and can untick anyone.</p>
         <div className="bk-cols"><span className="req">Staff:</span>{STAFF_COLUMNS.map((column) => <span key={column}>{column}</span>)}</div>
         <div className="bk-cols"><span className="req">Stores:</span><span>Store #</span><span>FBC</span><span>OM</span></div>
         <div className="bu-btns">
@@ -150,7 +144,7 @@ export default function StaffUpdateDialog() {
         {plan.removable.length > 0 && <div className={`s${deleteIds.length ? " bad" : ""}`}><b>{deleteIds.length}</b>To delete</div>}
       </div>
 
-      <DeleteReview noun="FBC / OM" nounPl="FBCs / OMs" disabled={saving} enabled={delOn} onEnabled={turnDelete} selected={delSel} setSelected={setDelSel}
+      <DeleteReview noun="FBC / OM" nounPl="FBCs / OMs" disabled={saving} kept={kept} setKept={setKept}
         note="people on neither sheet of this file"
         items={plan.removable.map((item) => ({
           key: item.key, title: item.name || "(no name)", sub: [item.role, item.email].filter(Boolean).join(" · "),

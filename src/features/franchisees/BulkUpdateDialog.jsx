@@ -25,30 +25,18 @@ export default function BulkUpdateDialog() {
   const [progress, setProgress] = useState(null);
   const [failures, setFailures] = useState([]);
   const plan = useMemo(() => (parsed ? planBulkUpdate(ctx, parsed, mode) : null), [ctx, parsed, mode]);
-  /** "Also delete what is not in this file", one opt-in per kind; then only the ticked records (keys) are deleted. */
-  const [delStoresOn, setDelStoresOn] = useState(false);
-  const [delFrOn, setDelFrOn] = useState(false);
-  const [delSel, setDelSel] = useState(() => new Set());
-  const storeIds = plan && delStoresOn ? plan.removable.stores.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
-  const franchiseeIds = plan && delFrOn ? plan.removable.franchisees.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
+  /** Stores and franchisees not in the file are deleted (the file is the source of truth); kept = the ones the user unticked. */
+  const [kept, setKept] = useState(() => new Set());
+  const storeIds = plan ? plan.removable.stores.filter((item) => !kept.has(item.key)).map((item) => item.id) : [];
+  const franchiseeIds = plan ? plan.removable.franchisees.filter((item) => !kept.has(item.key)).map((item) => item.id) : [];
   const deleteCount = storeIds.length + franchiseeIds.length;
-  const turn = (list, setOn) => (on) => {
-    setOn(on);
-    setDelSel((current) => {
-      const next = new Set(current);
-      list.forEach((item) => (on ? next.add(item.key) : next.delete(item.key)));
-      return next;
-    });
-  };
 
   async function chooseFile(file) {
     setFileName(file.name);
     setParsed(null);
     setError("");
     setFailures([]);
-    setDelStoresOn(false);
-    setDelFrOn(false);
-    setDelSel(new Set());
+    setKept(new Set());
     try {
       const result = await readUpdateFile(file);
       if (result.error) { setError(result.error); return; }
@@ -122,7 +110,8 @@ export default function BulkUpdateDialog() {
         <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}${deleteCount ? ` (${deleteCount} deleted)` : ""}` : "Update"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the spreadsheet</h4>
-        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged.</p>
+        <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged.
+          Stores and franchisees that aren't in the file are deleted to match it — you see the list first and can untick anything.</p>
         <div className="bk-cols">{UPDATE_COLUMNS.map((column) => <span key={column} className={column === "Store #" ? "req" : ""}>{column}</span>)}</div>
         <div className="bu-btns">
           <button type="button" className="btn sm round" onClick={() => downloadCurrentData(ctx).catch(xlsxFailed)}><Icon name="download" />Current data</button>
@@ -163,19 +152,17 @@ export default function BulkUpdateDialog() {
         {(plan.removable.stores.length > 0 || plan.removable.franchisees.length > 0) && <div className={`s${deleteCount ? " bad" : ""}`}><b>{deleteCount}</b>To delete</div>}
       </div>
 
-      <DeleteReview noun="store" nounPl="stores" disabled={saving} enabled={delStoresOn} onEnabled={turn(plan.removable.stores, setDelStoresOn)}
-        selected={delSel} setSelected={setDelSel} note="store numbers on no row of this file"
+      <DeleteReview noun="store" nounPl="stores" disabled={saving} kept={kept} setKept={setKept} note="store numbers on no row of this file"
         items={plan.removable.stores.map((item) => ({
           key: item.key, title: item.title, sub: item.sub,
           warn: [item.issues && plural(item.issues, "issue"), item.onboarding && plural(item.onboarding, "onboarding record"), item.walmart && "Walmart record"]
             .filter(Boolean).join(", ").replace(/^./, (first) => first.toUpperCase()) + ((item.issues || item.onboarding || item.walmart) ? " deleted with it" : ""),
         }))} />
 
-      <DeleteReview noun="franchisee" nounPl="franchisees" disabled={saving} enabled={delFrOn} onEnabled={turn(plan.removable.franchisees, setDelFrOn)}
-        selected={delSel} setSelected={setDelSel} note="owners named on no row of this file"
+      <DeleteReview noun="franchisee" nounPl="franchisees" disabled={saving} kept={kept} setKept={setKept} note="owners named on no row of this file"
         items={plan.removable.franchisees.map((item) => ({
           key: item.key, title: item.name || "(no name)",
-          warn: item.stores.length ? `Owns ${plural(item.stores.length, "store")} (${item.stores.slice(0, 6).join(", ")}${item.stores.length > 6 ? "…" : ""}) — also tick ${item.stores.length === 1 ? "it" : "them"} above, or the franchisee is kept` : "",
+          warn: item.stores.length ? `Owns ${plural(item.stores.length, "store")} (${item.stores.slice(0, 6).join(", ")}${item.stores.length > 6 ? "…" : ""}) — kept if you keep ${item.stores.length === 1 ? "that store" : "any of them"}` : "",
         }))} />
       {plan.emptied.length > 0 && <div className="warnbox show"><Icon name="triangle-alert" /><div>
         After the transfers, <b>{plan.emptied.join(", ")}</b> will have no stores left. They are kept in the list — close them in the Franchisees tab if they left.

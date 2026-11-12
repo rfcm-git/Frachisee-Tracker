@@ -151,6 +151,7 @@
   .dr-opt{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:13.5px;line-height:1.4}
   .dr-opt input,.dr-all input,.dr-col input{width:17px;height:17px;flex:none;margin-top:1px;accent-color:var(--danger);cursor:pointer}
   .dr-note{color:var(--ink-soft)}
+  .dr-help{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
   .dr-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px}
   .dr-all{display:inline-flex;align-items:center;gap:8px;min-height:30px;font-weight:700;cursor:pointer}
   .dr-table{margin-top:8px;max-height:280px;background:var(--surface)}
