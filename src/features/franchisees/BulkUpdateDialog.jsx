@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import DeleteReview from "../../components/ui/DeleteReview.jsx";
 import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
 import { downloadBackup, loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { confirmAction } from "../../state/dialogs.js";
+import { askPassword, confirmAction } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { UPDATE_COLUMNS, downloadCurrentData, downloadUpdateTemplate, planBulkUpdate, readUpdateFile, runBulkUpdate } from "./bulkUpdate.js";
 
@@ -24,12 +25,30 @@ export default function BulkUpdateDialog() {
   const [progress, setProgress] = useState(null);
   const [failures, setFailures] = useState([]);
   const plan = useMemo(() => (parsed ? planBulkUpdate(ctx, parsed, mode) : null), [ctx, parsed, mode]);
+  /** "Also delete what is not in this file", one opt-in per kind; then only the ticked records (keys) are deleted. */
+  const [delStoresOn, setDelStoresOn] = useState(false);
+  const [delFrOn, setDelFrOn] = useState(false);
+  const [delSel, setDelSel] = useState(() => new Set());
+  const storeIds = plan && delStoresOn ? plan.removable.stores.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
+  const franchiseeIds = plan && delFrOn ? plan.removable.franchisees.filter((item) => delSel.has(item.key)).map((item) => item.id) : [];
+  const deleteCount = storeIds.length + franchiseeIds.length;
+  const turn = (list, setOn) => (on) => {
+    setOn(on);
+    setDelSel((current) => {
+      const next = new Set(current);
+      list.forEach((item) => (on ? next.add(item.key) : next.delete(item.key)));
+      return next;
+    });
+  };
 
   async function chooseFile(file) {
     setFileName(file.name);
     setParsed(null);
     setError("");
     setFailures([]);
+    setDelStoresOn(false);
+    setDelFrOn(false);
+    setDelSel(new Set());
     try {
       const result = await readUpdateFile(file);
       if (result.error) { setError(result.error); return; }
@@ -42,8 +61,13 @@ export default function BulkUpdateDialog() {
 
   async function save() {
     const current = planBulkUpdate(getContext(), parsed, mode);
+    // Only records still missing from the file are deleted (in case the data changed since the preview).
+    const still = (list) => new Set(list.map((item) => item.id));
+    const okStores = still(current.removable.stores);
+    const okFr = still(current.removable.franchisees);
     setProgress({ done: 0, total: 1 });
-    const result = await runBulkUpdate(current, (done, total) => setProgress({ done, total }));
+    const result = await runBulkUpdate(current, (done, total) => setProgress({ done, total }),
+      { storeIds: storeIds.filter((id) => okStores.has(id)), franchiseeIds: franchiseeIds.filter((id) => okFr.has(id)) });
     setProgress(null);
     const { counts } = result;
     const summary = [
@@ -51,6 +75,8 @@ export default function BulkUpdateDialog() {
       counts.newStores && `${plural(counts.newStores, "store")} added`,
       counts.franchisees && `${plural(counts.franchisees, "franchisee")} updated`,
       counts.newFranchisees && `${plural(counts.newFranchisees, "franchisee")} added`,
+      counts.deletedStores && `${plural(counts.deletedStores, "store")} deleted`,
+      counts.deletedFranchisees && `${plural(counts.deletedFranchisees, "franchisee")} deleted`,
     ].filter(Boolean).join(" · ") || "Nothing was changed";
     await loadAll();
     if (result.error || result.failures.length) {
@@ -69,25 +95,31 @@ export default function BulkUpdateDialog() {
       plan.newStores.length && `add ${plural(plan.newStores.length, "store")}`,
       plan.franchiseeUpdates.length && `update ${plural(plan.franchiseeUpdates.length, "franchisee")}`,
       plan.newFranchisees.length && `add ${plural(plan.newFranchisees.length, "franchisee")}`,
+      storeIds.length && `DELETE ${plural(storeIds.length, "store")} not in the file (with their issues and onboarding / Walmart records)`,
+      franchiseeIds.length && `DELETE ${plural(franchiseeIds.length, "franchisee")} not in the file`,
     ].filter(Boolean);
-    confirmAction({
-      title: "Update the database?", okLabel: "Update", busyLabel: "Updating…", icon: "database", okClass: "btn",
+    const confirm = () => confirmAction({
+      title: deleteCount ? "Update and delete?" : "Update the database?", okLabel: deleteCount ? "Update and delete" : "Update", busyLabel: "Updating…",
+      icon: deleteCount ? "trash-2" : "database", okClass: deleteCount ? "btn danger" : "btn",
       text: `This will ${parts.join(", ")}. It can't be undone from the app — download a backup first if you're unsure.`,
       onConfirm: save,
     });
+    // Deleting needs the admin password, like deleting by hand.
+    if (deleteCount) askPassword(`Password to delete ${[storeIds.length && plural(storeIds.length, "store"), franchiseeIds.length && plural(franchiseeIds.length, "franchisee")].filter(Boolean).join(" and ")}`, confirm);
+    else confirm();
   }
 
   const ready = plan ? plan.rows.filter((row) => row.ok) : [];
   const skipped = plan ? plan.rows.filter((row) => !row.ok) : [];
-  const changeCount = plan ? plan.storeUpdates.length + plan.newStores.length + plan.franchiseeUpdates.length + plan.newFranchisees.length : 0;
+  const changeCount = plan ? plan.storeUpdates.length + plan.newStores.length + plan.franchiseeUpdates.length + plan.newFranchisees.length + deleteCount : 0;
   const transfers = plan ? plan.storeUpdates.filter((update) => update.ownerKey).length : 0;
   const saving = !!progress;
 
   return <Modal icon="database" title="Update franchisees & stores" subtitle="Upload a spreadsheet to update contacts, store details and owners" modalStyle={{ maxWidth: 920 }}
     onEscape={saving ? false : undefined}
     footer={<><button type="button" className="btn ghost" disabled={saving} onClick={close}>{failures.length ? "Close" : "Cancel"}</button>
-      <button type="button" className="btn" disabled={!changeCount || saving} onClick={askSave}><Icon name="database" />
-        <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}` : "Update"}</span></button></>}>
+      <button type="button" className={`btn${deleteCount ? " danger" : ""}`} disabled={!changeCount || saving} onClick={askSave}><Icon name={deleteCount ? "trash-2" : "database"} />
+        <span>{saving ? `Updating… ${progress.done}/${progress.total}` : changeCount ? `Update ${plural(changeCount, "record")}${deleteCount ? ` (${deleteCount} deleted)` : ""}` : "Update"}</span></button></>}>
     <div className="bk-steps bu-steps">
       <div className="bk-step"><h4><span className="n">1</span>Get the spreadsheet</h4>
         <p>Start from your current data (recommended) or an empty template. Blank cells leave saved values unchanged.</p>
@@ -128,7 +160,23 @@ export default function BulkUpdateDialog() {
         <div className={`s${plan.franchiseeUpdates.length ? " ok" : ""}`}><b>{plan.franchiseeUpdates.length}</b>Franchisees updated</div>
         <div className={`s${plan.newFranchisees.length ? " ok" : ""}`}><b>{plan.newFranchisees.length}</b>New franchisees</div>
         <div className={`s${skipped.length ? " bad" : ""}`}><b>{skipped.length}</b>Rows skipped</div>
+        {(plan.removable.stores.length > 0 || plan.removable.franchisees.length > 0) && <div className={`s${deleteCount ? " bad" : ""}`}><b>{deleteCount}</b>To delete</div>}
       </div>
+
+      <DeleteReview noun="store" nounPl="stores" disabled={saving} enabled={delStoresOn} onEnabled={turn(plan.removable.stores, setDelStoresOn)}
+        selected={delSel} setSelected={setDelSel} note="store numbers on no row of this file"
+        items={plan.removable.stores.map((item) => ({
+          key: item.key, title: item.title, sub: item.sub,
+          warn: [item.issues && plural(item.issues, "issue"), item.onboarding && plural(item.onboarding, "onboarding record"), item.walmart && "Walmart record"]
+            .filter(Boolean).join(", ").replace(/^./, (first) => first.toUpperCase()) + ((item.issues || item.onboarding || item.walmart) ? " deleted with it" : ""),
+        }))} />
+
+      <DeleteReview noun="franchisee" nounPl="franchisees" disabled={saving} enabled={delFrOn} onEnabled={turn(plan.removable.franchisees, setDelFrOn)}
+        selected={delSel} setSelected={setDelSel} note="owners named on no row of this file"
+        items={plan.removable.franchisees.map((item) => ({
+          key: item.key, title: item.name || "(no name)",
+          warn: item.stores.length ? `Owns ${plural(item.stores.length, "store")} (${item.stores.slice(0, 6).join(", ")}${item.stores.length > 6 ? "…" : ""}) — also tick ${item.stores.length === 1 ? "it" : "them"} above, or the franchisee is kept` : "",
+        }))} />
       {plan.emptied.length > 0 && <div className="warnbox show"><Icon name="triangle-alert" /><div>
         After the transfers, <b>{plan.emptied.join(", ")}</b> will have no stores left. They are kept in the list — close them in the Franchisees tab if they left.
       </div></div>}

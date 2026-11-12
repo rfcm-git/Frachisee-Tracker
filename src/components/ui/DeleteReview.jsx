@@ -22,7 +22,12 @@ export default function DeleteReview({ noun, nounPl, items, enabled, onEnabled, 
     if (on) next.add(key); else next.delete(key);
     return next;
   });
-  const setAll = (on) => setSelected(on ? new Set(items.map((item) => item.key)) : new Set());
+  // Only this list's items change, so two lists can share one selection.
+  const setAll = (on) => setSelected((current) => {
+    const next = new Set(current);
+    items.forEach((item) => (on ? next.add(item.key) : next.delete(item.key)));
+    return next;
+  });
   const many = (count) => `${count} ${count === 1 ? noun : nounPl}`;
 
   return <div className={`warnbox show dr-box${enabled ? " on" : ""}`}><Icon name="trash-2" /><div>

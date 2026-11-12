@@ -1,8 +1,10 @@
 /*
  * Update franchisees and stores from a spreadsheet: template, export of the current data, reading and checking rows, saving.
  * Blank cells leave the saved value unchanged, so a file can update only some columns (for example just Email and Cell Phone).
+ * Nothing is deleted unless the user turns on "Also delete" and ticks records in the preview (plan.removable):
+ * stores not in the file (when it has a Store # column) and franchisees not in it (when it has an Owner column).
  */
-import { TABLES, insertRows, insertWithNextIds, mergeRowSave } from "../../services/api.js";
+import { TABLES, deleteWhere, insertRows, insertWithNextIds, mergeRowSave } from "../../services/api.js";
 import { contactsOf, emptyPlatforms, territorySet } from "../../domain/records.js";
 import { localDateInput, phone10 } from "../../lib/format.js";
 import { compareNumbers, isEmail, normalizeName } from "../../lib/text.js";
@@ -266,7 +268,43 @@ export function planBulkUpdate(ctx, parsed, mode) {
     .map(({ franchisee }) => franchisee.name);
 
   const ownerIds = Object.fromEntries([...owners.values()].filter((owner) => owner.existing).map((owner) => [owner.key, owner.existing.id]));
-  return { rows, newFranchisees, franchiseeUpdates, storeUpdates, newStores, emptied, ownerIds, mode };
+  return {
+    rows, newFranchisees, franchiseeUpdates, storeUpdates, newStores, emptied, ownerIds, mode,
+    removable: removableRecords(ctx, parsed, owners, storeUpdates),
+    ready: { onboarding: !!ctx.onboardingReady, walmart: !!ctx.walmartReady },
+  };
+}
+
+/**
+ * Records not in the file, offered for deletion. Anything named on any row counts as in the file, even a skipped row.
+ * stores (file has a Store # column): { key, id, num, title, sub, issues, onboarding, walmart }.
+ * franchisees (file has an Owner column): { key, id, name, stores: [numbers they still own after the transfers] };
+ * franchisees who still own a store that is in the file are never offered.
+ */
+function removableRecords(ctx, parsed, owners, storeUpdates) {
+  const nums = new Set(parsed.rows.map(({ values }) => String(values.num || "").replace(/^#/, "").trim()).filter(Boolean));
+  const keptOwners = new Set([...owners.values()].filter((owner) => owner.existing).map((owner) => owner.existing.id));
+  parsed.rows.forEach(({ values }) => {
+    const name = String(values.owner || "").replace(/\s+/g, " ").trim();
+    const match = name ? findDuplicateFranchisee(ctx, name, null) : null;
+    if (match) keptOwners.add(match.id);
+  });
+  const stores = parsed.fields.has("num") ? ctx.stores.filter((store) => !nums.has(String(store.num))).map((store) => {
+    const num = String(store.num);
+    const count = (list) => (list || []).filter((item) => String(item.store_num) === num).length;
+    return {
+      key: `store:${store.id}`, id: store.id, num,
+      title: `Store ${num}`, sub: [ctx.frById.get(store.franchisee_id)?.name, [store.address, store.city].filter(Boolean).join(", ")].filter(Boolean).join(" · "),
+      issues: count(ctx.issues), onboarding: count(ctx.onboarding), walmart: count(ctx.walmart),
+    };
+  }).sort((a, b) => compareNumbers(a.num, b.num)) : [];
+
+  const movedAway = new Set(storeUpdates.filter((update) => update.ownerKey).map((update) => update.storeId));
+  const franchisees = parsed.fields.has("owner") ? ctx.franchisees.filter((franchisee) => !keptOwners.has(franchisee.id)).map((franchisee) => {
+    const owned = ctx.stores.filter((store) => store.franchisee_id === franchisee.id && !movedAway.has(store.id));
+    return { key: `fr:${franchisee.id}`, id: franchisee.id, name: franchisee.name || "", stores: owned.map((store) => String(store.num)), inFile: owned.some((store) => nums.has(String(store.num))) };
+  }).filter((item) => !item.inFile).sort((a, b) => a.name.localeCompare(b.name)) : [];
+  return { stores, franchisees };
 }
 
 /* ---------- saving ---------- */
@@ -283,14 +321,17 @@ async function eachLimited(items, limit, task) {
 }
 
 /**
- * Saves the plan. onProgress(done, total) is called as it goes.
- * Returns { counts: { newFranchisees, franchisees, stores, transfers, newStores }, failures: [text], error }.
+ * Saves the plan, then deletes what was picked in the preview (removal = { storeIds, franchiseeIds } from plan.removable).
+ * Stores go first (with their issues, onboarding and Walmart records, like removing a store by hand), then franchisees;
+ * a franchisee who would still own a store that isn't deleted is kept. onProgress(done, total) is called as it goes.
+ * Returns { counts: { newFranchisees, franchisees, stores, transfers, newStores, deletedStores, deletedFranchisees }, failures: [text], error }.
  */
-export async function runBulkUpdate(plan, onProgress = () => {}) {
-  const counts = { newFranchisees: 0, franchisees: 0, stores: 0, transfers: 0, newStores: 0 };
+export async function runBulkUpdate(plan, onProgress = () => {}, removal = { storeIds: [], franchiseeIds: [] }) {
+  const counts = { newFranchisees: 0, franchisees: 0, stores: 0, transfers: 0, newStores: 0, deletedStores: 0, deletedFranchisees: 0 };
   const failures = [];
   const idByKey = { ...plan.ownerIds };
-  const total = plan.newFranchisees.length + plan.franchiseeUpdates.length + plan.storeUpdates.length + plan.newStores.length;
+  const total = plan.newFranchisees.length + plan.franchiseeUpdates.length + plan.storeUpdates.length + plan.newStores.length
+    + removal.storeIds.length + removal.franchiseeIds.length;
   let done = 0;
   const step = (amount = 1) => { done += amount; onProgress(done, total); };
   const failText = (result) => (result.error ? result.error.message || "error" : result.gone ? "was deleted by a teammate" : "kept changing — try again");
@@ -340,6 +381,35 @@ export async function runBulkUpdate(plan, onProgress = () => {}) {
       if (result.error) throw result.error;
       counts.newStores += result.rows.length;
       step(part.length);
+    }
+
+    // Deletes last, after every update: stores first, then franchisees.
+    const storeInfo = new Map(plan.removable.stores.map((item) => [item.id, item]));
+    const deleted = new Set();
+    for (const id of removal.storeIds) {
+      const item = storeInfo.get(id);
+      if (!item) { step(); continue; }
+      let error = await deleteWhere(TABLES.issues, "store_num", item.num);
+      if (!error && plan.ready.onboarding) error = await deleteWhere(TABLES.onboarding, "store_num", item.num);
+      if (!error && plan.ready.walmart) error = await deleteWhere(TABLES.walmart, "store_num", item.num);
+      if (!error) error = await deleteWhere(TABLES.stores, "id", id);
+      if (error) failures.push(`Store ${item.num}: not deleted (${error.message || "error"})`);
+      else { counts.deletedStores += 1; deleted.add(item.num); }
+      step();
+    }
+    const frInfo = new Map(plan.removable.franchisees.map((item) => [item.id, item]));
+    for (const id of removal.franchiseeIds) {
+      const item = frInfo.get(id);
+      if (!item) { step(); continue; }
+      const left = item.stores.filter((num) => !deleted.has(num));
+      if (left.length) {
+        failures.push(`${item.name}: kept — still owns store${left.length === 1 ? "" : "s"} ${left.join(", ")} (not deleted)`);
+      } else {
+        const error = await deleteWhere(TABLES.franchisees, "id", id);
+        if (error) failures.push(`${item.name}: not deleted (${error.message || "error"})`);
+        else counts.deletedFranchisees += 1;
+      }
+      step();
     }
     return { counts, failures };
   } catch (error) {
