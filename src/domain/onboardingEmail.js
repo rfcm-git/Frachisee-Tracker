@@ -5,6 +5,7 @@
  * Sending adds an "Email Sent" update to each of those records; the status becomes (or stays) Work in Progress.
  */
 import { franchiseeName } from "./context.js";
+import { isEmailExempt } from "./emailExempt.js";
 import { composeEmail, recipientsFor } from "./capEmail.js";
 import { obIsEz, obIsOpen, obPlatformName, obStatusLabel, obVisible } from "./onboarding.js";
 import { emailOf, territorySet } from "./records.js";
@@ -151,8 +152,9 @@ export function buildOnboardingEmail(ctx, record, template) {
 export function obFranchiseeStores(ctx, record) {
   const store = ctx.storeByNum.get(String(record.store_num));
   if (!store || store.franchisee_id == null) return [{ num: String(record.store_num), targets: obEmailTargets(ctx, record) }];
+  const kind = record.platform === "ez" ? "ez" : "ob";
   const nums = new Set(ctx.onboarding.filter((item) => obVisible(item) && sameTab(item, record) && obIsOpen(item)).map((item) => String(item.store_num))
-    .filter((num) => ctx.storeByNum.get(num)?.franchisee_id === store.franchisee_id));
+    .filter((num) => ctx.storeByNum.get(num)?.franchisee_id === store.franchisee_id && !isEmailExempt(ctx, num, kind)));
   nums.add(String(record.store_num));
   return [...nums].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((num) => {
     const sample = num === String(record.store_num) ? record : ctx.onboarding.find((item) => String(item.store_num) === num && obVisible(item) && sameTab(item, record) && obIsOpen(item));

@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState } from "react";
+import { ExemptMailButton } from "../../components/ui/EmailExempt.jsx";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
@@ -305,7 +307,8 @@ function CapsTable({ ctx, rows, sort, showDue, showAssessment, picked, onPick, s
             href={contact.phone ? telHref(contact.phone) : ""} /></div>
         </td>
         <td className="cap-statuscol"><div className="cap-statuswrap"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} />
-          <EmailButton record={record} email={contact.email} /></div></td>
+          {isEmailExempt(ctx, record.store_num, "cap") ? <ExemptMailButton store={store} storeNum={record.store_num} kind="cap" />
+            : <EmailButton record={record} email={contact.email} />}</div></td>
         {showDue && <td className="cap-duecol">{record.due_date
           ? <div className="cap-due-cell"><span>{formatDueDate(record.due_date)}</span><CapDueBadge record={record} /></div>
           : normalizeCapStatus(record.status) === "Completed" ? <span className="muted">—</span>

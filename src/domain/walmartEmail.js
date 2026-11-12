@@ -5,6 +5,7 @@
  * Only stores at Awaiting App or Payment Setup can be emailed.
  */
 import { franchiseeName } from "./context.js";
+import { isEmailExempt } from "./emailExempt.js";
 import { composeEmail, recipientsFor } from "./capEmail.js";
 import { emailOf, territorySet } from "./records.js";
 import { WM_OPEN_STAGES, normalizeWmStage } from "./walmart.js";
@@ -130,14 +131,14 @@ export function buildWalmartEmail(ctx, record, template) {
 
 /**
  * The franchisee's stores at the same stage as this one (the message depends on the stage), in store-number order.
- * The clicked store is always included.
+ * The clicked store is always included; stores exempt from Walmart emails are left out.
  */
 export function wmFranchiseeRecords(ctx, record) {
   const store = ctx.storeByNum.get(String(record.store_num));
   const stage = normalizeWmStage(record.stage);
   if (!store || store.franchisee_id == null) return [record];
   return ctx.walmart.filter((item) => item.id === record.id || (normalizeWmStage(item.stage) === stage
-    && ctx.storeByNum.get(String(item.store_num))?.franchisee_id === store.franchisee_id))
+    && ctx.storeByNum.get(String(item.store_num))?.franchisee_id === store.franchisee_id && !isEmailExempt(ctx, item.store_num, "wm")))
     .sort((a, b) => compareNumbers(a.store_num, b.store_num));
 }
 

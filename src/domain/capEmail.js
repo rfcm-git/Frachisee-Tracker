@@ -6,6 +6,7 @@
  * Stores owned by Rohit or Raghu Marwaha go to Rajeev instead, with the owner moved to CC.
  */
 import { franchiseeName } from "./context.js";
+import { isEmailExempt } from "./emailExempt.js";
 import { capAssessmentId, capContact, formatDueDate, normalizeCapStatus } from "./caps.js";
 import { emailOf, territorySet } from "./records.js";
 import { staffForStore } from "./staff.js";
@@ -257,7 +258,8 @@ export function capFranchiseeRecords(ctx, record) {
   if (!store || store.franchisee_id == null) return [record];
   const records = ctx.caps.filter((item) => {
     const itemStore = ctx.storeByNum.get(String(item.store_num));
-    return itemStore && itemStore.franchisee_id === store.franchisee_id && (item.id === record.id || normalizeCapStatus(item.status) !== "Completed");
+    return itemStore && itemStore.franchisee_id === store.franchisee_id
+      && (item.id === record.id || (normalizeCapStatus(item.status) !== "Completed" && !isEmailExempt(ctx, item.store_num, "cap")));
   });
   return records.sort((a, b) => String(a.store_num).localeCompare(String(b.store_num), undefined, { numeric: true }));
 }

@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { ExemptMailButton } from "../../components/ui/EmailExempt.jsx";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import ContactCell from "../../components/ui/ContactCell.jsx";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
@@ -228,7 +230,8 @@ function WalmartTable({ ctx, rows, sort }) {
         <td className="cap-fr"><div className="cap-clamp" data-tip={contact.name || undefined}>{contact.name || <span className="muted">—</span>}</div></td>
         <ContactCell email={contact.email} phone={contact.phone} />
         <td className="cap-statuscol"><div className="cap-statuswrap"><StageSelect key={`${record.id}-${record.updated_at}`} record={record} stage={stage} />
-          {wmCanEmail(record) && <EmailButton record={record} stage={stage} email={contact.email} />}
+          {wmCanEmail(record) && (isEmailExempt(ctx, record.store_num, "wm") ? <ExemptMailButton store={store} storeNum={record.store_num} kind="wm" />
+            : <EmailButton record={record} stage={stage} email={contact.email} />)}
           {actual !== expected && <span className="wm-mismatch" role="img" aria-label={`Store's Walmart status is ${actual}`}
             data-tip={`The store's Walmart status is ${actual}; ${stage} means ${expected}. Changing the stage or the next import sets it to match.`}><Icon name="triangle-alert" /></span>}</div></td>
         <td className="cap-duecol">{!wmCanEmail(record) ? <span className="muted">—</span>

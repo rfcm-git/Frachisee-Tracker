@@ -1,5 +1,6 @@
 /* CAP email: saving the template and opening a filled-in email in Outlook. */
 import { CAP_STATES, STORAGE_KEYS } from "../../config/constants.js";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import { CAP_EMAIL_STATUS, MAILTO_SAFE_LENGTH, buildCapEmail, buildCapEmailMulti, capEmailTemplate, capFranchiseeRecords } from "../../domain/capEmail.js";
 import { formatDueDate } from "../../domain/caps.js";
 import { normalizeCapStatus } from "../../domain/caps.js";
@@ -74,6 +75,7 @@ export function sendCapEmail(recordId) {
   const ctx = getContext();
   const record = ctx.caps.find((item) => item.id === recordId);
   if (!record) return;
+  if (isEmailExempt(ctx, record.store_num, "cap")) { toast(`Store ${record.store_num} is exempt from CAP emails — change it in the store window`, "err"); return; }
   if (savedCapEmail(ctx) === null) {
     toast("Set up the email message first, then click the email button again");
     openCapEmail(record.id);

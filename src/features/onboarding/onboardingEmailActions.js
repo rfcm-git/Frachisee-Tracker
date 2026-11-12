@@ -1,5 +1,6 @@
 /* Onboarding email: saving the template and opening a filled-in email in Outlook. */
 import { STORAGE_KEYS } from "../../config/constants.js";
+import { emailKindLabel, isEmailExempt } from "../../domain/emailExempt.js";
 import { obHistory } from "../../domain/onboarding.js";
 import { DEFAULT_EZ_EMAIL, DEFAULT_OB_EMAIL, OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obEmailSent, obEmailTemplate, obFranchiseeStores, targetsText } from "../../domain/onboardingEmail.js";
 import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
@@ -72,6 +73,10 @@ export function sendOnboardingEmail(recordId) {
   const ctx = getContext();
   const record = ctx.onboarding.find((item) => item.id === recordId);
   if (!record) return;
+  if (isEmailExempt(ctx, record.store_num, emailScopeOf(record))) {
+    toast(`Store ${record.store_num} is exempt from ${emailKindLabel(emailScopeOf(record))} emails — change it in the store window`, "err");
+    return;
+  }
   if (savedObEmail(ctx, emailScopeOf(record)) === null) {
     toast("Set up the email message first, then click the email button again");
     openOnboardingEmail(record.id, emailScopeOf(record));

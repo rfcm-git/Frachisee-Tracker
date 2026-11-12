@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState } from "react";
+import { ExemptMailButton } from "../../components/ui/EmailExempt.jsx";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import FilterDropdown, { FilterOption } from "../../components/ui/FilterMenu.jsx";
@@ -188,8 +190,9 @@ function StoreTable({ ctx, groups, records, platforms }) {
           {group.lastAt && latest.updated_at && latest.updated_at !== latest.created_at && <><br />upd. {formatTimestamp(latest.updated_at)}</>}</td>
         <td className="c-act"><div className="row-acts">
           <button type="button" className="iconbtn mini" data-tip="Update this store's platforms, add progress or add platforms" aria-label={`Update store ${group.num}`} onClick={() => openStoreOnboarding(group.num)}><Icon name="refresh-cw" /></button>
-          <button type="button" className="iconbtn mini" data-tip="Email the franchisee about onboarding (opens Outlook and adds “Email Sent” to the updates)" aria-label={`Email store ${group.num}`}
-            onClick={() => sendOnboardingEmail(group.latest.id)}><Icon name="mail" /></button>
+          {isEmailExempt(ctx, group.num, "ob") ? <ExemptMailButton store={store} storeNum={group.num} kind="ob" />
+            : <button type="button" className="iconbtn mini" data-tip="Email the franchisee about onboarding (opens Outlook and adds “Email Sent” to the updates)" aria-label={`Email store ${group.num}`}
+              onClick={() => sendOnboardingEmail(group.latest.id)}><Icon name="mail" /></button>}
         </div></td>
       </tr>;
     })}

@@ -1,5 +1,6 @@
 /* Walmart tab: search, filters, sorting and the progress numbers. */
 import { franchiseeName } from "../../domain/context.js";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import { numRank } from "../../domain/search.js";
 import { normalizeWmStage, wmHistory, wmIsOpen, wmSummary } from "../../domain/walmart.js";
 import { timeOf } from "../../lib/format.js";
@@ -33,10 +34,10 @@ function passesEmail(row, email) {
   return email === "sent" ? !!row.record.last_email_at : !row.record.last_email_at;
 }
 
-/** Open stores (Awaiting App / Payment Setup) and how many of them were never emailed. */
+/** Open stores (Awaiting App / Payment Setup) and how many of them were never emailed (stores exempt from Walmart emails don't count). */
 export function walmartFollowUp(ctx) {
   const open = ctx.walmart.filter(wmIsOpen);
-  return { open: open.length, notEmailed: open.filter((record) => !record.last_email_at).length };
+  return { open: open.length, notEmailed: open.filter((record) => !record.last_email_at && !isEmailExempt(ctx, record.store_num, "wm")).length };
 }
 
 /** Last change or last email, whichever is later (sorting by Last Updated). */

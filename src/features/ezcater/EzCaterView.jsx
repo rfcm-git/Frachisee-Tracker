@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { ExemptMailButton } from "../../components/ui/EmailExempt.jsx";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import ContactCell from "../../components/ui/ContactCell.jsx";
 import Icon from "../../components/ui/Icon.jsx";
 import ChangeLogCell from "../../components/ui/ChangeLogCell.jsx";
@@ -210,7 +212,8 @@ function EzTable({ ctx, rows, sort }) {
         <td className="cap-fr"><div className="cap-clamp" data-tip={contact.name || undefined}>{contact.name || <span className="muted">—</span>}</div></td>
         <ContactCell email={contact.email} phone={contact.phone} />
         <td className="cap-statuscol"><div className="cap-statuswrap"><StatusSelect key={`${record.id}-${record.updated_at}`} record={record} />
-          {open && <EmailButton record={record} emailedAt={emailedAt} email={contact.email} />}
+          {open && (isEmailExempt(ctx, record.store_num, "ez") ? <ExemptMailButton store={store} storeNum={record.store_num} kind="ez" />
+            : <EmailButton record={record} emailedAt={emailedAt} email={contact.email} />)}
           {storeEz !== record.status && <span className="wm-mismatch" role="img" aria-label={`Store's ezCater status is ${storeEz}`}
             data-tip={`The store's ezCater status is ${storeEz}. Changing the status here sets it to match.`}><Icon name="triangle-alert" /></span>}</div></td>
         <td className="cap-duecol">{!open ? <span className="muted">—</span>

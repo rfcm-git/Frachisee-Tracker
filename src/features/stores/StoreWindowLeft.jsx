@@ -15,6 +15,7 @@ import { findWalmart } from "../walmart/walmartSelectors.js";
 import { createOnboarding } from "../onboarding/onboardingActions.js";
 import { obStatusLabel } from "../../domain/onboarding.js";
 import { saveStoreFields, setStorePlatform } from "./storeActions.js";
+import { EMAIL_KINDS, emailKindLabel, storeEmailExempt } from "../../domain/emailExempt.js";
 
 function EditButton({ onClick }) {
   return <button type="button" className="iconbtn mini ed" title="Edit" aria-label="Edit" onClick={onClick}><Icon name="pencil" /></button>;
@@ -37,6 +38,39 @@ const contactIcon = (type) => (type === "email" ? "mail" : type === "cell" ? "ph
 const contactTitle = (type) => (type === "email" ? "Email" : type === "cell" ? "Cellphone" : "Other");
 
 /** Left column of the store window. Editing state is local; the dialog is marked busy while editing. */
+/**
+ * Email exemptions: tick an email type to stop it for this store (saved right away).
+ * Exempt stores can't be emailed from that tab and are left out of several-stores emails.
+ */
+function EmailExemptCard({ store, ready }) {
+  const [saving, setSaving] = useState("");
+  const list = storeEmailExempt(store);
+  async function toggle(kind) {
+    const on = !list.includes(kind);
+    const next = on ? [...list, kind] : list.filter((key) => key !== kind);
+    setSaving(kind);
+    await saveStoreFields(store, { email_exempt: next },
+      on ? `Store ${store.num} won't get ${emailKindLabel(kind)} emails` : `Store ${store.num} gets ${emailKindLabel(kind)} emails again`);
+    setSaving("");
+  }
+  return <div className="lc"><div className="lch"><Icon name="mail-x" />Email exemptions
+    {list.length > 0 && <span className="sw-exc-n" data-tip={`Exempt from: ${list.map(emailKindLabel).join(", ")}`}>{list.length}</span>}</div><div className="lcb">
+    {!ready ? <div className="sw-exc-help">Run <code>migrate-email-exempt.sql</code> in Supabase, then click Refresh, to stop emails for this store.</div> : <>
+      <div className="sw-exc-help">Tick an email type to stop it for this store. It can't be emailed from that tab and is left out of emails about several stores.</div>
+      <div className="sw-exc" role="group" aria-label="Email types this store is exempt from">
+        {EMAIL_KINDS.map(([key, label]) => {
+          const on = list.includes(key);
+          return <button type="button" key={key} role="switch" aria-checked={on} className={`sw-exc-opt${on ? " on" : ""}`} disabled={!!saving} onClick={() => toggle(key)}>
+            <span className={`cbox${on ? " on" : ""}`} aria-hidden="true">{on && <Icon name="check" />}</span>
+            <span className="sw-exc-lb">{label}</span>
+            {saving === key ? <span className="sw-exc-tag busy">Saving…</span> : on && <span className="sw-exc-tag">No emails</span>}
+          </button>;
+        })}
+      </div>
+    </>}
+  </div></div>;
+}
+
 export default function StoreWindowLeft({ store }) {
   const ctx = useDataContext();
   const { setBusy } = useDialog();
@@ -190,6 +224,8 @@ export default function StoreWindowLeft({ store }) {
         </div>}
       </div>)}
     </div></div>
+
+    <EmailExemptCard store={store} ready={ctx.emailExemptReady} />
 
     <div className="lc"><div className="lch"><Icon name="map" />Google Business Profile<EditButton onClick={() => startEdit("gbp")} /></div><div className="lcb">
       {editing === "gbp" ? <>

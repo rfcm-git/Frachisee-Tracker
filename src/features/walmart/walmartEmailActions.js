@@ -1,5 +1,6 @@
 /* Walmart email: saving the template and opening a filled-in email in Outlook. */
 import { STORAGE_KEYS } from "../../config/constants.js";
+import { isEmailExempt } from "../../domain/emailExempt.js";
 import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
 import { normalizeWmStage, wmHistory } from "../../domain/walmart.js";
 import { buildWalmartEmail, buildWalmartEmailMulti, wmCanEmail, wmEmailTemplate, wmFranchiseeRecords } from "../../domain/walmartEmail.js";
@@ -95,6 +96,7 @@ export function sendWalmartEmail(recordId) {
   if (!record) return;
   const stage = normalizeWmStage(record.stage);
   if (!wmCanEmail(record)) { toast(`Only stores at Awaiting App or Payment Setup are emailed — store ${record.store_num} is ${stage}`, "err"); return; }
+  if (isEmailExempt(ctx, record.store_num, "wm")) { toast(`Store ${record.store_num} is exempt from Walmart emails — change it in the store window`, "err"); return; }
   if (savedWmEmail(ctx) === null) {
     toast("Set up the email messages first, then click the email button again");
     openWalmartEmail(record.id);
