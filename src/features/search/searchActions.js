@@ -2,7 +2,7 @@
 import { STORAGE_KEYS } from "../../config/constants.js";
 import { local } from "../../lib/storage.js";
 import { getContext } from "../../state/dataStore.js";
-import { openCallDetails, openCapForm, openIssueDetails, openOnboardingDetails, openStaffDetail, openStore } from "../../state/dialogs.js";
+import { openCallDetails, openIssueDetails, openOnboardingDetails, openStaffDetail, openStore } from "../../state/dialogs.js";
 import { showFranchisee } from "../../state/uiStore.js";
 
 const RECENT_LIMIT = 8;
@@ -15,7 +15,7 @@ export function openResult(entry) {
     if (franchisee) showFranchisee(franchisee);
     return;
   }
-  const openers = { store: openStore, staff: openStaffDetail, issue: openIssueDetails, onboarding: openOnboardingDetails, cap: openCapForm, call: openCallDetails };
+  const openers = { store: openStore, staff: openStaffDetail, issue: openIssueDetails, onboarding: openOnboardingDetails, call: openCallDetails };
   openers[type]?.(id);
 }
 

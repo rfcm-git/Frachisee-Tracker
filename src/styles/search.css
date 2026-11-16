@@ -47,7 +47,6 @@
   .cat-staff .fd-ic{background:var(--lime-soft);color:var(--lime-dark)}
   .cat-concerns .fd-ic{background:var(--danger-soft);color:var(--danger)}
   .cat-onboarding .fd-ic{background:#e8f1fb;color:#2f6fa8}
-  .cat-caps .fd-ic{background:var(--warn-soft);color:#9a5d00}
   .cat-calls .fd-ic{background:var(--idle-soft);color:var(--idle)}
   .fd-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
   .fd-title{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

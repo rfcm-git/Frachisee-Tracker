@@ -5,7 +5,7 @@ import { telHref } from "../../lib/format.js";
 const keepPhoneTogether = (value) => String(value || "").replace(/\) (?=\d)/g, ") ").replace(/(\d)-(\d)/g, "$1‑$2");
 
 /**
- * Email and phone in one table cell (CAP, ezCater, Walmart lists): one line each with a small icon.
+ * Email and phone in one table cell (ezCater and Walmart lists): one line each with a small icon.
  * Long emails end in "…"; the tip shows the full value. Clicks on the links don't select the row.
  */
 export default function ContactCell({ email, phone, className = "hide-sm cap-contact" }) {

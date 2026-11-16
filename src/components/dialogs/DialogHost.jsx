@@ -3,14 +3,11 @@ import { DialogContext } from "./dialogContext.js";
 import { ConfirmDialog, ConflictDialog, PasswordDialog } from "./CommonDialogs.jsx";
 import { closeDialog, setDialogBusy, useDialogStore } from "../../state/dialogStore.js";
 import { DIALOG } from "../../state/dialogs.js";
-import CapFormDialog from "../../features/caps/CapFormDialog.jsx";
-import CapsImportDialog from "../../features/caps/CapsImportDialog.jsx";
 import WalmartImportDialog from "../../features/walmart/WalmartImportDialog.jsx";
 import WalmartAddDialog from "../../features/walmart/WalmartAddDialog.jsx";
 import WalmartUpdateDialog from "../../features/walmart/WalmartUpdateDialog.jsx";
 import WalmartEmailDialog from "../../features/walmart/WalmartEmailDialog.jsx";
 import EmailScopeDialog from "../email/EmailScopeDialog.jsx";
-import CapEmailDialog from "../../features/caps/CapEmailDialog.jsx";
 import CallDetailsDialog from "../../features/calls/CallDetailsDialog.jsx";
 import CallLogDialog from "../../features/calls/CallLogDialog.jsx";
 import CallFollowUpDialog from "../../features/calls/CallFollowUpDialog.jsx";
@@ -71,14 +68,11 @@ const COMPONENTS = {
   [DIALOG.onboardingEmail]: OnboardingEmailDialog,
   [DIALOG.updateOnboarding]: UpdateOnboardingDialog,
   [DIALOG.storeOnboarding]: StoreOnboardingDialog,
-  [DIALOG.capForm]: CapFormDialog,
-  [DIALOG.capsImport]: CapsImportDialog,
   [DIALOG.walmartImport]: WalmartImportDialog,
   [DIALOG.walmartAdd]: WalmartAddDialog,
   [DIALOG.walmartUpdate]: WalmartUpdateDialog,
   [DIALOG.walmartEmail]: WalmartEmailDialog,
   [DIALOG.emailScope]: EmailScopeDialog,
-  [DIALOG.capEmail]: CapEmailDialog,
   [DIALOG.scheduleConfirm]: ScheduleConfirmDialog,
   [DIALOG.scheduleEdit]: ScheduleEditDialog,
   [DIALOG.report]: ReportBuilderDialog,

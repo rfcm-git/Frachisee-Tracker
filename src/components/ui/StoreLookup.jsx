@@ -16,7 +16,7 @@ import { cleanStoreNumber, compareStores, looksLikeName } from "../../lib/text.j
  * allowGeneral:   offer "General — no specific store" once a franchisee is picked
  * allowUnknown:   a typed store # that is not in the store list can still be picked
  * lockFranchisee: the franchisee is fixed (no Change button)
- * storeTag(num):  optional short tag shown next to a store (e.g. "In CAP list")
+ * storeTag(num):  optional short tag shown next to a store (e.g. "On the list")
  * ref exposes commitTyped() (picks what is still typed; returns the new value or null) and focus().
  */
 export default function StoreLookup({ ref, value, onChange, allowGeneral = false, allowUnknown = false, lockFranchisee = false, storeTag, inputId, autoFocus = true, invalid = false, describedBy }) {

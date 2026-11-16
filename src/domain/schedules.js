@@ -1,6 +1,6 @@
 /*
- * Scheduled reminders: tasks the user is reminded about at set times (update the records on Thursdays,
- * update the CAP list each morning). Each one can ask the user to confirm it was done, and keeps
+ * Scheduled reminders: tasks the user is reminded about at set times (e.g. update the records on Thursdays).
+ * Each one can ask the user to confirm it was done, and keeps
  * reminding them until they do or the shift ends.
  */
 
@@ -8,18 +8,13 @@ export const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /** Where "Open" on a reminder leads. */
-export const SCHEDULE_TARGETS = [["", "Nothing — just remind me"], ["caps", "CAP list"], ["franchisees", "Franchisees"], ["stores", "All Stores"], ["onboarding", "Onboarding"], ["issues", "Issues"]];
+export const SCHEDULE_TARGETS = [["", "Nothing — just remind me"], ["franchisees", "Franchisees"], ["stores", "All Stores"], ["onboarding", "Onboarding"], ["issues", "Issues"]];
 
 export const SCHEDULE_DEFAULTS = [
   {
     id: "records", name: "Update the records", icon: "clipboard-list",
     message: "Time to update the records. Confirm once they're up to date.",
     enabled: true, days: [4], times: ["08:00", "17:00"], confirm: true, repeatMin: 30, until: "17:00", target: "",
-  },
-  {
-    id: "caps", name: "Update the CAP list", icon: "list-checks",
-    message: "Start of shift: update the CAP list and confirm when it's done.",
-    enabled: true, days: [0, 1, 2, 3, 4, 5, 6], times: ["08:00"], confirm: true, repeatMin: 30, until: "17:00", target: "caps",
   },
 ];
 

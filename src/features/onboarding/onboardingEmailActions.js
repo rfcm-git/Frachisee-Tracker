@@ -3,7 +3,7 @@ import { STORAGE_KEYS } from "../../config/constants.js";
 import { emailKindLabel, isEmailExempt } from "../../domain/emailExempt.js";
 import { obHistory } from "../../domain/onboarding.js";
 import { DEFAULT_EZ_EMAIL, DEFAULT_OB_EMAIL, OB_EMAIL_NOTE, buildOnboardingEmail, buildOnboardingEmailMulti, obEmailSent, obEmailTemplate, obFranchiseeStores, targetsText } from "../../domain/onboardingEmail.js";
-import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
+import { MAILTO_SAFE_LENGTH } from "../../domain/email.js";
 import { obPlatformName } from "../../domain/onboarding.js";
 import { EZCATER_EMAIL_KEY, ONBOARDING_EMAIL_KEY, writeSetting } from "../../services/api.js";
 import { openMailto } from "../../lib/mailto.js";

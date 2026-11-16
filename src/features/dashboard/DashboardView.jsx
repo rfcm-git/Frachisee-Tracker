@@ -1,5 +1,5 @@
 /*
- * Dashboard: header (period, search, date range, territory), four KPI cards with trends,
+ * Dashboard: header (period, search, date range, territory), three KPI cards with trends,
  * issues opened vs resolved next to the top 5 stores with open issues, and the "Needs action today" list.
  */
 import { useMemo } from "react";

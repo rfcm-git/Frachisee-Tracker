@@ -1,12 +1,12 @@
 /*
  * Walmart email: one message for Awaiting App and one for Payment Setup, each with a one-store and a several-stores version.
- * Recipients follow the same rules as the CAP and onboarding emails (see capEmail.recipientsFor): the franchisee,
+ * Recipients follow the same rules as the onboarding emails (see email.recipientsFor): the franchisee,
  * FBC and OM, Houston or other-territory CC, always-CC, and Rohit / Raghu Marwaha stores to Rajeev.
  * Only stores at Awaiting App or Payment Setup can be emailed.
  */
 import { franchiseeName } from "./context.js";
 import { isEmailExempt } from "./emailExempt.js";
-import { composeEmail, recipientsFor } from "./capEmail.js";
+import { composeEmail, recipientsFor } from "./email.js";
 import { emailOf, territorySet } from "./records.js";
 import { WM_OPEN_STAGES, normalizeWmStage } from "./walmart.js";
 import { compareNumbers } from "../lib/text.js";

@@ -2,8 +2,8 @@
  * The "data context": all loaded tables plus lookup indexes.
  * It is rebuilt whenever the data changes and passed to every domain function.
  */
-import { byName, digitsOnly } from "../lib/text.js";
-import { contactsOf } from "./records.js";
+import { byName, cleanStoreNumber, digitsOnly } from "../lib/text.js";
+import { contactsOf, emailOf } from "./records.js";
 import { isIssueOpen } from "./issues.js";
 import { normalizeObStatus } from "./onboarding.js";
 
@@ -17,12 +17,8 @@ function normalizedObRow(record) {
 }
 
 export const EMPTY_DATA = Object.freeze({
-  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], caps: [], walmart: [], snapshots: [],
-  onboardingReady: true, callLogsReady: true, capsReady: true, walmartReady: true, snapshotsReady: true, capsDueReady: true, capsHistoryReady: true, capsAssessmentReady: true, emailExemptReady: true,
-  /** Last CAP import: { at, file, added, completed, updated } or null. */
-  capsLastImport: null,
-  /** Saved CAP email template, null when never saved, undefined when app_settings is not set up. */
-  capsEmail: null,
+  franchisees: [], stores: [], staff: [], issues: [], onboarding: [], callLogs: [], walmart: [], snapshots: [],
+  onboardingReady: true, callLogsReady: true, walmartReady: true, snapshotsReady: true, emailExemptReady: true,
   /** Saved onboarding email template, null when never saved, undefined when app_settings is not set up. */
   onboardingEmail: null,
   /** Saved ezCater email template, null when never saved, undefined when app_settings is not set up. */
@@ -91,6 +87,14 @@ export function buildContext(data) {
 export const storesOf = (ctx, franchiseeId) => ctx.storesByFr.get(franchiseeId) || [];
 
 export const franchiseeName = (ctx, id) => ctx.frById.get(id)?.name || "";
+
+/** Name, email and phone of a store from the store records ("" when unknown). */
+export function storeContactDefaults(ctx, num) {
+  const store = ctx.storeByNum.get(cleanStoreNumber(num));
+  if (!store) return { found: false, name: "", email: "", phone: "" };
+  const owner = ctx.frById.get(store.franchisee_id);
+  return { found: true, name: franchiseeName(ctx, store.franchisee_id), email: owner ? emailOf(owner) : "", phone: store.phone || "" };
+}
 
 export const storeOpenIssues = (ctx, num) => ctx.openIssuesByStore.get(String(num)) || 0;
 

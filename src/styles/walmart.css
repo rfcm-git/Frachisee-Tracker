@@ -1,11 +1,11 @@
-/* ---------- Walmart tab (built on the CAP tab's layout: progress strip, filters, table) ---------- */
+/* ---------- Walmart tab (uses the shared list layout in lists.css: progress strip, filters, table) ---------- */
   /* Stage colors: amber = waiting on the owner, purple = in progress, green = done, grey = exempted. */
   .wm-await{--st:#8a5600;--st-bg:var(--warn-soft);--st-line:#f2d39c;--st-dot:var(--warn)}
   .wm-pay{--st:#5b3699;--st-bg:#efe8fa;--st-line:#d6c6f0;--st-dot:#7a4fc2}
   .wm-done{--st:#146c3a;--st-bg:var(--ok-soft);--st-line:#b7e0c6;--st-dot:var(--ok)}
   .wm-exempt{--st:var(--idle);--st-bg:var(--idle-soft);--st-line:#d3d9d4;--st-dot:var(--idle)}
 
-  /* Stage badge and the stage dropdown in the table (same shape as the CAP status) */
+  /* Stage badge and the stage dropdown in the table (same shape as the ezCater status) */
   .badge.wm-await,.badge.wm-pay,.badge.wm-done,.badge.wm-exempt,
   .cap-sel.wm-await,.cap-sel.wm-pay,.cap-sel.wm-done,.cap-sel.wm-exempt{background:var(--st-bg);color:var(--st)}
   .wm-sel{min-width:142px}
@@ -58,7 +58,7 @@
     .wm-ogroup-h{width:auto}
   }
 
-/* ---------- ezCater tab (same CAP layout; statuses use the onboarding colors) ---------- */
+/* ---------- ezCater tab (same shared list layout; statuses use the onboarding colors) ---------- */
   .cap-sel.ob-none{background:var(--danger-soft);color:var(--danger)}
   .cap-sel.ob-wip{background:#efe8fa;color:#5b3699}
   .cap-sel.ob-done{background:var(--ok-soft);color:#146c3a}

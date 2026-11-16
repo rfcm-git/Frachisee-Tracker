@@ -66,7 +66,6 @@
   .qlog-btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
   .q-issue .qi{background:var(--danger-soft);color:var(--danger)}
   .q-call .qi{background:var(--green-soft);color:var(--green-dark)}
-  .q-cap .qi{background:var(--yellow-soft);color:var(--yellow-dark)}
   .q-ob .qi{background:var(--lime-soft);color:var(--lime-dark)}
   .detail-head + .qlog{margin:-4px 0 16px}
   .sw-qlog{flex:none;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface)}

@@ -1,5 +1,5 @@
 /*
- * Search tab: one box for every franchisee, store, FBC / OM, concern, onboarding record, CAP and call.
+ * Search tab: one box for every franchisee, store, FBC / OM, concern, onboarding record and call.
  *
  * A query can start with a prefix to search one thing only:
  *   #10020        store number          @Aggarwal     franchisee name
@@ -7,9 +7,8 @@
  *   zip:93722     ZIP code              phone:714863  phone (digits only, any part)
  *   email:gmail   email address
  * Without a prefix every field is searched. Records also match through their store and franchisee,
- * so "city:Fresno" finds the stores in Fresno and their issues, CAPs and calls.
+ * so "city:Fresno" finds the stores in Fresno and their issues and calls.
  */
-import { capContact, capDueText, capIsOpen, capAssessmentId, normalizeCapStatus } from "../../domain/caps.js";
 import { callFranchiseeName } from "../../domain/calls.js";
 import { franchiseeName, storeOpenIssues, storesOf } from "../../domain/context.js";
 import { isIssueOpen, issueFranchiseeId, issueNumber, normalizeIssueStatus } from "../../domain/issues.js";
@@ -28,19 +27,18 @@ export const SEARCH_SCOPES = [
   ["staff", "FBC / OM", "contact"],
   ["concerns", "Concerns", "message-square-warning"],
   ["onboarding", "Onboarding", "rocket"],
-  ["caps", "CAPs", "list-checks"],
   ["calls", "Calls", "phone-call"],
 ];
 
 /** Prefixes, longest token first when parsing. */
 export const SEARCH_PREFIXES = [
-  { key: "store", tokens: ["#"], label: "Store number", example: "#10020", help: "Exact number first, then numbers that start with or contain it. Shows the store and its owner, team, issues, CAP and calls." },
-  { key: "fr", tokens: ["@"], label: "Franchisee name", example: "@Aggarwal", help: "The franchisee plus all their stores, issues, onboarding, CAPs and calls." },
+  { key: "store", tokens: ["#"], label: "Store number", example: "#10020", help: "Exact number first, then numbers that start with or contain it. Shows the store and its owner, team, issues and calls." },
+  { key: "fr", tokens: ["@"], label: "Franchisee name", example: "@Aggarwal", help: "The franchisee plus all their stores, issues, onboarding and calls." },
   { key: "terr", tokens: ["territory:", "terr:", "t:"], label: "Territory", example: "t:540", help: "Everything in one territory." },
   { key: "city", tokens: ["city:"], label: "City", example: "city:Fresno", help: "Stores in the city and everything linked to them." },
   { key: "zip", tokens: ["zip:"], label: "ZIP code", example: "zip:937", help: "Full ZIP or its first digits." },
-  { key: "phone", tokens: ["phone:", "tel:"], label: "Phone", example: "phone:8638900", help: "Any part of a store, franchisee or CAP phone. Spaces, dashes and brackets are ignored." },
-  { key: "email", tokens: ["email:"], label: "Email", example: "email:gmail.com", help: "Franchisee, FBC / OM and CAP email addresses." },
+  { key: "phone", tokens: ["phone:", "tel:"], label: "Phone", example: "phone:8638900", help: "Any part of a store or franchisee phone. Spaces, dashes and brackets are ignored." },
+  { key: "email", tokens: ["email:"], label: "Email", example: "email:gmail.com", help: "Franchisee and FBC / OM email addresses." },
 ];
 
 const TOKENS = SEARCH_PREFIXES.flatMap((prefix) => prefix.tokens.map((token) => [token, prefix])).sort((a, b) => b[0].length - a[0].length);
@@ -66,7 +64,6 @@ const ago = (ts) => (ts ? new Date(ts).toLocaleDateString([], { month: "short", 
  */
 export function buildSearchIndex(ctx) {
   const entries = [];
-  const capByStore = new Map(ctx.caps.map((record) => [String(record.store_num), record]));
 
   ctx.franchisees.forEach((franchisee) => {
     const stores = storesOf(ctx, franchisee.id);
@@ -86,10 +83,9 @@ export function buildSearchIndex(ctx) {
   ctx.stores.forEach((store) => {
     const status = storeStatus(store);
     const open = storeOpenIssues(ctx, store.num);
-    const cap = capByStore.get(String(store.num));
     entries.push({
       cat: "stores", key: `st-${store.id}`, id: store.id, title: `Store ${store.num || "—"}`,
-      sub: [franchiseeName(ctx, store.franchisee_id), storeAddressLine(store), open ? `${open} open issue${open === 1 ? "" : "s"}` : "", cap && capIsOpen(cap) ? `CAP: ${normalizeCapStatus(cap.status)}` : ""].filter(Boolean).join(" · "),
+      sub: [franchiseeName(ctx, store.franchisee_id), storeAddressLine(store), open ? `${open} open issue${open === 1 ? "" : "s"}` : ""].filter(Boolean).join(" · "),
       status: status !== "Open" ? { text: status, tone: status === "Closed" ? "bad" : "warn" } : null,
       storeNum: String(store.num || ""), frId: store.franchisee_id, store,
       fields: [["num", "Store #", store.num], ["text", "Address", store.address], ["city", "City", store.city], ["text", "State", store.state], ["zip", "ZIP", store.zip], ["terr", "Territory", store.territory], ["phone", "Phone", store.phone]],
@@ -131,20 +127,6 @@ export function buildSearchIndex(ctx) {
       storeNum: String(record.store_num || ""), frId,
       fields: [["text", "Platform", obPlatformName(record.platform)], ["text", "Details", richToPlain(record.details || "")], ["text", "Latest update", richToPlain(record.last_update || "")]],
       sortKey: -new Date(record.created_at || 0).getTime(), open: { type: "onboarding", id: record.id },
-    });
-  });
-
-  ctx.caps.forEach((record) => {
-    const contact = capContact(ctx, record);
-    const status = normalizeCapStatus(record.status);
-    const store = ctx.storeByNum.get(String(record.store_num));
-    entries.push({
-      cat: "caps", key: `cap-${record.id}`, id: record.id, title: `CAP · Store ${record.store_num}`,
-      sub: [capAssessmentId(record) ? `Assessment ID ${capAssessmentId(record)}` : "", contact.name, capIsOpen(record) ? capDueText(record) : "", record.notes].filter(Boolean).join(" · "),
-      status: { text: status, tone: status === "Completed" ? "ok" : status === "No Action Yet" ? "bad" : "warn" },
-      storeNum: String(record.store_num || ""), frId: store?.franchisee_id,
-      fields: [["text", "Assessment ID", capAssessmentId(record)], ["email", "Email", contact.email], ["phone", "Phone", contact.phone], ["text", "Notes", record.notes], ["text", "Status", status]],
-      sortKey: record.store_num, open: { type: "cap", id: record.id },
     });
   });
 

@@ -1,20 +1,18 @@
 import { useMemo } from "react";
-import MenuButton, { MenuItem } from "../ui/MenuButton.jsx";
 import Icon from "../ui/Icon.jsx";
 import { territorySet } from "../../domain/records.js";
 import { reportKindForTab } from "../../reports/catalog.js";
 import { loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { openCallLog, openCapEmail, openCapForm, openCapsImport, openWalmartAdd, openWalmartEmail, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openNewOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
+import { openCallLog, openWalmartAdd, openWalmartEmail, openWalmartImport, openLogIssue, openMultiIssue, openAddOnboarding, openNewOnboarding, openOnboardingEmail, openReport, openStaffForm } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { openFind, setSearch, setTerrFilter, toggleClosedOnly, toggleIssuesOnly, useUiStore } from "../../state/uiStore.js";
 
-const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "ezcater", "walmart", "staff", "caps", "calls"];
+const SEARCH_TABS = ["franchisees", "stores", "issues", "onboarding", "ezcater", "walmart", "staff", "calls"];
 
 function searchPlaceholder(tab) {
   if (tab === "ezcater") return "Search ezCater: store #, franchisee, status or updates…";
   if (tab === "walmart") return "Search Walmart: store #, franchisee, stage or notes…";
-  if (tab === "caps") return "Search store #, Assessment ID, franchisee…";
   if (tab === "calls") return "Search calls: franchisee, store #, reason or result…";
   if (tab === "staff") return "Search name, email, or #store";
   if (tab === "onboarding") return "Search onboarding: store #, platform, notes, city…";
@@ -61,20 +59,6 @@ function TerritoryFilter() {
   </select>;
 }
 
-/** CAP tab: one "Add stores" button that opens a menu — add one store, or import a spreadsheet. */
-function CapsAddMenu({ ready }) {
-  const guard = (open) => () => {
-    if (!ready) { toast("Run migrate-caps.sql first", "err"); return; }
-    open();
-  };
-  return <MenuButton trigger={<><Icon name="plus" /><span>Add stores</span><Icon name="chevron-down" className="car" /></>}>
-    <MenuItem onSelect={guard(() => openCapForm())}><Icon name="plus" />
-      <span className="mnu-txt"><b>Add a store</b><small>Pick one store and fill in its details</small></span></MenuItem>
-    <MenuItem onSelect={guard(openCapsImport)}><Icon name="file-spreadsheet" />
-      <span className="mnu-txt"><b>Import spreadsheet</b><small>Add or update many stores from Excel</small></span></MenuItem>
-  </MenuButton>;
-}
-
 export default function Toolbar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
@@ -102,7 +86,6 @@ export default function Toolbar() {
         </span>}
         <span className="count">{countText}</span>
         {primary && <button type="button" className="btn round" onClick={primary[1]}><Icon name={primary[2] || "plus"} /><span>{primary[0]}</span></button>}
-        {tab === "caps" && <CapsAddMenu ready={ctx.capsReady} />}
         {tab === "ezcater" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each ezCater store" onClick={() => {
           if (!ctx.onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
           openOnboardingEmail(null, "ez");
@@ -115,16 +98,12 @@ export default function Toolbar() {
           if (!ctx.walmartReady) { toast("Run migrate-walmart.sql first", "err"); return; }
           openWalmartEmail();
         }}><Icon name="mail" />Email message</button>}
-        {tab === "caps" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each store" onClick={() => {
-          if (!ctx.capsReady) { toast("Run migrate-caps.sql first", "err"); return; }
-          openCapEmail();
-        }}><Icon name="mail" />Email message</button>}
         {tab === "onboarding" && <button type="button" className="btn outline round" title="Edit the subject, message and CC used by the email button on each onboarding row" onClick={() => {
           if (!ctx.onboardingReady) { toast("Run migrate-onboarding.sql first", "err"); return; }
           openOnboardingEmail();
         }}><Icon name="mail" />Email message</button>}
         {tab === "issues" && <button type="button" className="btn outline round" title="Log one issue for several stores at once" onClick={openMultiIssue}><Icon name="layers" />Multi-store issue</button>}
-        {(tab === "issues" || tab === "onboarding" || tab === "calls" || tab === "caps") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}
+        {(tab === "issues" || tab === "onboarding" || tab === "calls") && <button type="button" className="btn outline round" title="Download an Excel report" onClick={() => openReport(reportKindForTab(tab))}><Icon name="file-bar-chart" />Report</button>}
         <button type="button" className="btn ghost tb-refresh" aria-label="Refresh" data-tip="Reload the latest data" onClick={() => loadAll()}><Icon name="refresh-cw" /><span className="tb-lbl">Refresh</span></button>
       </div>}
       {(tab === "franchisees" || tab === "stores") && <div className={`hintbar hintbar-scope${prefixTyped ? " moved" : ""}`}>

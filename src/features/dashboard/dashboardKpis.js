@@ -1,14 +1,12 @@
 /*
- * The Dashboard's four KPI cards, for one territory (or all) and a date range:
- * open issues, 3PD coverage, onboarding progress and CAP status — each with a trend against the previous period.
+ * The Dashboard's three KPI cards, for one territory (or all) and a date range:
+ * open issues, 3PD coverage and onboarding progress — each with a trend against the previous period.
  */
-import { capHistory } from "../../domain/caps.js";
 import { corePercent, coverageCounts, snapshotCounts, snapshotOn } from "../../domain/coverage.js";
 import { isIssueOpen, resolvedAt } from "../../domain/issues.js";
 import { obHistory, obIsOpen, obOnTab } from "../../domain/onboarding.js";
 import { normalizeWmStage, wmHistory } from "../../domain/walmart.js";
 import { primaryTerritory } from "../../domain/records.js";
-import { capsProgress } from "../caps/capsSelectors.js";
 import { ezRecords } from "../ezcater/ezcaterSelectors.js";
 import { within } from "./dashboardRange.js";
 
@@ -105,25 +103,11 @@ function onboardingKpi(ctx, nums, range) {
   };
 }
 
-/** CAP % completed with overdue / due soon; trend = CAPs completed this period vs the one before. */
-function capKpi(ctx, nums, range, territory) {
-  const summary = capsProgress(ctx, territory);
-  const caps = ctx.caps.filter((record) => inScope(nums, record.store_num));
-  const completed = (from, to) => caps.reduce((count, record) => count + capHistory(record).filter((entry) => within(entry.ts, from, to)
-    && (entry.changes || []).some((change) => change.field === "status" && change.to === "Completed")).length, 0);
-  return {
-    key: "caps", label: "CAP", value: `${summary.percent}%`, valueNote: "completed", summary,
-    trend: trendOf(completed(range.start, range.end), completed(range.prevStart, range.prevEnd), { kind: "count" }), trendLabel: "CAPs completed",
-    tip: "Share of stores in the CAP list whose CAP is Completed. The trend compares how many were completed in this period with the period before.",
-  };
-}
-
 export function buildKpis(ctx, territory, range) {
   const nums = storeNumbers(ctx, territory);
   return [
     issuesKpi(ctx, nums, range),
     coverageKpi(ctx, nums, range, territory),
     onboardingKpi(ctx, nums, range),
-    ...(ctx.capsReady ? [capKpi(ctx, nums, range, territory)] : []),
   ];
 }

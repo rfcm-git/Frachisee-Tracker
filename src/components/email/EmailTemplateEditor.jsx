@@ -3,7 +3,7 @@ import PreviewPicker from "./PreviewPicker.jsx";
 import Icon from "../ui/Icon.jsx";
 import Modal from "../ui/Modal.jsx";
 import { useDialog } from "../dialogs/dialogContext.js";
-import { MAILTO_SAFE_LENGTH, badEmails, unknownPlaceholders } from "../../domain/capEmail.js";
+import { MAILTO_SAFE_LENGTH, badEmails, unknownPlaceholders } from "../../domain/email.js";
 import { toast } from "../../state/toastStore.js";
 
 const CC_FIELDS = [
@@ -27,7 +27,7 @@ function messageModes({ modes, fields, previewOptions, initialPreviewId, buildPr
 
 /**
  * Editor for an email template (subject, message with {{placeholders}}, CC rules) with a live preview for one store.
- * Used by the CAP, onboarding and Walmart emails.
+ * Used by the onboarding, ezCater and Walmart emails.
  *   fields: [[name, description]] placeholders offered as chips
  *   initial / defaults: templates ({ subject, body, ccHouston, ccOther, ccAlways })
  *   previewOptions: [{ id, label }]; buildPreview(values, id) -> email from recipientsFor + composeEmail

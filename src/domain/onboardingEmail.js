@@ -1,12 +1,12 @@
 /*
  * Onboarding email: the shared template, its {{placeholders}} and who it goes to.
  * One email covers a store's open onboarding (Not enrolled / Work in Progress) platforms. Recipients follow the same rules
- * as the CAP email (see capEmail.recipientsFor): FBC and OM, Houston or other-territory CC, always-CC, and Rohit / Raghu Marwaha stores to Rajeev.
+ * as the other emails (see email.recipientsFor): FBC and OM, Houston or other-territory CC, always-CC, and Rohit / Raghu Marwaha stores to Rajeev.
  * Sending adds an "Email Sent" update to each of those records; the status becomes (or stays) Work in Progress.
  */
 import { franchiseeName } from "./context.js";
 import { isEmailExempt } from "./emailExempt.js";
-import { composeEmail, recipientsFor } from "./capEmail.js";
+import { composeEmail, recipientsFor } from "./email.js";
 import { obIsEz, obIsOpen, obPlatformName, obStatusLabel, obVisible } from "./onboarding.js";
 import { emailOf, territorySet } from "./records.js";
 import { OB_ALL_PLATFORMS } from "../config/constants.js";

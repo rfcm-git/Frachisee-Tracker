@@ -3,13 +3,13 @@
  * Preferences are kept in localStorage; the current screen survives a browser refresh (sessionStorage).
  */
 import { create } from "zustand";
-import { CAP_STATES, ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS, WM_STAGES } from "../config/constants.js";
+import { ISSUE_STATES, OB_PLATFORMS, OB_STATES, PAGE_DEFAULTS, PAGE_OPTIONS, STORAGE_KEYS, TABS, WM_STAGES } from "../config/constants.js";
 import { CALL_VIEWS, DEFAULT_CALL_FILTERS } from "../domain/calls.js";
 import { localDateInput } from "../lib/format.js";
 import { defaultPeriod, withPeriod } from "../lib/periods.js";
 import { local, session } from "../lib/storage.js";
 
-const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, ez: 1, cl: 1, cap: 1, wm: 1, na: 1 };
+const FIRST_PAGES = { fr: 1, st: 1, frst: 1, is: 1, ob: 1, ez: 1, cl: 1, wm: 1, na: 1 };
 
 function savedPageSizes() {
   const sizes = {};
@@ -27,18 +27,6 @@ function savedIssueView() {
 
 const defaultIssueFilter = () => ({ statuses: [], ...defaultPeriod(7), sort: "new" });
 const defaultObFilter = () => ({ platforms: [], threePd: [], franchisees: [], sort: "new" });
-
-/** CAPs sort keys: store number, Assessment ID, status, date added, last updated, due date. */
-export const CAP_SORT_KEYS = ["num", "aid", "status", "added", "updated", "due"];
-const CAP_EMAIL_FILTERS = ["", "has", "none"];
-const CAP_ASSESSMENT_FILTERS = ["", "has", "none"];
-const CAP_DUE_FILTERS = ["", "overdue", "today", "week", "none"];
-/** Statuses checked by default: everything but Completed (the user can check it). */
-export const CAP_DEFAULT_STATUSES = CAP_STATES.filter((status) => status !== "Completed");
-/** True when the status filter is the default one. */
-export const capStatusesAreDefault = (statuses) => statuses.length === CAP_DEFAULT_STATUSES.length && CAP_DEFAULT_STATUSES.every((status) => statuses.includes(status));
-/** v: 2 = saved after Completed became unchecked by default; older saves start from the default. */
-const defaultCapsFilter = () => ({ v: 2, statuses: [...CAP_DEFAULT_STATUSES], email: "", assessment: "", due: "", sort: { key: "added", dir: -1 } });
 
 /** ezCater sort keys and email filter ("" all, "none" not emailed yet, "sent" emailed — open stores only). */
 export const EZ_SORTS = ["num", "status", "emailed", "added", "updated"];
@@ -67,7 +55,6 @@ function baseState() {
     issueView: savedIssueView(),
     issueFilter: defaultIssueFilter(),
     obFilter: defaultObFilter(),
-    capsFilter: defaultCapsFilter(),
     wmFilter: defaultWmFilter(),
     ezFilter: defaultEzFilter(),
     wmView: "stores",
@@ -145,17 +132,6 @@ function restoredState() {
       sort: WM_SORTS.includes(saved.wmFilter.sort?.key) ? { key: saved.wmFilter.sort.key, dir: saved.wmFilter.sort.dir === -1 ? -1 : 1 } : defaultWmFilter().sort,
     };
   }
-  if (saved.capsFilter && typeof saved.capsFilter === "object") {
-    const sort = saved.capsFilter.sort || {};
-    state.capsFilter = {
-      v: 2,
-      statuses: saved.capsFilter.v === 2 ? onlyValid(saved.capsFilter.statuses, CAP_STATES) : [...CAP_DEFAULT_STATUSES],
-      email: CAP_EMAIL_FILTERS.includes(saved.capsFilter.email) ? saved.capsFilter.email : "",
-      assessment: CAP_ASSESSMENT_FILTERS.includes(saved.capsFilter.assessment) ? saved.capsFilter.assessment : "",
-      due: CAP_DUE_FILTERS.includes(saved.capsFilter.due) ? saved.capsFilter.due : "",
-      sort: CAP_SORT_KEYS.includes(sort.key) ? { key: sort.key, dir: sort.dir === 1 ? 1 : -1 } : defaultCapsFilter().sort,
-    };
-  }
   if (saved.callFilters && typeof saved.callFilters === "object") state.callFilters = { ...DEFAULT_CALL_FILTERS, ...saved.callFilters };
   state.callSort = saved.callSort === "asc" ? "asc" : "desc";
   if (CALL_VIEWS.includes(saved.callView)) state.callView = saved.callView;
@@ -196,7 +172,7 @@ export function openFind(query) {
 }
 
 export function setSearch(search) {
-  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "cap", "wm", "ez") });
+  set({ search, ...resetPages("fr", "st", "frst", "is", "ob", "cl", "wm", "ez") });
 }
 
 export function setTerrFilter(terrFilter) {
@@ -312,47 +288,6 @@ export function toggleObCell(platform, status) {
     ? { ...obFilter, platforms: [], threePd: [] }
     : { ...obFilter, platforms: [platform], threePd: [status] };
   set({ obFilter: next, ...resetPages("ob") });
-}
-
-/* ---------- CAPs monitoring ---------- */
-
-const patchCapsFilter = (patch) => set({ capsFilter: { ...get().capsFilter, ...patch }, ...resetPages("cap") });
-
-/** Adds or removes a status; "" shows all statuses. */
-export function toggleCapStatus(status) {
-  const { statuses } = get().capsFilter;
-  patchCapsFilter({ statuses: !status ? [] : statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status] });
-}
-
-/** Shows only one status, or the default statuses again when it was the only one shown. */
-export function toggleCapOnlyStatus(status) {
-  const { statuses } = get().capsFilter;
-  patchCapsFilter({ statuses: !status || (statuses.length === 1 && statuses[0] === status) ? [...CAP_DEFAULT_STATUSES] : [status] });
-}
-
-export const setCapEmailFilter = (email) => patchCapsFilter({ email: CAP_EMAIL_FILTERS.includes(email) ? email : "" });
-
-export const setCapAssessmentFilter = (assessment) => patchCapsFilter({ assessment: CAP_ASSESSMENT_FILTERS.includes(assessment) ? assessment : "" });
-
-export const setCapDueFilter = (due) => patchCapsFilter({ due: CAP_DUE_FILTERS.includes(due) ? due : "" });
-
-/** Progress-strip chips: the same due filter again shows all. */
-export const toggleCapDueFilter = (due) => setCapDueFilter(get().capsFilter.due === due ? "" : due);
-
-/** Sorts by a column; the same column again flips the direction. Added / updated start newest first, the rest ascending (due date: soonest first). */
-export function sortCaps(key, dir) {
-  if (!CAP_SORT_KEYS.includes(key)) return;
-  const { sort } = get().capsFilter;
-  const next = dir === 1 || dir === -1 ? dir : sort.key === key ? -sort.dir : key === "added" || key === "updated" ? -1 : 1;
-  patchCapsFilter({ sort: { key, dir: next } });
-}
-
-export const clearCapsFilters = () => set({ capsFilter: { ...defaultCapsFilter(), sort: get().capsFilter.sort }, search: "", ...resetPages("cap") });
-
-/** Opens the CAP tab, optionally on one status or due date filter (dashboard and reminders). */
-export function showCaps(status = "", due = "") {
-  set({ tab: "caps", search: "", capsFilter: { ...get().capsFilter, statuses: status ? [status] : [...CAP_DEFAULT_STATUSES], email: "", assessment: "", due: CAP_DUE_FILTERS.includes(due) ? due : "" }, ...resetPages("cap") });
-  window.scrollTo(0, 0);
 }
 
 /* ---------- ezCater ---------- */
@@ -514,7 +449,7 @@ export function saveUiSession(extra) {
   session.setJson(STORAGE_KEYS.uiSession, {
     tab: state.tab, search: state.search, findQuery: state.findQuery, findScope: state.findScope, terrFilter: state.terrFilter, selectedFr: state.selectedFr,
     issuesOnly: state.issuesOnly, closedOnly: state.closedOnly, pages: state.pages,
-    issueFilter: state.issueFilter, obFilter: state.obFilter, capsFilter: state.capsFilter, wmFilter: state.wmFilter, wmView: state.wmView, ezFilter: state.ezFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
+    issueFilter: state.issueFilter, obFilter: state.obFilter, wmFilter: state.wmFilter, wmView: state.wmView, ezFilter: state.ezFilter, callFilters: state.callFilters, callSort: state.callSort, callView: state.callView,
     ...extra,
     at: Date.now(),
   });

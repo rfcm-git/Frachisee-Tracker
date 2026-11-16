@@ -1,8 +1,8 @@
-/* Dashboard header (title, search, date range, territory) and the four KPI cards. */
+/* Dashboard header (title, search, date range, territory) and the three KPI cards. */
 import { useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import { localDateInput } from "../../lib/format.js";
-import { openFind, openTabFromDashboard, setDashRange, setDashTerritory, setTab, showCaps, showOpenConcerns } from "../../state/uiStore.js";
+import { openFind, openTabFromDashboard, setDashRange, setDashTerritory, setTab, showOpenConcerns } from "../../state/uiStore.js";
 import { RANGE_PRESETS } from "./dashboardRange.js";
 
 export function DashboardHeader({ territory, territories, range, bounds, refreshed }) {
@@ -50,8 +50,8 @@ function Trend({ kpi, prevLabel }) {
   </span>;
 }
 
-const OPEN = { issues: () => showOpenConcerns(), coverage: () => openTabFromDashboard("stores"), caps: () => showCaps() };
-const OPEN_TEXT = { issues: "Open the Issues tab", coverage: "Open All Stores", caps: "Open the CAP tab" };
+const OPEN = { issues: () => showOpenConcerns(), coverage: () => openTabFromDashboard("stores") };
+const OPEN_TEXT = { issues: "Open the Issues tab", coverage: "Open All Stores" };
 
 function KpiValue({ kpi }) {
   return <span className="dk-val"><b>{kpi.value}</b>{kpi.valueNote && <span>{kpi.valueNote}</span>}</span>;
@@ -79,10 +79,7 @@ export function DashboardKpis({ kpis, prevLabel }) {
       return <button type="button" key={kpi.key} className={`dk-card dk-click${kpi.tone ? ` ${kpi.tone}` : ""}`} data-tip={`${kpi.tip} ${OPEN_TEXT[kpi.key]}.`} onClick={OPEN[kpi.key]}>
         <span className="dk-lb">{kpi.label}<Icon name="arrow-right" className="dk-go" /></span>
         <KpiValue kpi={kpi} />
-        {kpi.summary ? <span className="dk-caps">
-          <span className={kpi.summary.overdue ? "bad" : ""}><Icon name="triangle-alert" />{kpi.summary.overdue.toLocaleString()} overdue</span>
-          <span className={kpi.summary.dueSoon ? "warn" : ""}><Icon name="alarm-clock" />{kpi.summary.dueSoon.toLocaleString()} due soon</span>
-        </span> : <span className="dk-sub">{kpi.sub}</span>}
+        <span className="dk-sub">{kpi.sub}</span>
         <Trend kpi={kpi} prevLabel={prevLabel} />
       </button>;
     })}

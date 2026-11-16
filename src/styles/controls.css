@@ -1,7 +1,7 @@
   /*
    * Form controls shared by every tab. Loaded after the feature styles so one look wins everywhere.
    * Every native dropdown (<select>) gets the same chevron, hover, focus ring and disabled state.
-   * The CAP status pill (.cap-sel) draws its own.
+   * The status pill (.cap-sel) on the Walmart and ezCater tabs draws its own.
    */
   select:not(.cap-sel){
     appearance:none;-webkit-appearance:none;

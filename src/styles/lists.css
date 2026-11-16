@@ -1,9 +1,5 @@
-  /* ---------- CAP (Corrective Action Plan) ---------- */
-  .badge.cap-none,.cap-pill.cap-none{background:var(--danger-soft);color:#a12f23}
-  .badge.cap-sent,.cap-pill.cap-sent{background:#e3effa;color:#225f91}
-  .badge.cap-wip,.cap-pill.cap-wip{background:var(--warn-soft);color:#8a5600}
-  .badge.cap-review,.cap-pill.cap-review{background:#efe8fb;color:#5a3a9e}
-  .badge.cap-done,.cap-pill.cap-done{background:var(--ok-soft);color:#146c3a}
+/* ---------- Shared list layout (Walmart and ezCater tabs): progress strip, table, change log, row email button and the email editor.
+   The cap- prefix is historical: these styles started on the CAP tab, which has been removed. ---------- */
 
   /* Compact progress strip (one line on wide screens) */
   .cap-prog{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 10px;box-shadow:var(--shadow)}
@@ -58,7 +54,6 @@
   .cap-date{white-space:nowrap;font-size:12px}
   .cap-notes{min-width:140px;max-width:210px}
   .cap-note{font-size:12.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
-  .cap-fromstore{color:var(--ink-soft)}
   /* Gutter after the last column so icons never touch the card edge */
   .cap-table thead th:last-child,.cap-table tbody td:last-child{padding-right:16px}
   .ez-updcol{min-width:150px;max-width:190px}
@@ -70,87 +65,31 @@
   .cap-table a{color:inherit;text-decoration:none} .cap-table a:hover{color:var(--green-dark);text-decoration:underline}
   .cap-nostore{font-weight:700;color:var(--ink-soft)}
 
-  /* Add / edit and import dialogs */
+  /* Dialogs */
   .cap-storeinfo{font-size:12.5px;min-height:20px;margin-bottom:12px;color:var(--ink)}
   .cap-storeinfo span{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
   .cap-storeinfo [data-lucide]{width:14px;height:14px;color:var(--green)}
   .cap-storeinfo .btn.link{padding:0;height:auto}
   .cap-warn{color:#8a5600} .cap-storeinfo .cap-warn [data-lucide]{color:var(--warn)}
-  .field .cap-err{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px}
-  .cap-aid{font-variant-numeric:tabular-nums;white-space:nowrap}
-  .cap-outside{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:12.5px;color:var(--ink-soft)}
-  .cap-outside [data-lucide]{width:14px;height:14px;flex:none}
-  .cap-frcheck{background:var(--warn-soft);color:#5c3b00}
-  .cap-frbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
-  .cap-frall{display:inline-flex;align-items:center;gap:8px;min-height:32px;font-weight:700;cursor:pointer}
-  .cap-frall input,.cap-frcol input{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
-  .cap-frcol{width:64px;text-align:center}
-  .cap-frcheck tr.cap-frok td{background:var(--ok-soft);transition:background-color .2s ease-out}
-  .cap-frfile{display:block;font-size:11.5px;color:#8a5600}
-  /* Status picker in each row: a colored pill with a dot and a chevron */
-  .cap-pill{position:relative;display:inline-flex;align-items:center;height:32px;border-radius:999px;transition:box-shadow var(--t-fast) var(--ease-out),opacity var(--t-fast) ease}
-  .cap-pill:hover{box-shadow:0 0 0 1px currentColor}
-  .cap-pill:focus-within{outline:3px solid var(--yellow);outline-offset:1px}
-  .cap-pill.busy{opacity:.6}
-  .cap-pill .d{position:absolute;left:11px;width:8px;height:8px;border-radius:50%;pointer-events:none}
-  .cap-pill .car{position:absolute;right:9px;width:14px;height:14px;pointer-events:none}
+  /* Status / stage picker in each row: a colored pill */
   .cap-sel{appearance:none;-webkit-appearance:none;height:32px;min-width:136px;border:none;border-radius:999px;background:transparent;color:inherit;
     padding:0 30px 0 25px;font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer}
   .cap-sel:focus{outline:none}
   .cap-sel:disabled{cursor:progress}
   .cap-sel option{background:var(--surface);color:var(--ink);font-weight:500}
 
-  /* Column titles with a selection icon (Status, Actions) */
-  .cap-th{display:flex;align-items:center;gap:6px}
-  .c-act .cap-th{justify-content:flex-end}
-  .cap-hbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid transparent;border-radius:8px;
-    background:none;color:var(--ink-soft);cursor:pointer;transition:background var(--t-fast) ease,color var(--t-fast) ease,border-color var(--t-fast) ease}
-  .cap-hbtn [data-lucide]{width:16px;height:16px}
-  .cap-hbtn:hover{background:var(--lime-tint);border-color:var(--line);color:var(--ink)}
-  .cap-hbtn:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
-  .cap-hbtn.on{background:var(--green-soft);border-color:var(--green);color:var(--green-dark)}
-  .mnu.open .cap-hbtn{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
-  .cap-hcount{position:absolute;top:-7px;right:-8px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--green);color:#fff;
-    font-size:10.5px;font-weight:800;line-height:18px;text-align:center}
-  .cap-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-
-  /* Row selection (click to highlight) */
-  .cap-table tbody tr{cursor:pointer}
+  /* Row hover */
   .cap-table tbody tr td{transition:background-color .15s ease-out}
-  .cap-table tbody tr:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
   .cap-table tbody tr:hover td{background:var(--lime-tint)}
-  .cap-table tbody tr.cap-selrow td{background:var(--lime-soft)}
-  .cap-table tbody tr.cap-selrow td:first-child{box-shadow:inset 4px 0 0 var(--green)}
-  .cap-err{color:var(--danger)} .cap-storeinfo .cap-err [data-lucide]{color:var(--danger)}
-  .cap-src{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);font-size:10.5px;font-weight:600;vertical-align:1px}
-  .cap-src [data-lucide]{width:11px;height:11px}
-  .cap-newstatus{display:flex;align-items:center;gap:10px;font-size:12.5px;flex-wrap:wrap}
-  .cap-overwrite{display:flex;align-items:flex-start;gap:8px;margin-top:8px;font-weight:600;color:var(--ink);cursor:pointer}
-  .cap-overwrite input{margin-top:2px;accent-color:var(--green)}
-  .cap-hold{color:#8a5600;font-weight:600;display:inline-flex;align-items:center;gap:4px}
-  .cap-hold [data-lucide]{width:14px;height:14px}
 
-  /* Submission due date */
+  /* "Not emailed" chip and the Emailed column */
   .cap-cnt.cap-alert [data-lucide]{width:14px;height:14px}
-  .cap-cnt.cap-alert.hot{background:var(--danger-soft);border-color:#efb7af;color:#a12f23} .cap-cnt.cap-alert.hot b{color:#a12f23}
   .cap-cnt.cap-alert.warm{background:var(--warn-soft);border-color:#f0d29a;color:#8a5600} .cap-cnt.cap-alert.warm b{color:#8a5600}
   .cap-cnt.cap-alert.on{box-shadow:inset 0 0 0 2px var(--green);border-color:var(--green)}
   .cap-duecol{white-space:nowrap}
   .cap-due-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;font-size:12.5px}
-  .cap-due{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;white-space:nowrap}
-  .cap-due [data-lucide]{width:12px;height:12px}
-  .cap-due.overdue{background:var(--danger-soft);color:#a12f23}
-  .cap-due.today{background:var(--warn-soft);color:#8a5600}
-  .cap-due.soon{background:var(--yellow-soft);color:var(--yellow-dark)}
-  .cap-due.later{background:var(--lime-tint);color:var(--ink-soft)}
-  .cap-due.done{background:var(--ok-soft);color:#146c3a}
-  .cap-setdue{padding:0;height:auto;font-size:12px}
-  .cap-due-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .field .cap-due-row input[type=date]{width:180px}
-  .cap-migrate{margin:0 0 10px}
-  .cap-migrate code{font-size:12px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px}
 
-  /* Last import */
+  /* Meta line under the progress strip (last import…) */
   .cap-meta{display:flex;flex-wrap:wrap;gap:4px 18px;margin:-2px 2px 10px;font-size:12px;color:var(--ink-soft)}
   .cap-meta > span{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap}
   .cap-meta b{color:var(--ink);font-weight:600}
@@ -161,7 +100,6 @@
   .cap-check{margin:0 0 10px}
   .cap-check.bad{background:var(--danger-soft);color:#a12f23}
   .cap-check.ok{background:var(--ok-soft);color:#146c3a}
-  .cap-imp-contact{min-width:200px} .cap-imp-contact b{display:block;font-weight:600} .cap-imp-contact span{font-size:11.5px}
   .cap-nums{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
   .cap-nums span{font-size:11.5px;font-weight:700;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.08);border-radius:6px;padding:1px 6px}
   .cap-nums em{font-size:11.5px;font-style:normal;align-self:center}
@@ -171,11 +109,7 @@
   .cap-tag.warn{background:var(--warn-soft);color:#8a5600}
   .cap-tag.bad{background:var(--danger-soft);color:#a12f23}
 
-  /* Dashboard */
-  .db-caps .db-sech{margin-bottom:10px}
-  .db-caps-open{margin-left:auto;font-size:12.5px}
-  .db-caps .cap-prog{margin:0;padding:0;border:none;box-shadow:none;background:none}
-  .db-caps .db-empty{min-height:40px}
+  /* Change log on hover (Date Added / Last Updated) */
   .cap-logwrap{display:inline-block;cursor:help;border-radius:6px;padding:2px 4px;margin:-2px -4px;outline:none}
   .cap-logwrap:hover,.cap-logwrap:focus-visible{background:var(--green-soft);color:var(--ink)}
   .cap-logwrap:focus-visible{box-shadow:0 0 0 2px var(--green)}
@@ -193,7 +127,7 @@
   .cap-log-c{color:var(--ink-soft);margin-top:1px;word-break:break-word}
   .cap-log-more{padding:6px 12px 9px;color:var(--ink-soft);font-size:11.5px;border-top:1px solid var(--line)}
 
-  /* CAP email: row button and the message editor */
+  /* Row email button and the message editor */
   .cap-statuswrap{display:flex;align-items:center;gap:6px}
   .cap-mailbtn{flex:none;transition:background var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out)}
   .cap-mailbtn.fresh{border-color:var(--green);color:var(--green-dark);background:var(--green-soft)}

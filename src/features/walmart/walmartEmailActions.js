@@ -1,7 +1,7 @@
 /* Walmart email: saving the template and opening a filled-in email in Outlook. */
 import { STORAGE_KEYS } from "../../config/constants.js";
 import { isEmailExempt } from "../../domain/emailExempt.js";
-import { MAILTO_SAFE_LENGTH } from "../../domain/capEmail.js";
+import { MAILTO_SAFE_LENGTH } from "../../domain/email.js";
 import { normalizeWmStage, wmHistory } from "../../domain/walmart.js";
 import { buildWalmartEmail, buildWalmartEmailMulti, wmCanEmail, wmEmailTemplate, wmFranchiseeRecords } from "../../domain/walmartEmail.js";
 import { TABLES, WALMART_EMAIL_KEY, mergeRowSave, writeSetting } from "../../services/api.js";

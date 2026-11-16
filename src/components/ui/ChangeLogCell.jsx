@@ -38,7 +38,7 @@ function LogPanel({ heading, entries, footer, anchor }) {
 
 /**
  * Table cell: date added, with the last update below it (with the time when it was today).
- * Hover or focus shows the change log. Used by the CAP and Walmart tabs.
+ * Hover or focus shows the change log. Used by the ezCater and Walmart tabs.
  *   entries: newest first, [{ key, title, ts, created, lines: [text or element] }]
  */
 export default function ChangeLogCell({ createdAt, updatedAt, heading, label, entries, footer, className = "hide-sm muted cap-date" }) {

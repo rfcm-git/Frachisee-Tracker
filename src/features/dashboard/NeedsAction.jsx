@@ -3,14 +3,14 @@ import { useMemo, useState } from "react";
 import Icon from "../../components/ui/Icon.jsx";
 import Pagination from "../../components/ui/Pagination.jsx";
 import { usePaged } from "../../hooks/usePaged.js";
-import { openCallFollowUp, openCapForm, openStore, openUpdateIssue } from "../../state/dialogs.js";
+import { openCallFollowUp, openStore, openUpdateIssue } from "../../state/dialogs.js";
 import { setPage } from "../../state/uiStore.js";
 import { sendOnboardingEmail } from "../onboarding/onboardingEmailActions.js";
 import { sendWalmartEmail } from "../walmart/walmartEmailActions.js";
 import { ACTION_TYPES, OLD_ISSUE_DAYS, actionCounts } from "./needsAction.js";
 
 const TYPE = Object.fromEntries(ACTION_TYPES.map(([key, label, icon]) => [key, { label, icon }]));
-const RUN = { cap: openCapForm, followup: openCallFollowUp, issue: openUpdateIssue, obEmail: sendOnboardingEmail, wmEmail: sendWalmartEmail };
+const RUN = { followup: openCallFollowUp, issue: openUpdateIssue, obEmail: sendOnboardingEmail, wmEmail: sendWalmartEmail };
 const SEVERITY_ICON = { critical: "triangle-alert", warning: "alarm-clock" };
 
 export function NeedsActionCard({ ctx, items }) {
@@ -30,7 +30,7 @@ export function NeedsActionCard({ ctx, items }) {
 
   return <section className="dc-card na-card" aria-labelledby="na-title">
     <header className="dc-h">
-      <div><h3 id="na-title">Needs action today</h3><span>Overdue and due CAPs, call follow-ups due, issues open {OLD_ISSUE_DAYS}+ days, and onboarding stores not emailed yet</span></div>
+      <div><h3 id="na-title">Needs action today</h3><span>Call follow-ups due, issues open {OLD_ISSUE_DAYS}+ days, and onboarding stores not emailed yet</span></div>
     </header>
     <div className="na-chips" role="group" aria-label="Show">
       <button type="button" className={`na-chip${!type ? " on" : ""}`} aria-pressed={!type} onClick={() => pick("")}>All <b>{items.length.toLocaleString()}</b></button>

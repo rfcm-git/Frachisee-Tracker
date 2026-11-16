@@ -46,7 +46,7 @@ function promptNext() {
   openScheduleConfirm(next.id, next.key);
 }
 
-/** Raises the scheduled reminders (records update, CAP list update) at their set times while the app is open. */
+/** Raises the scheduled reminders (e.g. the records update) at their set times while the app is open. */
 export default function ScheduleReminderHost() {
   const schedules = useScheduleStore((s) => s.schedules);
 

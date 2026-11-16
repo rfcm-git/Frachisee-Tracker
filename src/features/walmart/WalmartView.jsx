@@ -10,7 +10,7 @@ import { EmptyState, InfoTip, StoreStatusIfClosed, WmStageBadge } from "../../co
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { WM_NEXT_STEP, WM_STAGES, WM_STAGE_COLOR } from "../../config/constants.js";
-import { storeContactDefaults } from "../../domain/caps.js";
+import { storeContactDefaults } from "../../domain/context.js";
 import { platformStatus, storeStatus } from "../../domain/records.js";
 import { searchQuery } from "../../domain/search.js";
 import { normalizeWmStage, wmHistory, wmPlatformStatus, wmStageClass } from "../../domain/walmart.js";

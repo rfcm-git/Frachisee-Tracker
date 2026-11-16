@@ -11,20 +11,13 @@ export const TABLES = {
   issues: "issues",
   onboarding: "onboarding",
   callLogs: "call_logs",
-  caps: "caps",
   walmart: "walmart",
   snapshots: "coverage_snapshots",
   settings: "app_settings",
 };
 
-/** app_settings key of the last CAP import. */
-export const CAPS_LAST_IMPORT_KEY = "caps_last_import";
-
 /** app_settings key of the scheduled-reminder state (which occurrences were reminded/confirmed, shared across devices). */
 export const SCHEDULE_STATE_KEY = "schedule_state";
-
-/** app_settings key of the CAP email template. */
-export const CAPS_EMAIL_KEY = "caps_email_template";
 
 /** app_settings key of the onboarding email template. */
 export const ONBOARDING_EMAIL_KEY = "onboarding_email_template";
@@ -62,12 +55,12 @@ function isMissingTable(error) {
     || /(?:relation|table).+does not exist/.test(message);
 }
 
-/** Loads every table. Onboarding, call logs and CAPs are optional (older databases may not have them). */
+/** Loads every table. Onboarding, call logs and Walmart are optional (older databases may not have them). */
 /** onProgress(fraction) is called as each table arrives (used by the intro's loading ring). */
 export async function loadAllTables({ onProgress } = {}) {
   let done = 0;
   const tick = (promise) => promise.then((value) => {
-    onProgress?.(++done / 9);
+    onProgress?.(++done / 8);
     return value;
   });
   const fetchOptional = async (table) => {
@@ -78,31 +71,21 @@ export async function loadAllTables({ onProgress } = {}) {
       throw error;
     }
   };
-  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, capsResult, walmartResult, snapshotsResult] = await Promise.all([
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, walmartResult, snapshotsResult] = await Promise.all([
     tick(fetchAll(TABLES.franchisees)),
     tick(fetchAll(TABLES.stores)),
     tick(fetchAll(TABLES.staff)),
     tick(fetchAll(TABLES.issues)),
     tick(fetchOptional(TABLES.onboarding)),
     tick(fetchOptional(TABLES.callLogs)),
-    tick(fetchOptional(TABLES.caps)),
     tick(fetchOptional(TABLES.walmart)),
     tick(fetchOptional(TABLES.snapshots)),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
-  const { rows: caps, ready: capsReady } = capsResult;
   const { rows: walmart, ready: walmartReady } = walmartResult;
   const { rows: snapshots, ready: snapshotsReady } = snapshotsResult;
   const emailExemptReady = await hasColumn(TABLES.stores, "email_exempt");
-  const [capsDueReady, capsHistoryReady, capsAssessmentReady, lastImport, emailTemplate] = capsReady
-    ? await Promise.all([hasColumn(TABLES.caps, "due_date"), hasColumn(TABLES.caps, "history"), hasColumn(TABLES.caps, "assessment_id"),
-      readSetting(CAPS_LAST_IMPORT_KEY).catch((error) => ({ error })), readSetting(CAPS_EMAIL_KEY).catch((error) => ({ error }))])
-    : [false, false, false, { value: null }, { value: null }];
-  // lastImport.error: app_settings is not set up; the CAP tab then shows the import saved on this computer.
-  const capsLastImport = lastImport.error ? undefined : lastImport.value || null;
-  // Same for the email template: undefined means it is kept on this computer instead.
-  const capsEmail = emailTemplate.error ? undefined : emailTemplate.value || null;
   // Onboarding email template: undefined when app_settings is not set up (kept on this computer instead).
   const obTemplate = onboardingReady ? await readSetting(ONBOARDING_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const onboardingEmail = obTemplate.error ? undefined : obTemplate.value || null;
@@ -111,7 +94,7 @@ export async function loadAllTables({ onProgress } = {}) {
   // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
   const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
   const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
-  return { franchisees, stores, staff, issues, onboarding, callLogs, caps, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, capsReady, capsDueReady, capsHistoryReady, capsAssessmentReady, emailExemptReady, capsLastImport, capsEmail, onboardingEmail, ezcaterEmail };
+  return { franchisees, stores, staff, issues, onboarding, callLogs, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, emailExemptReady, onboardingEmail, ezcaterEmail };
 }
 
 /** True when the table has the column (false when a newer migration has not been run yet). */

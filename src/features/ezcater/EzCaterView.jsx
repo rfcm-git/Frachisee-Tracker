@@ -10,7 +10,7 @@ import { EmptyState, InfoTip, StoreStatusIfClosed } from "../../components/ui/co
 import { usePaged } from "../../hooks/usePaged.js";
 import { useToolbarCount } from "../../hooks/useToolbarCount.js";
 import { OB_STATES, OB_STATUS_COLOR } from "../../config/constants.js";
-import { storeContactDefaults } from "../../domain/caps.js";
+import { storeContactDefaults } from "../../domain/context.js";
 import { obHistory, obIsOpen, obStatusClass, obStatusLabel } from "../../domain/onboarding.js";
 import { OB_EMAIL_NOTE } from "../../domain/onboardingEmail.js";
 import { platformStatus, storeStatus } from "../../domain/records.js";

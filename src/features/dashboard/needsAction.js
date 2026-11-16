@@ -1,12 +1,10 @@
 /*
  * "Needs action today": one work list across the tracker, most urgent first.
- *   cap       — CAP overdue, due today or due in the next few days
  *   followup  — call follow-ups that are due
  *   issue     — issues open for a week or more
  *   email     — stores being onboarded (3PDs, ezCater, Walmart) that were never emailed
  */
 import { callFollowUpDue, callFranchiseeName } from "../../domain/calls.js";
-import { capContact, capDueDate, capDueDays, capDueState, capDueText, formatDueDate } from "../../domain/caps.js";
 import { franchiseeName } from "../../domain/context.js";
 import { isIssueOpen, issueFranchiseeId, issueNumber } from "../../domain/issues.js";
 import { obHistory, obIsOpen, obOnTab, obPlatformName } from "../../domain/onboarding.js";
@@ -20,7 +18,6 @@ import { ezRows } from "../ezcater/ezcaterSelectors.js";
 export const OLD_ISSUE_DAYS = 7;
 
 export const ACTION_TYPES = [
-  ["cap", "CAP", "list-checks"],
   ["followup", "Follow-ups", "phone-call"],
   ["issue", "Issues", "triangle-alert"],
   ["email", "Not emailed", "mail"],
@@ -37,19 +34,6 @@ const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
 export function needsAction(ctx, territory, now = Date.now()) {
   const inTerritory = (num) => !territory || primaryTerritory(ctx.storeByNum.get(String(num ?? "")) || {}) === territory;
   const items = [];
-
-  // CAPs: overdue, due today, due soon.
-  ctx.caps.forEach((record) => {
-    const state = capDueState(record, new Date(now));
-    if (!["overdue", "today", "soon"].includes(state) || !inTerritory(record.store_num)) return;
-    const days = capDueDays(record, new Date(now));
-    items.push({
-      key: `cap-${record.id}`, type: "cap", urgency: state === "overdue" ? 0 : state === "today" ? 1 : 3, severity: state === "overdue" ? "critical" : "warning",
-      num: String(record.store_num), franchisee: capContact(ctx, record).name, what: capDueText(record, new Date(now)), detail: `CAP · ${record.status}`,
-      when: state === "overdue" ? `${plural(-days, "day")} late` : state === "today" ? "Today" : `In ${plural(days, "day")}`, whenTip: `Due ${formatDueDate(capDueDate(record))}`,
-      sortTime: new Date(`${capDueDate(record)}T00:00:00`).getTime(), action: { label: "Open CAP", kind: "cap", id: record.id },
-    });
-  });
 
   // Call follow-ups that are due.
   ctx.callLogs.forEach((call) => {

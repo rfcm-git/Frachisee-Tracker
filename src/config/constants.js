@@ -47,12 +47,6 @@ export const WM_NEXT_STEP = {
   Exempted: "No action needed.",
 };
 
-/** CAPs (Corrective Action Plan) monitoring: one record per store. New stores always start at the first status. */
-export const CAP_STATES = ["No Action Yet", "Email Sent", "In Progress", "In Review", "Completed"];
-export const CAP_STATUS_COLOR = { "No Action Yet": "var(--danger)", "Email Sent": "#2f7fbf", "In Progress": "var(--warn)", "In Review": "#7a55c7", Completed: "var(--ok)" };
-/** A CAP counts as "due soon" (and gets a reminder) this many days before its submission due date. */
-export const CAP_DUE_SOON_DAYS = 3;
-
 export const CALL_OUTCOMES = ["Answered", "No answer / voicemail", "Follow-up required", "Requested more info", "Completed"];
 export const CALL_OUTCOME_CLASS = {
   Answered: "cl-o-ans", "No answer / voicemail": "cl-o-nva", "Follow-up required": "cl-o-fu", "Requested more info": "cl-o-info", Completed: "cl-o-done",
@@ -75,14 +69,14 @@ export const PERIODS = [
 ];
 
 /** Paged lists: allowed and default page sizes. */
-export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], ez: [10, 25, 50, 100], cl: [10, 25, 50, 100], cap: [10, 25, 50, 100], wm: [10, 25, 50, 100], na: [10, 25, 50] };
-export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, ez: 25, cl: 25, cap: 25, wm: 25, na: 10 };
+export const PAGE_OPTIONS = { fr: [10, 25, 50, 100], frst: [5, 12, 25, 50], st: [5, 12, 25, 50], is: [10, 25, 50, 100], ob: [10, 25, 50, 100], ez: [10, 25, 50, 100], cl: [10, 25, 50, 100], wm: [10, 25, 50, 100], na: [10, 25, 50] };
+export const PAGE_DEFAULTS = { fr: 25, frst: 12, st: 50, is: 25, ob: 25, ez: 25, cl: 25, wm: 25, na: 10 };
 
-export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "ezcater", "walmart", "caps", "calls", "reports"];
+export const TABS = ["dashboard", "search", "franchisees", "stores", "staff", "issues", "onboarding", "ezcater", "walmart", "calls", "reports"];
 
 export const PAGE_TITLES = {
   dashboard: ["Dashboard", "Stores, 3PD coverage and issues at a glance"],
-  search: ["Search", "Find any franchisee, store, FBC / OM, issue, CAP or call — use # @ and filters to be specific"],
+  search: ["Search", "Find any franchisee, store, FBC / OM, issue or call — use # @ and filters to be specific"],
   franchisees: ["Franchisees", "Owners, contacts and their stores"],
   stores: ["All Stores", "Every store with platforms and status"],
   staff: ["FBC / OM", "Field consultants and operations managers"],
@@ -90,7 +84,6 @@ export const PAGE_TITLES = {
   onboarding: ["3PDs", "Onboarding · Uber Eats, DoorDash and Grubhub for each store and platform"],
   ezcater: ["ezCater", "Onboarding · ezCater catering — who still needs to onboard and where each store is"],
   walmart: ["Walmart", "Onboarding · Walmart Marketplace — who still needs to onboard and where each store is"],
-  caps: ["CAP", "Corrective Action Plan — track each store from first contact to completed"],
   calls: ["Call Logs", "Every call made to franchisees — reasons, results and follow-ups"],
   reports: ["Reports", "Build any report — Excel or PDF, by date, territory, franchisee, store and category"],
 };
@@ -115,11 +108,8 @@ export const STORAGE_KEYS = {
   callInsights: "ft2_cl_ins",
   callReminded: "ft2_cl_reminded",
   callSnooze: "ft2_cl_snooze",
-  capReminded: "ft2_cap_reminded",
   schedules: "ft2_schedules",
   scheduleState: "ft2_schedule_state",
-  capLastImport: "ft2_cap_last_import",
-  capEmail: "ft2_cap_email",
   obEmail: "ft2_ob_email",
   wmEmail: "ft2_wm_email",
   ezEmail: "ft2_ez_email",

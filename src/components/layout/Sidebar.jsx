@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import Icon from "../ui/Icon.jsx";
 import { hasOpenFollowUp } from "../../domain/calls.js";
 import { isIssueOpen } from "../../domain/issues.js";
-import { capsProgress, openCapsCount } from "../../features/caps/capsSelectors.js";
 import { openWalmartCount } from "../../features/walmart/walmartSelectors.js";
 import { openEzCount } from "../../features/ezcater/ezcaterSelectors.js";
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
@@ -59,10 +58,8 @@ export default function Sidebar() {
   const openIssues = ctx.issues.filter(isIssueOpen).length;
   const openOnboarding = openOnboardingCount(ctx);
   const openFollowUps = ctx.callLogs.filter(hasOpenFollowUp).length;
-  const openCaps = openCapsCount(ctx);
   const openWalmart = openWalmartCount(ctx);
   const openEz = openEzCount(ctx);
-  const overdueCaps = ctx.capsDueReady ? capsProgress(ctx).overdue : 0;
   const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
 
   return (
@@ -85,7 +82,6 @@ export default function Sidebar() {
           <TabButton sub tab="ezcater" active={tab === "ezcater"} icon="utensils" label="ezCater" count={openEz || ""} countId="cnt-ez" countTip="Stores still being onboarded on ezCater (Not enrolled or Work in Progress)" />
           <TabButton sub tab="walmart" active={tab === "walmart"} icon="shopping-cart" label="Walmart" count={openWalmart || ""} countId="cnt-wm" countTip="Stores still at Awaiting App or Payment Setup" />
         </NavGroup>
-        <TabButton tab="caps" active={tab === "caps"} icon="list-checks" label="CAP" count={openCaps || ""} countId="cnt-cap" countTip={`Stores whose CAP is not completed yet${overdueCaps ? ` · ${overdueCaps} past the due date` : ""}`} />
         <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>

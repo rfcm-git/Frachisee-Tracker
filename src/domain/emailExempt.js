@@ -6,7 +6,6 @@
 /** Email types a store can be exempt from: [key, label, short label]. Keys match the email scopes. */
 export const EMAIL_KINDS = [
   ["wm", "Walmart", "Walmart"],
-  ["cap", "CAP", "CAP"],
   ["ob", "3PDs (Uber Eats, DoorDash, Grubhub)", "3PDs"],
   ["ez", "ezCater", "ezCater"],
 ];

@@ -4,16 +4,15 @@ import { DIALOG } from "../../state/dialogs.js";
 import { useNotificationStore } from "../../state/notificationStore.js";
 import { confirmOccurrence, getSchedule, isConfirmed } from "../../state/scheduleStore.js";
 import { toast } from "../../state/toastStore.js";
-import { setTab, showCaps } from "../../state/uiStore.js";
+import { setTab } from "../../state/uiStore.js";
 
-const TAB_LABELS = { caps: "Open CAP list", franchisees: "Open Franchisees", stores: "Open All Stores", onboarding: "Open Onboarding", issues: "Open Issues" };
+const TAB_LABELS = { franchisees: "Open Franchisees", stores: "Open All Stores", onboarding: "Open Onboarding", issues: "Open Issues" };
 
 export const targetLabel = (target) => TAB_LABELS[target] || "";
 
 /** Goes to the page the reminder is about. */
 export function openScheduleTarget(target) {
-  if (target === "caps") showCaps();
-  else if (target) { setTab(target); window.scrollTo(0, 0); }
+  if (target) { setTab(target); window.scrollTo(0, 0); }
 }
 
 /**

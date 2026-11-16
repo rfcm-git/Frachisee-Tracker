@@ -11,7 +11,8 @@ const MAX_ITEMS = 100;
  * incoming: notifications waiting to be shown as a card before they land in the box
  */
 export const useNotificationStore = create(() => ({
-  items: local.getJson(STORAGE_KEYS.notifications, []).filter((item) => item && item.id),
+  // CAP notifications are dropped: the CAP tab was removed.
+  items: local.getJson(STORAGE_KEYS.notifications, []).filter((item) => item && item.id && item.target?.type !== "cap" && item.target?.type !== "caps"),
   incoming: [],
   position: local.getJson(STORAGE_KEYS.notifyPosition, null),
   panelOpen: false,
