@@ -3,5 +3,8 @@ dist/
 .vercel/
 *.log
 /Old Versions/README.md
+
+# Environment files (real settings and secrets). The .env.example files are committed.
 .env
 .env.*
+!.env.example

@@ -1,36 +1,19 @@
 {
-  "name": "franchisee-tracker",
+  "name": "franchisee-tracker-workspace",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "workspaces": ["frontend", "backend"],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint .",
-    "intro:assets": "node scripts/build-intro-assets.mjs"
-  },
-  "dependencies": {
-    "@supabase/server": "^1.9.2",
-    "@supabase/supabase-js": "^2.118.0",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.9",
-    "lucide-react": "^1.58.0",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "three": "^0.187.0",
-    "xlsx-js-style": "^1.2.0",
-    "zustand": "^5.0.15"
+    "dev": "concurrently -k -n backend,frontend -c green,cyan \"npm:dev -w backend\" \"npm:dev -w frontend\"",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run dev -w backend",
+    "start:backend": "npm run start -w backend",
+    "build": "npm run build -w frontend",
+    "lint": "npm run lint -w frontend && npm run lint -w backend",
+    "test": "npm run test -w backend"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@expo-google-fonts/montserrat": "^0.4.2",
-    "@vitejs/plugin-react": "^6.1.2",
-    "eslint": "^10.13.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "fontkit": "^2.0.4",
-    "globals": "^17.13.0",
-    "vite": "^8.3.4"
+    "concurrently": "^9.2.1"
   }
 }

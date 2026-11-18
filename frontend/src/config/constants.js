@@ -1,11 +1,5 @@
 /* Shared constants for the whole app. */
 
-export const DEFAULT_SUPABASE_URL = "https://pwgxzzkzvhqajlgkbziu.supabase.co";
-export const DEFAULT_SUPABASE_KEY = "sb_publishable_xcn3uRSFsyYZC3cDhOOVIw_pAsEd1o7";
-
-/** Password asked before restoring a backup or deleting a franchisee. */
-export const ADMIN_PASSWORD = "Sup3rUs3r!";
-
 /** Delivery platforms stored on each store. Foodja is kept in the data but hidden in the app. */
 export const PLATFORMS = [["ue", "Uber Eats"], ["dd", "DoorDash"], ["gh", "Grubhub"], ["ez", "ezCater"], ["wm", "Walmart"], ["fj", "Foodja"]];
 export const PLATFORMS_UI = PLATFORMS.filter(([key]) => key !== "fj");
@@ -97,8 +91,6 @@ export const REPORT_TIME_ZONES = [
 
 /** Browser storage keys (kept from the original app so saved preferences survive). */
 export const STORAGE_KEYS = {
-  url: "ft2_url",
-  key: "ft2_key",
   idle: "ft2_idle",
   pageSize: (which) => `ft2_ps_${which}`,
   issueView: "ft2_isview",

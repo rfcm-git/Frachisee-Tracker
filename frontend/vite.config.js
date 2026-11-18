@@ -10,7 +10,6 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: "react", test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
-            { name: "supabase", test: /node_modules[\\/](@supabase|iceberg-js|tslib)[\\/]/ },
           ],
         },
       },

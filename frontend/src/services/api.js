@@ -1,8 +1,11 @@
 /*
- * Database access. Every function uses the active Supabase client.
- * Write helpers return { row } | { rows } | { conflict: true } | { gone: true } | { error }.
+ * Database access through the backend API (backend/). Same functions and results as before the split:
+ * write helpers return { row } | { rows } | { conflict: true } | { gone: true } | { error }.
+ * Errors keep the database's code and message, so lib/errors.js still turns them into plain messages.
  */
-import { getDb } from "./supabase.js";
+
+/** Backend address from VITE_API_BASE_URL (frontend/.env). Empty = same address as the app (/api). */
+const API_BASE = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
 export const TABLES = {
   franchisees: "franchisees",
@@ -28,23 +31,41 @@ export const WALMART_EMAIL_KEY = "walmart_email_template";
 /** app_settings key of the ezCater email template. */
 export const EZCATER_EMAIL_KEY = "ezcater_email_template";
 
-function db() {
-  const client = getDb();
-  if (!client) throw new Error("Not connected");
-  return client;
+let connected = false;
+
+/** Marks the backend as configured (set when the app connects at start). */
+export function setConnected(value) {
+  connected = Boolean(value);
 }
 
-/** Reads a whole table, 1000 rows at a time. */
+/** An Error carrying the API's error details (code, details, hint, status). */
+function apiError(body, status) {
+  const info = body?.error || {};
+  return Object.assign(new Error(info.message || `Request failed (${status})`), {
+    code: info.code, details: info.details, hint: info.hint, status,
+  });
+}
+
+/** Calls the backend. Resolves with the JSON body; throws on network failure or an error status (409 included). */
+async function request(method, path, body) {
+  const response = await fetch(`${API_BASE}/api${path}`, {
+    method,
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw apiError(data, response.status);
+  return data;
+}
+
+const tablePath = (table) => `/tables/${encodeURIComponent(table)}`;
+
+/** Runs a write and returns its error, or null. */
+const errorOf = (promise) => promise.then(() => null, (error) => error);
+
+/** Reads a whole table (the backend pages through it). */
 export async function fetchAll(table) {
-  const pageSize = 1000;
-  let all = [];
-  for (let from = 0; ; from += pageSize) {
-    const { data, error } = await db().from(table).select("*").range(from, from + pageSize - 1);
-    if (error) throw error;
-    all = all.concat(data || []);
-    if (!data || data.length < pageSize) break;
-  }
-  return all;
+  return (await request("GET", tablePath(table))).rows || [];
 }
 
 function isMissingTable(error) {
@@ -99,11 +120,7 @@ export async function loadAllTables({ onProgress } = {}) {
 
 /** True when the table has the column (false when a newer migration has not been run yet). */
 async function hasColumn(table, column) {
-  const { error } = await db().from(table).select(column).limit(1);
-  if (!error) return true;
-  const code = String(error.code || "").toUpperCase();
-  if (code === "42703" || code === "PGRST204" || String(error.message || "").toLowerCase().includes(column)) return false;
-  throw error;
+  return (await request("GET", `${tablePath(table)}/columns/${encodeURIComponent(column)}`)).exists;
 }
 
 /**
@@ -111,12 +128,12 @@ async function hasColumn(table, column) {
  * (matched on updated_at). Returns { row } | { conflict: true } | { error }.
  */
 export async function guardedUpdate(table, row, patch) {
-  let query = db().from(table).update(patch).eq("id", row.id);
-  if (row.updated_at) query = query.eq("updated_at", row.updated_at);
-  const { data, error } = await query.select();
-  if (error) return { error };
-  if (!data || !data.length) return { conflict: true };
-  return { row: data[0] };
+  try {
+    const data = await request("PATCH", `${tablePath(table)}/rows/${encodeURIComponent(row.id)}`, { patch, updated_at: row.updated_at || null });
+    return { row: data.row };
+  } catch (error) {
+    return error.status === 409 ? { conflict: true } : { error };
+  }
 }
 
 /**
@@ -128,8 +145,12 @@ export const mergeStoreSave = (storeId, mutate) => mergeRowSave(TABLES.stores, s
 /** Same as mergeStoreSave, for any table with an id column. */
 export async function mergeRowSave(table, id, mutate) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const { data: fresh, error } = await db().from(table).select("*").eq("id", id).maybeSingle();
-    if (error) return { error };
+    let fresh;
+    try {
+      fresh = (await request("GET", `${tablePath(table)}/rows/${encodeURIComponent(id)}`)).row;
+    } catch (error) {
+      return { error };
+    }
     if (!fresh) return { gone: true };
     const result = await guardedUpdate(table, fresh, mutate(fresh));
     if (result.error || result.row) return result;
@@ -139,66 +160,61 @@ export async function mergeRowSave(table, id, mutate) {
 
 /** Inserts rows and returns { rows } | { error }. */
 export async function insertRows(table, rows) {
-  const { data, error } = await db().from(table).insert(rows).select();
-  return error ? { error } : { rows: data || [] };
+  try {
+    return { rows: (await request("POST", `${tablePath(table)}/rows`, { rows })).rows || [] };
+  } catch (error) {
+    return { error };
+  }
 }
 
 /**
- * Inserts rows that need a numeric id taken from the database (franchisees).
- * Retries when a teammate took the same ids first.
+ * Inserts rows that need a numeric id taken from the database (franchisees, staff).
+ * The backend retries when a teammate took the same ids first.
  */
 export async function insertWithNextIds(table, records, select = "*") {
-  let lastError = null;
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const max = await db().from(table).select("id").order("id", { ascending: false }).limit(1);
-    if (max.error) return { error: max.error };
-    let next = (max.data?.[0]?.id || 0) + 1;
-    const withIds = records.map((record) => ({ ...record, id: next++ }));
-    const { data, error } = await db().from(table).insert(withIds).select(select);
-    if (!error) return { rows: data || [] };
-    lastError = error;
-    const isIdClash = error.code === "23505" && String(error.message || "").toLowerCase().includes("pkey");
-    if (!isIdClash) return { error };
+  try {
+    return { rows: (await request("POST", `${tablePath(table)}/rows/next-ids`, { rows: records, select })).rows || [] };
+  } catch (error) {
+    return { error };
   }
-  return { error: lastError || new Error("Couldn't get free IDs — try again") };
 }
 
-export async function deleteWhere(table, column, value) {
-  const { error } = await db().from(table).delete().eq(column, value);
-  return error || null;
-}
+export const deleteWhere = (table, column, value) => errorOf(request("DELETE", `${tablePath(table)}/rows`, { column, value }));
 
 /** Sets patch on every row where column = value. Returns the error or null. */
-export async function updateWhere(table, column, value, patch) {
-  const { error } = await db().from(table).update(patch).eq(column, value);
-  return error || null;
-}
+export const updateWhere = (table, column, value, patch) => errorOf(request("PATCH", `${tablePath(table)}/rows`, { column, value, patch }));
 
-export async function deleteIn(table, column, values) {
-  const { error } = await db().from(table).delete().in(column, values);
-  return error || null;
-}
+export const deleteIn = (table, column, values) => errorOf(request("DELETE", `${tablePath(table)}/rows`, { column, values }));
 
 /** Current updated_at of several rows (used before saving a multi-store update). */
 export async function fetchUpdatedAt(table, ids) {
-  const { data, error } = await db().from(table).select("id,updated_at").in("id", ids);
-  return error ? { error } : { rows: data || [] };
+  try {
+    return { rows: (await request("POST", `${tablePath(table)}/updated-at`, { ids })).rows || [] };
+  } catch (error) {
+    return { error };
+  }
 }
 
-export async function upsertRows(table, rows, onConflict = "id") {
-  const { error } = await db().from(table).upsert(rows, { onConflict });
-  return error || null;
-}
+export const upsertRows = (table, rows, onConflict = "id") => errorOf(request("PUT", `${tablePath(table)}/rows`, { rows, onConflict }));
 
 /** app_settings key/value storage. Returns { value } | { error }. */
 export async function readSetting(key) {
-  const { data, error } = await db().from(TABLES.settings).select("value").eq("key", key).maybeSingle();
-  return error ? { error } : { value: data ? data.value : null };
+  try {
+    return { value: (await request("GET", `/settings/${encodeURIComponent(key)}`)).value ?? null };
+  } catch (error) {
+    return { error };
+  }
 }
 
-export async function writeSetting(key, value) {
-  const { error } = await db().from(TABLES.settings).upsert({ key, value }, { onConflict: "key" });
-  return error || null;
+export const writeSetting = (key, value) => errorOf(request("PUT", `/settings/${encodeURIComponent(key)}`, { value }));
+
+/** Checks the admin password on the server. Returns { ok } | { error } (a wrong password is { ok: false }). */
+export async function verifyAdminPassword(password) {
+  try {
+    return { ok: (await request("POST", "/auth/password", { password })).ok === true };
+  } catch (error) {
+    return error.status === 401 ? { ok: false } : { error };
+  }
 }
 
-export const hasDb = () => !!getDb();
+export const hasDb = () => connected;

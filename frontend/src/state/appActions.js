@@ -2,9 +2,8 @@
 import { errorTitle, friendlyError } from "../lib/errors.js";
 import { downloadBlob } from "../lib/browser.js";
 import { localDateInput, nowIso } from "../lib/format.js";
-import { TABLES, fetchAll, hasDb, insertRows, loadAllTables, upsertRows } from "../services/api.js";
+import { TABLES, fetchAll, hasDb, insertRows, loadAllTables, setConnected, upsertRows } from "../services/api.js";
 import { coverageSnapshot, dayKey } from "../domain/coverage.js";
-import { clearDb, createDb, getDb, getSavedCredentials, saveCredentials } from "../services/supabase.js";
 import { addRows, getContext, setAllData, setConnection, useDataStore } from "./dataStore.js";
 import { DIALOG, closeDialogs } from "./dialogs.js";
 import { toast } from "./toastStore.js";
@@ -66,23 +65,11 @@ export function loadAll({ silent = false } = {}) {
   return activeLoad;
 }
 
-/** Connects with the given credentials, then loads the data. */
-export async function connect(url, key, { silent = false } = {}) {
-  const projectUrl = String(url || "").trim();
-  const projectKey = String(key || "").trim();
-  if (!projectUrl || !projectKey) { toast("Enter both URL and key", "err"); return false; }
+/** Connects to the backend API (address from VITE_API_BASE_URL), then loads the data. */
+export async function connect({ silent = false } = {}) {
   setConnection("busy", "Connecting…");
   if (!silent) setPhase("loading", { loadingText: "Connecting…" });
-  try {
-    createDb(projectUrl, projectKey);
-  } catch (error) {
-    clearDb();
-    setConnection("err", "Not connected", errorTitle(error));
-    setPhase("error", { error });
-    notifyDatabaseProblem(error);
-    return false;
-  }
-  saveCredentials(projectUrl, projectKey);
+  setConnected(true);
   const loaded = await loadAll();
   if (loaded && !silent) {
     toast("Connected", "ok");
@@ -91,18 +78,12 @@ export async function connect(url, key, { silent = false } = {}) {
   return loaded;
 }
 
-/** Connects with the saved (or default) credentials when the app starts. */
-export function connectSaved() {
-  const { url, key } = getSavedCredentials();
-  if (url && key) return connect(url, key, { silent: true });
-  setPhase("disconnected");
-  notifyDatabaseProblem(new Error("Database credentials are unavailable"));
-  return Promise.resolve(false);
-}
+/** Connects when the app starts. */
+export const connectSaved = () => connect({ silent: true });
 
 /** Downloads every table as one JSON file. */
 export async function downloadBackup() {
-  if (!getDb()) { toast("Connect first", "err"); return; }
+  if (!hasDb()) { toast("Connect first", "err"); return; }
   try {
     const [franchisees, stores, staff, issues] = await Promise.all([fetchAll(TABLES.franchisees), fetchAll(TABLES.stores), fetchAll(TABLES.staff), fetchAll(TABLES.issues)]);
     const onboarding = await fetchAll(TABLES.onboarding).catch(() => []);
@@ -185,7 +166,7 @@ async function restoreHistory(table, rows, chunk = 300) {
   if (!rows.length) return { updated: 0, added: 0, skipped: 0 };
   const { update, add, skipped } = planHistoryRestore(await fetchAll(table), rows, (row) => historyKey(table, row));
   for (const part of chunks(update, chunk)) { const error = await upsertRows(table, part); if (error) throw error; }
-  for (const part of chunks(add, chunk)) { const { error } = await getDb().from(table).insert(part); if (error) throw error; }
+  for (const part of chunks(add, chunk)) { const { error } = await insertRows(table, part); if (error) throw error; }
   return { updated: update.length, added: add.length, skipped };
 }
 
