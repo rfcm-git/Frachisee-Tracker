@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import Icon from "../ui/Icon.jsx";
-import { hasOpenFollowUp } from "../../domain/calls.js";
 import { isIssueOpen } from "../../domain/issues.js";
 import { openWalmartCount } from "../../features/walmart/walmartSelectors.js";
 import { openEzCount } from "../../features/ezcater/ezcaterSelectors.js";
@@ -57,7 +56,6 @@ export default function Sidebar() {
   const collapsed = useUiStore((state) => state.sidebarCollapsed);
   const openIssues = ctx.issues.filter(isIssueOpen).length;
   const openOnboarding = openOnboardingCount(ctx);
-  const openFollowUps = ctx.callLogs.filter(hasOpenFollowUp).length;
   const openWalmart = openWalmartCount(ctx);
   const openEz = openEzCount(ctx);
   const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
@@ -76,13 +74,13 @@ export default function Sidebar() {
         <TabButton tab="franchisees" active={tab === "franchisees"} icon="users" label="Franchisees" count={ctx.franchisees.length} />
         <TabButton tab="stores" active={tab === "stores"} icon="store" label="All Stores" count={ctx.stores.length} />
         <TabButton tab="staff" active={tab === "staff"} icon="contact" label="FBC / OM" count={ctx.staff.length} />
-        <TabButton tab="issues" active={tab === "issues"} icon="triangle-alert" label="Issues" count={openIssues} />
+        <TabButton tab="issues" active={tab === "issues"} icon="triangle-alert" label="Issues" count={openIssues || ""} countId="cnt-is" countTip="Issues not resolved yet" />
         <NavGroup tab={tab} label="Onboarding" icon="rocket" total={openOnboarding + openEz + openWalmart}>
           <TabButton sub tab="onboarding" active={tab === "onboarding"} icon="bike" label="3PDs" count={openOnboarding || ""} countId="cnt-ob" countTip="Uber Eats, DoorDash and Grubhub records still being onboarded" />
           <TabButton sub tab="ezcater" active={tab === "ezcater"} icon="utensils" label="ezCater" count={openEz || ""} countId="cnt-ez" countTip="Stores still being onboarded on ezCater (Not enrolled or Work in Progress)" />
           <TabButton sub tab="walmart" active={tab === "walmart"} icon="shopping-cart" label="Walmart" count={openWalmart || ""} countId="cnt-wm" countTip="Stores still at Awaiting App or Payment Setup" />
         </NavGroup>
-        <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" count={openFollowUps || ""} countId="cnt-cl" countTip="Follow-ups still open" />
+        <TabButton tab="calls" active={tab === "calls"} icon="phone-call" label="Call Logs" />
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>
       <div className="sb-foot">

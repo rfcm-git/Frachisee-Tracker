@@ -106,5 +106,4 @@
   .cfu-state svg{width:17px;height:17px;flex:none;margin-top:1px}
   .cfu-state.open{background:var(--warn-soft);color:#7a5600} .cfu-state.closed{background:var(--ok-soft);color:#146c3a}
   @media(max-width:560px){.cl-nextrow input[type="datetime-local"]{flex-basis:100%}.cfu-ctx .k{min-width:98px}}
-  #cnt-cl{background:var(--yellow)!important;color:var(--green-dark)!important}
   
