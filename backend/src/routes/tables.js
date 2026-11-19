@@ -5,7 +5,8 @@
 import { Router } from "express";
 import * as store from "../db.js";
 import { ApiError, badRequest } from "../errors.js";
-import { isAllowedTable, isColumnName, isSelectList } from "../tables.js";
+import { isAdmin } from "../auth/middleware.js";
+import { TABLES, isAllowedTable, isColumnName, isSelectList } from "../tables.js";
 
 const requireArray = (value, name) => {
   if (!Array.isArray(value)) throw badRequest(`${name} must be an array`);
@@ -15,6 +16,11 @@ const requireColumn = (value) => {
   if (!isColumnName(value)) throw badRequest("column must be a column name");
   return value;
 };
+/** Admin-only actions (they used to ask for the shared admin password). */
+const adminOnly = (req, what) => {
+  if (!isAdmin(req)) throw new ApiError(403, `Only admins can ${what}`, { code: "ADMIN_ONLY" });
+};
+
 const requireObject = (value, name) => {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw badRequest(`${name} must be an object`);
   return value;
@@ -59,8 +65,9 @@ export function tablesRouter(db) {
     res.status(201).json({ rows: await store.insertWithNextIds(db, req.params.table, requireArray(req.body?.rows, "rows"), select) });
   });
 
-  // Insert or overwrite rows matched on onConflict (default id).
+  // Insert or overwrite rows matched on onConflict (default id). Only used by backup restore.
   router.put("/:table/rows", async (req, res) => {
+    adminOnly(req, "restore a backup");
     const onConflict = req.body?.onConflict ?? "id";
     if (onConflict === "*" || !isSelectList(onConflict)) throw badRequest("onConflict must be column names");
     await store.upsertRows(db, req.params.table, requireArray(req.body?.rows, "rows"), onConflict);
@@ -84,6 +91,7 @@ export function tablesRouter(db) {
 
   // Delete rows where column = value, or column is one of values.
   router.delete("/:table/rows", async (req, res) => {
+    if (req.params.table === TABLES.franchisees) adminOnly(req, "delete franchisees");
     const { column, value, values } = req.body || {};
     if (values !== undefined) requireArray(values, "values");
     else if (value === undefined) throw badRequest("value or values is required");
