@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { mountIntro } from "./overlay.js";
-import { INTRO_DEFAULTS, shouldShowIntro, PLAY_INTRO_EVENT } from "./settings.js";
+import { INTRO_DEFAULTS, shouldShowIntro, PLAY_INTRO_EVENT, prefersReducedMotion } from "./settings.js";
+import { useAuthStore } from "../state/authStore.js";
 
 /**
- * Plays the 3D intro over the app on first load (see settings.js for the rules)
- * and whenever "Play intro" is chosen. The app renders underneath the whole
+ * Plays the 3D intro over the app on first load (see settings.js for the rules),
+ * whenever "Play intro" is chosen, and behind the sign-in window whenever someone has to sign in. The app renders underneath the whole
  * time, so its data loads in the background; #root is inert until the intro ends.
  *
  * Pass `config` and `preload` as stable references (module-level constants).
@@ -18,6 +19,15 @@ export function IntroGate({ children, config, preload }) {
     window.addEventListener(PLAY_INTRO_EVENT, play);
     return () => window.removeEventListener(PLAY_INTRO_EVENT, play);
   }, []);
+
+  // Sign-in needed (first visit, after logging out, or a session that ended): the intro is the background.
+  useEffect(() => {
+    const skipForMotion = prefersReducedMotion() && { ...INTRO_DEFAULTS, ...config }.reducedMotion === "skip";
+    const needsSignIn = (status) => status === "signedOut" || status === "unavailable";
+    return useAuthStore.subscribe((state, previous) => {
+      if (!skipForMotion && needsSignIn(state.status) && !needsSignIn(previous.status)) setShow(true);
+    });
+  }, [config]);
 
   // Layout effect: the overlay is in place before the first paint, so the app never flashes.
   useLayoutEffect(() => {

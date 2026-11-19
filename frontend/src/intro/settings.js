@@ -10,11 +10,11 @@ export const INTRO_DEFAULTS = {
   /** Open the site on its own once the animation has finished and the data has loaded. When false, it waits for Skip. */
   autoHide: true,
   /** How long the final shot holds after the camera move, before the site opens, in ms. */
-  holdMs: 600,
+  holdMs: 400,
   /** With "reduce motion" on: "still" shows the finished scene without movement, "skip" doesn't show the intro. */
   reducedMotion: "still",
   /** Shortest time the still version stays up, in ms. */
-  stillHoldMs: 3500,
+  stillHoldMs: 2000,
   /** Where models/ and fonts/ are served from. */
   assetBase: `${import.meta.env.BASE_URL}intro/`,
   heading: "3PD HELPDESK",

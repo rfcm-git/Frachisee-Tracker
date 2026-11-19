@@ -147,7 +147,7 @@ const CAMERA_PATH = [
   { pos: [-7, 4.0, 14], look: [0, 5.0, 0] }, // swing across to face the store
   { pos: [0, 5.4, 18.6], look: [0, 6.0, -0.5] }, // final front-on shot, from the far sidewalk
 ];
-export const MOVE_SECONDS = 8;
+export const MOVE_SECONDS = 3.6;
 // Cars are timed so none passes in front of the camera during the final shot.
 const CAR_LANES = [
   { z: 12.7, dir: 1, speed: 9.5, xAtEnd: -20 },
@@ -155,8 +155,8 @@ const CAR_LANES = [
   { z: 12.7, dir: 1, speed: 10.5, xAtEnd: 32 },
   { z: 7.7, dir: -1, speed: 9, xAtEnd: 58 },
 ];
-const END_SECONDS = 8.6;
-const REVEAL = { lamps: 4.5, heading: 4.8, letterStagger: 0.055, letterDur: 0.5, subheading: 5.8 };
+const END_SECONDS = 4;
+const REVEAL = { lamps: 2.0, heading: 2.15, letterStagger: 0.035, letterDur: 0.35, subheading: 2.6 };
 
 const SHIRTS = ["#3d6fb6", "#d2553d", "#f0c04a", "#5a9e6f", "#8a5bb8", "#e7e2d6", "#2f3d4f", "#d97aa0", "#4fa3a5", "#b8472f"];
 const PANTS = ["#30343b", "#3b4a66", "#5a4a3a", "#26292e", "#6b6f75", "#7b6a52"];

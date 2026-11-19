@@ -129,6 +129,7 @@ export default function SettingsDialog() {
       <div className="help">The 3D intro plays once each time you open the tracker in a new tab. Untick to turn it off; Play intro still works.</div>
     </div>
 
+    {admin && <>
     <div style={sectionStyle}>
       <label style={labelStyle}>Update from spreadsheet</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -147,5 +148,6 @@ export default function SettingsDialog() {
         onChange={(event) => { const file = event.target.files[0]; event.target.value = ""; if (file) chooseBackup(file); }} />
       <div className="help">Restores a saved backup file into the database. Overwrites matching records — use after data loss.</div>
     </div>
+    </>}
   </Modal>;
 }

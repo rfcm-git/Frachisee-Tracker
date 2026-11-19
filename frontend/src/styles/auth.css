@@ -45,6 +45,8 @@
 
   /* While sign-in is needed, the intro's loading ring steps aside for the window. */
   html[data-auth="signedOut"] .tpdi-progress,html[data-auth="unavailable"] .tpdi-progress,html[data-auth="checking"] .tpdi-progress{opacity:0 !important}
+  /* ...and as the sign-in background it has no Skip / "Don't show again" controls. */
+  html[data-auth="signedOut"] .tpdi-controls,html[data-auth="unavailable"] .tpdi-controls{visibility:hidden}
 
   /* Signed-in account in the menu footer */
   .sb-user{display:flex;align-items:center;gap:10px;padding:6px 10px 8px;color:#fff;min-width:0}
