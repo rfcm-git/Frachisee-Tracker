@@ -6,7 +6,7 @@ import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
 import { downloadBackup, loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { askPassword, confirmAction } from "../../state/dialogs.js";
+import { confirmAction, requireAdmin } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { STAFF_COLUMNS, downloadStaffData, downloadStaffTemplate, planStaffUpdate, readStaffFile, runStaffUpdate } from "./staffUpdate.js";
 
@@ -94,7 +94,7 @@ export default function StaffUpdateDialog() {
       onConfirm: save,
     });
     // Deleting needs the admin password, like deleting by hand.
-    if (deleteIds.length) askPassword(`Password to delete ${plural(deleteIds.length, "FBC / OM")}`, confirm); else confirm();
+    if (deleteIds.length) requireAdmin(`delete ${plural(deleteIds.length, "FBC / OM")} in an import`, confirm); else confirm();
   }
 
   const skipped = plan ? [...plan.staffResults, ...plan.storeResults].filter((row) => !row.ok).length : 0;

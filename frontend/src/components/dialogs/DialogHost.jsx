@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { DialogContext } from "./dialogContext.js";
-import { ConfirmDialog, ConflictDialog, PasswordDialog } from "./CommonDialogs.jsx";
+import { ConfirmDialog, ConflictDialog } from "./CommonDialogs.jsx";
+import AccountsDialog from "../../features/accounts/AccountsDialog.jsx";
+import AccountFormDialog from "../../features/accounts/AccountFormDialog.jsx";
 import { closeDialog, setDialogBusy, useDialogStore } from "../../state/dialogStore.js";
 import { DIALOG } from "../../state/dialogs.js";
 import WalmartImportDialog from "../../features/walmart/WalmartImportDialog.jsx";
@@ -77,7 +79,8 @@ const COMPONENTS = {
   [DIALOG.scheduleEdit]: ScheduleEditDialog,
   [DIALOG.report]: ReportBuilderDialog,
   [DIALOG.confirm]: ConfirmDialog,
-  [DIALOG.password]: PasswordDialog,
+  [DIALOG.accounts]: AccountsDialog,
+  [DIALOG.accountForm]: AccountFormDialog,
   [DIALOG.conflict]: ConflictDialog,
 };
 

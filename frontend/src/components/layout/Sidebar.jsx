@@ -5,7 +5,8 @@ import { openWalmartCount } from "../../features/walmart/walmartSelectors.js";
 import { openEzCount } from "../../features/ezcater/ezcaterSelectors.js";
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
-import { openLinks, openSettings } from "../../state/dialogs.js";
+import { logOut, useCurrentUser } from "../../state/authStore.js";
+import { confirmAction, openAccounts, openLinks, openSettings } from "../../state/dialogs.js";
 import { setNavOnboardingOpen, setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
 
 function TabButton({ tab, active, icon, label, count, countId, countTip, kbd, sub = false }) {
@@ -50,6 +51,27 @@ function SidebarBackdrop() {
   </div>;
 }
 
+/** Who is signed in, with Accounts (admins) and Log out. */
+function UserFoot() {
+  const user = useCurrentUser();
+  if (!user) return null;
+  const name = user.displayName || user.username;
+  const askLogOut = () => confirmAction({
+    title: "Log out", okLabel: "Log out", busyLabel: "Logging out…", icon: "log-out", okClass: "btn",
+    text: "Log out of the Franchisee Tracker on this browser?", onConfirm: () => logOut(),
+  });
+  return <>
+    <div className="sb-user" title={`Signed in as ${user.username}${user.role === "admin" ? " (admin)" : ""}`}>
+      <span className="av" aria-hidden="true">{name.trim().charAt(0).toUpperCase()}</span>
+      <span className="who"><b>{name}</b><span>{user.role === "admin" ? "Admin" : `@${user.username}`}</span></span>
+    </div>
+    {user.role === "admin" && <button type="button" className="sb-item" title="Accounts" aria-label="Accounts" onClick={openAccounts}>
+      <span className="t-ic"><Icon name="users" /></span><span className="t-lb">Accounts</span></button>}
+    <button type="button" className="sb-item" title="Log out" aria-label="Log out" onClick={askLogOut}>
+      <span className="t-ic"><Icon name="log-out" /></span><span className="t-lb">Log out</span></button>
+  </>;
+}
+
 export default function Sidebar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
@@ -84,6 +106,7 @@ export default function Sidebar() {
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>
       <div className="sb-foot">
+        <UserFoot />
         <button type="button" className="sb-item" title="Links" aria-label="Links" onClick={openLinks}><span className="t-ic"><Icon name="link" /></span><span className="t-lb">Links</span></button>
         <button type="button" className="sb-item" title="Settings" aria-label="Settings" onClick={openSettings}><span className="t-ic"><Icon name="settings" /></span><span className="t-lb">Settings</span></button>
         <button type="button" className="sb-item sb-collapse" title={toggleLabel} aria-label={toggleLabel} aria-expanded={!collapsed} onClick={toggleSidebar}>

@@ -3,8 +3,6 @@ import Icon from "../ui/Icon.jsx";
 import Modal from "../ui/Modal.jsx";
 import { BusyButton } from "../ui/common.jsx";
 import { useDialog } from "./dialogContext.js";
-import { errorTitle } from "../../lib/errors.js";
-import { verifyAdminPassword } from "../../services/api.js";
 import { loadAll } from "../../state/appActions.js";
 import { DIALOG, closeDialogs } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
@@ -25,34 +23,6 @@ export function ConfirmDialog({ text, okLabel = "Delete", title = "Confirm delet
     footer={<><button type="button" className="btn ghost" disabled={busy} onClick={close}>Cancel</button>
       <BusyButton className={okClass} busy={busy} busyLabel={busyLabel || `${okLabel}…`} onClick={confirm} autoFocus>{okLabel}</BusyButton></>}>
     {typeof text === "string" ? <p className="hint">{text}</p> : <div className="hint">{text}</div>}
-  </Modal>;
-}
-
-/** Asks for the admin password before a protected action. */
-export function PasswordDialog({ label = "Password", onUnlock, onCancel }) {
-  const { close } = useDialog();
-  const [value, setValue] = useState("");
-  const [checking, setChecking] = useState(false);
-
-  // The password is checked by the backend, so it is never sent to the browser.
-  async function unlock() {
-    if (checking) return;
-    setChecking(true);
-    const result = await verifyAdminPassword(value);
-    setChecking(false);
-    if (result.error) { toast(errorTitle(result.error), "err"); return; }
-    if (!result.ok) { toast("Wrong password", "err"); return; }
-    close();
-    onUnlock?.();
-  }
-  const cancel = () => { close(); onCancel?.(); };
-
-  return <Modal size="small" icon="lock" title="Enter password" onClose={cancel}
-    footer={<><button type="button" className="btn ghost" onClick={cancel}>Cancel</button>
-      <button type="button" className="btn" disabled={checking} aria-busy={checking} onClick={unlock}><Icon name="unlock" />{checking ? "Checking…" : "Unlock"}</button></>}>
-    <div className="field"><label htmlFor="imp_pw">{label}</label>
-      <input id="imp_pw" type="password" placeholder="Password" autoComplete="off" spellCheck="false" autoFocus value={value}
-        onChange={(event) => setValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock(); }} /></div>
   </Modal>;
 }
 

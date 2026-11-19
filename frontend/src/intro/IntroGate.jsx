@@ -25,10 +25,13 @@ export function IntroGate({ children, config, preload }) {
     played.current = true;
     const root = document.getElementById("root");
     root?.setAttribute("inert", "");
+    // The sign-in window reads this to sit inside the intro instead of covering the page.
+    document.documentElement.dataset.intro = "on";
     const intro = mountIntro({ config, preload, onFinish: () => setShow(false) });
     return () => {
       intro.destroy();
       root?.removeAttribute("inert");
+      document.documentElement.dataset.intro = "off";
     };
   }, [show, config, preload]);
 

@@ -32,6 +32,12 @@ export const WALMART_EMAIL_KEY = "walmart_email_template";
 export const EZCATER_EMAIL_KEY = "ezcater_email_template";
 
 let connected = false;
+let onSignedOut = null;
+
+/** Called with the error when the backend answers 401 (not signed in, or the session ended). */
+export function setSignedOutHandler(handler) {
+  onSignedOut = handler;
+}
 
 /** Marks the backend as configured (set when the app connects at start). */
 export function setConnected(value) {
@@ -46,15 +52,23 @@ function apiError(body, status) {
   });
 }
 
-/** Calls the backend. Resolves with the JSON body; throws on network failure or an error status (409 included). */
-async function request(method, path, body) {
+/**
+ * Calls the backend with the session cookie. Resolves with the JSON body; throws on network failure or an
+ * error status (409 included). A 401 also tells the sign-in screen to show (unless quiet401).
+ */
+async function request(method, path, body, { quiet401 = false } = {}) {
   const response = await fetch(`${API_BASE}/api${path}`, {
     method,
+    credentials: "include",
     headers: body === undefined ? undefined : { "Content-Type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json().catch(() => null);
-  if (!response.ok) throw apiError(data, response.status);
+  if (!response.ok) {
+    const error = apiError(data, response.status);
+    if (response.status === 401 && !quiet401) onSignedOut?.(error);
+    throw error;
+  }
   return data;
 }
 
@@ -208,13 +222,58 @@ export async function readSetting(key) {
 
 export const writeSetting = (key, value) => errorOf(request("PUT", `/settings/${encodeURIComponent(key)}`, { value }));
 
-/** Checks the admin password on the server. Returns { ok } | { error } (a wrong password is { ok: false }). */
-export async function verifyAdminPassword(password) {
+/* ---------------------------------------------------------------- sign-in */
+
+/** The signed-in account, or null when signed out. Throws on other failures (backend down, accounts not set up). */
+export async function fetchCurrentUser() {
   try {
-    return { ok: (await request("POST", "/auth/password", { password })).ok === true };
+    return (await request("GET", "/auth/me", undefined, { quiet401: true })).user;
   } catch (error) {
-    return error.status === 401 ? { ok: false } : { error };
+    if (error.status === 401) return null;
+    throw error;
   }
 }
+
+/** Returns { user } | { error }. */
+export async function signIn(username, password) {
+  try {
+    return { user: (await request("POST", "/auth/login", { username, password }, { quiet401: true })).user };
+  } catch (error) {
+    return { error };
+  }
+}
+
+export const signOut = () => errorOf(request("POST", "/auth/logout", {}, { quiet401: true }));
+
+/* --------------------------------------------------------------- accounts (admins) */
+
+/** Returns { accounts } | { error }. */
+export async function fetchAccounts() {
+  try {
+    return { accounts: (await request("GET", "/accounts")).accounts || [] };
+  } catch (error) {
+    return { error };
+  }
+}
+
+/** Returns { account } | { error }. */
+export async function createAccount(fields) {
+  try {
+    return { account: (await request("POST", "/accounts", fields)).account };
+  } catch (error) {
+    return { error };
+  }
+}
+
+/** Returns { account } | { error }. Only the fields given are changed (password: "" = keep). */
+export async function updateAccount(id, fields) {
+  try {
+    return { account: (await request("PATCH", `/accounts/${encodeURIComponent(id)}`, fields)).account };
+  } catch (error) {
+    return { error };
+  }
+}
+
+export const deleteAccount = (id) => errorOf(request("DELETE", `/accounts/${encodeURIComponent(id)}`));
 
 export const hasDb = () => connected;

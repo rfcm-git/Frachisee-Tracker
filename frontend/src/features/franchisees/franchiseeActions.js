@@ -1,7 +1,7 @@
 /* Saving and deleting franchisees. */
 import { TABLES, deleteWhere, guardedUpdate, insertWithNextIds } from "../../services/api.js";
 import { addRows, getContext, replaceRow, updateData } from "../../state/dataStore.js";
-import { askPassword, confirmAction } from "../../state/dialogs.js";
+import { confirmAction, requireAdmin } from "../../state/dialogs.js";
 import { saveSucceeded, toastError } from "../../state/feedback.js";
 import { toast } from "../../state/toastStore.js";
 import { useUiStore } from "../../state/uiStore.js";
@@ -27,12 +27,12 @@ export async function createFranchisee(record) {
   return row;
 }
 
-/** Password, then confirmation, then delete with their stores and issues. */
+/** Admins only: confirmation, then delete with their stores and issues. */
 export function askDeleteFranchisee(franchiseeId) {
   const ctx = getContext();
   const franchisee = ctx.frById.get(franchiseeId);
   if (!franchisee) return;
-  askPassword("Password to delete a franchisee", () => {
+  requireAdmin("delete franchisees", () => {
     const storeCount = storesOf(ctx, franchiseeId).length;
     const issueCount = ctx.issues.filter((issue) => issue.franchisee_id === franchiseeId).length;
     confirmAction({

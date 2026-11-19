@@ -141,6 +141,8 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
   /* ---------------------------------------------------------- keyboard */
   function onKey(e) {
     if (finished) return;
+    // Keys typed in the sign-in window (shown over the intro) belong to it.
+    if (e.target instanceof Element && e.target.closest("[data-auth-screen]")) return;
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();

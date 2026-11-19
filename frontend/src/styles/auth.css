@@ -1,0 +1,85 @@
+/* ---------- Sign-in window and accounts ---------- */
+
+  /* Full page: the intro's sky behind a centred card. Over the intro: transparent, card where the loading ring sits. */
+  .auth-screen{position:fixed;inset:0;z-index:2147483001;display:grid;place-items:center;padding:24px 16px;overflow:auto;
+    font-family:var(--font, Inter, ui-sans-serif, system-ui, sans-serif)}
+  .auth-screen::before{content:"";position:fixed;inset:0;z-index:-1;
+    background:linear-gradient(to bottom, #3a86d8 0%, #7fb2e3 40%, #c4dcf1 70%, #d7e6f2 100%);
+    transition:opacity var(--t-slow, 360ms) var(--ease-out, ease-out)}
+  .auth-screen.over-intro{pointer-events:none}
+  .auth-screen.over-intro::before{opacity:0}
+  .auth-screen.over-intro .auth-card{pointer-events:auto}
+  @media (min-width: 720px){
+    .auth-screen.over-intro{place-items:center end;padding-right:max(32px, env(safe-area-inset-right))}
+  }
+
+  .auth-card{width:min(360px, 100%);background:var(--surface, #fff);color:var(--ink);border-radius:16px;padding:24px 24px 20px;
+    box-shadow:0 2px 6px rgba(19,32,26,.08), 0 24px 60px rgba(19,32,26,.22);
+    animation:authIn var(--t-slow, 360ms) var(--ease-out, ease-out)}
+  @keyframes authIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .auth-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .auth-head .mark{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--yellow);color:var(--green-dark);
+    font-weight:800;font-size:14px;letter-spacing:.02em}
+  .auth-head h2{margin:0;font-size:18px;line-height:1.2;color:var(--green-dark)}
+  .auth-head p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
+
+  .auth-form{display:grid;gap:12px}
+  .auth-form .field input{height:42px;font-size:15px}
+  .auth-form .field input[aria-invalid="true"]{border-color:var(--danger)}
+  .auth-pass{position:relative}
+  .auth-pass input{padding-right:46px}
+  .auth-eye{position:absolute;right:3px;top:3px;width:36px;height:36px;border:none;border-radius:7px;background:none;color:var(--ink-soft);
+    display:grid;place-items:center;cursor:pointer}
+  .auth-eye:hover{background:var(--lime-tint);color:var(--ink)}
+  .auth-eye svg{width:18px;height:18px}
+
+  .auth-notice{margin:0;display:flex;gap:8px;align-items:flex-start;padding:9px 11px;border-radius:8px;background:var(--warn-soft);color:#7a5600;font-size:13px}
+  .auth-error{margin:-2px 0 0;min-height:18px;display:flex;gap:6px;align-items:center;color:var(--danger);font-size:13px;font-weight:600}
+  .auth-error.is-block{margin:0;padding:9px 11px;border-radius:8px;background:var(--danger-soft)}
+  .auth-notice svg,.auth-error svg{flex:none;width:16px;height:16px}
+  .auth-submit{width:100%;justify-content:center;height:44px;font-size:15px}
+  .auth-help{margin:0;text-align:center;font-size:12.5px;color:var(--ink-soft)}
+  .auth-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:authSpin .8s linear infinite}
+  @keyframes authSpin{to{transform:rotate(360deg)}}
+
+  /* While sign-in is needed, the intro's loading ring steps aside for the window. */
+  html[data-auth="signedOut"] .tpdi-progress,html[data-auth="unavailable"] .tpdi-progress,html[data-auth="checking"] .tpdi-progress{opacity:0 !important}
+
+  /* Signed-in account in the menu footer */
+  .sb-user{display:flex;align-items:center;gap:10px;padding:6px 10px 8px;color:#fff;min-width:0}
+  .sb-user .av{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);font-weight:700;font-size:13px}
+  .sb-user .who{min-width:0;display:grid;line-height:1.2}
+  .sb-user .who b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-user .who span{font-size:11.5px;color:#cfe8c0}
+  .app.collapsed .sb-user{justify-content:center;padding:6px 0}
+  .app.collapsed .sb-user .who{display:none}
+  @media (max-width: 900px) and (min-width: 600px){
+    .app:not(.expanded-sm) .sb-user{justify-content:center;padding:6px 0}
+    .app:not(.expanded-sm) .sb-user .who{display:none}
+  }
+
+  /* Accounts dialog */
+  .acct-list{display:grid;gap:8px}
+  .acct-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+  .acct-row.off{background:var(--idle-soft)}
+  .acct-row .av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--green-soft);color:var(--green-dark);font-weight:700}
+  .acct-row.off .av{background:#dfe3df;color:var(--idle)}
+  .acct-row .who{flex:1;min-width:0;display:grid;gap:2px}
+  .acct-row .who b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .acct-row .who span{font-size:12.5px;color:var(--ink-soft)}
+  .acct-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
+  .acct-tag.admin{background:var(--yellow-soft);color:var(--yellow-dark)}
+  .acct-tag.you{background:var(--green-soft);color:var(--green-dark)}
+  .acct-tag.off{background:#dfe3df;color:var(--idle)}
+  .acct-row .acts{display:flex;gap:6px}
+  .acct-row .acts .iconbtn{width:36px;height:36px}
+  .acct-check{display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0 2px}
+  .acct-check input{width:18px;height:18px;accent-color:var(--green)}
+
+  @media (prefers-reduced-motion: reduce){
+    .auth-card{animation:none}
+    .auth-screen::before{transition:none}
+    .auth-spin{animation-duration:2s}
+  }
+  .acct-list{list-style:none;margin:0;padding:0}

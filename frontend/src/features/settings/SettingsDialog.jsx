@@ -7,7 +7,7 @@ import { errorTitle } from "../../lib/errors.js";
 import { hasDb } from "../../services/api.js";
 import { downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
-import { askPassword, confirmAction, openBulkUpdate, openStaffUpdate } from "../../state/dialogs.js";
+import { confirmAction, openBulkUpdate, openStaffUpdate, requireAdmin } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
@@ -21,9 +21,9 @@ function notificationPermission() {
   return typeof Notification === "undefined" ? "unsupported" : Notification.permission;
 }
 
-/** Asks for the password and a confirmation, then restores the backup. */
+/** Admins only: confirmation, then restores the backup. */
 function startRestore(backup, closeSettings) {
-  askPassword("Import password", () => confirmAction({
+  requireAdmin("restore a backup", () => confirmAction({
     title: "Confirm restore",
     okLabel: "Restore",
     busyLabel: "Restoring…",

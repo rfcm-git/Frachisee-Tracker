@@ -6,6 +6,11 @@ export function friendlyError(error) {
   const message = String(error?.message || "").toLowerCase();
   const code = error?.code ? String(error.code) : "";
 
+  // Sign-in and account messages from the backend are already written for people.
+  if (code === "UNAUTHENTICATED") return { title: "Please sign in again", body: "Your session has ended." };
+  if (["ADMIN_ONLY", "BAD_LOGIN", "LOCKED", "ACCOUNT_OFF", "USERNAME_TAKEN", "ACCOUNT_GONE", "BAD_REQUEST"].includes(code)) return { title: error.message, body: "" };
+  if (code === "ACCOUNTS_NOT_SET_UP") return { title: "Sign-in isn't set up yet", body: error.message, action: "retry" };
+
   if (message.includes("call_logs_store_mismatch")) return { title: "That store doesn't belong to this franchisee", body: "Pick one of their stores, or leave Store as General." };
   if (message.includes("call_logs_not_future")) return { title: "The call time can't be in the future", body: "Check the date and time." };
   if (message.includes("call_logs_reason_required") || message.includes("call_logs_result_required")) return { title: "Reason and result are required", body: "Fill in both fields." };

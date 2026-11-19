@@ -5,7 +5,7 @@
 import {
   Activity, AlarmClock, ArrowDown, ArrowDownUp, ArrowRightLeft, ShieldCheck, ArrowDownWideNarrow, ArrowRight, ArrowUp, ArrowUpNarrowWide, BadgeCheck, BarChart3, Bell, BellOff, BellRing,
   Bike, Bold, Bookmark, Building2, Calendar, CalendarCheck, CalendarClock, CalendarRange, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsLeft, ChevronsRight, Circle,
-  CircleAlert, CircleCheck, CircleOff, CircleX, Clapperboard, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye,
+  CircleAlert, CircleCheck, CircleOff, CircleX, Clapperboard, ClipboardList, Clock, Contact, Copy, Database, DoorClosed, Download, ExternalLink, Eye, EyeOff, KeyRound, LogIn, LogOut,
   FileBarChart, FileSpreadsheet, FileText, Filter, Flag, Folder, FolderPlus, Globe, Hash, History, Hourglass, IdCard, IndentDecrease,
   IndentIncrease, Info, Keyboard, Lightbulb, Sparkles, Layers, LayoutDashboard, LayoutGrid, Link as LinkIcon, List, ListChecks, Loader, Lock, Mail, MailCheck, MailX, Map as MapIcon, MapPin, MapPinned,
   Maximize2, Menu, MessageSquare, MessageSquareWarning, MousePointerClick, PanelLeftClose, PanelLeftOpen, Pencil, Phone, PhoneCall, PieChart, Plus,
@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 
 export const ICONS = {
+  "eye-off": EyeOff,
+  "key-round": KeyRound,
+  "log-in": LogIn,
+  "log-out": LogOut,
   activity: Activity,
   "alarm-clock": AlarmClock,
   "arrow-down": ArrowDown,

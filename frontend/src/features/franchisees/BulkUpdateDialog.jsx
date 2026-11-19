@@ -6,7 +6,7 @@ import { useDialog } from "../../components/dialogs/dialogContext.js";
 import { errorTitle } from "../../lib/errors.js";
 import { downloadBackup, loadAll } from "../../state/appActions.js";
 import { getContext, useDataContext } from "../../state/dataStore.js";
-import { askPassword, confirmAction } from "../../state/dialogs.js";
+import { confirmAction, requireAdmin } from "../../state/dialogs.js";
 import { toast } from "../../state/toastStore.js";
 import { UPDATE_COLUMNS, downloadCurrentData, downloadUpdateTemplate, planBulkUpdate, readUpdateFile, runBulkUpdate } from "./bulkUpdate.js";
 
@@ -93,7 +93,7 @@ export default function BulkUpdateDialog() {
       onConfirm: save,
     });
     // Deleting needs the admin password, like deleting by hand.
-    if (deleteCount) askPassword(`Password to delete ${[storeIds.length && plural(storeIds.length, "store"), franchiseeIds.length && plural(franchiseeIds.length, "franchisee")].filter(Boolean).join(" and ")}`, confirm);
+    if (deleteCount) requireAdmin(`delete ${[storeIds.length && plural(storeIds.length, "store"), franchiseeIds.length && plural(franchiseeIds.length, "franchisee")].filter(Boolean).join(" and ")} in an import`, confirm);
     else confirm();
   }
 

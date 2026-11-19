@@ -3,10 +3,14 @@
  * The matching components are registered in components/dialogs/DialogHost.jsx.
  */
 import { closeAllDialogs, closeDialogType, findDialog, openDialog } from "./dialogStore.js";
+import { currentUser, isAdmin } from "./authStore.js";
+import { toast } from "./toastStore.js";
 
 export { findDialog };
 
 export const DIALOG = {
+  accounts: "accounts",
+  accountForm: "accountForm",
   settings: "settings",
   links: "links",
   store: "store",
@@ -43,7 +47,6 @@ export const DIALOG = {
   emailScope: "emailScope",
   report: "report",
   confirm: "confirm",
-  password: "password",
   conflict: "conflict",
 };
 
@@ -128,8 +131,14 @@ export const openReport = (kind, preset = null, download = null) => openDialog(D
 export const confirmAction = ({ text, okLabel = "Delete", title = "Confirm delete", onConfirm, busyLabel, icon, okClass }) =>
   openDialog(DIALOG.confirm, { text, okLabel, title, onConfirm, busyLabel, icon, okClass });
 
-/** Asks for the admin password, then runs onUnlock. */
-export const askPassword = (label, onUnlock, onCancel) => openDialog(DIALOG.password, { label, onUnlock, onCancel });
+/** Runs action() for admins; tells everyone else it is admin only. (Replaces the old shared admin password.) */
+export function requireAdmin(what, action) {
+  if (isAdmin(currentUser())) { action(); return; }
+  toast(`Only admins can ${what}`, "err");
+}
+
+export const openAccounts = () => openDialog(DIALOG.accounts);
+export const openAccountForm = (account = null, onSaved = null) => openDialog(DIALOG.accountForm, { account, onSaved });
 
 /** Tells the user a teammate changed the record first. */
 export const showConflict = (what) => openDialog(DIALOG.conflict, { what });
