@@ -10,13 +10,15 @@ Browser (frontend, React)  ──HTTP /api──▶  backend (Express)  ──�
 
 ```text
 package.json          workspace root: one install and one lockfile for both apps, scripts to run them together
+vercel.json, api/     Vercel hosting: builds the frontend, runs the backend as a function at /api
 frontend/             React + Vite app (UI, business rules, reports, 3D intro)
   src/                app code (see "How the frontend code is organized" below)
   public/, scripts/   intro models and fonts, and the script that builds them
   docs/INTRO.md       the 3D intro
   .env.example        frontend settings (backend address)
 backend/              Express API in front of Supabase
-  src/server.js       starts the API (reads backend/.env)
+  src/server.js       starts the API locally or on a Node host (reads backend/.env)
+  src/main.js         builds the API from the environment (used by server.js and api/index.js)
   src/app.js          the Express app: CORS, JSON, routes, error responses
   src/routes/         tables.js (row access), settings.js (app_settings), auth.js (admin password)
   src/db.js           Supabase queries (paged reads, team-safe updates, next free ids…)
@@ -106,12 +108,23 @@ Some tabs need a table that older databases don't have yet. Run the matching scr
 - `migrate-walmart.sql` — Walmart tab (Walmart Marketplace onboarding: Awaiting App → Payment Setup → Account Created, plus Exempted). Until it is run, the Walmart tab shows a reminder and other tabs work as before.
 - `migrate-onboarding-statuses.sql` — one set of statuses for onboarding and Delivery Platforms (Not enrolled · Work in Progress · Onboarded · Exempted), a one-time sync of the two, and Walmart as an onboarding platform. Until it is run, the app shows the new statuses but saving an onboarding status asks you to run it.
 
-## Deploy
+## Deploy (Vercel)
 
-The two parts deploy separately:
+One Vercel project serves both parts from the repository root: the website from `frontend/dist`, and the backend API as a serverless function at `/api` on the same address (`api/index.js` → `backend/`). `vercel.json` holds the build settings, so the project's Root Directory must stay empty (the repository root).
 
-- **Frontend (Vercel, static):** set the project's Root Directory to `frontend`, build command `npm run build`, output directory `dist`, and the environment variable `VITE_API_BASE_URL` to the backend's public address.
-- **Backend (any Node host):** run `npm install` then `npm run start -w backend` with the variables from `backend/.env.example` set on the host, and `CORS_ORIGINS` set to the frontend's address. `backend/src/app.js` exports the Express app without starting it, for hosts that want the app object.
+Set these in Vercel → Project → Settings → Environment Variables:
+
+| Variable | Value |
+| --- | --- |
+| `SUPABASE_URL` | Supabase → Project Settings → Data API → Project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API Keys → Publishable key (not the secret key) |
+| `ADMIN_PASSWORD` | The admin password |
+
+Leave `VITE_API_BASE_URL` unset on Vercel: the website then calls `/api` on its own address, so no CORS setup is needed. After changing a variable, redeploy.
+
+Vercel limits a request to about 4.5 MB; imports and restores already send rows in chunks well under that.
+
+To host the backend somewhere else instead: run `npm install` then `npm run start -w backend` on any Node host with the variables from `backend/.env.example`, set `CORS_ORIGINS` to the website's address, and build the frontend with `VITE_API_BASE_URL` set to the backend's address.
 
 ## How the frontend code is organized
 
