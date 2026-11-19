@@ -47,8 +47,10 @@ Using `npm.cmd` in PowerShell avoids the `npm.ps1` execution-policy error withou
 | --- | --- |
 | `PORT` | Port the API listens on (default `4000`). |
 | `SUPABASE_URL` | The Supabase project URL. |
-| `SUPABASE_PUBLISHABLE_KEY` | The project's publishable (anon) key. The API uses it so the database's row-level security rules apply exactly as before. |
-| `ADMIN_PASSWORD` | Password asked before deletes, imports and backup restores. Checked by the API; it is no longer in the browser code. |
+| `SUPABASE_SECRET_KEY` | The project's secret key. Only the API holds it; the database is closed to the public key (see Sign-in setup). |
+| `AUTH_SECRET` | Long random text (32+ characters) that signs login sessions. Changing it signs everyone out. |
+| `SESSION_HOURS` | How long a login lasts (default `12`). |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | First admin: while no accounts exist, signing in with these creates the admin account. After that they are not used. |
 | `CORS_ORIGINS` | Comma-separated frontend addresses allowed to call the API (default `http://localhost:5173`). |
 | `JSON_LIMIT` | Largest request body (default `25mb`; imports and restores send many rows). |
 
@@ -74,14 +76,31 @@ Open <http://localhost:5173>. Check the backend with <http://localhost:4000/api/
 
 All libraries (Lucide icons, Excel and PDF export, Supabase on the backend) come from npm. Only the Inter font loads from Google Fonts. The Excel and PDF libraries download on first use.
 
+## Sign-in
+
+Everyone signs in with a username and password. The sign-in window appears inside the 3D intro (the intro waits for it), or as a full page when the intro doesn't play. A login lasts 12 hours; **Log out** is next to your name at the bottom of the menu.
+
+- **Admins** manage accounts (menu → **Accounts**: add, edit, reset password, turn off, delete), delete franchisees, delete records in imports, and restore backups.
+- **Users** can do everything else.
+- Turning an account off, or giving it a new password, signs it out everywhere at once.
+- Passwords are stored only as scrypt hashes. Forgotten passwords are reset by an admin.
+
+### Sign-in setup (once)
+
+1. In Supabase → SQL Editor, run [backend/sql/01-accounts.sql](backend/sql/01-accounts.sql) (creates the accounts table).
+2. Set `SUPABASE_SECRET_KEY`, `AUTH_SECRET` and `ADMIN_PASSWORD` (backend/.env locally; Vercel → Environment Variables for Production and Preview).
+3. Sign in as `admin` with `ADMIN_PASSWORD`: that creates the first admin account. Add everyone else under **Accounts**.
+4. Once the live site runs this version, run [backend/sql/02-lock-database.sql](backend/sql/02-lock-database.sql) so the database only accepts the backend (the public key stops working, so the login can't be bypassed).
+
 ## Backend API
 
 All responses are JSON. Errors are `{ "error": { "message", "code", "details", "hint" } }`, keeping Supabase's error codes so the app's messages (duplicate store number, missing migration, and so on) still apply. Only the app's tables are allowed: `franchisees`, `stores`, `staff`, `issues`, `onboarding`, `call_logs`, `walmart`, `coverage_snapshots`, `app_settings`.
 
 | Method and path | Does |
 | --- | --- |
-| `GET /api/health` | API up and database reachable |
-| `POST /api/auth/password` `{ password }` | Checks the admin password (401 when wrong) |
+| `GET /api/health` | API up and database reachable (no sign-in needed) |
+| `POST /api/auth/login` `{ username, password }` · `POST /api/auth/logout` · `GET /api/auth/me` | Sign in (sets the session cookie), sign out, who is signed in |
+| `GET/POST /api/accounts` · `PATCH/DELETE /api/accounts/:id` | Admins: list, add, edit, delete accounts |
 | `GET /api/settings/:key` · `PUT /api/settings/:key` `{ value }` | Shared settings (email templates, links, reminders) |
 | `GET /api/tables/:table` | Every row |
 | `GET /api/tables/:table/rows/:id` | One row (`{ row: null }` when gone) |
@@ -94,7 +113,7 @@ All responses are JSON. Errors are `{ "error": { "message", "code", "details", "
 | `DELETE /api/tables/:table/rows` `{ column, value }` or `{ column, values }` | Delete matching rows |
 | `POST /api/tables/:table/updated-at` `{ ids }` | Current `updated_at` of several rows |
 
-The API has no login of its own, the same as the app before the split: anyone who can reach it can read and change the data that the publishable key allows.
+Every endpoint except health and sign-in needs a signed-in account (401 otherwise). Deleting franchisees and restoring backups (`PUT …/rows`) need an admin (403).
 
 ## 3D intro
 
@@ -117,8 +136,9 @@ Set these in Vercel → Project → Settings → Environment Variables:
 | Variable | Value |
 | --- | --- |
 | `SUPABASE_URL` | Supabase → Project Settings → Data API → Project URL |
-| `SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API Keys → Publishable key (not the secret key) |
-| `ADMIN_PASSWORD` | The admin password |
+| `SUPABASE_SECRET_KEY` | Supabase → Project Settings → API Keys → Secret key |
+| `AUTH_SECRET` | Long random text (32+ characters) |
+| `ADMIN_PASSWORD` | First admin's password (see Sign-in setup) |
 
 Leave `VITE_API_BASE_URL` unset on Vercel: the website then calls `/api` on its own address, so no CORS setup is needed. After changing a variable, redeploy.
 

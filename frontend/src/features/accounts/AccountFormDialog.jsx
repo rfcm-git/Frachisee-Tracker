@@ -63,10 +63,12 @@ export default function AccountFormDialog({ account = null, onSaved }) {
       </div>
       <div className="field" style={{ marginBottom: 13 }}><label htmlFor="ac_role">Role</label>
         <select id="ac_role" value={form.role} disabled={self} onChange={(event) => set("role", event.target.value)}>
-          <option value="user">User: uses the whole tracker</option>
-          <option value="admin">Admin: also manages accounts, deletes franchisees, imports and restores</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
         </select>
-        {self && <div className="help">You can't change your own role.</div>}
+        <div className="help">{self ? "You can't change your own role." : form.role === "admin"
+          ? "Uses the whole tracker, and also manages accounts, deletes franchisees and restores backups."
+          : "Uses the whole tracker, except managing accounts, deleting franchisees and restoring backups."}</div>
       </div>
       <div className="field"><label htmlFor="ac_pass">{account ? "New password" : "Password"}</label>
         <div className="auth-pass">

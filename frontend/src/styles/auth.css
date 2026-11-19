@@ -52,11 +52,18 @@
   .sb-user .who{min-width:0;display:grid;line-height:1.2}
   .sb-user .who b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sb-user .who span{font-size:11.5px;color:#cfe8c0}
+  .sb-user .who{flex:1}
+  .sb-out{flex:none;margin-left:auto;width:36px;height:36px;border:none;border-radius:9px;background:none;color:#e9f6de;display:grid;place-items:center;cursor:pointer;
+    transition:background var(--t-fast) ease,color var(--t-fast) ease}
+  .sb-out:hover{background:rgba(140,198,63,.28);color:#fff}
+  .sb-out svg{width:18px;height:18px}
   .app.collapsed .sb-user{justify-content:center;padding:6px 0}
+  .app.collapsed .sb-user{flex-direction:column;gap:4px}
   .app.collapsed .sb-user .who{display:none}
   @media (max-width: 900px) and (min-width: 600px){
     .app:not(.expanded-sm) .sb-user{justify-content:center;padding:6px 0}
     .app:not(.expanded-sm) .sb-user .who{display:none}
+    .app:not(.expanded-sm) .sb-user{flex-direction:column;gap:4px}
   }
 
   /* Accounts dialog */

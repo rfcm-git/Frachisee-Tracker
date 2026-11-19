@@ -61,14 +61,13 @@ function UserFoot() {
     text: "Log out of the Franchisee Tracker on this browser?", onConfirm: () => logOut(),
   });
   return <>
-    <div className="sb-user" title={`Signed in as ${user.username}${user.role === "admin" ? " (admin)" : ""}`}>
-      <span className="av" aria-hidden="true">{name.trim().charAt(0).toUpperCase()}</span>
-      <span className="who"><b>{name}</b><span>{user.role === "admin" ? "Admin" : `@${user.username}`}</span></span>
+    <div className="sb-user">
+      <span className="av" aria-hidden="true" title={`Signed in as ${user.username}`}>{name.trim().charAt(0).toUpperCase()}</span>
+      <span className="who"><b>{name}</b><span>@{user.username}{user.role === "admin" ? " · Admin" : ""}</span></span>
+      <button type="button" className="sb-out" title="Log out" aria-label="Log out" onClick={askLogOut}><Icon name="log-out" /></button>
     </div>
     {user.role === "admin" && <button type="button" className="sb-item" title="Accounts" aria-label="Accounts" onClick={openAccounts}>
       <span className="t-ic"><Icon name="users" /></span><span className="t-lb">Accounts</span></button>}
-    <button type="button" className="sb-item" title="Log out" aria-label="Log out" onClick={askLogOut}>
-      <span className="t-ic"><Icon name="log-out" /></span><span className="t-lb">Log out</span></button>
   </>;
 }
 
