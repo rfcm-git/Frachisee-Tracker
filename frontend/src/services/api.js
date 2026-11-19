@@ -106,7 +106,9 @@ export async function loadAllTables({ onProgress } = {}) {
       throw error;
     }
   };
-  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, walmartResult, snapshotsResult] = await Promise.all([
+  // Everything is requested at once (tables, the column check and the email templates), so loading takes one round trip.
+  const template = (key) => readSetting(key).catch((error) => ({ error }));
+  const [franchisees, stores, staff, issues, onboardingResult, callLogsResult, walmartResult, snapshotsResult, emailExemptReady, obSetting, ezSetting, wmSetting] = await Promise.all([
     tick(fetchAll(TABLES.franchisees)),
     tick(fetchAll(TABLES.stores)),
     tick(fetchAll(TABLES.staff)),
@@ -115,19 +117,21 @@ export async function loadAllTables({ onProgress } = {}) {
     tick(fetchOptional(TABLES.callLogs)),
     tick(fetchOptional(TABLES.walmart)),
     tick(fetchOptional(TABLES.snapshots)),
+    hasColumn(TABLES.stores, "email_exempt"),
+    template(ONBOARDING_EMAIL_KEY),
+    template(EZCATER_EMAIL_KEY),
+    template(WALMART_EMAIL_KEY),
   ]);
   const { rows: onboarding, ready: onboardingReady } = onboardingResult;
   const { rows: callLogs, ready: callLogsReady } = callLogsResult;
   const { rows: walmart, ready: walmartReady } = walmartResult;
   const { rows: snapshots, ready: snapshotsReady } = snapshotsResult;
-  const emailExemptReady = await hasColumn(TABLES.stores, "email_exempt");
-  // Onboarding email template: undefined when app_settings is not set up (kept on this computer instead).
-  const obTemplate = onboardingReady ? await readSetting(ONBOARDING_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  // Email templates: undefined when app_settings is not set up (kept on this computer instead); only used when their tab exists.
+  const obTemplate = onboardingReady ? obSetting : { value: null };
   const onboardingEmail = obTemplate.error ? undefined : obTemplate.value || null;
-  const ezTemplate = onboardingReady ? await readSetting(EZCATER_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const ezTemplate = onboardingReady ? ezSetting : { value: null };
   const ezcaterEmail = ezTemplate.error ? undefined : ezTemplate.value || null;
-  // Walmart email template: undefined when app_settings is not set up (kept on this computer instead).
-  const wmTemplate = walmartReady ? await readSetting(WALMART_EMAIL_KEY).catch((error) => ({ error })) : { value: null };
+  const wmTemplate = walmartReady ? wmSetting : { value: null };
   const walmartEmail = wmTemplate.error ? undefined : wmTemplate.value || null;
   return { franchisees, stores, staff, issues, onboarding, callLogs, walmart, walmartReady, walmartEmail, snapshots, snapshotsReady, onboardingReady, callLogsReady, emailExemptReady, onboardingEmail, ezcaterEmail };
 }

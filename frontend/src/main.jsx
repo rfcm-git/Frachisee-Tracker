@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import { IntroGate } from "./intro/IntroGate.jsx";
 import LoginScreen from "./components/auth/LoginScreen.jsx";
 import { connectSaved, loadAll } from "./state/appActions.js";
-import { checkSession, onSignedIn, whenSignedIn } from "./state/authStore.js";
+import { checkSession, onSignedIn, useAuthStore, whenSignedIn } from "./state/authStore.js";
 import { useDataStore } from "./state/dataStore.js";
 import "./styles.css";
 
@@ -17,11 +17,14 @@ onSignedIn(() => {
 });
 checkSession();
 
-// The intro's loading ring follows the database load (after sign-in), table by table,
-// waiting up to 15 seconds once signed in, so the tracker is ready when the intro ends.
-// While nobody is signed in, the intro waits on the sign-in window.
-const waitForData = (report) =>
-  whenSignedIn().then(() => new Promise((resolve) => {
+// The intro waits for the database load (after sign-in), up to 15 seconds once signed in,
+// so the tracker is ready when the intro ends. While nobody is signed in, the intro waits on
+// the sign-in window; when someone signs in there, the tracker opens as soon as its data is in.
+const needsSignIn = (status) => status === "signedOut" || status === "unavailable";
+const waitForData = (report) => {
+  let signedInHere = needsSignIn(useAuthStore.getState().status);
+  const stopWatching = useAuthStore.subscribe((state) => { if (needsSignIn(state.status)) signedInHere = true; });
+  return whenSignedIn().then(() => new Promise((resolve) => {
     const done = () => useDataStore.getState().phase !== "loading";
     if (done()) return resolve();
     const timer = setTimeout(finish, 15000);
@@ -34,7 +37,11 @@ const waitForData = (report) =>
       unsubscribe();
       resolve();
     }
-  }));
+  })).then(() => {
+    stopWatching();
+    return { openNow: signedInHere };
+  });
+};
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

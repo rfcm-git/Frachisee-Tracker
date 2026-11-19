@@ -135,7 +135,7 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
       if (!onFinish && prevFocus instanceof HTMLElement) prevFocus.focus({ preventScroll: true });
     };
     if (reduced) done();
-    else setTimeout(done, 600); // matches the .is-leaving transition
+    else setTimeout(done, 400); // matches the .is-leaving transition
   }
 
   /* ---------------------------------------------------------- keyboard */
@@ -198,10 +198,13 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
       meterRaf = requestAnimationFrame(tickMeter);
       root.dataset.state = "playing";
 
-      // The site opens once the ring reaches 100%: the animation has finished and
-      // the data has loaded. If the data is slower, the camera sways on the store.
+      // The site opens once the animation has finished and the data has loaded
+      // (if the data is slower, the camera sways on the store). When someone signed in
+      // during the intro, preload resolves with { openNow: true }: the site opens as soon
+      // as its data has loaded, without waiting for the rest of the animation.
       if (config.autoHide) {
         const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+        dataReady.then((result) => { if (result?.openNow && !finished) finish("complete"); });
         Promise.all([dataReady, meterDone, still ? wait(config.stillHoldMs) : null])
           .then(() => wait(reduced ? 0 : 350))
           .then(() => !finished && finish("complete"));

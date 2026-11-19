@@ -19,7 +19,7 @@
   color: var(--tpdi-ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   opacity: 1;
-  transition: opacity 600ms var(--tpdi-ease-in);
+  transition: opacity 400ms var(--tpdi-ease-in);
 }
 .tpdi.is-leaving {
   opacity: 0;
@@ -42,7 +42,7 @@
 }
 .tpdi.is-leaving .tpdi-canvas {
   transform: scale(1.03);
-  transition: transform 600ms var(--tpdi-ease-in);
+  transition: transform 400ms var(--tpdi-ease-in);
 }
 
 /* Darkens the bottom edge so the controls stay legible over the scene. */
@@ -58,7 +58,9 @@
 /* The loading ring and its status line sit beside the animation (right side,
    vertically centred). They appear when the animation starts and count until
    the animation has finished and the site has loaded. */
+/* The percentage ring is no longer shown (it still times the hand-off internally). */
 .tpdi-progress {
+  display: none !important;
   position: absolute;
   top: calc(50% - 60px);
   right: max(24px, env(safe-area-inset-right));

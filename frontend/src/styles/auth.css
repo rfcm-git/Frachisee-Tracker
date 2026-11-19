@@ -9,12 +9,12 @@
   .auth-screen.over-intro{pointer-events:none}
   .auth-screen.over-intro::before{opacity:0}
   .auth-screen.over-intro .auth-card{pointer-events:auto}
-  @media (min-width: 720px){
-    .auth-screen.over-intro{place-items:center end;padding-right:max(32px, env(safe-area-inset-right))}
-  }
 
-  .auth-card{width:min(360px, 100%);background:var(--surface, #fff);color:var(--ink);border-radius:16px;padding:24px 24px 20px;
-    box-shadow:0 2px 6px rgba(19,32,26,.08), 0 24px 60px rgba(19,32,26,.22);
+  /* Frosted glass: the scene shows through, blurred. Opaque enough to keep the text easy to read. */
+  .auth-card{width:min(380px, 100%);color:var(--ink);border-radius:20px;padding:26px 26px 22px;
+    background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.7);
+    -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 2px 6px rgba(19,32,26,.08), 0 24px 60px rgba(19,32,26,.25);
     animation:authIn var(--t-slow, 360ms) var(--ease-out, ease-out)}
   @keyframes authIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
@@ -22,10 +22,14 @@
   .auth-head .mark{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--yellow);color:var(--green-dark);
     font-weight:800;font-size:14px;letter-spacing:.02em}
   .auth-head h2{margin:0;font-size:18px;line-height:1.2;color:var(--green-dark)}
-  .auth-head p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
+  .auth-head p{margin:2px 0 0;font-size:13.5px;color:#44524a}
 
   .auth-form{display:grid;gap:12px}
-  .auth-form .field input{height:42px;font-size:15px}
+  .auth-form .field input{height:42px;font-size:15px;background:rgba(255,255,255,.82);border-color:rgba(19,32,26,.14)}
+  .auth-form .field input:focus{background:#fff}
+  .auth-form .field label{color:#3c4a40}
+  /* No blur support: a solid card instead. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){ .auth-card{background:rgba(255,255,255,.95)} }
   .auth-form .field input[aria-invalid="true"]{border-color:var(--danger)}
   .auth-pass{position:relative}
   .auth-pass input{padding-right:46px}
@@ -39,13 +43,12 @@
   .auth-error.is-block{margin:0;padding:9px 11px;border-radius:8px;background:var(--danger-soft)}
   .auth-notice svg,.auth-error svg{flex:none;width:16px;height:16px}
   .auth-submit{width:100%;justify-content:center;height:44px;font-size:15px}
-  .auth-help{margin:0;text-align:center;font-size:12.5px;color:var(--ink-soft)}
+  .auth-help{margin:0;text-align:center;font-size:12.5px;color:#44524a}
   .auth-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:authSpin .8s linear infinite}
   @keyframes authSpin{to{transform:rotate(360deg)}}
 
   /* While sign-in is needed, the intro's loading ring steps aside for the window. */
-  html[data-auth="signedOut"] .tpdi-progress,html[data-auth="unavailable"] .tpdi-progress,html[data-auth="checking"] .tpdi-progress{opacity:0 !important}
-  /* ...and as the sign-in background it has no Skip / "Don't show again" controls. */
+  /* As the sign-in background it has no Skip / "Don't show again" controls. */
   html[data-auth="signedOut"] .tpdi-controls,html[data-auth="unavailable"] .tpdi-controls{visibility:hidden}
 
   /* Signed-in account in the menu footer */
