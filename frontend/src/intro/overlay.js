@@ -1,5 +1,5 @@
-// The intro overlay: the 3D animation with a loading ring beside it, Skip and
-// "Don't show again" controls, and the hand-off to the site.
+// The intro overlay: the 3D animation and the hand-off to the site.
+// No on-screen controls: Escape skips it (once signed in), and Settings turns it off.
 // Plain DOM, so the React app only has to call mountIntro().
 //
 // The 3D animation is the whole loading screen. The ring appears when the
@@ -8,7 +8,7 @@
 // has finished AND the data has loaded. Only then does the site open.
 
 import "./intro.css";
-import { INTRO_DEFAULTS, markIntroSeen, setIntroDisabled, prefersReducedMotion } from "./settings.js";
+import { INTRO_DEFAULTS, markIntroSeen, prefersReducedMotion } from "./settings.js";
 
 const RING_R = 52;
 const RING_C = 2 * Math.PI * RING_R;
@@ -53,10 +53,6 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
       </div>
       <p class="tpdi-status" id="${id}-status">Loading</p>
     </div>
-    <div class="tpdi-controls">
-      <label class="tpdi-check"><input type="checkbox" /> <span>Don't show the intro again</span></label>
-      <button type="button" class="tpdi-skip">Skip intro <kbd aria-hidden="true">Esc</kbd></button>
-    </div>
     <div class="tpdi-sr" aria-live="polite"></div>`;
 
   const $ = (sel) => root.querySelector(sel);
@@ -68,15 +64,14 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
   const pctText = $(".tpdi-pct");
   const statusText = $(".tpdi-status");
   const live = root.querySelector("[aria-live]");
-  const skipBtn = $(".tpdi-skip");
-  const checkbox = $(".tpdi-check input");
   if (still) root.classList.add("is-still");
 
   const prevOverflow = document.documentElement.style.overflow;
   document.documentElement.style.overflow = "hidden";
   const prevFocus = document.activeElement;
   parent.appendChild(root);
-  skipBtn.focus({ preventScroll: true });
+  root.tabIndex = -1;
+  root.focus({ preventScroll: true });
 
   /* -------------------------------------------------------------- progress */
   let scene = null;
@@ -127,7 +122,6 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
     if (finished) return;
     finished = true;
     markIntroSeen();
-    if (checkbox.checked) setIntroDisabled(true);
     root.classList.add("is-leaving");
     const done = () => {
       teardown();
@@ -143,20 +137,18 @@ export function mountIntro({ config: overrides = {}, parent = document.body, pre
     if (finished) return;
     // Keys typed in the sign-in window (shown over the intro) belong to it.
     if (e.target instanceof Element && e.target.closest("[data-auth-screen]")) return;
-    if (e.key === "Escape") {
+    // While someone has to sign in, the intro is only the background: it can't be skipped away.
+    const signedIn = document.documentElement.dataset.auth === "signedIn";
+    if (e.key === "Escape" && signedIn) {
       e.preventDefault();
       e.stopPropagation();
       finish("skip");
     } else if (e.key === "Tab") {
-      // Keep focus inside the intro while it's open.
-      const items = [checkbox, skipBtn];
-      const i = items.indexOf(document.activeElement);
+      // Nothing to tab to on the intro itself; keep focus off the page behind it.
       e.preventDefault();
-      items[(i + (e.shiftKey ? items.length - 1 : 1)) % items.length].focus();
     }
   }
   document.addEventListener("keydown", onKey, true);
-  skipBtn.addEventListener("click", () => finish("skip"));
 
   /* -------------------------------------------------------------- loading */
   // The site's data starts loading right away, in the background.

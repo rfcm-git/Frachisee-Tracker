@@ -9,8 +9,8 @@ When you open the Franchisee Tracker, a 3D animation is its loading screen. The 
 - **The tracker opens only after the animation has finished**: the 3.6-second camera move plus a 0.4-second hold on the store (about 4 seconds in all). If the data is still loading at that point, the ring holds below 100%, the camera sways slowly in front of the store, and the tracker opens as soon as the data arrives. It waits up to 15 seconds for the database.
 
 **Skipping and turning it off**
-- Click **Skip intro** or press `Esc`.
-- Tick **Don't show the intro again** to turn it off for future visits.
+- There are no buttons on the intro itself. Press `Esc` to skip it once you're signed in.
+- Turn it off in **Settings → Intro** (untick **Play the intro when the tracker opens**).
 - It plays once per browser tab session.
 - **Settings → Intro → Play intro** replays it, and the **Play the intro when the tracker opens** checkbox there turns it on or off.
 
@@ -31,7 +31,7 @@ When you open the Franchisee Tracker, a 3D animation is its loading screen. The 
 
 ## How it plays
 
-1. **Scene loading.** A sky-colored backdrop, with Skip and the checkbox at the bottom.
+1. **Scene loading.** A sky-colored backdrop.
 2. **Animation and loading ring together.** The camera starts high above the road and drops to street level beside the walkers. It then swings round and finishes facing the storefront (3.6 s), holds for 0.4 s, and sways slowly if the data isn't done yet. At about 2 s the rooftop lamps flicker on, each letter of the heading pops up, and then MGBD appears. Meanwhile the ring counts up beside it.
 3. **Hand-off.** When the ring reaches 100% (animation finished and data loaded), the overlay fades out over 600 ms and focus moves to the page content.
 
@@ -45,7 +45,7 @@ Defaults are in `src/intro/settings.js`. To override them, pass `config` to `<In
 |---|---|---|
 | `enabled` | `true` | Turns the intro on or off |
 | `frequency` | `"session"` | `"session"` plays once per tab session, `"always"` plays on every load, `"once"` plays on the first visit only |
-| `autoHide` | `true` | Opens the tracker on its own once the animation has finished and the data has loaded. If `false`, it waits for Skip. |
+| `autoHide` | `true` | Opens the tracker on its own once the animation has finished and the data has loaded. If `false`, it waits for `Esc`. |
 | `holdMs` | `400` | How long the final shot holds after the camera move, before the tracker opens, in ms |
 | `reducedMotion` | `"still"` | With the system's "reduce motion" setting on: `"still"` shows the finished scene without movement, `"skip"` doesn't play the intro |
 | `stillHoldMs` | `2000` | Shortest time the still version stays up, in ms |
@@ -55,7 +55,7 @@ Defaults are in `src/intro/settings.js`. To override them, pass `config` to `<In
 | `description` | (a description of the scene) | What screen readers read for the intro |
 
 **Saved in the browser:**
-- `localStorage["franchiseeTracker.intro.off"]` records "Don't show the intro again". Delete it to turn the intro back on.
+- `localStorage["franchiseeTracker.intro.off"]` records that the intro is turned off in Settings. Delete it to turn the intro back on.
 - `sessionStorage["franchiseeTracker.intro.seen"]` records that the intro played in this tab session.
 - `localStorage["franchiseeTracker.intro.seenOnce"]` records a first visit, for `frequency: "once"`.
 
@@ -78,9 +78,8 @@ The **SUBWAY** lettering on the green fascia is the word typed in Montserrat, wi
 
 - **Screen readers:** the intro is a modal dialog labelled "3PD HELPDESK, MGBD". Its description tells screen reader users what the scene shows, and the 3D canvas itself is hidden from them.
 - **Keyboard:**
-  - Focus starts on **Skip intro**.
-  - `Tab` moves between the checkbox and Skip.
-  - `Esc` skips.
+  - Focus starts on the intro itself (or on the sign-in window when it is shown).
+  - `Esc` skips, once signed in.
   - While the intro is open, the tracker behind it can't be reached (`#root` is inert). When it closes, focus moves to `<main>`.
 - **Loading ring:** it's a `progressbar` with a live value. Over the animation, it sits on a dark disc and its status text has a shadow, so both stay readable over the scene.
 - **Reduced motion:** with the system's "reduce motion" setting on, the intro shows a still frame without fades or zooms.
@@ -106,9 +105,9 @@ The **SUBWAY** lettering on the green fascia is the word typed in Montserrat, wi
 ## Known limitations
 
 - The models are simple generated stand-ins, and the wordmark isn't the official Subway logo.
-- The tracker always takes at least about 4 seconds to open while the intro is on, because it waits for the animation. Use Skip, or turn the intro off in Settings, to go straight in.
+- The tracker always takes at least about 4 seconds to open while the intro is on, because it waits for the animation. Press `Esc`, or turn the intro off in Settings, to go straight in.
 - The intro has been tested in Edge at desktop and phone sizes. It hasn't been tested on real phones, Safari, Firefox or low-end graphics hardware.
 
 ## Sign-in background
 
-Whenever someone has to sign in (first visit, after logging out, or when a session ends), the intro plays behind the sign-in window, even if it has already played in this tab or is turned off in Settings. The sign-in window sits in the middle as frosted glass, and Skip and "Don't show the intro again" are hidden. Once the animation finishes, the camera sways slowly on the store until the person signs in; the tracker then opens as soon as the data has loaded, without waiting for the rest of the animation. The percentage ring is no longer shown. With "reduce motion" on, the still version is shown instead.
+Whenever someone has to sign in (first visit, after logging out, or when a session ends), the intro plays behind the sign-in window, even if it has already played in this tab or is turned off in Settings. The sign-in window sits in the middle as frosted glass, and `Esc` doesn't skip the background. Once the animation finishes, the camera sways slowly on the store until the person signs in. After a successful sign-in the window shows "Opening tracker…" while the data loads, then the window and the animation fade away together and the tracker opens, without waiting for the rest of the animation. The percentage ring is no longer shown. With "reduce motion" on, the still version is shown instead.

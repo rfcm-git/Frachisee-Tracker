@@ -117,7 +117,7 @@ Every endpoint except health and sign-in needs a signed-in account (401 otherwis
 
 ## 3D intro
 
-When the tracker opens, a 3D animation is its loading screen: a street scene that ends on a two-storey Subway store with red awnings and glass windows showing the inside and **3PD HELPDESK / MGBD** on its roof sign. A circular loading ring with the percentage inside appears beside the animation when it starts, and the tracker opens once the animation has finished and its data has loaded. It also has **Skip intro** (`Esc`) and **Don't show the intro again**. It plays once per browser tab session, and **Settings → Play intro** replays it. Add `?intro=1` to the address to force it to play, or `?intro=0` to turn it off. `npm.cmd run intro:assets -w frontend` rebuilds its models and font. See [frontend/docs/INTRO.md](frontend/docs/INTRO.md) for settings, replacing the models, and accessibility.
+When the tracker opens, a 3D animation is its loading screen: a street scene that ends on a two-storey Subway store with red awnings and glass windows showing the inside and **3PD HELPDESK / MGBD** on its roof sign. It is also the background of the sign-in window. The tracker opens once its data has loaded (after the 4-second animation, or straight after signing in). `Esc` skips it once signed in, and **Settings → Intro** turns it off. It plays once per browser tab session, and **Settings → Play intro** replays it. Add `?intro=1` to the address to force it to play, or `?intro=0` to turn it off. `npm.cmd run intro:assets -w frontend` rebuilds its models and font. See [frontend/docs/INTRO.md](frontend/docs/INTRO.md) for settings, replacing the models, and accessibility.
 
 ## Database updates
 

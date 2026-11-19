@@ -3,6 +3,9 @@ import { createPortal } from "react-dom";
 import Icon from "../ui/Icon.jsx";
 import { friendlyError } from "../../lib/errors.js";
 import { checkSession, logIn, useAuthStore } from "../../state/authStore.js";
+import { useDataStore } from "../../state/dataStore.js";
+
+const LEAVE_MS = 400; // matches .auth-screen.is-leaving
 
 /** True while the 3D intro is on screen (IntroGate sets <html data-intro="on">). */
 const readIntroOn = () => document.documentElement.dataset.intro === "on";
@@ -24,7 +27,8 @@ function trapTab(event, box) {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
-function SignInForm() {
+/** opening: signed in, the tracker's data is loading (the window then fades away with the intro). */
+function SignInForm({ opening }) {
   const notice = useAuthStore((state) => state.notice);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -40,8 +44,8 @@ function SignInForm() {
     setBusy(true);
     setError("");
     const failure = await logIn(username.trim(), password);
+    if (!failure) return; // stays busy: the window shows "Opening tracker…" until it fades away
     setBusy(false);
-    if (!failure) return;
     setError(friendlyError(failure).title);
     setPassword("");
     passwordRef.current?.focus();
@@ -65,8 +69,9 @@ function SignInForm() {
       </div>
     </div>
     <p className="auth-error" id="auth_err" role="alert">{error && <><Icon name="circle-alert" />{error}</>}</p>
-    <button type="submit" className="btn auth-submit" disabled={busy} aria-busy={busy}>
-      {busy ? <><span className="auth-spin" aria-hidden="true" />Signing in…</> : <><Icon name="log-in" />Sign in</>}
+    <button type="submit" className="btn auth-submit" disabled={busy || opening} aria-busy={busy || opening}>
+      {opening ? <><span className="auth-spin" aria-hidden="true" />Opening tracker…</>
+        : busy ? <><span className="auth-spin" aria-hidden="true" />Signing in…</> : <><Icon name="log-in" />Sign in</>}
     </button>
     <p className="auth-help">Forgot your password? Ask an admin to reset it.</p>
   </form>;
@@ -91,36 +96,52 @@ function Unavailable() {
 }
 
 /**
- * The sign-in window. Over the 3D intro it takes the loading ring's place (the intro waits for it);
- * without the intro it is a full-page sign-in. Shown whenever nobody is signed in.
+ * The sign-in window, in the middle of the screen over the 3D intro (or a plain sky when the intro isn't playing).
+ * Shown whenever nobody is signed in. After signing in it stays, showing "Opening tracker…", until the data
+ * has loaded; then it fades away together with the intro.
  */
 export default function LoginScreen() {
   const status = useAuthStore((state) => state.status);
+  const phase = useDataStore((state) => state.phase);
   const introOn = useIntroOn();
   const boxRef = useRef(null);
-  const visible = status === "signedOut" || status === "unavailable";
+  const needsSignIn = status === "signedOut" || status === "unavailable";
+  // Remember that the window was up, so it can stay through "Opening tracker…" and fade out.
+  const [wasUp, setWasUp] = useState(false);
+  if (needsSignIn && !wasUp) setWasUp(true);
+  const signedInHere = wasUp && status === "signedIn";
+  const opening = signedInHere && phase === "loading";
+  const leaving = signedInHere && !opening;
+  const visible = needsSignIn || signedInHere;
+
+  // Once faded out, take it off the page.
+  useEffect(() => {
+    if (!leaving) return undefined;
+    const timer = setTimeout(() => setWasUp(false), LEAVE_MS);
+    return () => clearTimeout(timer);
+  }, [leaving]);
 
   // The app behind can't be reached while the window is up (IntroGate does the same while the intro plays).
   useEffect(() => {
-    if (!visible) return undefined;
+    if (!visible || leaving) return undefined;
     const root = document.getElementById("root");
     root?.setAttribute("inert", "");
     return () => { if (document.documentElement.dataset.intro !== "on") root?.removeAttribute("inert"); };
-  }, [visible, introOn]);
+  }, [visible, leaving, introOn]);
 
   if (!visible) return null;
   return createPortal(
-    <div className={`auth-screen${introOn ? " over-intro" : ""}`} data-auth-screen="">
+    <div className={`auth-screen${introOn ? " over-intro" : ""}${leaving ? " is-leaving" : ""}`} data-auth-screen="" aria-hidden={leaving || undefined}>
       <div className="auth-card" ref={boxRef} role="dialog" aria-modal="true" aria-labelledby="auth_title" aria-describedby="auth_sub"
         onKeyDown={(event) => trapTab(event, boxRef.current)}>
         <div className="auth-head">
           <div className="mark" aria-hidden="true">3PD</div>
           <div>
             <h2 id="auth_title">Franchisee Tracker</h2>
-            <p id="auth_sub">{status === "unavailable" ? "Can't sign in right now" : "Sign in to continue"}</p>
+            <p id="auth_sub">{status === "unavailable" ? "Can't sign in right now" : signedInHere ? "Signed in" : "Sign in to continue"}</p>
           </div>
         </div>
-        {status === "unavailable" ? <Unavailable /> : <SignInForm />}
+        {status === "unavailable" ? <Unavailable /> : <SignInForm opening={signedInHere} />}
       </div>
     </div>,
     document.body,
