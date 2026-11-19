@@ -6,8 +6,8 @@ import { openEzCount } from "../../features/ezcater/ezcaterSelectors.js";
 import { openOnboardingCount } from "../../features/onboarding/onboardingSelectors.js";
 import { useDataContext } from "../../state/dataStore.js";
 import { logOut, useCurrentUser } from "../../state/authStore.js";
-import { confirmAction, openAccounts, openLinks, openSettings } from "../../state/dialogs.js";
-import { setNavOnboardingOpen, setTab, toggleSidebar, useUiStore } from "../../state/uiStore.js";
+import { confirmAction, openLinks, openSettings } from "../../state/dialogs.js";
+import { setNavOnboardingOpen, setTab, useUiStore } from "../../state/uiStore.js";
 
 function TabButton({ tab, active, icon, label, count, countId, countTip, kbd, sub = false }) {
   return <button type="button" className={`tab${sub ? " tab-sub" : ""}${active ? " active" : ""}`} title={kbd ? `${label} (${kbd} or Ctrl+K)` : label} aria-current={active ? "page" : undefined} onClick={() => setTab(tab)}>
@@ -51,7 +51,7 @@ function SidebarBackdrop() {
   </div>;
 }
 
-/** Who is signed in, with Accounts (admins) and Log out. */
+/** Who is signed in, with Log out. Last thing in the menu. */
 function UserFoot() {
   const user = useCurrentUser();
   if (!user) return null;
@@ -60,26 +60,20 @@ function UserFoot() {
     title: "Log out", okLabel: "Log out", busyLabel: "Logging out…", icon: "log-out", okClass: "btn",
     text: "Log out of the Franchisee Tracker on this browser?", onConfirm: () => logOut(),
   });
-  return <>
-    <div className="sb-user">
-      <span className="av" aria-hidden="true" title={`Signed in as ${user.username}`}>{name.trim().charAt(0).toUpperCase()}</span>
-      <span className="who"><b>{name}</b><span>@{user.username}{user.role === "admin" ? " · Admin" : ""}</span></span>
-      <button type="button" className="sb-out" title="Log out" aria-label="Log out" onClick={askLogOut}><Icon name="log-out" /></button>
-    </div>
-    {user.role === "admin" && <button type="button" className="sb-item" title="Accounts" aria-label="Accounts" onClick={openAccounts}>
-      <span className="t-ic"><Icon name="users" /></span><span className="t-lb">Accounts</span></button>}
-  </>;
+  return <div className="sb-user">
+    <span className="av" aria-hidden="true" title={`Signed in as ${user.username}`}>{name.trim().charAt(0).toUpperCase()}</span>
+    <span className="who"><b>{name}</b><span>@{user.username}{user.role === "admin" ? " · Admin" : ""}</span></span>
+    <button type="button" className="sb-out" title="Log out" aria-label="Log out" onClick={askLogOut}><Icon name="log-out" /></button>
+  </div>;
 }
 
 export default function Sidebar() {
   const ctx = useDataContext();
   const tab = useUiStore((state) => state.tab);
-  const collapsed = useUiStore((state) => state.sidebarCollapsed);
   const openIssues = ctx.issues.filter(isIssueOpen).length;
   const openOnboarding = openOnboardingCount(ctx);
   const openWalmart = openWalmartCount(ctx);
   const openEz = openEzCount(ctx);
-  const toggleLabel = collapsed ? "Expand menu" : "Collapse menu";
 
   return (
     <aside className="sidebar" id="sidebar" aria-label="Main navigation">
@@ -105,11 +99,9 @@ export default function Sidebar() {
         <TabButton tab="reports" active={tab === "reports"} icon="file-bar-chart" label="Reports" />
       </nav>
       <div className="sb-foot">
-        <UserFoot />
         <button type="button" className="sb-item" title="Links" aria-label="Links" onClick={openLinks}><span className="t-ic"><Icon name="link" /></span><span className="t-lb">Links</span></button>
         <button type="button" className="sb-item" title="Settings" aria-label="Settings" onClick={openSettings}><span className="t-ic"><Icon name="settings" /></span><span className="t-lb">Settings</span></button>
-        <button type="button" className="sb-item sb-collapse" title={toggleLabel} aria-label={toggleLabel} aria-expanded={!collapsed} onClick={toggleSidebar}>
-          <span className="t-ic"><Icon name={collapsed ? "panel-left-open" : "panel-left-close"} /></span><span className="t-lb">{collapsed ? "Expand" : "Collapse"}</span></button>
+        <UserFoot />
       </div>
     </aside>
   );

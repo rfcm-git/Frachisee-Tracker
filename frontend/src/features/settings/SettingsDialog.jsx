@@ -7,7 +7,8 @@ import { errorTitle } from "../../lib/errors.js";
 import { hasDb } from "../../services/api.js";
 import { downloadBackup, loadAll, readBackupFile, restoreBackup } from "../../state/appActions.js";
 import { useDataStore } from "../../state/dataStore.js";
-import { confirmAction, openBulkUpdate, openStaffUpdate, requireAdmin } from "../../state/dialogs.js";
+import { confirmAction, openAccounts, openBulkUpdate, openStaffUpdate, requireAdmin } from "../../state/dialogs.js";
+import { useIsAdmin } from "../../state/authStore.js";
 import { toast } from "../../state/toastStore.js";
 import { setIdleMinutes, useUiStore } from "../../state/uiStore.js";
 import { shortTime } from "../../lib/format.js";
@@ -15,6 +16,8 @@ import { isIntroDisabled, playIntro, setIntroDisabled } from "../../intro/settin
 import ScheduleSettings from "../schedules/ScheduleSettings.jsx";
 
 const sectionStyle = { marginTop: 16, borderTop: "1px solid var(--line)", paddingTop: 15 };
+/** The first section has no divider above it. */
+const firstSectionStyle = {};
 const labelStyle = { display: "block", fontSize: 12.5, color: "var(--ink-soft)", fontWeight: 600, marginBottom: 7 };
 
 function notificationPermission() {
@@ -45,6 +48,7 @@ function startRestore(backup, closeSettings) {
 }
 
 export default function SettingsDialog() {
+  const admin = useIsAdmin();
   const { close } = useDialog();
   const lastRefreshAt = useDataStore((state) => state.lastRefreshAt);
   const idleMinutes = useUiStore((state) => state.idleMinutes);
@@ -85,7 +89,13 @@ export default function SettingsDialog() {
   }
 
   return <Modal size="small" icon="settings" title="Settings" footer={<button type="button" className="btn ghost" onClick={close}>Close</button>}>
-    <div style={sectionStyle}>
+    {admin && <div style={firstSectionStyle}>
+      <label style={labelStyle}>Accounts</label>
+      <button type="button" className="btn ghost" onClick={() => { close(); openAccounts(); }}><Icon name="users" />Manage accounts</button>
+      <div className="help">Add people who can sign in, reset passwords, turn accounts on or off, and choose who is an admin.</div>
+    </div>}
+
+    <div style={admin ? sectionStyle : firstSectionStyle}>
       <label style={labelStyle} htmlFor="idleMin">Auto-refresh when idle</label>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Icon name="timer" style={{ color: "var(--green)" }} />

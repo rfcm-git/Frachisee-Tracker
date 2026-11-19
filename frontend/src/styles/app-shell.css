@@ -584,3 +584,21 @@
   .subway-backdrop{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;opacity:.13}
   @media print{ .subway-backdrop{display:none} }
   @media (prefers-reduced-motion: reduce){ .tab .badge-num{transition:none} }
+
+/* ---------- Menu collapse handle: middle of the menu's edge, shown while hovering the menu ---------- */
+  .app{--sb-now:var(--sb-w)}
+  .app.collapsed{--sb-now:var(--sb-wc)}
+  @media(max-width:900px){ .app:not(.expanded-sm){--sb-now:var(--sb-wc)} }
+  .sb-handle{position:fixed;top:50%;left:calc(var(--sb-now) - 14px);z-index:30;width:28px;height:28px;margin-top:-14px;padding:0;
+    display:grid;place-items:center;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--green-dark);cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,60,20,.22);opacity:0;pointer-events:none;
+    transition:opacity var(--t-fast) var(--ease-in),left .18s ease,background var(--t-fast) ease}
+  .sb-handle svg{width:16px;height:16px}
+  .sidebar:hover ~ .sb-handle,.sb-handle:hover,.sb-handle:focus-visible{opacity:1;pointer-events:auto;transition-timing-function:var(--ease-out),ease,ease}
+  .sb-handle:hover{background:var(--lime-soft)}
+  .sb-handle:focus-visible{outline:none;box-shadow:var(--ring)}
+  /* Touch screens can't hover: keep it visible. */
+  @media (hover: none){ .sb-handle{opacity:1;pointer-events:auto} }
+  /* Phones: the menu is a drawer opened from the top bar instead. */
+  @media(max-width:600px){ .sb-handle{display:none} }
+  @media (prefers-reduced-motion: reduce){ .sb-handle{transition:none} }
